@@ -3,13 +3,13 @@ import { preventEvent } from "../Common/helper";
 import Header from "./components/Header";
 import ChildDrawers from "../Common/ChildDrawers";
 import Activity from "./components/Activity";
-import Overview from "./components/Overview";
+import Summary from "./components/Summary";
 import Tasks from "./components/Tasks";
 import BillsOfMaterial from "./components/BillsOfMaterial";
 
 const TicketDetails = (props) => {
   const { lablesVisible, customer, showBoM } = props;
-  const [open1, setopen1] = React.useState(null);
+  const [open1, setopen1] = React.useState(null); 
 
   const handleIconButton = (event, childDrawer) => {
     preventEvent(event);
@@ -36,7 +36,7 @@ const TicketDetails = (props) => {
     <div>
       <Header customer={customer} />
       <div className="drawer-wrapper-full p-3">
-        <Overview
+        <Summary
           handleIconButton={handleIconButton}
           customer={customer}
           lablesVisible={lablesVisible}

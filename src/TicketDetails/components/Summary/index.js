@@ -15,7 +15,7 @@ import {
 import { ChevronLeft, ExpandLess, ExpandMore } from "@mui/icons-material";
 import { preventEvent } from "Common/helper";
 
-const Overview = (props) => {
+const Summary = (props) => {
   const { customer } = props;
   const [showFilters, setShowFilters] = useState(true);
   const handleFilterVisibility = (event) => {
@@ -126,12 +126,12 @@ const Overview = (props) => {
             onClick={handleFilterVisibility}
             size="small"
             className="border rounded-0 position-absolute"
-            style={{ left: showFilters ? -5 : -21, top: 15 }}
+            style={{ left: showFilters ? -4 : -20, top: 15 }}
           >
             <ChevronLeft className="f-18" />
           </IconButton>
           {!showFilters && (
-            <div className="border-left pl-3 py-3">
+            <div className="border-left pl-3 py-3 h-100">
               <Grid container>
                 <Grid item xs="auto">
                   <Typography variant="subtitle1">Assignee: </Typography>
@@ -161,4 +161,4 @@ const Overview = (props) => {
     </AccordionCard>
   );
 };
-export default Overview;
+export default Summary;
