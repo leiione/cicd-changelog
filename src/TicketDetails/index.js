@@ -8,8 +8,8 @@ import Tasks from "./components/Tasks";
 import BillsOfMaterial from "./components/BillsOfMaterial";
 
 const TicketDetails = (props) => {
-  const { lablesVisible, customer, showBoM } = props;
-  const [open1, setopen1] = React.useState(null); 
+  const { lablesVisible, customer, BoMVisible, showSignature } = props;
+  const [open1, setopen1] = React.useState(null);
 
   const handleIconButton = (event, childDrawer) => {
     preventEvent(event);
@@ -40,6 +40,7 @@ const TicketDetails = (props) => {
           handleIconButton={handleIconButton}
           customer={customer}
           lablesVisible={lablesVisible}
+          showSignature={showSignature}
         />
 
         <Tasks
@@ -47,11 +48,11 @@ const TicketDetails = (props) => {
           customer={customer}
           lablesVisible={lablesVisible}
         />
-        {showBoM && (
+        {BoMVisible && (
           <BillsOfMaterial
             handleIconButton={handleIconButton}
             customer={customer}
-            showBoM={showBoM}
+            BoMVisible={BoMVisible}
             lablesVisible={lablesVisible}
           />
         )}

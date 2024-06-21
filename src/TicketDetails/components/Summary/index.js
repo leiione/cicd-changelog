@@ -4,40 +4,25 @@ import HeaderMenuOptions from "./components/HeaderMenuOptions";
 import TicketPriority from "./components/TicketPriority";
 import TicketType from "./components/TicketType";
 import TicketStatus from "./components/TicketStatus";
-import {
-  Button,
-  Collapse,
-  Grid,
-  IconButton,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { ChevronLeft, ExpandLess, ExpandMore } from "@mui/icons-material";
+import { Grid, IconButton, Typography } from "@mui/material";
+import { ChevronLeft } from "@mui/icons-material";
 import { preventEvent } from "Common/helper";
+import Followers from "./components/Followers";
+import Assignee from "./components/Assignee";
+import Signature from "./components/Signature";
+import Description from "./components/Description";
+import Schedule from "./components/Schedule";
+import ServiceContact from "./components/ServiceContact";
+import LinkedTickets from "./components/LinkedTickets";
 
 const Summary = (props) => {
-  const { customer } = props;
+  const { customer, showSignature } = props;
   const [showFilters, setShowFilters] = useState(true);
   const handleFilterVisibility = (event) => {
     preventEvent(event);
     setShowFilters(!showFilters);
   };
 
-  const [openInline, setOpenInline] = useState("");
-
-  const handleInlineEdit = () =>
-    setTimeout(() => {
-      setOpenInline(!openInline);
-    }, 500);
-
-  const handleCancel = () => {
-    setOpenInline(!openInline);
-  };
-
-  const [expandCollapse, setExpandCollapse] = useState("");
-  const handleCollapse = () => {
-    setExpandCollapse(!expandCollapse);
-  };
   return (
     <AccordionCard
       label="Overview"
@@ -52,72 +37,13 @@ const Summary = (props) => {
       menuOption={<HeaderMenuOptions />}
     >
       <Grid container spacing={1}>
-        <Grid item xs>
+        <Grid item xs className="h-100">
           <div className="py-3 pr-5">
-            {!openInline ? (
-              customer.summary ? (
-                <div
-                  className="cursor-pointer"
-                  onClick={() => handleInlineEdit()}
-                >
-                  <Typography variant="body2">Description</Typography>
-                  <Typography variant="body1">{customer.summary}</Typography>
-                </div>
-              ) : (
-                <Button color="primary" onClick={() => handleInlineEdit()}>
-                  Click to add description
-                </Button>
-              )
-            ) : (
-              <div className="position-relative">
-                <TextField
-                  id="standard-basic"
-                  variant="standard"
-                  className="mb-0"
-                  fullWidth
-                  value={customer.summary}
-                />
-                <div
-                  className="position-absolute right-0 bg-white rounded shadow"
-                  style={{ bottom: -32 }}
-                >
-                  <Button
-                    color="primary"
-                    size="small"
-                    onClick={handleCancel}
-                    className="my-1"
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    color="default"
-                    size="small"
-                    onClick={handleCancel}
-                    className="my-1"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
+            <Description customer={customer} />
             <div className="border-top mt-3 pt-3">
-              <Button
-                color="default"
-                className="mx-0 px-1 text-muted"
-                onClick={handleCollapse}
-              >
-                {expandCollapse ? (
-                  <ExpandMore className="mr-2" />
-                ) : (
-                  <ExpandLess className="mr-2" />
-                )}
-                Schedule
-              </Button>
-              <Collapse in={expandCollapse}>
-                <Typography variant="subtitle1">
-                  <span className="text-dark">Date </span> {customer.date_added}
-                </Typography>
-              </Collapse>
+              <Schedule customer={customer} />
+              <ServiceContact customer={customer} />
+              <LinkedTickets customer={customer} />
             </div>
           </div>
         </Grid>
@@ -126,33 +52,22 @@ const Summary = (props) => {
             onClick={handleFilterVisibility}
             size="small"
             className="border rounded-0 position-absolute"
-            style={{ left: showFilters ? -4 : -20, top: 15 }}
+            style={{ left: showFilters ? -4 : -21, top: 15 }}
           >
             <ChevronLeft className="f-18" />
           </IconButton>
           {!showFilters && (
             <div className="border-left pl-3 py-3 h-100">
-              <Grid container>
-                <Grid item xs="auto">
-                  <Typography variant="subtitle1">Assignee: </Typography>
-                </Grid>
-                <Grid item xs="auto">
-                  <Typography variant="subtitle1">Assignee: </Typography>
-                </Grid>
-              </Grid>
-              <Grid container>
-                <Grid item xs="auto">
-                  <Typography variant="subtitle1">Followers: </Typography>
-                </Grid>
-                <Grid item xs="auto">
-                  <Typography variant="subtitle1">Assignee: </Typography>
-                </Grid>
-              </Grid>
-              <Typography variant="caption" className="d-block">
-                Created by: on {customer.date_added}
+              <Assignee customer={customer} />
+              <Followers customer={customer} />
+              {showSignature && <Signature showSignature={showSignature} />}
+              <Typography variant="caption" className="d-block mt-2">
+                Created by: <strong>name is missing</strong> on{" "}
+                {customer.date_added}
               </Typography>
               <Typography variant="caption">
-                Last updated by: on {customer.last_modified}{" "}
+                Last updated by: <strong>name is missing</strong> on{" "}
+                {customer.last_modified}
               </Typography>
             </div>
           )}
