@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Header = (props) => {
   const classes = useStyles();
-  const { customer, category, handleBoM, toggleSignature, toggleDelete } = props;
+  const { ticket, category, toggleDelete } = props;
   const [anchorEl, setAnchorEl] = React.useState(null)
 
   const handleClick = (event) => {
@@ -41,18 +41,10 @@ const Header = (props) => {
             horizontal: "left"
           }}
         >
-          {customer.ticket_id > 0 &&
-            <>
-              <MenuItem onClick={handleBoM}>
-                Bill of Materials
-              </MenuItem>
-              <MenuItem onClick={() => toggleSignature(true)}>
-                Signature
-              </MenuItem>
+          {ticket.ticket_id > 0 &&
               <MenuItem onClick={() => toggleDelete(true)}>
                 Delete Ticket
               </MenuItem>
-            </>
           }
           <MenuItem className="pl-2">
             {/* <CSAT category={category} key={category} /> */}
@@ -64,7 +56,7 @@ const Header = (props) => {
         </Popover>
       </div>
       <Toolbar className="drawer-header">
-        <Typography variant="h6">{customer.ticket_id > 0 ? `Ticket #${customer.ticket_id}` : 'Add Ticket'}</Typography>
+        <Typography variant="h6">{ticket.ticket_id > 0 ? `Ticket #${ticket.ticket_id}` : 'Add Ticket'}</Typography>
       </Toolbar>
     </>
   );

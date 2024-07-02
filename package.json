@@ -27,6 +27,7 @@
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.10",
     "graphql": "^16.8.1",
+    "graphql-ws": "^5.16.0",
     "html2plaintext": "^2.1.4",
     "lodash": "^4.17.21",
     "moment-timezone": "^0.5.43",

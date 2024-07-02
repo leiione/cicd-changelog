@@ -9,10 +9,11 @@ import BillsOfMaterial from "./components/BillsOfMaterial";
 import DialogAlert from "components/DialogAlert";
 
 const TicketDetails = (props) => {
-  const { lablesVisible, customer, category } = props;
+  const { lablesVisible, ticket, category } = props;
+  const openSignature = true // this should be from ticket type setting
+  const showBoM = true // this should be from ticket type setting
+
   const [open1, setopen1] = React.useState(null);
-  const [showBoM, setShowBoM] = React.useState(null);
-  const [openSignature, toggleSignature] = React.useState(null);
   const [openDelete, toggleDelete] = React.useState(null);
 
   const handleIconButton = (event, childDrawer) => {
@@ -23,10 +24,6 @@ const TicketDetails = (props) => {
   const handleDrawerClose1 = () => {
     setopen1(null);
   };
-
-  const handleBoM = () => {
-    setShowBoM(!showBoM);
-  }
 
   const renderChildComponent = () => {
     switch (open1) {
@@ -43,36 +40,34 @@ const TicketDetails = (props) => {
   return (
     <div>
       <Header
-        customer={customer}
+        ticket={ticket}
         category={category}
-        handleBoM={handleBoM}
-        toggleSignature={toggleSignature}
         toggleDelete={toggleDelete}
       />
       <div className="drawer-wrapper-full p-3">
         <Summary
           handleIconButton={handleIconButton}
-          customer={customer}
+          customer={ticket}
           lablesVisible={lablesVisible}
           showSignature={openSignature}
         />
 
         <Tasks
           handleIconButton={handleIconButton}
-          customer={customer}
+          customer={ticket}
           lablesVisible={lablesVisible}
         />
         {showBoM && (
           <BillsOfMaterial
             handleIconButton={handleIconButton}
-            customer={customer}
+            customer={ticket}
             showBoM={showBoM}
             lablesVisible={lablesVisible}
           />
         )}
         <Activity
           handleIconButton={handleIconButton}
-          customer={customer}
+          customer={ticket}
           lablesVisible={lablesVisible}
         />
       </div>
