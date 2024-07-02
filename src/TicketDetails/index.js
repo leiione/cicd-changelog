@@ -6,10 +6,14 @@ import Activity from "./components/Activity";
 import Summary from "./components/Summary";
 import Tasks from "./components/Tasks";
 import BillsOfMaterial from "./components/BillsOfMaterial";
+import DialogAlert from "components/DialogAlert";
 
 const TicketDetails = (props) => {
-  const { lablesVisible, customer, BoMVisible, showSignature } = props;
+  const { lablesVisible, customer, category } = props;
   const [open1, setopen1] = React.useState(null);
+  const [showBoM, setShowBoM] = React.useState(null);
+  const [openSignature, toggleSignature] = React.useState(null);
+  const [openDelete, toggleDelete] = React.useState(null);
 
   const handleIconButton = (event, childDrawer) => {
     preventEvent(event);
@@ -19,6 +23,10 @@ const TicketDetails = (props) => {
   const handleDrawerClose1 = () => {
     setopen1(null);
   };
+
+  const handleBoM = () => {
+    setShowBoM(!showBoM);
+  }
 
   const renderChildComponent = () => {
     switch (open1) {
@@ -34,13 +42,19 @@ const TicketDetails = (props) => {
   };
   return (
     <div>
-      <Header customer={customer} />
+      <Header
+        customer={customer}
+        category={category}
+        handleBoM={handleBoM}
+        toggleSignature={toggleSignature}
+        toggleDelete={toggleDelete}
+      />
       <div className="drawer-wrapper-full p-3">
         <Summary
           handleIconButton={handleIconButton}
           customer={customer}
           lablesVisible={lablesVisible}
-          showSignature={showSignature}
+          showSignature={openSignature}
         />
 
         <Tasks
@@ -48,11 +62,11 @@ const TicketDetails = (props) => {
           customer={customer}
           lablesVisible={lablesVisible}
         />
-        {BoMVisible && (
+        {showBoM && (
           <BillsOfMaterial
             handleIconButton={handleIconButton}
             customer={customer}
-            BoMVisible={BoMVisible}
+            showBoM={showBoM}
             lablesVisible={lablesVisible}
           />
         )}
@@ -69,6 +83,27 @@ const TicketDetails = (props) => {
       >
         {renderChildComponent()}
       </ChildDrawers>
+      {openDelete && <DialogAlert
+        open={openDelete}
+        message={<span>Are you sure you want to delete this ticket?</span>}
+        buttonsList={[
+          {
+            label: "Yes",
+            size: "medium",
+            color: "primary",
+            isProgress: true,
+            // isSubmitting: loading,
+            onClick: () => toggleDelete(false)
+          },
+          {
+            label: "No",
+            size: "medium",
+            color: "default",
+            // disabled: loading,
+            onClick: () => toggleDelete(false)
+          }
+        ]}
+      />}
     </div>
   );
 };

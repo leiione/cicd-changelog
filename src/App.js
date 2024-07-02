@@ -2,6 +2,8 @@ import { StyledEngineProvider, ThemeProvider } from "@mui/material";
 import { StylesProvider, createGenerateClassName } from "@mui/styles";
 import TicketDetails from "./TicketDetails";
 import { LicenseInfo } from "@mui/x-data-grid-pro";
+import { Provider } from "react-redux";
+import store from "config/store";
 
 const App = ({ theme, ...rest }) => {
   LicenseInfo.setLicenseKey(
@@ -13,13 +15,15 @@ const App = ({ theme, ...rest }) => {
   });
 
   return (
-    <StyledEngineProvider injectFirst>
-      <StylesProvider generateClassName={generateClassName}>
-        <ThemeProvider theme={theme}>
-          <TicketDetails {...rest} />
-        </ThemeProvider>
-      </StylesProvider>
-    </StyledEngineProvider>
+    <Provider store={store}>
+      <StyledEngineProvider injectFirst>
+        <StylesProvider generateClassName={generateClassName}>
+          <ThemeProvider theme={theme}>
+            <TicketDetails {...rest} />
+          </ThemeProvider>
+        </StylesProvider>
+      </StyledEngineProvider>
+    </Provider>
   );
 };
 
