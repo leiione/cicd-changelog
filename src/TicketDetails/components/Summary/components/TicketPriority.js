@@ -8,7 +8,6 @@ import {
 import { preventEvent } from "../../../../Common/helper";
 
 const TicketPriority = (props) => {
-  const { customer } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openMenu = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -19,8 +18,6 @@ const TicketPriority = (props) => {
     preventEvent(event);
     setAnchorEl(null);
   };
-
-  console.log("Ticket", customer);
 
   return (
     <>

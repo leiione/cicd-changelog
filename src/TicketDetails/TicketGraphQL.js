@@ -7,6 +7,7 @@ export const GET_TICKET = gql`
       description
       priority
       status
+      assigned_name
     }
   }
 `

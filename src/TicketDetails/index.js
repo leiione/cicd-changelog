@@ -7,14 +7,28 @@ import Summary from "./components/Summary";
 import Tasks from "./components/Tasks";
 import BillsOfMaterial from "./components/BillsOfMaterial";
 import DialogAlert from "components/DialogAlert";
+// import { GET_TICKET } from "./TicketGraphQL";
+// import { useQuery } from "@apollo/client";
+// import ErrorPage from "components/ErrorPage";
 
 const TicketDetails = (props) => {
-  const { lablesVisible, ticket, category } = props;
+  const { lablesVisible, ticket: ticketData, category } = props;
+  console.log('props: ', props);
+  // const { ticket_id } = ticketData
   const openSignature = true // this should be from ticket type setting
   const showBoM = true // this should be from ticket type setting
 
   const [open1, setopen1] = React.useState(null);
   const [openDelete, toggleDelete] = React.useState(null);
+
+  // const { loading, error, data } = useQuery(GET_TICKET, {
+  //   variables: { id: ticket_id },
+  //   fetchPolicy: "network-only"
+  // })
+
+  // if (error) return <ErrorPage error={error} />
+
+  const ticket = ticketData //!loading && data ? data.ticket : ticketData
 
   const handleIconButton = (event, childDrawer) => {
     preventEvent(event);
@@ -28,7 +42,7 @@ const TicketDetails = (props) => {
   const renderChildComponent = () => {
     switch (open1) {
       case "Notes and Alerts":
-        return "text";
+        return "Coming Soon";
       default:
         return (
           <div className="drawer-wapper-full p-3 tex-center">
@@ -43,6 +57,7 @@ const TicketDetails = (props) => {
         ticket={ticket}
         category={category}
         toggleDelete={toggleDelete}
+        setopen1={setopen1}
       />
       <div className="drawer-wrapper-full p-3">
         <Summary
