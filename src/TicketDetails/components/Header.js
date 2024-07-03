@@ -1,9 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { IconButton, MenuItem, Popover, Toolbar, Tooltip, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { ContentCopy, DescriptionOutlined, MoreVert, SentimentSatisfiedAlt } from "@mui/icons-material";
+import { ContentCopy, DescriptionOutlined, MoreVert } from "@mui/icons-material";
 import { preventEvent } from "Common/helper";
 import { includes } from "lodash";
+import DialogAlert from "components/DialogAlert";
+import { useMutation } from "@apollo/client";
+import { DELETE_TICKET } from "TicketDetails/TicketGraphQL";
+import { useDispatch } from "react-redux";
+import { showSnackbar } from "config/store";
+import CSAT from "Common/CSAT";
 
 const useStyles = makeStyles((theme) => ({
   header: {
@@ -18,8 +24,12 @@ const useStyles = makeStyles((theme) => ({
 
 const Header = (props) => {
   const classes = useStyles();
-  const { ticket, category, toggleDelete, setopen1 } = props;
-  const [anchorEl, setAnchorEl] = React.useState(null)
+  const dispatch = useDispatch()
+  const { ticket, category, setopen1, hideContentDrawer, appuser_id } = props;
+  const [anchorEl, setAnchorEl] = useState(null)
+  const [openDelete, toggleDelete] = useState(null);
+  const [loading, setLoading] = useState(false)
+  const [deleteTicket] = useMutation(DELETE_TICKET)
 
   const handleClick = (event) => {
     preventEvent(event);
@@ -28,6 +38,24 @@ const Header = (props) => {
 
   const copyText = () => {
     navigator.clipboard.writeText(ticket.ticket_id)
+  }
+
+  const onDeleteTicket = async () => {
+    try {
+      setLoading(true)
+      await deleteTicket({
+        variables: { id: ticket.ticket_id },
+      }).finally(() => {
+        setLoading(false)
+        toggleDelete(false)
+        setAnchorEl(null)
+        hideContentDrawer({ message: "Deleted the ticket successfully.", severity: "success" })
+      })
+    } catch (e) {
+      setLoading(false)
+      const message = e.message.split("GraphQL error:")
+      dispatch(showSnackbar({ message, severity: "error" }))
+    }
   }
 
   return (
@@ -52,11 +80,7 @@ const Header = (props) => {
             </MenuItem>
           }
           <MenuItem className="pl-2">
-            {/* <CSAT category={category} key={category} /> */}
-            <IconButton>
-              <SentimentSatisfiedAlt />
-            </IconButton>
-            Feedback
+            <CSAT appuser_id={appuser_id} category={category} key={category} isSettings={false} />
           </MenuItem>
         </Popover>
       </div>
@@ -76,6 +100,30 @@ const Header = (props) => {
           </>
         }
       </Toolbar>
+      {openDelete && <DialogAlert
+        open={openDelete}
+        message={<span>Are you sure you want to delete this ticket?</span>}
+        buttonsList={[
+          {
+            label: "Yes",
+            size: "medium",
+            color: "primary",
+            isProgress: true,
+            isSubmitting: loading,
+            onClick: onDeleteTicket
+          },
+          {
+            label: "No",
+            size: "medium",
+            color: "default",
+            disabled: loading,
+            onClick: () => {
+              toggleDelete(false)
+              setAnchorEl(null)
+            }
+          }
+        ]}
+      />}
     </>
   );
 };
