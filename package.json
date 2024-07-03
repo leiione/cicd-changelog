@@ -5,9 +5,12 @@
   "config-overrides-path": "node_modules/react-app-rewired/config-overrides.js",
   "dependencies": {
     "@apollo/client": "^3.8.6",
+    "@awesome.me/kit-bf5f144381": "^1.0.13",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@mui/icons-material": "^5.14.15",
     "@mui/lab": "^5.0.0-alpha.150",
     "@mui/material": "^5.14.18",

@@ -10,6 +10,8 @@ import DialogAlert from "components/DialogAlert";
 import { GET_TICKET } from "./TicketGraphQL";
 import { useQuery } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+// import { faHouse } from '@awesome.me/kit-bf5f144381/icons/classic/solid'
 
 const TicketDetails = (props) => {
   const { lablesVisible, ticket: ticketData, category } = props;
@@ -60,6 +62,7 @@ const TicketDetails = (props) => {
         setopen1={setopen1}
       />
       <div className="drawer-wrapper-full p-3">
+        {/* <FontAwesomeIcon icon={faHouse}/> */}
         <Summary
           handleIconButton={handleIconButton}
           customer={ticket}
