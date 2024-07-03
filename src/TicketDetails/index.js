@@ -9,6 +9,8 @@ import BillsOfMaterial from "./components/BillsOfMaterial";
 import { GET_TICKET } from "./TicketGraphQL";
 import { useQuery } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+// import { faHouse } from '@awesome.me/kit-bf5f144381/icons/classic/solid'
 import { useSelector } from "react-redux";
 import GlobalSnackbar from "Common/GlobalSnackbar";
 
@@ -65,6 +67,7 @@ const TicketDetails = (props) => {
         appuser_id={appuser_id}
       />
       <div className="drawer-wrapper-full p-3">
+        {/* <FontAwesomeIcon icon={faHouse}/> */}
         <Summary
           handleIconButton={handleIconButton}
           customer={ticket}
