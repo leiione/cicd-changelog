@@ -11,3 +11,11 @@ export const GET_TICKET = gql`
     }
   }
 `
+
+export const DELETE_TICKET = gql`
+  mutation deleteTicket($id: Int!) {
+    deleteTicket(id: $id) {
+      ticket_id
+    }
+  }
+`

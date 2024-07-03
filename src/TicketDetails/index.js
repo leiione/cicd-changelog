@@ -6,24 +6,23 @@ import Activity from "./components/Activity";
 import Summary from "./components/Summary";
 import Tasks from "./components/Tasks";
 import BillsOfMaterial from "./components/BillsOfMaterial";
-import DialogAlert from "components/DialogAlert";
 import { GET_TICKET } from "./TicketGraphQL";
 import { useQuery } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
 
 const TicketDetails = (props) => {
-  const { lablesVisible, ticket: ticketData, category } = props;
+  const { lablesVisible, ticket: ticketData, category, hideContentDrawer } = props;
   console.log('props: ', props);
   const { ticket_id } = ticketData
   const openSignature = true // this should be from ticket type setting
   const showBoM = true // this should be from ticket type setting
 
   const [open1, setopen1] = React.useState(null);
-  const [openDelete, toggleDelete] = React.useState(null);
 
   const { loading, error, data } = useQuery(GET_TICKET, {
     variables: { id: ticket_id },
-    fetchPolicy: "network-only"
+    fetchPolicy: "network-only",
+    skip: !ticket_id,
   })
 
   if (error) return <ErrorPage error={error} />
@@ -56,8 +55,8 @@ const TicketDetails = (props) => {
       <Header
         ticket={ticket}
         category={category}
-        toggleDelete={toggleDelete}
         setopen1={setopen1}
+        hideContentDrawer={hideContentDrawer}
       />
       <div className="drawer-wrapper-full p-3">
         <Summary
@@ -93,27 +92,6 @@ const TicketDetails = (props) => {
       >
         {renderChildComponent()}
       </ChildDrawers>
-      {openDelete && <DialogAlert
-        open={openDelete}
-        message={<span>Are you sure you want to delete this ticket?</span>}
-        buttonsList={[
-          {
-            label: "Yes",
-            size: "medium",
-            color: "primary",
-            isProgress: true,
-            // isSubmitting: loading,
-            onClick: () => toggleDelete(false)
-          },
-          {
-            label: "No",
-            size: "medium",
-            color: "default",
-            // disabled: loading,
-            onClick: () => toggleDelete(false)
-          }
-        ]}
-      />}
     </div>
   );
 };
