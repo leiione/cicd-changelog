@@ -9,9 +9,13 @@ import BillsOfMaterial from "./components/BillsOfMaterial";
 import { GET_TICKET } from "./TicketGraphQL";
 import { useQuery } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
+import { useSelector } from "react-redux";
+import GlobalSnackbar from "Common/GlobalSnackbar";
 
 const TicketDetails = (props) => {
-  const { lablesVisible, ticket: ticketData, category, hideContentDrawer } = props;
+  const { lablesVisible, ticket: ticketData, category, hideContentDrawer, appuser_id } = props;
+  const snackbar = useSelector(state => state.snackbar)
+
   console.log('props: ', props);
   const { ticket_id } = ticketData
   const openSignature = true // this should be from ticket type setting
@@ -52,11 +56,13 @@ const TicketDetails = (props) => {
   };
   return (
     <div>
+      {snackbar && snackbar.open && <GlobalSnackbar {...snackbar} />}
       <Header
         ticket={ticket}
         category={category}
         setopen1={setopen1}
         hideContentDrawer={hideContentDrawer}
+        appuser_id={appuser_id}
       />
       <div className="drawer-wrapper-full p-3">
         <Summary

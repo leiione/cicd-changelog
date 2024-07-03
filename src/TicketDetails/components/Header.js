@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { IconButton, MenuItem, Popover, Toolbar, Tooltip, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { ContentCopy, DescriptionOutlined, MoreVert, SentimentSatisfiedAlt } from "@mui/icons-material";
+import { ContentCopy, DescriptionOutlined, MoreVert } from "@mui/icons-material";
 import { preventEvent } from "Common/helper";
 import { includes } from "lodash";
 import DialogAlert from "components/DialogAlert";
@@ -9,6 +9,7 @@ import { useMutation } from "@apollo/client";
 import { DELETE_TICKET } from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
+import CSAT from "Common/CSAT";
 
 const useStyles = makeStyles((theme) => ({
   header: {
@@ -24,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
 const Header = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch()
-  const { ticket, category, setopen1, hideContentDrawer } = props;
+  const { ticket, category, setopen1, hideContentDrawer, appuser_id } = props;
   const [anchorEl, setAnchorEl] = useState(null)
   const [openDelete, toggleDelete] = useState(null);
   const [loading, setLoading] = useState(false)
@@ -79,11 +80,7 @@ const Header = (props) => {
             </MenuItem>
           }
           <MenuItem className="pl-2">
-            {/* <CSAT category={category} key={category} /> */}
-            <IconButton>
-              <SentimentSatisfiedAlt />
-            </IconButton>
-            Feedback
+            <CSAT appuser_id={appuser_id} category={category} key={category} isSettings={false} />
           </MenuItem>
         </Popover>
       </div>
