@@ -8,6 +8,9 @@ export const GET_TICKET = gql`
       priority
       status
       assigned_name
+      due_by_date
+      earliest_arrival_time
+      latest_arrival_time
     }
   }
 `

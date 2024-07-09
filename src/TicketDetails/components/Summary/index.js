@@ -41,9 +41,9 @@ const Summary = (props) => {
           <div className="py-3 pr-5">
             <Description customer={customer} />
             <div className="border-top mt-3 pt-3">
-              <Schedule customer={customer} />
-              <ServiceContact customer={customer} />
-              <LinkedTickets customer={customer} />
+              <Schedule ticket={customer} />
+              <ServiceContact ticket={customer} />
+              <LinkedTickets ticket={customer} />
             </div>
           </div>
         </Grid>

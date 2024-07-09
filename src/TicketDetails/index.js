@@ -33,7 +33,7 @@ const TicketDetails = (props) => {
 
   if (error) return <ErrorPage error={error} />
 
-  const ticket = !loading && data && data.ticket ? data.ticket : ticketData
+  const ticket = !loading && data && data.ticket ? data.ticket : {}
 
   const handleIconButton = (event, childDrawer) => {
     preventEvent(event);
