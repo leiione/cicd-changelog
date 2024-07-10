@@ -16,8 +16,13 @@ import ServiceContact from "./components/ServiceContact";
 import LinkedTickets from "./components/LinkedTickets";
 import { UPDATE_TICKET_MUTATION } from "TicketDetails/TicketGraphQL";
 import { useMutation } from "@apollo/client";
+import { useDispatch } from "react-redux";
+import { showSnackbar } from "config/store";
+
 
 const Summary = (props) => {
+  const dispatch = useDispatch()
+
   const { customer, showSignature, ticketTypes, ticketStatuses } = props;
   const [showFilters, setShowFilters] = useState(true);
   const handleFilterVisibility = (event) => {
@@ -36,7 +41,9 @@ const Summary = (props) => {
             input_ticket: input_ticket,
           },
         });
-      } catch (error) {
+        dispatch(showSnackbar({ message:"Ticket updated successfully", severity: "success" }))
+
+       } catch (error) {
         console.error("Error updating ticket priority:", error);
       }
     };
