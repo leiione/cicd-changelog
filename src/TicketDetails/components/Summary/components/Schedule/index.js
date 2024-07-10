@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { Collapse, Grid, IconButton, Typography } from "@mui/material";
-import DueDate from "./DueDate";
-import PreferredArrival from "./PreferredArrival";
+import DueDate from "./components/DueDate";
+import PreferredArrival from "./components/PreferredArrival";
 import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles(() => ({
