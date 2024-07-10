@@ -22,8 +22,8 @@ const Schedule = (props) => {
 
   return (
     <Grid container spacing={0}>
-      <Grid item xs={12} style={{ marginBottom: "-10px" }}>
-        <IconButton onClick={handleCollapse} className="mx-0 px-1 text-muted">
+      <Grid item xs={12}>
+        <IconButton onClick={handleCollapse} className="p-2 text-muted">
           {expandCollapse ? (
             <ExpandMore className="mr-1" />
           ) : (

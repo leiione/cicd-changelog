@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { preventEvent } from "../Common/helper";
 import Header from "./components/Header";
 import ChildDrawers from "../Common/ChildDrawers";
@@ -30,9 +30,10 @@ const TicketDetails = (props) => {
     skip: !ticket_id,
   })
 
+
+  const ticket = useMemo(() => !loading && data && data.ticket ? data.ticket : ticketData, [loading, data, ticketData]);
   if (error) return <ErrorPage error={error} />
 
-  const ticket = !loading && data && data.ticket ? data.ticket : {}
   const ticketTypes = !loading && data && data.ticketTypes ? data.ticketTypes : [];
   const ticketStatuses = !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
 

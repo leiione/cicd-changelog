@@ -40,7 +40,7 @@ const PreferredArrival = (props) => {
   return (
     <>
       <Typography variant="subtitle1" onClick={handleClick}>
-        <AccessTime className="text-dark" style={{ marginRight: 5 }} /> Preferred Arrival
+        <AccessTime className="text-muted f-20" style={{ marginRight: 5 }} /> Preferred Arrival
         <Typography variant="subtitle1" className={`${classes.dueDate} d-inline-block ml-3`}>
           {arrivalTime}
         </Typography>

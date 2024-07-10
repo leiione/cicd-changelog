@@ -13,6 +13,11 @@ export const GET_TICKET = gql`
       due_by_date
       earliest_arrival_time
       latest_arrival_time
+      category_type
+      subscriber
+      address
+      ticket_contact_numbers
+      ticket_contact_email
     }
     ticketTypes {
       ticket_type_id

@@ -1,74 +1,80 @@
 import React, { useState } from "react";
 import {
+  Business,
+  CallOutlined,
   ExpandLess,
   ExpandMore,
-  LocationOnOutlined,
-  MailOutline,
+  FmdGoodOutlined,
+  MailOutlined,
   Person,
-  PhoneOutlined,
 } from "@mui/icons-material";
-import { Button, Collapse, Table, Typography } from "@mui/material";
+import { Collapse, Grid, IconButton, Typography } from "@mui/material";
 
 const ServiceContact = (props) => {
+  const { ticket } = props
+  const customer = (ticket.subscriber && ticket.subscriber.customer_detail) ? { ...ticket.subscriber, ...ticket.subscriber.customer_detail } : {}
+  const servicePhone = ticket.ticket_contact_numbers ? ticket.ticket_contact_numbers.split(",") : [];
   const [expandCollapse, setExpandCollapse] = useState("");
   const handleCollapse = () => {
     setExpandCollapse(!expandCollapse);
   };
 
   return (
-    <>
-      <Button
-        color="default"
-        className="mx-0 px-1 text-muted"
-        onClick={handleCollapse}
-      >
-        {expandCollapse ? (
-          <ExpandMore className="mr-1" />
-        ) : (
-          <ExpandLess className="mr-1" />
-        )}
-        Service Contact
-      </Button>
-      <Collapse in={expandCollapse} className="pl-4 mr-1">
-        <Table size="small">
-          <tr>
-            <td width={30}>
-              <Person className="text-muted" />
-            </td>
-            <td>
-              <Typography variant="subtitle1">Andrew Arthur</Typography>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <LocationOnOutlined className="text-muted" />
-            </td>
-            <td>
-              <Typography variant="subtitle1">1636 Coventry Court, Grey Hawk, KY, 40434</Typography>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <PhoneOutlined className="text-muted" />
-            </td>
-            <td>
+    <Grid container spacing={0}>
+      <Grid item xs={12}>
+        <IconButton onClick={handleCollapse} className="p-2 text-muted">
+          {expandCollapse ? (
+            <ExpandMore className="mr-1" />
+          ) : (
+            <ExpandLess className="mr-1" />
+          )}
+          <Typography variant="subtitle1" className="text-muted">
+            Service Contact
+          </Typography>
+        </IconButton>
+      </Grid>
+      <Grid item xs={12}>
+        <Collapse in={expandCollapse} style={{ paddingLeft: "25px", position: "relative" }}>
+          <Grid container spacing={1}>
+            <Grid item xs={12} >
               <Typography variant="subtitle1">
-                <span className="d-inline-block mr-3">Home (361) 362-4482</span>
-                <span className="d-inline-block mr-3">Work (361) 362-4482</span>
+                <Business className="text-muted f-20" style={{ marginRight: 5 }} /> {customer.main_company || "-"}
               </Typography>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <MailOutline className="text-muted" />
-            </td>
-            <td>
-              <Typography variant="subtitle1">dru.arthur@yahoo.com</Typography>
-            </td>
-          </tr>
-        </Table>
-      </Collapse>
-    </>
+            </Grid>
+            <Grid item xs={12} >
+              <Typography variant="subtitle1">
+                <Person className="text-success f-20" style={{ marginRight: 5 }} /> {`${customer.first_name} ${customer.last_name}`}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} >
+              <Typography variant="subtitle1">
+                <FmdGoodOutlined className="text-muted f-20" style={{ marginRight: 5 }} /> {ticket.address || "-"}
+              </Typography>
+            </Grid>
+            {servicePhone.length > 0 &&
+              <Grid item xs={12} >
+                <Grid container spacing={2}>
+                  <Grid item xs={"auto"} >
+                    <Typography variant="subtitle1">
+                      <CallOutlined className="text-muted f-20" style={{ marginRight: 8 }} /><span>Home &nbsp; {servicePhone[0]}</span>
+                    </Typography>
+                  </Grid>
+                  {servicePhone.length > 1 && <Grid item xs={"auto"} >
+                    <Typography variant="subtitle1"><span>Work &nbsp; {servicePhone[1]}</span></Typography>
+                  </Grid>
+                  }
+                </Grid>
+              </Grid>
+            }
+            {ticket.ticket_contact_email && <Grid item xs={12} >
+              <Typography variant="subtitle1">
+                <MailOutlined className="text-muted f-20" style={{ marginRight: 5 }} /> {ticket.ticket_contact_email}
+              </Typography>
+            </Grid>}
+          </Grid>
+        </Collapse>
+      </Grid>
+    </Grid >
   );
 };
 export default ServiceContact;

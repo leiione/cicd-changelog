@@ -32,7 +32,7 @@ const DueDate = (props) => {
   return (
     <>
       <Typography variant="subtitle1" onClick={handleClick}>
-        <CalendarToday className="text-dark" style={{ marginRight: 5 }} /> Due Date
+        <CalendarToday className="text-muted f-20" style={{ marginRight: 5 }} /> Due Date
         <Typography variant="subtitle1" className={`${classes.dueDate} d-inline-block ml-3`}>
           {moment(dueDate).format("MMM DD, YYYY")}
         </Typography>
