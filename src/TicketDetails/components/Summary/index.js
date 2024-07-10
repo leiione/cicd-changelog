@@ -14,7 +14,7 @@ import Description from "./components/Description";
 import Schedule from "./components/Schedule";
 import ServiceContact from "./components/ServiceContact";
 import LinkedTickets from "./components/LinkedTickets";
-import { UPDATE_TICKET_MUTATION } from "TicketDetails/TicketGraphQL";
+import { GET_TICKET, UPDATE_TICKET_MUTATION } from "TicketDetails/TicketGraphQL";
 import { useMutation } from "@apollo/client";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
@@ -33,22 +33,20 @@ const Summary = (props) => {
   const [updateTicket] = useMutation(UPDATE_TICKET_MUTATION);
 
 
-    // 3. Function to execute the mutation
-    const handleUpdate = async (input_ticket) => {
-      try {
-         await updateTicket({
-          variables: {
-            input_ticket: input_ticket,
-          },
-        });
-        dispatch(showSnackbar({ message:"Ticket updated successfully", severity: "success" }))
-
-       } catch (error) {
-        console.error("Error updating ticket priority:", error);
-      }
-    };
-  
-  
+  // 3. Function to execute the mutation
+  const handleUpdate = async (input_ticket) => {
+    try {
+      await updateTicket({
+        variables: {
+          input_ticket: input_ticket,
+        },
+        refetchQueries: [{ query: GET_TICKET, variables: { id: customer.ticket_id } }]
+      });
+      dispatch(showSnackbar({ message: "Ticket updated successfully", severity: "success" }))
+    } catch (error) {
+      console.error("Error updating ticket priority:", error);
+    }
+  };
 
   return (
     <AccordionCard
@@ -56,7 +54,7 @@ const Summary = (props) => {
       className="py-0"
       iconButtons={
         <>
-          <TicketPriority customer={customer} handleUpdate={handleUpdate}/>
+          <TicketPriority customer={customer} handleUpdate={handleUpdate} />
           <TicketType customer={customer} ticketTypes={ticketTypes} handleUpdate={handleUpdate} />
           <TicketStatus customer={customer} ticketStatuses={ticketStatuses} handleUpdate={handleUpdate} />
         </>
@@ -68,7 +66,7 @@ const Summary = (props) => {
           <div className="py-3 pr-5">
             <Description customer={customer} />
             <div className="border-top mt-3 pt-3">
-              <Schedule ticket={customer} />
+              <Schedule ticket={customer} updateTicket={handleUpdate} />
               <ServiceContact ticket={customer} />
               <LinkedTickets ticket={customer} />
             </div>
