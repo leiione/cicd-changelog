@@ -18,7 +18,6 @@ const TicketDetails = (props) => {
   const { lablesVisible, ticket: ticketData, category, hideContentDrawer, appuser_id } = props;
   const snackbar = useSelector(state => state.snackbar)
 
-  console.log('props: ', props);
   const { ticket_id } = ticketData
   const openSignature = true // this should be from ticket type setting
   const showBoM = true // this should be from ticket type setting
@@ -34,6 +33,8 @@ const TicketDetails = (props) => {
   if (error) return <ErrorPage error={error} />
 
   const ticket = !loading && data && data.ticket ? data.ticket : {}
+  const ticketTypes = !loading && data && data.ticketTypes ? data.ticketTypes : [];
+  const ticketStatuses = !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
 
   const handleIconButton = (event, childDrawer) => {
     preventEvent(event);
@@ -71,6 +72,8 @@ const TicketDetails = (props) => {
         <Summary
           handleIconButton={handleIconButton}
           customer={ticket}
+          ticketTypes={ticketTypes}
+          ticketStatuses={ticketStatuses}
           lablesVisible={lablesVisible}
           showSignature={openSignature}
         />

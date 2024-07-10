@@ -14,14 +14,34 @@ import Description from "./components/Description";
 import Schedule from "./components/Schedule";
 import ServiceContact from "./components/ServiceContact";
 import LinkedTickets from "./components/LinkedTickets";
+import { UPDATE_TICKET_MUTATION } from "TicketDetails/TicketGraphQL";
+import { useMutation } from "@apollo/client";
 
 const Summary = (props) => {
-  const { customer, showSignature } = props;
+  const { customer, showSignature, ticketTypes, ticketStatuses } = props;
   const [showFilters, setShowFilters] = useState(true);
   const handleFilterVisibility = (event) => {
     preventEvent(event);
     setShowFilters(!showFilters);
   };
+
+  const [updateTicket] = useMutation(UPDATE_TICKET_MUTATION);
+
+
+    // 3. Function to execute the mutation
+    const handleUpdate = async (input_ticket) => {
+      try {
+         await updateTicket({
+          variables: {
+            input_ticket: input_ticket,
+          },
+        });
+      } catch (error) {
+        console.error("Error updating ticket priority:", error);
+      }
+    };
+  
+  
 
   return (
     <AccordionCard
@@ -29,9 +49,9 @@ const Summary = (props) => {
       className="py-0"
       iconButtons={
         <>
-          <TicketPriority customer={customer} />
-          <TicketType customer={customer} />
-          <TicketStatus customer={customer} />
+          <TicketPriority customer={customer} handleUpdate={handleUpdate}/>
+          <TicketType customer={customer} ticketTypes={ticketTypes} handleUpdate={handleUpdate} />
+          <TicketStatus customer={customer} ticketStatuses={ticketStatuses} handleUpdate={handleUpdate} />
         </>
       }
       menuOption={<HeaderMenuOptions />}
