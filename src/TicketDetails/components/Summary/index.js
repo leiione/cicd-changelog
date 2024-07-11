@@ -67,7 +67,7 @@ const Summary = (props) => {
             <Description customer={customer} />
             <div className="border-top mt-3 pt-3">
               <Schedule ticket={customer} updateTicket={handleUpdate} />
-              <ServiceContact ticket={customer} />
+              <ServiceContact ticket={customer} updateTicket={handleUpdate} />
               <LinkedTickets ticket={customer} />
             </div>
           </div>

@@ -50,6 +50,21 @@ export const UPDATE_TICKET_MUTATION = gql`
       due_by_date
       earliest_arrival_time
       latest_arrival_time
+      address
     }
   }
 `;
+
+
+export const GET_CUSTOMER_ADDRESSES = gql`
+  query customerAddresses ($customer_id: Int!) {
+    customerAddresses(customer_id: $customer_id) {
+      type
+      address1
+      address2
+      city
+      state
+      zip
+    }
+  }
+`
