@@ -11,24 +11,35 @@ import {
 } from "@mui/icons-material";
 import { Button, Collapse, Divider, Grid, IconButton, Typography } from "@mui/material";
 import ContactAddressDropdown from "./components/ContactAddressDropdown";
-import { getFormattedAddress } from "utils/formatter";
+import { formatPhoneNumber, getFormattedAddress, getFormattedPGAddress } from "utils/formatter";
+import { includes, sortBy } from "lodash";
 
 const ServiceContact = (props) => {
   const { ticket, updateTicket } = props
-  const customer = (ticket.subscriber && ticket.subscriber.customer_detail) ? { ...ticket.subscriber, ...ticket.subscriber.customer_detail } : {}
-  const servicePhone = ticket.ticket_contact_numbers ? ticket.ticket_contact_numbers.split(",") : [];
-  const customerAddress = ticket.address ? ticket.address : getFormattedAddress(customer, 'main')
+  const isSubscriber = ticket.category_type === "SUBSCRIBER"
 
+  let contact = (ticket.subscriber && ticket.subscriber.customer_detail) ? { ...ticket.subscriber, ...ticket.subscriber.customer_detail } : {}
+  let servicePhone = ticket.ticket_contact_numbers ? ticket.ticket_contact_numbers.split(",") : [];
+  let serviceEmail = ticket.ticket_contact_email;
+  let contactAddress = ticket.address ? ticket.address : getFormattedAddress(contact, 'main')
+
+  if (!isSubscriber && ticket.infrastructure) {
+    contact = ticket.infrastructure
+    servicePhone = contact.phone_numbers ? sortBy(contact.phone_numbers.filter(x => includes(["home", "work"], x.type)), ['type'])
+      .map(phone => formatPhoneNumber(phone.number)) : []
+    serviceEmail = contact.email_addresses ? contact.email_addresses.map(mail => mail.email) : []
+    contactAddress = getFormattedPGAddress(ticket.infrastructure.address)
+  }
   const [expandCollapse, setExpandCollapse] = useState(false);
   const [onEditMode, setEditMode] = useState(false);
-  const [selectedAddress, setSelectedAddress] = React.useState(customerAddress);
+  const [selectedAddress, setSelectedAddress] = React.useState(contactAddress);
 
   useEffect(() => {
-    if (selectedAddress !== customerAddress) {
-      setSelectedAddress(customerAddress)
+    if (selectedAddress !== contactAddress) {
+      setSelectedAddress(contactAddress)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [customerAddress, onEditMode])
+  }, [contactAddress, onEditMode])
 
   const handleCollapse = () => {
     setExpandCollapse(!expandCollapse);
@@ -63,18 +74,18 @@ const ServiceContact = (props) => {
           <Grid container spacing={1}>
             <Grid item xs={12} >
               <Typography variant="subtitle1">
-                <Business className="text-muted f-20" style={{ marginRight: 5 }} /> {customer.main_company || "-"}
+                <Business className="text-muted f-20" style={{ marginRight: 5 }} /> {contact.main_company || "-"}
               </Typography>
             </Grid>
             <Grid item xs={12} >
               <Typography variant="subtitle1">
-                <Person className="text-success f-20" style={{ marginRight: 5 }} /> {`${customer.first_name} ${customer.last_name}`}
+                <Person className="text-success f-20" style={{ marginRight: 5 }} /> {contact.first_name ? `${contact.first_name} ${contact.last_name}` : "-"}
               </Typography>
             </Grid>
             <Grid item xs={12} >
               <Typography variant="subtitle1">
                 <FmdGoodOutlined className="text-muted f-20" style={{ marginRight: 5 }} /> {selectedAddress}
-                {onEditMode && <ContactAddressDropdown selectedAddress={selectedAddress} setSelectedAddress={setSelectedAddress} customer={customer} customerAddress={customerAddress} />}
+                {onEditMode && <ContactAddressDropdown selectedAddress={selectedAddress} setSelectedAddress={setSelectedAddress} customer={contact} customerAddress={contactAddress} />}
               </Typography>
             </Grid>
             {servicePhone.length > 0 &&
@@ -92,16 +103,16 @@ const ServiceContact = (props) => {
                 </Grid>
               </Grid>
             }
-            {ticket.ticket_contact_email && <Grid item xs={12} >
+            {serviceEmail && <Grid item xs={12} >
               <Typography variant="subtitle1">
-                <MailOutlined className="text-muted f-20" style={{ marginRight: 5 }} /> {ticket.ticket_contact_email}
+                <MailOutlined className="text-muted f-20" style={{ marginRight: 5 }} /> {serviceEmail}
               </Typography>
             </Grid>}
             {onEditMode &&
               <Grid item xs={9}>
                 <Divider />
                 <div className="text-right">
-                  <Button color="primary" size="large" style={{ padding: "5px" }} onClick={onSaveAddress}>
+                  <Button color="primary" size="large" style={{ padding: "5px" }} onClick={onSaveAddress} disabled={selectedAddress === contactAddress}>
                     Save
                   </Button>
                   <Button className="bg-white text-muted" size="large" style={{ padding: "5px" }} onClick={() => setEditMode(false)}>
