@@ -18,6 +18,7 @@ export const GET_TICKET = gql`
       address
       ticket_contact_numbers
       ticket_contact_email
+      location_id
       site_contact_id
       infrastructure {
         id
@@ -90,6 +91,35 @@ export const GET_CUSTOMER_ADDRESSES = gql`
       city
       state
       zip
+    }
+  }
+`
+
+export const GET_SITE_CONTACTS = gql`
+  query serviceContacts($location_id: Int!) {
+    serviceContacts(location_id: $location_id) {
+      id
+      first_name
+      last_name
+      main_company
+      address {
+        id
+        street
+        suffix
+        city
+        state
+        zip
+      }
+      phone_numbers {
+        id
+        number
+        type
+      }
+      email_addresses {
+        id
+        email
+        type
+      }
     }
   }
 `

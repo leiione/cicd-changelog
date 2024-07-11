@@ -1,44 +1,38 @@
 import React from "react"
 import { IconButton, MenuItem, MenuList, Popover } from "@mui/material"
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material"
-import { GET_CUSTOMER_ADDRESSES } from "TicketDetails/TicketGraphQL"
+import { GET_SITE_CONTACTS } from "TicketDetails/TicketGraphQL"
 import { useQuery } from "@apollo/client"
 import ErrorPage from "components/ErrorPage"
 import Loader from "components/Loader"
-import { isEmpty, pick, startCase } from "lodash"
-import { getFormattedAddress } from "utils/formatter"
 
-const ContactAddressDropdown = props => {
-  const { customer, customerAddress, selectedAddress, setSelectedAddress } = props
+const SiteContactDropdown = props => {
+  const { ticket, selectedContact, setSelectedContact } = props
   const [anchorEl, setAnchorEl] = React.useState(false)
   const open = Boolean(anchorEl);
 
-  const { loading, error, data } = useQuery(GET_CUSTOMER_ADDRESSES, {
-    variables: { customer_id: customer.customer_id },
+  const { loading, error, data } = useQuery(GET_SITE_CONTACTS, {
+    variables: { location_id: ticket.location_id },
     fetchPolicy: "network-only",
-    skip: !customer.customer_id,
+    skip: !ticket.location_id,
   })
 
-  const addressOptions = React.useMemo(() => {
+  const contactOptions = React.useMemo(() => {
     const list = [];
-    if (!loading && !error && data && data.customerAddresses) {
-      data.customerAddresses.forEach((address) => {
-        let customerAddress = getFormattedAddress(address)
-        if (!isEmpty(customerAddress) && !list.some(e => e.value === customerAddress)) {
-          list.push({
-            category: address.type === "PACKAGE" ? address.name : startCase(address.type),
-            label: customerAddress,
-            value: customerAddress,
-            ...pick(address, ['lat', 'lng'])
-          })
-        }
+    if (!loading && !error && data && data.serviceContacts) {
+      data.serviceContacts.forEach((contact) => {
+        list.push({
+          label: `${contact.first_name} ${contact.last_name}`,
+          value: contact.id,
+          ...contact
+        })
       })
     }
     return list; // eslint-disable-next-line
-  }, [loading, error, data, customerAddress]);
+  }, [loading, error, data]);
 
   const handleOnSelect = (value) => {
-    setSelectedAddress(value)
+    setSelectedContact(value)
     setAnchorEl(null)
   }
 
@@ -66,11 +60,11 @@ const ContactAddressDropdown = props => {
           : (loading ?
             <Loader style={{ fontSize: 12 }} />
             : <MenuList>
-              {addressOptions.map((option, index) => (
+              {contactOptions.map((option, index) => (
                 <MenuItem
                   key={index}
-                  selected={selectedAddress === option.value}
-                  onClick={(event) => handleOnSelect(option.value)}
+                  selected={selectedContact.value === option.value}
+                  onClick={(event) => handleOnSelect(option)}
                 >
                   {option.label}
                 </MenuItem>
@@ -82,4 +76,4 @@ const ContactAddressDropdown = props => {
   )
 }
 
-export default React.memo(ContactAddressDropdown)
+export default React.memo(SiteContactDropdown)
