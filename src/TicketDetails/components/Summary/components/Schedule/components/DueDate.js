@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
@@ -11,6 +11,12 @@ const DueDate = (props) => {
   const { classes, ticket, updateTicket } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [tempDueDate, setTempDueDate] = React.useState(ticket.due_by_date);
+
+  useEffect(() => {
+    if(ticket.due_by_date && !tempDueDate) {
+      setTempDueDate(ticket.due_by_date);
+    }
+  }, [ticket.due_by_date, tempDueDate])
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -66,4 +72,4 @@ const DueDate = (props) => {
     </>
   );
 };
-export default DueDate;
+export default React.memo(DueDate);

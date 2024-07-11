@@ -1,21 +1,44 @@
-import React from "react";
-import { Typography, Popover, Button, FormControl, RadioGroup, FormControlLabel, Radio, Divider } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Typography, Popover, Button, FormControlLabel, Radio, Divider, Grid, Tooltip, TextField } from "@mui/material";
 import { AccessTime } from "@mui/icons-material";
 import moment from "moment-timezone";
 import { includes } from "lodash";
 
 const PreferredArrival = (props) => {
-  const { classes, ticket } = props;
-  const start = !includes([null, "00:00:00", "00:00:00+00"], ticket.earliest_arrival_time) ? moment(ticket.earliest_arrival_time, [moment.ISO_8601, "HH:mm"]) : moment("08:00:00+00", [moment.ISO_8601, "HH:mm"])
-  const end = !includes([null, "00:00:00", "00:00:00+00"], ticket.latest_arrival_time) ? moment(ticket.latest_arrival_time, [moment.ISO_8601, "HH:mm"]) : moment("08:00:00+00", [moment.ISO_8601, "HH:mm"])
-  const arrivalTime = moment(start).isSame(end) ? moment(start).format("LT") : `${moment(start).format("LT")} - ${moment(end).format("LT")}`;
+  const { classes, ticket, updateTicket } = props;
+  const earliestArrivalTime = !includes([null, "00:00:00", "00:00:00+00"], ticket.earliest_arrival_time) ? moment(ticket.earliest_arrival_time, [moment.ISO_8601, "HH:mm"]) : "08:00:00"
+  const latestArrivalTime = !includes([null, "00:00:00", "00:00:00+00"], ticket.latest_arrival_time) ? moment(ticket.latest_arrival_time, [moment.ISO_8601, "HH:mm"]) : "08:00:00"
+  const arrivalTime = moment(earliestArrivalTime).isSame(latestArrivalTime) ? moment(earliestArrivalTime).format("LT") : `${moment(earliestArrivalTime).format("LT")} - ${moment(latestArrivalTime).format("LT")}`;
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [tempArrivalTime, setTempArrivalTime] = React.useState({
-    start: start,
-    end: end,
-    preferredTime: moment(start).isSame(end) ? "exact" : "window"
-  });
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [preferred, setPreferred] = useState(moment(earliestArrivalTime).isSame(latestArrivalTime) ? "exact" : "window")
+  const [startTime, setStartTime] = useState(ticket.earliest_arrival_time)
+  const [endTime, setEndTime] = useState(ticket.latest_arrival_time)
+  const [err, setErr] = useState({ start: "", end: "" })
+
+  React.useEffect(() => {
+    if (preferred === "window") {
+      const start = moment(startTime, [moment.ISO_8601, "HH:mm"])
+      const end = moment(endTime, [moment.ISO_8601, "HH:mm"])
+      const isAfter = moment(start).isAfter(end)
+      const isBefore = moment(end).isBefore(start)
+      setErr({
+        start: isAfter ? "'Earliest arrival time' should be earlier than 'Latest arrival time'" : "",
+        end: isBefore ? "'Latest arrival time' should be later than 'Earliest arrival time'" : ""
+      })
+    } else {
+      setErr({ start: "", end: "" })
+    }
+    // eslint-disable-next-line
+  }, [preferred, startTime, endTime])
+
+  useEffect(() => {
+    if (ticket.earliest_arrival_time && ticket.latest_arrival_time && !startTime && !endTime) {
+      setStartTime(String(ticket.earliest_arrival_time))
+      setEndTime(String(ticket.latest_arrival_time))
+      setPreferred(moment(earliestArrivalTime).isSame(latestArrivalTime) ? "exact" : "window")
+    }
+  }, [ticket.earliest_arrival_time, ticket.latest_arrival_time, startTime, endTime, earliestArrivalTime, latestArrivalTime])
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -27,11 +50,12 @@ const PreferredArrival = (props) => {
 
   const onRadioChange = (event) => {
     const { value } = event.target;
-    setTempArrivalTime({ ...tempArrivalTime, preferredTime: value });
+    setPreferred(value);
   }
 
   const onSaveArrivalTime = () => {
-    // TODO save
+    updateTicket({ ticket_id: ticket.ticket_id, earliest_arrival_time: startTime, latest_arrival_time: preferred === "window" ? endTime : startTime });
+    handleClose()
   }
 
   const open = Boolean(anchorEl);
@@ -54,22 +78,69 @@ const PreferredArrival = (props) => {
           vertical: "bottom",
           horizontal: "left",
         }}
+        slotProps={{
+          paper: { style: { width: '23%' } }
+        }}
       >
-        <div style={{ padding: 10 }}>
-          <FormControl>
-            <RadioGroup
-              row
-              value={tempArrivalTime.preferredTime}
-              onChange={onRadioChange}
-            >
-              <FormControlLabel value="exact" control={<Radio />} label={<Typography variant="subtitle2" className="f-14">Exact Time</Typography>} />
-              <FormControlLabel value="window" control={<Radio />} label={<Typography variant="subtitle2" className="f-14">Window Time</Typography>} />
-            </RadioGroup>
-          </FormControl>
-        </div>
+        <Grid container spacing={1} style={{ padding: 10 }}>
+          <Grid item xs={6}>
+            <FormControlLabel
+              value="exact"
+              checked={preferred === "exact"}
+              control={<Radio />}
+              onClick={onRadioChange}
+              label={<Typography variant="subtitle2" className="f-14">Exact Time</Typography>}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <FormControlLabel
+              value="window"
+              checked={preferred === "window"}
+              control={<Radio />}
+              onClick={onRadioChange}
+              label={<Typography variant="subtitle2" className="f-14">Window Time</Typography>}
+            />
+          </Grid>
+          <Grid item xs={6} style={{ paddingLeft: 18 }}>
+            <Tooltip placement="top" title={err.start > "" ? err.start : ""} classes={{ tooltip: classes.tooltip }}>
+              <TextField
+                error={err.start > ""}
+                type="time"
+                variant="standard"
+                fullWidth
+                label={preferred === "window" ? "Earliest Arrival Time" : ''}
+                InputLabelProps={{ shrink: true }}
+                onChange={e => setStartTime(e.target.value)}
+                value={moment(startTime, [moment.ISO_8601, "HH:mm"]).format("HH:mm")}
+              />
+            </Tooltip>
+          </Grid>
+          {preferred === "window" &&
+            <Grid item xs={6} style={{ paddingLeft: 18 }}>
+              <Tooltip placement="top" title={err.end > "" ? err.end : ""} classes={{ tooltip: classes.tooltip }}>
+                <TextField
+                  error={err.end > ""}
+                  type="time"
+                  variant="standard"
+                  fullWidth
+                  label={preferred === "window" ? "Latest Arrival Time" : ''}
+                  InputLabelProps={{ shrink: true }}
+                  onChange={e => setEndTime(e.target.value)}
+                  value={moment(endTime, [moment.ISO_8601, "HH:mm"]).format("HH:mm")}
+                />
+              </Tooltip>
+            </Grid>
+          }
+        </Grid>
         <Divider />
         <div className="text-right">
-          <Button color="primary" size="large" style={{ padding: "5px" }} onClick={onSaveArrivalTime}>
+          <Button
+            color="primary"
+            size="large"
+            style={{ padding: "5px" }}
+            onClick={onSaveArrivalTime}
+            disabled={err.start > "" || err.end > ""}
+          >
             Save
           </Button>
           <Button className="bg-white text-muted" size="large" style={{ padding: "5px" }} onClick={handleClose}>
@@ -80,4 +151,4 @@ const PreferredArrival = (props) => {
     </>
   );
 };
-export default PreferredArrival;
+export default React.memo(PreferredArrival);

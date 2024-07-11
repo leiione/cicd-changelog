@@ -10,8 +10,13 @@ const useStyles = makeStyles(() => ({
     "&:hover": {
       color: "#0053F4"
     }
+  },
+  tooltip: {
+    backgroundColor: "#d32f2f",
+    color: "#fff"
   }
 }))
+
 const Schedule = (props) => {
   const classes = useStyles();
   const { ticket, updateTicket } = props;
@@ -42,7 +47,7 @@ const Schedule = (props) => {
               <DueDate classes={classes} ticket={ticket} updateTicket={updateTicket} />
             </Grid>
             <Grid item xs={12} >
-              <PreferredArrival classes={classes} ticket={ticket} />
+              <PreferredArrival classes={classes} ticket={ticket} updateTicket={updateTicket} />
             </Grid>
           </Grid>
         </Collapse>
@@ -50,4 +55,4 @@ const Schedule = (props) => {
     </Grid >
   );
 };
-export default Schedule;
+export default React.memo(Schedule);
