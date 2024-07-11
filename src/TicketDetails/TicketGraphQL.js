@@ -18,7 +18,31 @@ export const GET_TICKET = gql`
       address
       ticket_contact_numbers
       ticket_contact_email
-      infrastructure
+      site_contact_id
+      infrastructure {
+        id
+        first_name
+        last_name
+        main_company
+        address {
+          id
+          street
+          suffix
+          city
+          state
+          zip
+        }
+        phone_numbers {
+          id
+          number
+          type
+        }
+        email_addresses {
+          id
+          email
+          type
+        }
+      }
     }
     ticketTypes {
       ticket_type_id

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Business,
   CallOutlined,
@@ -18,18 +18,30 @@ const ServiceContact = (props) => {
   const { ticket, updateTicket } = props
   const isSubscriber = ticket.category_type === "SUBSCRIBER"
 
-  let contact = (ticket.subscriber && ticket.subscriber.customer_detail) ? { ...ticket.subscriber, ...ticket.subscriber.customer_detail } : {}
-  let servicePhone = ticket.ticket_contact_numbers ? ticket.ticket_contact_numbers.split(",") : [];
-  let serviceEmail = ticket.ticket_contact_email;
-  let contactAddress = ticket.address ? ticket.address : getFormattedAddress(contact, 'main')
+  const contact = useMemo(() => {
+    let contact = (ticket.subscriber && ticket.subscriber.customer_detail) ? { ...ticket.subscriber, ...ticket.subscriber.customer_detail } : {}
+    if (isSubscriber) {
+      contact = {
+        ...contact,
+        phone: ticket.ticket_contact_numbers ? ticket.ticket_contact_numbers.split(",") : [],
+        email: ticket.ticket_contact_email,
+      }
+    } else if (ticket.infrastructure) {
+      contact = {
+        ...ticket.infrastructure,
+        phone: ticket.infrastructure.phone_numbers ? sortBy(ticket.infrastructure.phone_numbers.filter(x => includes(["home", "work"], x.type)), ['type'])
+          .map(phone => formatPhoneNumber(phone.number)) : [],
+        email: ticket.infrastructure.email_addresses ? ticket.infrastructure.email_addresses.map(mail => mail.email) : ""
+      }
+    }
+    return contact
+  }, [ticket, isSubscriber])
 
+  let contactAddress = ticket.address ? ticket.address : getFormattedAddress(contact, 'main')
   if (!isSubscriber && ticket.infrastructure) {
-    contact = ticket.infrastructure
-    servicePhone = contact.phone_numbers ? sortBy(contact.phone_numbers.filter(x => includes(["home", "work"], x.type)), ['type'])
-      .map(phone => formatPhoneNumber(phone.number)) : []
-    serviceEmail = contact.email_addresses ? contact.email_addresses.map(mail => mail.email) : []
     contactAddress = getFormattedPGAddress(ticket.infrastructure.address)
   }
+
   const [expandCollapse, setExpandCollapse] = useState(false);
   const [onEditMode, setEditMode] = useState(false);
   const [selectedAddress, setSelectedAddress] = React.useState(contactAddress);
@@ -88,24 +100,24 @@ const ServiceContact = (props) => {
                 {onEditMode && <ContactAddressDropdown selectedAddress={selectedAddress} setSelectedAddress={setSelectedAddress} customer={contact} customerAddress={contactAddress} />}
               </Typography>
             </Grid>
-            {servicePhone.length > 0 &&
+            {contact.phone && contact.phone.length > 0 &&
               <Grid item xs={12} >
                 <Grid container spacing={2}>
                   <Grid item xs={"auto"} >
                     <Typography variant="subtitle1">
-                      <CallOutlined className="text-muted f-20" style={{ marginRight: 8 }} /><span>Home &nbsp; {servicePhone[0]}</span>
+                      <CallOutlined className="text-muted f-20" style={{ marginRight: 8 }} /><span>Home &nbsp; {contact.phone[0]}</span>
                     </Typography>
                   </Grid>
-                  {servicePhone.length > 1 && <Grid item xs={"auto"} >
-                    <Typography variant="subtitle1"><span>Work &nbsp; {servicePhone[1]}</span></Typography>
+                  {contact.phone.length > 1 && <Grid item xs={"auto"} >
+                    <Typography variant="subtitle1"><span>Work &nbsp; {contact.phone[1]}</span></Typography>
                   </Grid>
                   }
                 </Grid>
               </Grid>
             }
-            {serviceEmail && <Grid item xs={12} >
+            {contact.email && <Grid item xs={12} >
               <Typography variant="subtitle1">
-                <MailOutlined className="text-muted f-20" style={{ marginRight: 5 }} /> {serviceEmail}
+                <MailOutlined className="text-muted f-20" style={{ marginRight: 5 }} /> {contact.email}
               </Typography>
             </Grid>}
             {onEditMode &&
