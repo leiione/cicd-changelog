@@ -156,7 +156,7 @@ const ServiceContact = (props) => {
                     size="large"
                     style={{ padding: "5px" }}
                     onClick={onSaveContact}
-                    disabled={selectedAddress === contactAddress && selectedContact.value === ticket.site_contact_id}
+                    disabled={isSubscriber ? selectedAddress === contactAddress : selectedContact.value === ticket.site_contact_id}
                   >
                     Save
                   </Button>

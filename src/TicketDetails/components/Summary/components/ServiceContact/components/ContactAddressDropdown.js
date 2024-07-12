@@ -64,7 +64,9 @@ const ContactAddressDropdown = props => {
       >
         {error ? <ErrorPage error={error} />
           : (loading ?
-            <Loader style={{ fontSize: 12 }} />
+            <div style={{ width: 200 }}>
+              <Loader size={14} loaderStyle={{ margin: 5, textAlign: "center" }} />
+            </div>
             : <MenuList>
               {addressOptions.map((option, index) => (
                 <MenuItem

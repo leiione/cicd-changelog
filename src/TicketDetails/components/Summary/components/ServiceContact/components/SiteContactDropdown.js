@@ -11,10 +11,12 @@ const SiteContactDropdown = props => {
   const [anchorEl, setAnchorEl] = React.useState(false)
   const open = Boolean(anchorEl);
 
+  const variables = ticket.category_type === "INFRASTRUCTURE" ? { location_id: ticket.location_id } : { equipment_id: ticket.equipment_id }
+
   const { loading, error, data } = useQuery(GET_SITE_CONTACTS, {
-    variables: { location_id: ticket.location_id },
+    variables,
     fetchPolicy: "network-only",
-    skip: !ticket.location_id,
+    skip: ticket.category_type === "INFRASTRUCTURE" ? !ticket.location_id : !ticket.equipment_id,
   })
 
   const contactOptions = React.useMemo(() => {
@@ -58,7 +60,9 @@ const SiteContactDropdown = props => {
       >
         {error ? <ErrorPage error={error} />
           : (loading ?
-            <Loader style={{ fontSize: 12 }} />
+            <div style={{ width: 200 }}>
+              <Loader size={14} loaderStyle={{ margin: 5, textAlign: "center" }} />
+            </div>
             : <MenuList>
               {contactOptions.map((option, index) => (
                 <MenuItem

@@ -19,6 +19,7 @@ export const GET_TICKET = gql`
       ticket_contact_numbers
       ticket_contact_email
       location_id
+      equipment_id
       site_contact_id
       infrastructure {
         id
@@ -96,8 +97,8 @@ export const GET_CUSTOMER_ADDRESSES = gql`
 `
 
 export const GET_SITE_CONTACTS = gql`
-  query serviceContacts($location_id: Int!) {
-    serviceContacts(location_id: $location_id) {
+  query serviceContacts($location_id: Int, $equipment_id: Int) {
+    serviceContacts(location_id: $location_id, equipment_id: $equipment_id) {
       id
       first_name
       last_name
