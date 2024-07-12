@@ -23,7 +23,7 @@ import { showSnackbar } from "config/store";
 const Summary = (props) => {
   const dispatch = useDispatch()
 
-  const { customer, showSignature, ticketTypes, ticketStatuses } = props;
+  const { customer, showSignature, ticketTypes, ticketStatuses, handleOpenTicket } = props;
   const [showFilters, setShowFilters] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
   const handleFilterVisibility = (event) => {
@@ -72,7 +72,7 @@ const Summary = (props) => {
             <div className="border-top mt-3 pt-3">
               <Schedule ticket={customer} updateTicket={handleUpdate} />
               <ServiceContact ticket={customer} updateTicket={handleUpdate} isSubmitting={isSubmitting} />
-              <LinkedTickets ticket={customer} />
+              <LinkedTickets ticket={customer} handleOpenTicket={handleOpenTicket}/>
             </div>
           </div>
         </Grid>

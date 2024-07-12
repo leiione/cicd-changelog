@@ -45,6 +45,7 @@ export const GET_TICKET = gql`
           type
         }
       }
+      linked_count
     }
     ticketTypes {
       ticket_type_id
@@ -121,6 +122,20 @@ export const GET_SITE_CONTACTS = gql`
         email
         type
       }
+    }
+  }
+`
+
+export const GET_LINKED_TICKETS = gql`
+  query linkedTickets($ticket_id: Int!) {
+    linkedTickets(ticket_id: $ticket_id) {
+      id
+      type_id
+      ticket_id
+      option_label
+      description
+      status
+      priority
     }
   }
 `

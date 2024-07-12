@@ -15,7 +15,14 @@ import { useSelector } from "react-redux";
 import GlobalSnackbar from "Common/GlobalSnackbar";
 
 const TicketDetails = (props) => {
-  const { lablesVisible, ticket: ticketData, category, hideContentDrawer, appuser_id } = props;
+  const {
+    lablesVisible,
+    ticket: ticketData,
+    category,
+    hideContentDrawer,
+    handleOpenTicket,
+    appuser_id
+  } = props;
   const snackbar = useSelector(state => state.snackbar)
 
   const { ticket_id } = ticketData
@@ -69,7 +76,6 @@ const TicketDetails = (props) => {
         appuser_id={appuser_id}
       />
       <div className="drawer-wrapper-full p-3">
-        {/* <FontAwesomeIcon icon={faHouse}/> */}
         <Summary
           handleIconButton={handleIconButton}
           customer={ticket}
@@ -77,6 +83,7 @@ const TicketDetails = (props) => {
           ticketStatuses={ticketStatuses}
           lablesVisible={lablesVisible}
           showSignature={openSignature}
+          handleOpenTicket={handleOpenTicket}
         />
 
         <Tasks
