@@ -25,6 +25,7 @@ const Summary = (props) => {
 
   const { customer, showSignature, ticketTypes, ticketStatuses } = props;
   const [showFilters, setShowFilters] = useState(true);
+  const [isSubmitting, setSubmitting] = useState(false);
   const handleFilterVisibility = (event) => {
     preventEvent(event);
     setShowFilters(!showFilters);
@@ -35,6 +36,7 @@ const Summary = (props) => {
 
   // 3. Function to execute the mutation
   const handleUpdate = async (input_ticket) => {
+    setSubmitting(true)
     try {
       await updateTicket({
         variables: {
@@ -43,8 +45,10 @@ const Summary = (props) => {
         refetchQueries: [{ query: GET_TICKET, variables: { id: customer.ticket_id } }]
       });
       dispatch(showSnackbar({ message: "Ticket updated successfully", severity: "success" }))
+      setSubmitting(false)
     } catch (error) {
       console.error("Error updating ticket priority:", error);
+      setSubmitting(false)
     }
   };
 
@@ -67,7 +71,7 @@ const Summary = (props) => {
             <Description customer={customer} />
             <div className="border-top mt-3 pt-3">
               <Schedule ticket={customer} updateTicket={handleUpdate} />
-              <ServiceContact ticket={customer} updateTicket={handleUpdate} />
+              <ServiceContact ticket={customer} updateTicket={handleUpdate} isSubmitting={isSubmitting} />
               <LinkedTickets ticket={customer} />
             </div>
           </div>

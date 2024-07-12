@@ -14,9 +14,10 @@ import ContactAddressDropdown from "./components/ContactAddressDropdown";
 import { formatPhoneNumber, getFormattedAddress, getFormattedPGAddress } from "utils/formatter";
 import { includes, sortBy } from "lodash";
 import SiteContactDropdown from "./components/SiteContactDropdown";
+import ProgressButton from "Common/ProgressButton";
 
 const ServiceContact = (props) => {
-  const { ticket, updateTicket } = props
+  const { ticket, updateTicket, isSubmitting } = props
   const { infrastructure = {} } = ticket
   const isSubscriber = ticket.category_type === "SUBSCRIBER"
 
@@ -151,15 +152,16 @@ const ServiceContact = (props) => {
               <Grid item xs={9}>
                 <Divider />
                 <div className="text-right">
-                  <Button
+                  <ProgressButton
                     color="primary"
                     size="large"
                     style={{ padding: "5px" }}
                     onClick={onSaveContact}
                     disabled={isSubscriber ? selectedAddress === contactAddress : selectedContact.value === ticket.site_contact_id}
+                    isSubmitting={isSubmitting}
                   >
                     Save
-                  </Button>
+                  </ProgressButton>
                   <Button className="bg-white text-muted" size="large" style={{ padding: "5px" }} onClick={() => setEditMode(false)}>
                     Cancel
                   </Button>
