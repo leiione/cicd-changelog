@@ -35,7 +35,7 @@ const Schedule = (props) => {
           ) : (
             <ExpandLess className="mr-1" />
           )}
-          <Typography variant="subtitle1" className="text-muted">
+          <Typography variant="body1">
             Schedule
           </Typography>
         </IconButton>

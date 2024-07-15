@@ -160,7 +160,7 @@ const LinkedTickets = (props) => {
       <Grid item xs={12}>
         <IconButton onClick={handleCollapse} className="p-2 text-muted">
           {expandCollapse ? <ExpandMore className="mr-1" /> : <ExpandLess className="mr-1" />}
-          <Typography variant="subtitle1" className="text-muted">
+          <Typography variant="body1">
             Linked Tickets
           </Typography>
         </IconButton>
