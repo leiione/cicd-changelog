@@ -140,3 +140,20 @@ export const GET_LINKED_TICKETS = gql`
     }
   }
 `
+
+export const REMOVE_LINKED_TICKET = gql`
+  mutation removeLinkedTicket(
+    $link_id: Int
+    $ticket_id: Int
+    $linked_ticket_id: Int
+  ) {
+    removeLinkedTicket(
+      link_id: $link_id
+      ticket_id: $ticket_id
+      linked_ticket_id: $linked_ticket_id
+    ) {
+      id
+      ticket_id
+    }
+  }
+`

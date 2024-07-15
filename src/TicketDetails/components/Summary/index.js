@@ -47,7 +47,8 @@ const Summary = (props) => {
       dispatch(showSnackbar({ message: "Ticket updated successfully", severity: "success" }))
       setSubmitting(false)
     } catch (error) {
-      console.error("Error updating ticket priority:", error);
+      const msg = error.message.replace("GraphQL error: ", "")
+      dispatch(showSnackbar({ message: msg, severity: "error" }))
       setSubmitting(false)
     }
   };

@@ -1,14 +1,23 @@
 import React, { useMemo, useState } from "react";
 import { ExpandLess, ExpandMore, HighlightOff, Link } from "@mui/icons-material";
 import { Chip, Collapse, Grid, IconButton, MenuItem, MenuList, Skeleton, Tooltip, Typography } from "@mui/material";
-import { GET_LINKED_TICKETS } from "TicketDetails/TicketGraphQL";
-import { useQuery } from "@apollo/client";
+import { GET_LINKED_TICKETS, GET_TICKET, REMOVE_LINKED_TICKET } from "TicketDetails/TicketGraphQL";
+import { useMutation, useQuery } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
-import { startCase } from "lodash";
+import { startCase, uniq } from "lodash";
 import { getPriorityIcon } from "utils/getPriorityIcon";
+import DialogAlert from "components/DialogAlert";
+import { useDispatch } from "react-redux";
+import { showSnackbar } from "config/store";
+import { preventEvent } from "Common/helper";
 
 const LinkedTicketContent = (props) => {
-  const { loading, error, linkedTickets, handleOpenTicket} = props;
+  const dispatch = useDispatch()
+  const { ticket_id, loading, error, linkedTickets, handleOpenTicket } = props;
+  const [removeTicketId, setRemoveTicketId] = useState(0);
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [removeLinkedTicket] = useMutation(REMOVE_LINKED_TICKET);
+
   if (error) return <ErrorPage error={error} />
   if (loading) return (
     <>
@@ -19,6 +28,31 @@ const LinkedTicketContent = (props) => {
 
   const onLinkedTicketClick = (ticket) => {
     handleOpenTicket(ticket)
+  }
+
+  const handleRemoveTicket = (event, link_id) => {
+    preventEvent(event)
+    setRemoveTicketId(link_id)
+  }
+
+  const onRemoveTicket = async (event) => {
+    if (removeTicketId > 0) {
+      setSubmitting(true)
+      try {
+        await removeLinkedTicket({
+          variables: { link_id: removeTicketId },
+          refetchQueries: [{ query: GET_LINKED_TICKETS, variables: { ticket_id } }, { query: GET_TICKET, variables: { id: ticket_id } }]
+        });
+        dispatch(showSnackbar({ message: "Ticket updated successfully", severity: "success" }))
+        setRemoveTicketId(0)
+        setSubmitting(false)
+      } catch (error) {
+        const msg = error.message.replace("GraphQL error: ", "")
+        dispatch(showSnackbar({ message: msg, severity: "error" }))
+        setRemoveTicketId(0)
+        setSubmitting(false)
+      }
+    }
   }
 
   return (
@@ -52,7 +86,7 @@ const LinkedTicketContent = (props) => {
                             </Tooltip>
                           </span>
                           <Typography variant="subtitle1" className="text-dark">{item.status}</Typography>
-                          <IconButton style={{ padding: 0, marginLeft: 15 }}>
+                          <IconButton style={{ padding: 0, marginLeft: 15 }} onClick={e => handleRemoveTicket(e, item.id)}>
                             <HighlightOff className="f-18" />
                           </IconButton>
                         </div>
@@ -66,6 +100,29 @@ const LinkedTicketContent = (props) => {
         ))
         : <Typography variant="subtitle1" className="text-muted">No Linked Tickets</Typography>
       }
+      {removeTicketId > 0 && <DialogAlert
+        open={removeTicketId > 0}
+        message={<span>Are you sure you want to unlink this ticket?</span>}
+        buttonsList={[
+          {
+            label: "Yes",
+            size: "medium",
+            color: "primary",
+            isProgress: true,
+            isSubmitting,
+            onClick: onRemoveTicket
+          },
+          {
+            label: "No",
+            size: "medium",
+            color: "default",
+            disabled: isSubmitting,
+            onClick: () => {
+              setRemoveTicketId(0)
+            }
+          }
+        ]}
+      />}
     </>
   )
 }
@@ -83,7 +140,7 @@ const LinkedTickets = (props) => {
   const linkedTickets = useMemo(() => {
     let tickets = []
     if (!loading && data && data.linkedTickets) {
-      const linkTypes = data.linkedTickets.map(link => link.type_id) // group by link type
+      const linkTypes = uniq(data.linkedTickets.map(link => link.type_id)) // group by link type
       for (let type of linkTypes) {
         tickets.push({
           type_id: type,
@@ -117,7 +174,7 @@ const LinkedTickets = (props) => {
           <Link className="text-muted f-19" style={{ transform: "rotate(135deg)", }} />
         </IconButton>
         <Collapse in={expandCollapse} style={{ paddingLeft: "25px", position: "relative" }}>
-          <LinkedTicketContent loading={loading} error={error} linkedTickets={linkedTickets} handleOpenTicket={handleOpenTicket}/>
+          <LinkedTicketContent ticket_id={ticket.ticket_id} loading={loading} error={error} linkedTickets={linkedTickets} handleOpenTicket={handleOpenTicket} />
         </Collapse>
       </Grid>
     </Grid>
