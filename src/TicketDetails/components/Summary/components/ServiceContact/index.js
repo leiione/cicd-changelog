@@ -11,15 +11,27 @@ import {
 } from "@mui/icons-material";
 import { Button, Collapse, Divider, Grid, IconButton, Typography } from "@mui/material";
 import ContactAddressDropdown from "./components/ContactAddressDropdown";
-import { formatPhoneNumber, getFormattedAddress, getFormattedPGAddress } from "utils/formatter";
+import { formatPhoneNumber, getFormattedAddress } from "utils/formatter";
 import { includes, sortBy } from "lodash";
 import SiteContactDropdown from "./components/SiteContactDropdown";
 import ProgressButton from "Common/ProgressButton";
+import { GET_SITE_CONTACTS } from "TicketDetails/TicketGraphQL";
+import { useQuery } from "@apollo/client";
 
 const ServiceContact = (props) => {
   const { ticket, updateTicket, isSubmitting } = props
   const { infrastructure = {} } = ticket
+  const [expandCollapse, setExpandCollapse] = useState(false);
+  const [onEditMode, setEditMode] = useState(false);
   const isSubscriber = ticket.category_type === "SUBSCRIBER"
+
+  const variables = ticket.category_type === "INFRASTRUCTURE" ? { location_id: ticket.location_id } : { equipment_id: ticket.equipment_id }
+
+  const { loading: cLoading, error: cError, data: cData } = useQuery(GET_SITE_CONTACTS, {
+    variables,
+    fetchPolicy: "network-only",
+    skip: !onEditMode || isSubscriber || (ticket.category_type === "INFRASTRUCTURE" ? !ticket.location_id : !ticket.equipment_id),
+  })
 
   const [selectedContact, setSelectedContact] = React.useState({ // for non-SUBSCRIBER tickets
     ...infrastructure,
@@ -46,13 +58,7 @@ const ServiceContact = (props) => {
     return contact
   }, [ticket, isSubscriber, selectedContact])
 
-  let contactAddress = ticket.address ? ticket.address : getFormattedAddress(contact, 'main')
-  if (!isSubscriber && selectedContact && selectedContact.address) {
-    contactAddress = getFormattedPGAddress(selectedContact.address)
-  }
-
-  const [expandCollapse, setExpandCollapse] = useState(false);
-  const [onEditMode, setEditMode] = useState(false);
+  const contactAddress = ticket.address ? ticket.address : getFormattedAddress(contact, 'main')
   const [selectedAddress, setSelectedAddress] = React.useState(contactAddress); // for SUBSCRIBER tickets
 
   useEffect(() => {
@@ -63,7 +69,7 @@ const ServiceContact = (props) => {
   }, [contactAddress, onEditMode])
 
   useEffect(() => {
-    if (selectedContact.id !== ticket.site_contact_id && !isSubscriber) {
+    if (selectedContact.id !== ticket.site_contact_id && !isSubscriber && infrastructure) {
       setSelectedContact({ value: ticket.site_contact_id, label: `${infrastructure.first_name} ${infrastructure.last_name}`, ...infrastructure })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -76,7 +82,7 @@ const ServiceContact = (props) => {
   const onSaveContact = async () => {
     let toUpdate = { address: selectedAddress };
     if (!isSubscriber) {
-      toUpdate = { site_contact_id: selectedContact.value, address: getFormattedPGAddress(selectedContact.address) };
+      toUpdate = { site_contact_id: selectedContact.value, address: selectedAddress };
     }
     await updateTicket({ ticket_id: ticket.ticket_id, ...toUpdate });
     setTimeout(() => { setEditMode(false) }, 500); // so value wont change
@@ -108,7 +114,13 @@ const ServiceContact = (props) => {
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
                   {selectedContact.value > 0 ? selectedContact.label : "Choose Contact"}
-                  <SiteContactDropdown ticket={ticket} selectedContact={selectedContact} setSelectedContact={setSelectedContact} />
+                  <SiteContactDropdown
+                    loading={cLoading}
+                    error={cError}
+                    data={cData}
+                    selectedContact={selectedContact}
+                    setSelectedContact={setSelectedContact}
+                  />
                 </Typography>
               </Grid>
             }
@@ -125,7 +137,17 @@ const ServiceContact = (props) => {
             <Grid item xs={12} >
               <Typography variant="subtitle1">
                 <FmdGoodOutlined className="text-muted f-20" style={{ marginRight: 5 }} /> {selectedAddress}
-                {onEditMode && isSubscriber && <ContactAddressDropdown selectedAddress={selectedAddress} setSelectedAddress={setSelectedAddress} customer={contact} customerAddress={contactAddress} />}
+                {onEditMode &&
+                  <ContactAddressDropdown
+                    ticket={ticket}
+                    selectedAddress={selectedAddress}
+                    setSelectedAddress={setSelectedAddress}
+                    customer={contact}
+                    customerAddress={contactAddress}
+                    cLoading={cLoading}
+                    cError={cError}
+                    cData={cData}
+                  />}
               </Typography>
             </Grid>
             {contact.phone && contact.phone.length > 0 &&
@@ -157,7 +179,7 @@ const ServiceContact = (props) => {
                     size="large"
                     style={{ padding: "5px" }}
                     onClick={onSaveContact}
-                    disabled={isSubscriber ? selectedAddress === contactAddress : selectedContact.value === ticket.site_contact_id}
+                    disabled={isSubscriber ? selectedAddress === contactAddress : (selectedContact.value === ticket.site_contact_id && selectedAddress === contactAddress)}
                     isSubmitting={isSubmitting}
                   >
                     Save

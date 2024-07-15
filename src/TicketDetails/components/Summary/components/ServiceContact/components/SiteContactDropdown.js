@@ -1,23 +1,13 @@
 import React from "react"
 import { IconButton, MenuItem, MenuList, Popover } from "@mui/material"
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material"
-import { GET_SITE_CONTACTS } from "TicketDetails/TicketGraphQL"
-import { useQuery } from "@apollo/client"
 import ErrorPage from "components/ErrorPage"
 import Loader from "components/Loader"
 
 const SiteContactDropdown = props => {
-  const { ticket, selectedContact, setSelectedContact } = props
+  const { selectedContact, setSelectedContact, loading, error, data } = props
   const [anchorEl, setAnchorEl] = React.useState(false)
   const open = Boolean(anchorEl);
-
-  const variables = ticket.category_type === "INFRASTRUCTURE" ? { location_id: ticket.location_id } : { equipment_id: ticket.equipment_id }
-
-  const { loading, error, data } = useQuery(GET_SITE_CONTACTS, {
-    variables,
-    fetchPolicy: "network-only",
-    skip: ticket.category_type === "INFRASTRUCTURE" ? !ticket.location_id : !ticket.equipment_id,
-  })
 
   const contactOptions = React.useMemo(() => {
     const list = [];
@@ -64,15 +54,20 @@ const SiteContactDropdown = props => {
               <Loader size={14} loaderStyle={{ margin: 5, textAlign: "center" }} />
             </div>
             : <MenuList>
-              {contactOptions.map((option, index) => (
-                <MenuItem
-                  key={index}
-                  selected={selectedContact.value === option.value}
-                  onClick={(event) => handleOnSelect(option)}
-                >
-                  {option.label}
+              {contactOptions.length > 0 ?
+                contactOptions.map((option, index) => (
+                  <MenuItem
+                    key={index}
+                    selected={selectedContact.value === option.value}
+                    onClick={(event) => handleOnSelect(option)}
+                  >
+                    {option.label}
+                  </MenuItem>
+                )) :
+                <MenuItem disabled>
+                  No contacts found
                 </MenuItem>
-              ))}
+              }
             </MenuList>
           )}
       </Popover>

@@ -6,10 +6,10 @@ import { useQuery } from "@apollo/client"
 import ErrorPage from "components/ErrorPage"
 import Loader from "components/Loader"
 import { isEmpty, pick, startCase } from "lodash"
-import { getFormattedAddress } from "utils/formatter"
+import { getFormattedAddress, getFormattedPGAddress } from "utils/formatter"
 
 const ContactAddressDropdown = props => {
-  const { customer, customerAddress, selectedAddress, setSelectedAddress } = props
+  const { ticket, customer, customerAddress, selectedAddress, setSelectedAddress, cLoading, cError, cData } = props
   const [anchorEl, setAnchorEl] = React.useState(false)
   const open = Boolean(anchorEl);
 
@@ -19,7 +19,7 @@ const ContactAddressDropdown = props => {
     skip: !customer.customer_id,
   })
 
-  const addressOptions = React.useMemo(() => {
+  const subscriberOptions = React.useMemo(() => {
     const list = [];
     if (!loading && !error && data && data.customerAddresses) {
       data.customerAddresses.forEach((address) => {
@@ -37,10 +37,33 @@ const ContactAddressDropdown = props => {
     return list; // eslint-disable-next-line
   }, [loading, error, data, customerAddress]);
 
+  const locationOptions = React.useMemo(() => {
+    let list = [];
+    if (ticket && ticket.address) {
+      list.push({ value: ticket.address, label: ticket.address })
+    }
+    if (ticket && ticket.infrastructure_address && !list.some(e => e.value === ticket.infrastructure_address)) {
+      list.push({ value: ticket.infrastructure_address, label: ticket.infrastructure_address })
+    }
+    if (!cLoading && !cError && cData && cData.serviceContacts) {
+      cData.serviceContacts.forEach(item => {
+        if (item.address && !list.some(e => e.value === getFormattedPGAddress(item.address))) {
+          list.push({
+            label: getFormattedPGAddress(item.address),
+            value: getFormattedPGAddress(item.address)
+          })
+        }
+      })
+    }
+    return list
+  }, [ticket, cLoading, cError, cData])
+
   const handleOnSelect = (value) => {
     setSelectedAddress(value)
     setAnchorEl(null)
   }
+
+  const addressOptions = customer.customer_id > 0 ? subscriberOptions : locationOptions
 
   return (
     <>
@@ -62,8 +85,8 @@ const ContactAddressDropdown = props => {
           horizontal: 'center',
         }}
       >
-        {error ? <ErrorPage error={error} />
-          : (loading ?
+        {error || cError ? <ErrorPage error={error || cError} />
+          : (loading || cLoading ?
             <div style={{ width: 200 }}>
               <Loader size={14} loaderStyle={{ margin: 5, textAlign: "center" }} />
             </div>

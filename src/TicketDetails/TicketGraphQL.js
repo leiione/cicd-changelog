@@ -21,6 +21,7 @@ export const GET_TICKET = gql`
       location_id
       equipment_id
       site_contact_id
+      infrastructure_address
       infrastructure {
         id
         first_name
