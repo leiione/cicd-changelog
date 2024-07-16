@@ -20,6 +20,7 @@ const TicketDetails = (props) => {
     ticket: ticketData,
     category,
     hideContentDrawer,
+    toggleOffCRMDrawer,
     handleOpenTicket,
     appuser_id
   } = props;
@@ -74,6 +75,7 @@ const TicketDetails = (props) => {
         setopen1={setopen1}
         hideContentDrawer={hideContentDrawer}
         appuser_id={appuser_id}
+        toggleOffCRMDrawer={toggleOffCRMDrawer}
       />
       <div className="drawer-wrapper-full p-3">
         <Summary

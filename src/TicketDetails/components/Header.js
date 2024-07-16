@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { IconButton, MenuItem, Popover, Toolbar, Tooltip, Typography } from "@mui/material";
+import { FormControlLabel, IconButton, MenuItem, Popover, Switch, Toolbar, Tooltip, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { ContentCopy, DescriptionOutlined, MoreVert } from "@mui/icons-material";
 import { preventEvent } from "Common/helper";
@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
 const Header = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch()
-  const { ticket, category, setopen1, hideContentDrawer, appuser_id } = props;
+  const { ticket, category, setopen1, hideContentDrawer, appuser_id, toggleOffCRMDrawer } = props;
   const [anchorEl, setAnchorEl] = useState(null)
   const [openDelete, toggleDelete] = useState(null);
   const [loading, setLoading] = useState(false)
@@ -58,9 +58,14 @@ const Header = (props) => {
     }
   }
 
+  const onToggleDrawer = () => {
+    toggleOffCRMDrawer()
+    setAnchorEl(null)
+  }
+
   return (
     <>
-      <div className={`${classes.header} docker-buttons`} style={{ right: includes(category, 'Add') || includes(category, 'config') ? 50 : 100 }}>
+      <div className={`${classes.header} docker-buttons`} style={{ right: includes(category, 'Add') || includes(category, 'config') ? 50 : 97 }}>
         <IconButton onClick={handleClick} size="large" className="text-light">
           <MoreVert className="f-20" />
         </IconButton>
@@ -74,6 +79,15 @@ const Header = (props) => {
             horizontal: "left"
           }}
         >
+          <MenuItem>
+            <FormControlLabel
+              control={<Switch
+                checked={true} name="newCardView"
+                onChange={onToggleDrawer}
+                size="small"
+              />}
+              label="New (beta)" />
+          </MenuItem>
           {ticket.ticket_id > 0 &&
             <MenuItem onClick={() => toggleDelete(true)}>
               Delete Ticket
