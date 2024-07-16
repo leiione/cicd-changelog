@@ -1,9 +1,15 @@
 import React from "react";
-import { Button, Menu, MenuItem } from "@mui/material";
+import { Button, makeStyles, Menu, MenuItem } from "@mui/material";
 import { preventEvent } from "../../../../Common/helper";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 
+const useStyles = makeStyles((theme) => ({
+  paperHeight: {
+    height: 300,
+  },
+}));
 const TicketStatus = (props) => {
+  const classes = useStyles();
   const { customer, ticketStatuses,handleUpdate } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [status, setStatus] = React.useState();
@@ -47,6 +53,7 @@ const TicketStatus = (props) => {
         anchorEl={anchorEl}
         open={openMenu}
         onClose={handlePopoverClose}
+        classes={{ paper: classes.paperHeight }}
         MenuListProps={{
           "aria-labelledby": "basic-button",
         }}
