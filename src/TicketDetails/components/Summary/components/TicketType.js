@@ -1,12 +1,13 @@
 import React from "react";
-import { Button, makeStyles, Menu, MenuItem } from "@mui/material";
+import { Button, Menu, MenuItem } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { preventEvent } from "../../../../Common/helper";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import DialogAlert from "components/DialogAlert";
 
 const useStyles = makeStyles((theme) => ({
   paperHeight: {
-    height: 300,
+    maxHeight: 300,
   },
 }));
 const TicketType = (props) => {
