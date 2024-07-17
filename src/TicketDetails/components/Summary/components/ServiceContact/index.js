@@ -124,16 +124,20 @@ const ServiceContact = (props) => {
                 </Typography>
               </Grid>
             }
-            <Grid item xs={12} >
-              <Typography variant="subtitle1">
-                <Business className="text-muted f-20" style={{ marginRight: 5 }} /> {contact.main_company || "-"}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} >
-              <Typography variant="subtitle1">
-                <Person className="text-success f-20" style={{ marginRight: 5 }} /> {contact.first_name ? `${contact.first_name} ${contact.last_name}` : "-"}
-              </Typography>
-            </Grid>
+            {contact.main_company &&
+              <Grid item xs={12} >
+                <Typography variant="subtitle1">
+                  <Business className="text-muted f-20" style={{ marginRight: 5 }} /> {contact.main_company}
+                </Typography>
+              </Grid>
+            }
+            {contact.first_name &&
+              <Grid item xs={12} >
+                <Typography variant="subtitle1">
+                  <Person className="text-success f-20" style={{ marginRight: 5 }} /> {`${contact.first_name} ${contact.last_name}`}
+                </Typography>
+              </Grid>
+            }
             <Grid item xs={12} >
               <Typography variant="subtitle1">
                 <FmdGoodOutlined className="text-muted f-20" style={{ marginRight: 5 }} /> {selectedAddress}
