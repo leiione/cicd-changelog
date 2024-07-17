@@ -79,6 +79,7 @@ const TicketDetails = (props) => {
       />
       <div className="drawer-wrapper-full p-3">
         <Summary
+          loading={loading}
           handleIconButton={handleIconButton}
           customer={ticket}
           ticketTypes={ticketTypes}
