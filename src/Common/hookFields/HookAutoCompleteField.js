@@ -1,5 +1,5 @@
 import React, { Fragment } from "react"
-import { Autocomplete, ListItemButton, ListItemText, TextField, createFilterOptions } from "@mui/material"
+import { Autocomplete, CircularProgress, InputAdornment, ListItemButton, ListItemText, TextField, createFilterOptions } from "@mui/material"
 import { find, includes, isEqual, isNil, toLower } from "lodash"
 import { Controller } from "react-hook-form"
 
@@ -17,6 +17,12 @@ const HookAutoCompleteField = props => {
     overrideOnChange,
     variant = "standard",
     customError,
+    noOptionMsg = null,
+    onInputChange = () => { },
+    onBlur = () => { },
+    loading = false,
+    filterOptions,
+    placeholder
   } = props
 
   const getOptionLabel = React.useCallback(option => {
@@ -67,6 +73,10 @@ const HookAutoCompleteField = props => {
     }
   }
 
+  if (filterOptions) {
+    otherProps.filterOptions = filterOptions
+  }
+
   return (
     <Controller
       name={name}
@@ -94,20 +104,33 @@ const HookAutoCompleteField = props => {
               customOnChange(name, newValue, onChange);
             }
           }}
-          disableClearable={disableClearable || !value}
+          onBlur={onBlur}
+          disableClearable={disableClearable || !value || loading}
           sx={{
             "& .MuiInputBase-root": { paddingTop: "0px !important", paddingBottom: "0px !important" },
             "& .MuiInputBase-input": { height: "17px !important" },
           }}
+          noOptionsText={noOptionMsg || 'No data available'}
           renderInput={(params) => (
             <TextField
               {...params}
               variant={variant}
+              placeholder={placeholder || ''}
               label={label}
               error={!!error || customError}
               helperText={error ? error.message : null}
               required={required}
               fullWidth
+              onKeyDown={onInputChange}
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {loading ? <CircularProgress color="success" size={18} /> : null}
+                    {params.InputProps.endAdornment}
+                  </InputAdornment>
+                )
+              }}
             />
           )}
           disabled={isSubmitting || disabled}

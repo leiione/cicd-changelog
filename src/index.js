@@ -2,22 +2,30 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import { unmountComponentAtNode } from 'react-dom';
 
-window.renderTicketsDrawer = (containerId, props) => {
-  const root = ReactDOM.createRoot(document.getElementById(containerId));
-  root.render(
-    <App {...props} />
-  );
+let root = null
+
+window.renderTicketsDrawer = (containerId, history, props) => {
+  if (root && root._internalRoot) {
+    root.render(
+      <App {...props} />
+    );
+  } else {
+    root = ReactDOM.createRoot(document.getElementById(containerId));
+    root.render(
+      <App {...props} />
+    );
+  }
 };
 
-window.unmountTicketsDrawer = containerId => {
-  if(document.getElementById(containerId)) {
-    unmountComponentAtNode(document.getElementById(containerId));
+window.unmountTicketsDrawer = () => {
+  if (root) {
+    root.unmount()
   }
- };
+};
 
 if (!document.getElementById('TicketsDrawer-container')) {
   const root = ReactDOM.createRoot(document.getElementById("root"));
-  root.render(<App />);
+  root.render(<>{"Microservice not found!"}</>);
 }
+

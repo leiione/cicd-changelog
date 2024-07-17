@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { preventEvent } from "../Common/helper";
 import Header from "./components/Header";
 import ChildDrawers from "../Common/ChildDrawers";
@@ -15,7 +15,15 @@ import { useSelector } from "react-redux";
 import GlobalSnackbar from "Common/GlobalSnackbar";
 
 const TicketDetails = (props) => {
-  const { lablesVisible, ticket: ticketData, category, hideContentDrawer, appuser_id } = props;
+  const {
+    lablesVisible,
+    ticket: ticketData,
+    category,
+    hideContentDrawer,
+    toggleOffCRMDrawer,
+    handleOpenTicket,
+    appuser_id
+  } = props;
   const snackbar = useSelector(state => state.snackbar)
 
   const { ticket_id } = ticketData
@@ -30,9 +38,10 @@ const TicketDetails = (props) => {
     skip: !ticket_id,
   })
 
+
+  const ticket = useMemo(() => !loading && data && data.ticket ? data.ticket : ticketData, [loading, data, ticketData]);
   if (error) return <ErrorPage error={error} />
 
-  const ticket = !loading && data && data.ticket ? data.ticket : {}
   const ticketTypes = !loading && data && data.ticketTypes ? data.ticketTypes : [];
   const ticketStatuses = !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
 
@@ -66,16 +75,18 @@ const TicketDetails = (props) => {
         setopen1={setopen1}
         hideContentDrawer={hideContentDrawer}
         appuser_id={appuser_id}
+        toggleOffCRMDrawer={toggleOffCRMDrawer}
       />
       <div className="drawer-wrapper-full p-3">
-        {/* <FontAwesomeIcon icon={faHouse}/> */}
         <Summary
+          loading={loading}
           handleIconButton={handleIconButton}
           customer={ticket}
           ticketTypes={ticketTypes}
           ticketStatuses={ticketStatuses}
           lablesVisible={lablesVisible}
           showSignature={openSignature}
+          handleOpenTicket={handleOpenTicket}
         />
 
         <Tasks
