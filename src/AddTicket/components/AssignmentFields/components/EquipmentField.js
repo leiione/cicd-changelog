@@ -78,4 +78,4 @@ const EquipmentField = (props) => {
   )
 }
 
-export default EquipmentField;
+export default React.memo(EquipmentField);

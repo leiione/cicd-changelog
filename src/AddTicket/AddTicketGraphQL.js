@@ -11,3 +11,19 @@ export const SEARCH_INFRASTRUCTURE = gql`
     searchInfrastructure(searchValue: $searchValue)
   }
 `
+
+export const SEARCH_SUBSCRIBER = gql`
+  query searchCustomer($searchValue: String!) {
+    searchCustomer(searchValue: $searchValue)
+  }
+`
+
+
+export const GET_TICKET_TYPES = gql`
+  query ticketTypes {
+    ticketTypes {
+      ticket_type_id
+      ticket_type_desc
+    }
+  }
+`

@@ -1,47 +1,47 @@
 import React, { useEffect, useMemo } from "react";
 import { useQuery } from "@apollo/client";
-import { SEARCH_INFRASTRUCTURE } from "AddTicket/AddTicketGraphQL";
+import { SEARCH_SUBSCRIBER } from "AddTicket/AddTicketGraphQL";
 import HookAutoCompleteField from "Common/hookFields/HookAutoCompleteField";
 import ErrorPage from "components/ErrorPage";
 import { debounce, find, isEmpty } from "lodash";
 
-const InfrastructureField = (props) => {
+const SubscriberField = (props) => {
   const { control, setValue, values } = props;
-  const [searchValue, setSearchVal] = React.useState('')
-  const [selected, setSelected] = React.useState({})
+  const [searchValue, setSearchVal] = React.useState()
+  const [selected, setSelected] = React.useState(values.initSelected ? values.initSelected : {})
 
-  const { loading, error, data } = useQuery(SEARCH_INFRASTRUCTURE, {
+  const { loading, error, data } = useQuery(SEARCH_SUBSCRIBER, {
     variables: { searchValue },
     fetchPolicy: "network-only",
     skip: !searchValue
   })
 
-  const infrastructureOptions = useMemo(() => {
+  const subscriberOptions = useMemo(() => {
     let list = [];
-    if (searchValue && !loading && data && data.searchInfrastructure) {
-      data.searchInfrastructure.forEach((item) => {
+    if (searchValue && !loading && data && data.searchCustomer) {
+      data.searchCustomer.forEach((item) => {
         list.push({
-          label: item.name,
-          value: item.id
+          label: `${item.first_name} ${item.last_name}`,
+          value: item.customer_id
         })
       })
     }
-    if (values.location_id > 0 && isEmpty(searchValue) && selected.value > 0 && !find(list, { value: values.location_id })) { // selected should be in the list
+    if (values.customer_id > 0 && isEmpty(searchValue) && selected.value > 0 && !find(list, { value: values.customer_id })) { // selected should be in the list
       list = [{ ...selected }]
     }
 
     if (list.length === 0 && !searchValue) {
-      list.push({ label: "Type to search for Infrastructure", value: 'type', disabled: true })
+      list.push({ label: "Type to search for Subscriber", value: 'type', disabled: true })
     }
     return list;
-  }, [searchValue, loading, data, values.location_id, selected]);
+  }, [searchValue, loading, data, values.customer_id, selected]);
 
   useEffect(() => {
-    const selectedItem = find(infrastructureOptions, { value: values.location_id })
+    const selectedItem = find(subscriberOptions, { value: values.customer_id })
     if (selectedItem && selectedItem.value !== selected.value) {
       setSelected(selectedItem)
     }
-  }, [values.location_id, infrastructureOptions, selected])
+  }, [values.customer_id, subscriberOptions, selected])
 
   if (error) return <ErrorPage error={error} />
 
@@ -61,21 +61,21 @@ const InfrastructureField = (props) => {
   return (
     <HookAutoCompleteField
       control={control}
-      name={"location_id"}
+      name={"customer_id"}
       label={""}
-      options={infrastructureOptions}
+      options={subscriberOptions}
       InputLabelProps={{ shrink: true }}
       onChange={handleOnChange}
       overrideOnChange
-      placeholder="Type to search for Infrastructure"
+      placeholder="Type to search for Subscriber"
       required
       onInputChange={keyPress}
       onBlur={() => setSearchVal('')} // to reset options
       loading={loading}
       filterOptions={(options) => options}
-      noOptionMsg={loading ? "Loading..." : (searchValue ? 'Infrastructure not found.' : '')}
+      noOptionMsg={loading ? "Loading..." : (searchValue ? 'Subscriber not found.' : '')}
     />
   )
 }
 
-export default React.memo(InfrastructureField);
+export default React.memo(SubscriberField);

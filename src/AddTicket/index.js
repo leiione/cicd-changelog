@@ -5,13 +5,14 @@ import AssignmentType from "./components/AssignmentType";
 import PriorityField from "./components/PriorityField";
 import AssignmentFields from "./components/AssignmentFields";
 import ProgressButton from "Common/ProgressButton";
+import TicketTypeField from "./components/TicketTypeField";
 
 const style = {
   position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+  width: 355,
   bgcolor: 'background.paper',
   borderRadius: "5px",
   padding: "16px 0px 0px 16px"
@@ -28,18 +29,15 @@ const AddTicketForm = props => {
   }
 
   return (
-    <Modal
-      open={true}
-    // onClose={handleClose}
-    >
+    <Modal open={true}    >
       <Box sx={style}>
         <Grid container spacing={2}>
-          <Grid item xs={12} className="bg-lighter" style={{ borderRadius: "5px 5px 0px 0px", padding: "10px 15px" }}>
-            <Typography variant="h5" className="text-dark">Create Ticket</Typography>
+          <Grid item xs={12} className="bg-lighter" style={{ borderRadius: "5px 5px 0px 0px", padding: "7px 15px" }}>
+            <Typography variant="h6" className="text-dark">Create Ticket</Typography>
           </Grid>
-          <Grid container spacing={2} style={{ padding: "10px 15px" }}>
+          <Grid container spacing={2} style={{ padding: "20px 15px" }}>
             <Grid item xs={5}>
-              <Typography variant="subtitle1" className="f-14 text-dark">Assignment Type:</Typography>
+              <Typography variant="subtitle1" className="text-dark">Assignment Type:</Typography>
             </Grid>
             <Grid item xs={7}>
               <AssignmentType {...commonProps} />
@@ -49,14 +47,7 @@ const AddTicketForm = props => {
               <PriorityField {...commonProps} />
             </Grid>
             <Grid item xs={12}>
-              <Grid container spacing={1}>
-                <Grid item xs={"auto"}>
-                  <Typography variant="subtitle1" className="f-14 text-dark">Ticket Type:</Typography>
-                </Grid>
-                <Grid item xs={"auto"}>
-                  <Typography variant="subtitle1" className="f-14 text-dark">Sample</Typography>
-                </Grid>
-              </Grid>
+              <TicketTypeField {...commonProps} />
             </Grid>
             <Grid item xs={12}>
               <div className="text-right">
@@ -68,7 +59,7 @@ const AddTicketForm = props => {
                   onClick={() => hideContentDrawer()}
                 // isSubmitting={isSubmitting}
                 >
-                  
+
                   Create
                 </ProgressButton>
                 <Button color="default" variant="outlined" size="small" style={{ padding: "5px" }} onClick={() => hideContentDrawer()}>
@@ -84,15 +75,28 @@ const AddTicketForm = props => {
 }
 
 const AddTicket = (props) => {
-  const initialValues = {
+  const { ticket } = props;
+  let initialValues = {
     category_type: "",
     priority: "Normal",
-    ticketType: "Sample",
+    ticket_type_id: 0,
     equipment_id: 0,
     location_id: 0,
     customer_id: 0,
   }
 
+  if (ticket && ticket.initSelectedCustId > 0) {
+    initialValues = {
+      ...initialValues,
+      customer_id: ticket.initSelectedCustId,
+      category_type: 'Subscriber',
+      initSelected: {
+        value: ticket.initSelectedCustId,
+        customer_id: ticket.initSelectedCustId,
+        label: `${ticket.first_name} ${ticket.last_name}`
+      }
+    }
+  }
   let form = useForm({
     defaultValues: initialValues,
     mode: "onChange",
@@ -104,4 +108,4 @@ const AddTicket = (props) => {
   );
 }
 
-export default AddTicket;
+export default React.memo(AddTicket);

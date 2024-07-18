@@ -11,7 +11,7 @@ const PriorityField = props => {
   return (
     <Grid container spacing={1}>
       <Grid item xs={"auto"}>
-        <Typography variant="subtitle1" className="f-14 text-dark">Priority:</Typography>
+        <Typography variant="subtitle1" className="text-dark">Priority:</Typography>
       </Grid>
       <Grid item xs={"auto"} style={{ padding: "10px 0px 0px 10px" }}>
         <IconButton style={{ padding: 0 }} onClick={e => setAnchorEl(e.currentTarget)}>
@@ -19,7 +19,7 @@ const PriorityField = props => {
         </IconButton>
       </Grid>
       <Grid item xs={"auto"}>
-        <Typography variant="subtitle1" className="f-14 text-dark">{values.priority}</Typography>
+        <Typography variant="subtitle1" className="text-dark">{values.priority}</Typography>
       </Grid>
       {anchorEl &&
         <Popover
@@ -58,4 +58,4 @@ const PriorityField = props => {
   )
 }
 
-export default PriorityField;
+export default React.memo(PriorityField);

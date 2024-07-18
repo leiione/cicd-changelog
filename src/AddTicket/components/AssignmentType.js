@@ -10,7 +10,7 @@ const AssignmentType = (props) => {
 
   return (
     <>
-      <Typography variant="subtitle1" className="f-14 text-muted">
+      <Typography variant="subtitle1" className="text-muted">
         {values.category_type || "Select Assignment Type"}
         <IconButton style={{ padding: 0 }} onClick={e => setAnchorEl(e.currentTarget)}>
           {anchorEl ?
@@ -52,4 +52,4 @@ const AssignmentType = (props) => {
   )
 }
 
-export default AssignmentType;
+export default React.memo(AssignmentType);
