@@ -2,12 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Typography, Popover, Button, FormControlLabel, Radio, Divider, Grid, Tooltip, TextField } from "@mui/material";
 import { AccessTime } from "@mui/icons-material";
 import moment from "moment-timezone";
-import { includes } from "lodash";
 
 const PreferredArrival = (props) => {
   const { classes, ticket, updateTicket } = props;
-  const earliestArrivalTime = !includes([null, "00:00:00", "00:00:00+00"], ticket.earliest_arrival_time) ? moment(ticket.earliest_arrival_time, [moment.ISO_8601, "HH:mm"]) : "08:00:00"
-  const latestArrivalTime = !includes([null, "00:00:00", "00:00:00+00"], ticket.latest_arrival_time) ? moment(ticket.latest_arrival_time, [moment.ISO_8601, "HH:mm"]) : "08:00:00"
+  const earliestArrivalTime = moment(moment(ticket.earliest_arrival_time).isValid() ? ticket.earliest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
+  const latestArrivalTime = moment(moment(ticket.latest_arrival_time).isValid() ? ticket.latest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
   const arrivalTime = moment(earliestArrivalTime).isSame(latestArrivalTime) ? moment(earliestArrivalTime).format("LT") : `${moment(earliestArrivalTime).format("LT")} - ${moment(latestArrivalTime).format("LT")}`;
 
   const [anchorEl, setAnchorEl] = useState(null);
