@@ -71,7 +71,7 @@ const Summary = (props) => {
         : <Grid container spacing={1}>
           <Grid item xs className="h-100">
             <div className="py-3 pr-5">
-              <Description customer={customer} />
+              <Description ticket={customer} updateTicket={handleUpdate} />
               <div className="border-top mt-3 pt-3">
                 <Schedule ticket={customer} updateTicket={handleUpdate} />
                 <ServiceContact ticket={customer} updateTicket={handleUpdate} isSubmitting={isSubmitting} />
@@ -90,8 +90,8 @@ const Summary = (props) => {
             </IconButton>
             {!showFilters && (
               <div className="border-left pl-3 py-3 h-100">
-                <Assignee customer={customer} />
-                <Followers customer={customer} />
+                <Assignee ticket={customer} updateTicket={handleUpdate} />
+                <Followers ticket={customer} updateTicket={handleUpdate} />
                 {showSignature && <Signature showSignature={showSignature} />}
                 <Typography variant="caption" className="d-block mt-2">
                   Created by: <strong>name is missing</strong> on{" "}

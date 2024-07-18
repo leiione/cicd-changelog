@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { Button, TextField, Typography } from "@mui/material";
 
 const Description = (props) => {
-  const { customer } = props;
+  const { ticket, updateTicket } = props;
   const [openInline, setOpenInline] = useState("");
+  const [description, setDescription] = useState(ticket.description);
 
   const handleInlineEdit = () =>
     setTimeout(() => {
@@ -12,14 +13,27 @@ const Description = (props) => {
 
   const handleCancel = () => {
     setOpenInline(!openInline);
+    setDescription(ticket.description);
   };
+
+
+   const handleSave = async () => {
+    let toUpdate = { description: description };
+    await updateTicket({ ticket_id: ticket.ticket_id, ...toUpdate });
+
+   };
+ 
+
+
+   
+
   return (
     <>
       {!openInline ? (
-        customer.summary ? (
+        ticket.description ? (
           <div className="cursor-pointer" onClick={() => handleInlineEdit()}>
             <Typography variant="body2">Description</Typography>
-            <Typography variant="body1">{customer.summary}</Typography>
+            <Typography variant="body1">{ticket.description}</Typography>
           </div>
         ) : (
           <Button color="primary" onClick={() => handleInlineEdit()}>
@@ -33,7 +47,8 @@ const Description = (props) => {
             variant="standard"
             className="mb-0"
             fullWidth
-            value={customer.summary}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           />
           <div
             className="position-absolute right-0 bg-white rounded shadow"
@@ -42,7 +57,7 @@ const Description = (props) => {
             <Button
               color="primary"
               size="small"
-              onClick={handleCancel}
+              onClick={handleSave}
               className="my-1"
             >
               Save

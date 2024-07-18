@@ -10,6 +10,7 @@ export const GET_TICKET = gql`
       type
       ticket_type_id
       assigned_name
+      followers
       due_by_date
       earliest_arrival_time
       latest_arrival_time
@@ -157,3 +158,23 @@ export const REMOVE_LINKED_TICKET = gql`
     }
   }
 `
+
+export const GET_ASSIGNEES = gql`
+  query assignees {
+    assignees {
+      appuser_id
+      email
+      realname
+    }
+  }
+`;
+
+export const GET_FOLLOWERS= gql`
+  query FOLLOWERS {
+    followers {
+      appuser_id
+      email
+      realname
+    }
+  }
+`;
