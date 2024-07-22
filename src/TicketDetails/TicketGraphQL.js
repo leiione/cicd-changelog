@@ -6,6 +6,8 @@ export const GET_TICKET = gql`
       ticket_id
       description
       priority
+      created_by 
+      last_updated_by
       status
       type
       ticket_type_id

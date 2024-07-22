@@ -94,11 +94,11 @@ const Summary = (props) => {
                 <Followers ticket={customer} updateTicket={handleUpdate} />
                 {showSignature && <Signature showSignature={showSignature} />}
                 <Typography variant="caption" className="d-block mt-2">
-                  Created by: <strong>name is missing</strong> on{" "}
+                  Created by: <strong>{customer.created_by}</strong> on{" "}
                   {customer.date_added}
                 </Typography>
                 <Typography variant="caption">
-                  Last updated by: <strong>name is missing</strong> on{" "}
+                  Last updated by: <strong>{customer.last_updated_by}</strong> on{" "}
                   {customer.last_modified}
                 </Typography>
               </div>
