@@ -6,6 +6,11 @@ import PriorityField from "./components/PriorityField";
 import AssignmentFields from "./components/AssignmentFields";
 import ProgressButton from "Common/ProgressButton";
 import TicketTypeField from "./components/TicketTypeField";
+import { useMutation } from "@apollo/client";
+import { ADD_TICKET } from "./AddTicketGraphQL";
+import { useDispatch } from "react-redux";
+import { showSnackbar } from "config/store";
+import { toUpper } from "lodash";
 
 const style = {
   position: 'absolute',
@@ -19,14 +24,24 @@ const style = {
 };
 
 const AddTicketForm = props => {
-  const { form, hideContentDrawer } = props;
-  const { control, watch, setValue } = form;
+  const { form, hideContentDrawer, onSubmit } = props;
+  const {
+    control,
+    watch,
+    setValue,
+    formState: { isSubmitting },
+    handleSubmit
+  } = form;
   const values = watch()
+  console.log('values: ', values);
+
   const commonProps = {
     values,
     control,
     setValue
   }
+
+  let isFormValid = values.category_type && values.priority && values.ticket_type_id > 0 && (values.location_id > 0 || values.equipment_id > 0 || values.customer_id > 0)
 
   return (
     <Modal open={true}    >
@@ -56,10 +71,10 @@ const AddTicketForm = props => {
                   color="primary"
                   size="small"
                   style={{ padding: "5px" }}
-                  onClick={() => hideContentDrawer()}
-                // isSubmitting={isSubmitting}
+                  onClick={handleSubmit(onSubmit)}
+                  isSubmitting={isSubmitting}
+                  disabled={!isFormValid}
                 >
-
                   Create
                 </ProgressButton>
                 <Button color="default" variant="outlined" size="small" style={{ padding: "5px" }} onClick={() => hideContentDrawer()}>
@@ -75,7 +90,9 @@ const AddTicketForm = props => {
 }
 
 const AddTicket = (props) => {
-  const { ticket } = props;
+  const [addTicket] = useMutation(ADD_TICKET);
+  const dispatch = useDispatch()
+  const { ticket, handleOpenTicket } = props;
   let initialValues = {
     category_type: "",
     priority: "Normal",
@@ -83,6 +100,11 @@ const AddTicket = (props) => {
     equipment_id: 0,
     location_id: 0,
     customer_id: 0,
+    assigned_name: '',
+    address: '',
+    ticket_contact_emails: '',
+    ticket_contact_name: '',
+    ticket_contact_numbers: '',
   }
 
   if (ticket && ticket.initSelectedCustId > 0) {
@@ -103,8 +125,28 @@ const AddTicket = (props) => {
     reValidateMode: "onSubmit",
   });
 
+  const onSubmit = async (values) => {
+    try {
+      await addTicket({
+        variables: {
+          input_ticket: {
+            ...values,
+            category_type: toUpper(values.category_type),
+          },
+        },
+        update: (cache, { data }) => {
+          handleOpenTicket({ ...data.addTicket })
+        },
+      });
+      dispatch(showSnackbar({ message: "The ticket was added successfully", severity: "success" }))
+    } catch (error) {
+      const msg = error.message.replace("GraphQL error: ", "")
+      dispatch(showSnackbar({ message: msg, severity: "error" }))
+    }
+  }
+
   return (
-    <AddTicketForm form={form} {...props} />
+    <AddTicketForm form={form} {...props} onSubmit={onSubmit} />
   );
 }
 
