@@ -74,11 +74,13 @@ function LinkedTicketsList(props) {
 
   const handleSearch = (event) => {
     const value = event.target.value;
+    setSelectedRows([]);
     setSearchText(value);
   };
 
   const handleCancelSearch = (event) => {
     setSearchText("");
+    setSelectedRows([]);
     setShowSearch(false);
   };
 
