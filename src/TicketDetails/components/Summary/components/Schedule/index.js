@@ -19,7 +19,7 @@ const useStyles = makeStyles(() => ({
 
 const Schedule = (props) => {
   const classes = useStyles();
-  const { ticket, updateTicket } = props;
+  const { ticket, updateTicket, isSubmitting } = props;
   const [expandCollapse, setExpandCollapse] = useState("");
 
   const handleCollapse = () => {
@@ -47,7 +47,7 @@ const Schedule = (props) => {
               <DueDate classes={classes} ticket={ticket} updateTicket={updateTicket} />
             </Grid>
             <Grid item xs={12} >
-              <PreferredArrival classes={classes} ticket={ticket} updateTicket={updateTicket} />
+              <PreferredArrival isSubmitting={isSubmitting} classes={classes} ticket={ticket} updateTicket={updateTicket} />
             </Grid>
           </Grid>
         </Collapse>
