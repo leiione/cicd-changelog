@@ -69,6 +69,7 @@ const Description = (props) => {
                             size="small"
                             onClick={handleCancel}
                             className="my-1"
+                            style={{ opacity: loading ? 0.5 : 1 }} // Adjust opacity to make button look active
                             disabled={loading}
                         >
                             Cancel
