@@ -1,116 +1,205 @@
 import React, { useState } from "react";
-import { DataGrid } from "@mui/x-data-grid";
 import TextField from "@mui/material/TextField";
-import { makeStyles } from "@mui/styles";
-import { InputAdornment, IconButton, Grid } from "@mui/material";
+import { InputAdornment, IconButton, Grid, Button } from "@mui/material";
 import { Close, Search } from "@mui/icons-material";
 import { isEmpty } from "lodash";
+import { useDebounce } from "use-debounce"; // Assuming you have a debounce hook
+import {
+  ADD_LINKED_TICKET_MUTATION,
+  GET_LINKED_TICKETS,
+  GET_TICKET,
+  GET_TICKETS_QUERY,
+} from "TicketDetails/TicketGraphQL";
+import { useMutation, useQuery } from "@apollo/client";
+import { DataGrid } from "@mui/x-data-grid"; // Import DataGrid
+import TickeLinkType from "./TicketLinkType";
+import ProgressButton from "Common/ProgressButton";
+import { useDispatch } from "react-redux";
+import { showSnackbar } from "config/store";
 
-const rows = [
-  { id: 1, name: "Laptop", quantity: 100, category: "Electronics" },
-  { id: 2, name: "Chair", quantity: 45, category: "Furniture" },
-  { id: 3, name: "Desk", quantity: 30, category: "Furniture" },
-  // Add more rows as needed
-];
+function LinkedTicketsList(props) {
+  const dispatch = useDispatch();
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    padding:theme.spacing(3),
-    width: "100%",
-    marginTop: "20px",
-  },
-  actions: {
-    display: "flex",
-    justifyContent: "flex-end",
-    marginBottom: 8,
-  },
-}));
-
-function LinkedTicketsList() {
-  const classes = useStyles();
+  const { ticket, closeDrawer } = props;
   const [searchText, setSearchText] = useState("");
-  const [filteredRows, setFilteredRows] = useState(rows);
   const [showSearch, setShowSearch] = useState(false);
+  const [debouncedSearchTerm] = useDebounce(searchText, 500); // Debounce search term
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [tickeLinkType, setTicketLinkType] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const { data, loading } = useQuery(GET_TICKETS_QUERY, {
+    variables: { searchVal: debouncedSearchTerm, ticket_id: ticket.ticket_id },
+    skip: !debouncedSearchTerm, // Skip query if search term is empty
+  });
+
+  const [addLinkedTicket] = useMutation(ADD_LINKED_TICKET_MUTATION);
+
+  const saveLinkedTicket = async (ticketId, linkedTicketInput) => {
+    setSubmitting(true);
+    try {
+      await addLinkedTicket({
+        variables: {
+          ticket_id: ticket.ticket_id,
+          linked_input: linkedTicketInput,
+        },
+        refetchQueries: [
+          { query: GET_LINKED_TICKETS, variables: { ticket_id: ticketId } },
+          { query: GET_TICKET, variables: { id: ticketId } },
+        ],
+      });
+      dispatch(
+        showSnackbar({
+          message: "Ticket Linked successfully",
+          severity: "success",
+        })
+      );
+      setSubmitting(false);
+      setSearchText("");
+      setShowSearch(false);
+      setSelectedRows([]);
+      closeDrawer(false);
+    } catch (error) {
+      const msg = error.message.replace("GraphQL error: ", "");
+      dispatch(showSnackbar({ message: msg, severity: "error" }));
+      setSubmitting(false);
+    }
+  };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
-    { field: "name", headerName: "Name", width: 150 },
-    { field: "quantity", headerName: "Quantity", type: "number", width: 110 },
-    { field: "category", headerName: "Category", width: 150 },
+    { field: "ticket_id", headerName: "Ticket ID" },
+    { field: "type", headerName: "Title" },
+    { field: "description", headerName: "Description", width: 225 },
+    { field: "priority", headerName: "Priority" },
   ];
 
   const handleSearch = (event) => {
-    const value = event.target.value.toLowerCase();
+    const value = event.target.value;
     setSearchText(value);
-    const filtered = rows.filter((row) => {
-      return (
-        row.name.toLowerCase().includes(value) ||
-        row.category.toLowerCase().includes(value)
-      );
-    });
-    setFilteredRows(filtered);
   };
 
   const handleCancelSearch = (event) => {
-    const value = "";
-    setSearchText(value);
-    const filtered = rows.filter((row) => {
-      return (
-        row.name.toLowerCase().includes(value) ||
-        row.category.toLowerCase().includes(value)
-      );
-    });
-    setFilteredRows(filtered);
-    setShowSearch(false)
-
+    setSearchText("");
+    setShowSearch(false);
   };
 
+  const handelSaveLinkedTicket = () => {
+    const linkedTicketIds = selectedRows
+      .map((id) => parseInt(id, 10))
+      .filter((id) => !isNaN(id));
+
+    const linkedTicketInput = {
+      linked_ticket_id: linkedTicketIds,
+      ticket_id: ticket.ticket_id,
+      ticket_link_type_id: tickeLinkType.id,
+    };
+    saveLinkedTicket(ticket.ticket_id, linkedTicketInput);
+  };
+
+  const handlCloseContentDrawer= ()=>{
+    setSubmitting(false);
+    setSearchText("");
+    setShowSearch(false);
+    setSelectedRows([]);
+    closeDrawer(false);
+  }
+
   return (
-    <Grid container alignItems="center">
-      <div className={classes.container}>
-        <Grid item xs="auto">
-          <div className={classes.actions}>
+    <>
+      <Grid container className="p-3">
+        <Grid item xs={8} className="">
+          <TickeLinkType
+            tickeLinkType={tickeLinkType}
+            setTicketLinkType={setTicketLinkType}
+          ></TickeLinkType>
+        </Grid>
+        <Grid
+          item
+          xs={4}
+          style={{ display: "flex" }}
+          justifyContent="flex-end"
+          className="pr-2"
+        >
           {showSearch ? (
             <TextField
-            variant="outlined"
-            value={searchText}
-            onChange={handleSearch}
-            placeholder="Search…"
-            InputProps={{
-              endAdornment: !isEmpty(searchText) && (
-                <InputAdornment
-                  className="equipment-adornment"
-                  position="end"
-                >
-                  <IconButton onClick={handleCancelSearch} size="large">
-                    <Close className="f-14" />
-                  </IconButton>
-                </InputAdornment>
-              ),
-              inputProps: { className: "px-2 py-1" },
-            }}
-            InputLabelProps={{ shrink: false }}
-            label=""
-          />
-            ) : (
-              <IconButton onClick={() => setShowSearch(true)}  >
-                <Search />
-              </IconButton>
-            )}
-           
-           
-           
-           
-          </div>
+              variant="standard"
+              value={searchText}
+              onChange={handleSearch}
+              placeholder="Search…"
+              InputProps={{
+                endAdornment: !isEmpty(searchText) && (
+                  <InputAdornment
+                    className="equipment-adornment"
+                    position="end"
+                  >
+                    <IconButton onClick={handleCancelSearch} size="large">
+                      <Close className="f-14" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                inputProps: { className: "px-2 py-1" },
+              }}
+              InputLabelProps={{ shrink: false }}
+              label=""
+            />
+          ) : (
+            <IconButton onClick={() => setShowSearch(true)}>
+              <Search />
+            </IconButton>
+          )}
         </Grid>
+      </Grid>
+
+      <Grid item xs="auto" className="p-3">
         <DataGrid
-          rows={filteredRows}
+          rows={
+            data?.tickets.map((ticket, index) => ({
+              ...ticket,
+              id: ticket.ticket_id || index,
+            })) || []
+          }
           columns={columns}
-          pageSize={5}
-          rowsPerPageOptions={[5]}
+          pageSize={25}
+          loading={loading}
+          pageSizeOptions={[10, 25, 50, 100]}
+          autoHeight
+          checkboxSelection
+          disableColumnMenu={true}
+          onRowSelectionModelChange={(newSelection) => {
+            setSelectedRows(newSelection);
+          }}
         />
-      </div>
-    </Grid>
+      </Grid>
+      <Grid item xs={12} className="text-right p-3" >
+        
+        
+        <ProgressButton
+          color="primary"
+          variant="outlined"
+          disableRipple
+          onClick={() => {
+            handelSaveLinkedTicket();
+          }}
+          isSubmitting={submitting}
+          style={{ padding: "5px" }}
+        >
+          Link
+        </ProgressButton>
+
+        <Button
+          color="default"
+          variant="outlined"
+          size="small"
+          className="pl-2"
+          style={{ padding: "5px" }}
+          onClick={() => handlCloseContentDrawer()}
+        >
+          Cancel
+        </Button>
+     
+
+     
+      </Grid>
+    </>
   );
 }
 

@@ -192,7 +192,7 @@ const LinkedTickets = (props) => {
 
       {isLinkedTicketDrawerOpen &&
         <InnerDrawer header={"Linked Tickets"} open={isLinkedTicketDrawerOpen} onCloseDrawer={() => onCloseLinkedTicketDrawer(false)}>
-           <LinkedTicketsList></LinkedTicketsList>
+           <LinkedTicketsList ticket={ticket} closeDrawer={onCloseLinkedTicketDrawer} ></LinkedTicketsList>
         </InnerDrawer>
       }
     </Grid>

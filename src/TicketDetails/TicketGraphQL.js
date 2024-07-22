@@ -1,7 +1,7 @@
-import gql from "graphql-tag"
+import gql from "graphql-tag";
 
 export const GET_TICKET = gql`
- query ticket($id: Int!) {
+  query ticket($id: Int!) {
     ticket(id: $id) {
       ticket_id
       description
@@ -57,9 +57,8 @@ export const GET_TICKET = gql`
       id
       name
     }
-    
-    }
-`
+  }
+`;
 
 export const DELETE_TICKET = gql`
   mutation deleteTicket($id: Int!) {
@@ -67,7 +66,7 @@ export const DELETE_TICKET = gql`
       ticket_id
     }
   }
-`
+`;
 
 // 1. Define the GraphQL mutation
 export const UPDATE_TICKET_MUTATION = gql`
@@ -85,9 +84,8 @@ export const UPDATE_TICKET_MUTATION = gql`
   }
 `;
 
-
 export const GET_CUSTOMER_ADDRESSES = gql`
-  query customerAddresses ($customer_id: Int!) {
+  query customerAddresses($customer_id: Int!) {
     customerAddresses(customer_id: $customer_id) {
       type
       address1
@@ -97,7 +95,7 @@ export const GET_CUSTOMER_ADDRESSES = gql`
       zip
     }
   }
-`
+`;
 
 export const GET_SITE_CONTACTS = gql`
   query serviceContacts($location_id: Int, $equipment_id: Int) {
@@ -126,7 +124,7 @@ export const GET_SITE_CONTACTS = gql`
       }
     }
   }
-`
+`;
 
 export const GET_LINKED_TICKETS = gql`
   query linkedTickets($ticket_id: Int!) {
@@ -140,7 +138,7 @@ export const GET_LINKED_TICKETS = gql`
       priority
     }
   }
-`
+`;
 
 export const REMOVE_LINKED_TICKET = gql`
   mutation removeLinkedTicket(
@@ -157,7 +155,7 @@ export const REMOVE_LINKED_TICKET = gql`
       ticket_id
     }
   }
-`
+`;
 
 export const GET_ASSIGNEES = gql`
   query assignees {
@@ -169,12 +167,45 @@ export const GET_ASSIGNEES = gql`
   }
 `;
 
-export const GET_FOLLOWERS= gql`
+export const GET_FOLLOWERS = gql`
   query FOLLOWERS {
     followers {
       appuser_id
       email
       realname
+    }
+  }
+`;
+
+export const GET_TICKETS_QUERY = gql`
+  query GetTickets($searchVal: String!, $ticket_id: Int!) {
+    tickets(searchVal: $searchVal, ticket_id: $ticket_id) {
+      ticket_id
+      description
+      status
+      priority
+      type
+    }
+  }
+`;
+
+export const GET_TICKET_LINK_TYPES = gql`
+  query GetTicketLinkTypes {
+    ticketLinkTypes {
+      id
+      name
+      option_label
+      group_label
+      linked_type_id_partner
+    }
+  }
+`;
+
+
+export const ADD_LINKED_TICKET_MUTATION = gql`
+  mutation AddLinkedTicket($ticket_id: Int!, $linked_input: LinkedTicketInput!) {
+    addLinkedTicket(ticket_id: $ticket_id, linked_input: $linked_input) {
+      id
     }
   }
 `;
