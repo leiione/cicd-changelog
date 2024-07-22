@@ -95,11 +95,11 @@ const Summary = (props) => {
                 {showSignature && <Signature showSignature={showSignature} />}
                 <Typography variant="caption" className="d-block mt-2">
                   Created by: <strong>{customer.created_by}</strong> on{" "}
-                  {customer.date_added}
+                  {customer.created_by_time}
                 </Typography>
                 <Typography variant="caption">
                   Last updated by: <strong>{customer.last_updated_by}</strong> on{" "}
-                  {customer.last_modified}
+                  {customer.last_updated_by_time}
                 </Typography>
               </div>
             )}
