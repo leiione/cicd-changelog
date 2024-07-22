@@ -73,7 +73,7 @@ const Summary = (props) => {
             <div className="py-3 pr-5">
               <Description ticket={customer} updateTicket={handleUpdate} />
               <div className="border-top mt-3 pt-3">
-                <Schedule ticket={customer} updateTicket={handleUpdate} />
+                <Schedule isSubmitting={isSubmitting} ticket={customer} updateTicket={handleUpdate} />
                 <ServiceContact ticket={customer} updateTicket={handleUpdate} isSubmitting={isSubmitting} />
                 <LinkedTickets ticket={customer} handleOpenTicket={handleOpenTicket} />
               </div>
@@ -94,12 +94,12 @@ const Summary = (props) => {
                 <Followers ticket={customer} updateTicket={handleUpdate} />
                 {showSignature && <Signature showSignature={showSignature} />}
                 <Typography variant="caption" className="d-block mt-2">
-                  Created by: <strong>name is missing</strong> on{" "}
-                  {customer.date_added}
+                  Created by: <strong>{customer.created_by}</strong> on{" "}
+                  {customer.created_by_time}
                 </Typography>
                 <Typography variant="caption">
-                  Last updated by: <strong>name is missing</strong> on{" "}
-                  {customer.last_modified}
+                  Last updated by: <strong>{customer.last_updated_by}</strong> on{" "}
+                  {customer.last_updated_by_time}
                 </Typography>
               </div>
             )}

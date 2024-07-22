@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Typography, Popover, Button, FormControlLabel, Radio, Divider, Grid, Tooltip, TextField } from "@mui/material";
 import { AccessTime } from "@mui/icons-material";
 import moment from "moment-timezone";
+import ProgressButton from "Common/ProgressButton";
+import { includes } from "lodash";
 
 const PreferredArrival = (props) => {
-  const { classes, ticket, updateTicket } = props;
-  const earliestArrivalTime = moment(moment(ticket.earliest_arrival_time).isValid() ? ticket.earliest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
-  const latestArrivalTime = moment(moment(ticket.latest_arrival_time).isValid() ? ticket.latest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
+  const { isSubmitting, classes, ticket, updateTicket } = props;
+  const earliestArrivalTime = moment(!includes(ticket.earliest_arrival_time, "00:00:00") && moment(ticket.earliest_arrival_time, [moment.ISO_8601, "HH:mm"]).isValid() ? ticket.earliest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
+  const latestArrivalTime = moment(!includes(ticket.latest_arrival_time, "00:00:00") && moment(ticket.latest_arrival_time, [moment.ISO_8601, "HH:mm"]).isValid() ? ticket.latest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
   const arrivalTime = moment(earliestArrivalTime).isSame(latestArrivalTime) ? moment(earliestArrivalTime).format("LT") : `${moment(earliestArrivalTime).format("LT")} - ${moment(latestArrivalTime).format("LT")}`;
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -52,9 +54,11 @@ const PreferredArrival = (props) => {
     setPreferred(value);
   }
 
-  const onSaveArrivalTime = () => {
-    updateTicket({ ticket_id: ticket.ticket_id, earliest_arrival_time: startTime, latest_arrival_time: preferred === "window" ? endTime : startTime });
-    handleClose()
+  const onSaveArrivalTime = async () => {
+    await updateTicket({ ticket_id: ticket.ticket_id, earliest_arrival_time: startTime, latest_arrival_time: preferred === "window" ? endTime : startTime });
+    if (!isSubmitting) {
+      handleClose()
+    }
   }
 
   const open = Boolean(anchorEl);
@@ -133,15 +137,16 @@ const PreferredArrival = (props) => {
         </Grid>
         <Divider />
         <div className="text-right">
-          <Button
+          <ProgressButton
             color="primary"
             size="large"
             style={{ padding: "5px" }}
             onClick={onSaveArrivalTime}
+            isSubmitting={isSubmitting}
             disabled={err.start > "" || err.end > ""}
           >
             Save
-          </Button>
+          </ProgressButton>
           <Button className="bg-white text-muted" size="large" style={{ padding: "5px" }} onClick={handleClose}>
             Cancel
           </Button>

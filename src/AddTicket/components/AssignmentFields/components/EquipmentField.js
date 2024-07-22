@@ -4,6 +4,7 @@ import { SEARCH_EQUIPMENT } from "AddTicket/AddTicketGraphQL";
 import HookAutoCompleteField from "Common/hookFields/HookAutoCompleteField";
 import ErrorPage from "components/ErrorPage";
 import { debounce, find, isEmpty } from "lodash";
+import { getFormattedPGAddress } from "utils/formatter";
 
 const EquipmentField = (props) => {
   const { control, setValue, values } = props;
@@ -21,6 +22,7 @@ const EquipmentField = (props) => {
     if (searchValue && !loading && data && data.searchEquipment) {
       data.searchEquipment.forEach((item) => {
         list.push({
+          ...item,
           label: `${item.description} (${item.location_name})`,
           value: item.id
         })
@@ -56,6 +58,18 @@ const EquipmentField = (props) => {
 
   const handleOnChange = (name, value) => {
     setValue(name, value)
+    if (value > 0) {
+      const selected = find(equipmentOptions, { value })
+      if (selected) {
+        setValue('assigned_name', `${selected.description} (${selected.location_name})`)
+        setValue('ticket_contact_name', `${selected.description} (${selected.location_name})`)
+        setValue('address', getFormattedPGAddress(selected.address))
+      } else {
+        setValue('assigned_name', '')
+        setValue('ticket_contact_name', '')
+        setValue('address', '')
+      }
+    }
   }
 
   return (

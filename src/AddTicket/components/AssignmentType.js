@@ -38,6 +38,9 @@ const AssignmentType = (props) => {
                   selected={type === values.category_type}
                   onClick={() => {
                     setValue("category_type", type)
+                    setValue("customer_id", 0)
+                    setValue("location_id", 0)
+                    setValue("equipment_id", 0)
                     setAnchorEl(null)
                   }}
                 >

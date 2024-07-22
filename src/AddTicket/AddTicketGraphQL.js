@@ -1,5 +1,16 @@
 import gql from "graphql-tag"
 
+export const ADD_TICKET = gql`
+  mutation addTicket($input_ticket: TicketInput) {
+    addTicket(input_ticket: $input_ticket) {
+      ticket_id
+      priority
+      status
+      description
+    }
+  }
+`
+
 export const SEARCH_EQUIPMENT = gql`
   query searchEquipment($searchValue: String!) {
     searchEquipment(searchValue: $searchValue)

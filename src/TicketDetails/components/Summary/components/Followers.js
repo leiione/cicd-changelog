@@ -74,7 +74,7 @@ const Followers = (props) => {
               </Typography>
             ))
           ) : (
-            <Typography variant="subtitle1">Undefined</Typography>
+            <Typography variant="subtitle1"></Typography>
           )}
 
           <Popover

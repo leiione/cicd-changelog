@@ -6,6 +6,10 @@ export const GET_TICKET = gql`
       ticket_id
       description
       priority
+      created_by 
+      created_by_time
+      last_updated_by
+      last_updated_by_time
       status
       type
       ticket_type_id
@@ -73,13 +77,6 @@ export const UPDATE_TICKET_MUTATION = gql`
   mutation UpdateTicket($input_ticket: TicketInput!) {
     updateTicket(input_ticket: $input_ticket) {
       ticket_id
-      priority
-      status
-      type
-      due_by_date
-      earliest_arrival_time
-      latest_arrival_time
-      address
     }
   }
 `;

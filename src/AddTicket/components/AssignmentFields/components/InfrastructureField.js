@@ -4,6 +4,7 @@ import { SEARCH_INFRASTRUCTURE } from "AddTicket/AddTicketGraphQL";
 import HookAutoCompleteField from "Common/hookFields/HookAutoCompleteField";
 import ErrorPage from "components/ErrorPage";
 import { debounce, find, isEmpty } from "lodash";
+import { getFormattedPGAddress } from "utils/formatter";
 
 const InfrastructureField = (props) => {
   const { control, setValue, values } = props;
@@ -21,6 +22,7 @@ const InfrastructureField = (props) => {
     if (searchValue && !loading && data && data.searchInfrastructure) {
       data.searchInfrastructure.forEach((item) => {
         list.push({
+          ...item,
           label: item.name,
           value: item.id
         })
@@ -56,6 +58,18 @@ const InfrastructureField = (props) => {
 
   const handleOnChange = (name, value) => {
     setValue(name, value)
+    if (value > 0) {
+      const selected = find(infrastructureOptions, { value })
+      if (selected) {
+        setValue('assigned_name', `${selected.name}`)
+        setValue('ticket_contact_name', `${selected.name}`)
+        setValue('address', getFormattedPGAddress(selected.address))
+      } else {
+        setValue('assigned_name', '')
+        setValue('ticket_contact_name', '')
+        setValue('address', '')
+      }
+    }
   }
 
   return (
