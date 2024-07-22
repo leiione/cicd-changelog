@@ -32,7 +32,7 @@ const Description = (props) => {
             {!openInline ? (
                 ticket.description ? (
                     <div className="cursor-pointer" onClick={handleInlineEdit}>
-                        <Typography variant="body2">Description</Typography>
+                        {/*<Typography variant="body2">Description</Typography>*/}
                         <Typography variant="body1">{ticket.description}</Typography>
                     </div>
                 ) : (
