@@ -6,6 +6,7 @@ import {
   Popover,
   Checkbox,
   FormControlLabel,
+  Button,
 } from "@mui/material";
 import { useQuery } from "@apollo/client";
 
@@ -13,7 +14,7 @@ import { GET_FOLLOWERS } from "TicketDetails/TicketGraphQL";
 import { preventEvent } from "Common/helper";
 
 const Followers = (props) => {
-  const { ticket,updateTicket } = props;
+  const { ticket, updateTicket } = props;
   const [selectedFollowers, setFollowers] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
@@ -31,13 +32,13 @@ const Followers = (props) => {
     return followerEmail;
   };
 
-  const handlePopoverClose = async(event) => {
-   
-    const followerEmails = selectedFollowers.map(follower => follower.email); // Extract emails from selectedFollowers
+  const handlePopoverClose = async (event) => {
+    const followerEmails = selectedFollowers.map((follower) => follower.email); // Extract emails from selectedFollowers
 
-    await updateTicket({ticket_id: ticket.ticket_id,
-      followers:followerEmails
-    })
+    await updateTicket({
+      ticket_id: ticket.ticket_id,
+      followers: followerEmails,
+    });
     preventEvent(event);
     setAnchorEl(null);
   };
@@ -62,19 +63,21 @@ const Followers = (props) => {
 
   return (
     <>
-      <Grid container spacing={1}>
+      <Grid container spacing={1} alignItems="center">
         <Grid item xs="auto">
           <Typography variant="subtitle1">Followers: </Typography>
         </Grid>
         <Grid item xs="auto" onClick={handleClick}>
           {ticket && ticket.followers && ticket.followers.length > 0 ? (
             ticket.followers.split(",").map((follower) => (
-              <Typography variant="subtitle1" key={follower}>
+              <Typography variant="subtitle1" className="d-flex align-items-center" key={follower}>
                 {fetchFollowerName(follower)}
               </Typography>
             ))
           ) : (
-            <Typography variant="subtitle1"></Typography>
+            <Typography variant="body2" color="primary" onClick={handleClick}>
+              Add Followers
+            </Typography>
           )}
 
           <Popover
@@ -117,6 +120,14 @@ const Followers = (props) => {
                   />
                 </MenuItem>
               ))}
+            <div className="drawer-footer">
+              <Button color="primary" variant="outlined">
+                Save
+              </Button>
+              <Button color="default" variant="outlined">
+                Cancel
+              </Button>
+            </div>
           </Popover>
         </Grid>
       </Grid>
