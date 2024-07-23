@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import ChildDrawers from "../Common/ChildDrawers";
 import Activity from "./components/Activity";
 import Summary from "./components/Summary";
+import WorkOrder from "./components/Summary/components/WorkOrder";
 import Tasks from "./components/Tasks";
 import BillsOfMaterial from "./components/BillsOfMaterial";
 import { GET_TICKET } from "./TicketGraphQL";
@@ -54,10 +55,13 @@ const TicketDetails = (props) => {
     setopen1(null);
   };
 
+
   const renderChildComponent = () => {
     switch (open1) {
       case "Notes and Alerts":
         return "Coming Soon";
+      case "Work Order":
+        return <WorkOrder ticket_id={ticket_id} />;
       default:
         return (
           <div className="drawer-wapper-full p-3 tex-center">

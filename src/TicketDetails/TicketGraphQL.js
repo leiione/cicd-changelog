@@ -154,6 +154,30 @@ export const REMOVE_LINKED_TICKET = gql`
   }
 `;
 
+export const GET_DETAIL_TEXT = gql`
+    query workflowOrder($ticket_id: Int!) {
+      workflowOrder(ticket_id: $ticket_id) {
+        detail_text
+      }
+    }
+`;
+
+export const UPDATE_DETAIL_TEXT = gql`
+  mutation updateTicketWorkOrder (
+      $ticket_id: Int!
+      $detail_id: Int!
+      $history_id: Int!
+      $detail_text: String
+    ) {
+      updateTicketWorkOrder (
+        ticket_id: $ticket_id
+        detail_id: $detail_id
+        history_id: $history_id
+        detail_text: $detail_text
+      ) 
+    }
+`;
+
 export const GET_ASSIGNEES = gql`
   query assignees {
     assignees {
