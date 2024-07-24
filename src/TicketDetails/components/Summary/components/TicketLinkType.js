@@ -44,7 +44,7 @@ const TickeLinkType = (props) => {
   return (
     <>
 
-      <span className="text-dark font-weight-normal">Ticket Type relationship:</span>
+      <span className="text-dark font-weight-normal">Ticket Type Relationship:</span>
       <Button
         color="default"
         onClick={handleClick}

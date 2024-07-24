@@ -111,7 +111,7 @@ const Assignee = (props) => {
               horizontal: "left",
             }}
           >
-            <List>
+            <List className="paper-height-300 overflow-y-auto">
               {data &&
                 data.assignees &&
                 data.assignees.map((assignee) => (

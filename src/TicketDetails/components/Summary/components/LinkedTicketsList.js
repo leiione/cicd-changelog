@@ -97,61 +97,56 @@ function LinkedTicketsList(props) {
     saveLinkedTicket(ticket.ticket_id, linkedTicketInput);
   };
 
-  const handlCloseContentDrawer= ()=>{
+  const handlCloseContentDrawer = () => {
     setSubmitting(false);
     setSearchText("");
     setShowSearch(false);
     setSelectedRows([]);
     closeDrawer(false);
-  }
+  };
 
   return (
     <>
-      <Grid container className="p-3">
-        <Grid item xs={8} className="">
-          <TickeLinkType
-            tickeLinkType={tickeLinkType}
-            setTicketLinkType={setTicketLinkType}
-          ></TickeLinkType>
+      <div className="p-3 drawer-wrapper">
+        <Grid container>
+          <Grid item xs={8} className="">
+            <TickeLinkType
+              tickeLinkType={tickeLinkType}
+              setTicketLinkType={setTicketLinkType}
+            ></TickeLinkType>
+          </Grid>
+          <Grid item xs={4} className="text-right">
+            {showSearch ? (
+              <TextField
+                variant="standard"
+                value={searchText}
+                onChange={handleSearch}
+                placeholder="Search…"
+                fullWidth
+                InputProps={{
+                  endAdornment: !isEmpty(searchText) && (
+                    <InputAdornment
+                      className="equipment-adornment"
+                      position="end"
+                    >
+                      <IconButton onClick={handleCancelSearch} size="large">
+                        <Close className="f-14" />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                  inputProps: { className: "px-2 py-1" },
+                }}
+                InputLabelProps={{ shrink: false }}
+                label=""
+              />
+            ) : (
+              <IconButton onClick={() => setShowSearch(true)}>
+                <Search />
+              </IconButton>
+            )}
+          </Grid>
         </Grid>
-        <Grid
-          item
-          xs={4}
-          style={{ display: "flex" }}
-          justifyContent="flex-end"
-          className="pr-2"
-        >
-          {showSearch ? (
-            <TextField
-              variant="standard"
-              value={searchText}
-              onChange={handleSearch}
-              placeholder="Search…"
-              InputProps={{
-                endAdornment: !isEmpty(searchText) && (
-                  <InputAdornment
-                    className="equipment-adornment"
-                    position="end"
-                  >
-                    <IconButton onClick={handleCancelSearch} size="large">
-                      <Close className="f-14" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                inputProps: { className: "px-2 py-1" },
-              }}
-              InputLabelProps={{ shrink: false }}
-              label=""
-            />
-          ) : (
-            <IconButton onClick={() => setShowSearch(true)}>
-              <Search />
-            </IconButton>
-          )}
-        </Grid>
-      </Grid>
 
-      <Grid item xs="auto" className="p-3">
         <DataGrid
           rows={
             data?.tickets.map((ticket, index) => ({
@@ -170,10 +165,8 @@ function LinkedTicketsList(props) {
             setSelectedRows(newSelection);
           }}
         />
-      </Grid>
-      <Grid item xs={12} className="text-right p-3" >
-        
-        
+      </div>
+      <div className="drawer-footer">
         <ProgressButton
           color="primary"
           variant="outlined"
@@ -197,10 +190,7 @@ function LinkedTicketsList(props) {
         >
           Cancel
         </Button>
-     
-
-     
-      </Grid>
+      </div>
     </>
   );
 }
