@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import TextField from "@mui/material/TextField";
 import { InputAdornment, IconButton, Grid, Button } from "@mui/material";
 import { Close, Search } from "@mui/icons-material";
@@ -32,9 +32,14 @@ function LinkedTicketsList(props) {
   .map((id) => parseInt(id, 10))
   .filter((id) => !isNaN(id));
 
+  const variables = useMemo(() => ({
+    searchVal: debouncedSearchTerm,
+    ticket_id: ticket.ticket_id,
+    selected_ticket_id: linkedTicketIds,
+  }), [debouncedSearchTerm, ticket.ticket_id]);
 
   const { data, loading } = useQuery(GET_TICKETS_QUERY, {
-    variables: { searchVal: debouncedSearchTerm, ticket_id: ticket.ticket_id, selected_ticket_id: linkedTicketIds  },
+    variables,
     skip: !debouncedSearchTerm, // Skip query if search term is empty
   });
 
