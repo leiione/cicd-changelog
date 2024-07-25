@@ -10,7 +10,7 @@ import { useMutation } from "@apollo/client";
 import { ADD_TICKET } from "./AddTicketGraphQL";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
-import { toUpper } from "lodash";
+import { omit, toUpper } from "lodash";
 
 const style = {
   position: 'absolute',
@@ -130,7 +130,7 @@ const AddTicket = (props) => {
       await addTicket({
         variables: {
           input_ticket: {
-            ...values,
+            ...omit(values, ["initSelected"]),
             category_type: toUpper(values.category_type),
           },
         },
