@@ -5,6 +5,8 @@ import { preventEvent } from "../../../../Common/helper";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import { useQuery } from "@apollo/client";
 import { GET_TICKET_LINK_TYPES } from "TicketDetails/TicketGraphQL";
+import { capitalize } from "lodash";
+
 
 const useStyles = makeStyles((theme) => ({
   paperHeight: {
@@ -22,8 +24,9 @@ const TickeLinkType = (props) => {
     setAnchorEl(event.currentTarget);
   };
   const handlePopoverClose = (event, taskType) => {
-   
-    setTicketLinkType(taskType);
+    if (taskType !== "backdropClick") {
+      setTicketLinkType(taskType);
+    }
     preventEvent(event);
     setAnchorEl(null);
   };
@@ -44,7 +47,7 @@ const TickeLinkType = (props) => {
   return (
     <>
 
-      <span className="text-dark font-weight-normal">Ticket Type relationship:</span>
+      <span className="text-dark font-weight-normal">Ticket Type Relationship:</span>
       <Button
         color="default"
         onClick={handleClick}
@@ -70,7 +73,8 @@ const TickeLinkType = (props) => {
             handlePopoverClose(event, type)
           }
         >
-          {type.name}
+          {capitalize(type.name)
+          }
         </MenuItem>
       ))}
         

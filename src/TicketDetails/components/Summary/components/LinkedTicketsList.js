@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {  useEffect, useMemo, useState } from "react";
 import TextField from "@mui/material/TextField";
 import { InputAdornment, IconButton, Grid, Button } from "@mui/material";
 import { Close, Search } from "@mui/icons-material";
@@ -27,10 +27,39 @@ function LinkedTicketsList(props) {
   const [selectedRows, setSelectedRows] = useState([]);
   const [tickeLinkType, setTicketLinkType] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [rows, setRows] = useState([]);
+  const [pageSize, setPageSize] = useState(10);
+
+ 
+
+  const variables = useMemo(() => ({
+    searchVal: debouncedSearchTerm,
+    ticket_id: ticket.ticket_id,
+    selected_ticket_id: selectedRows
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [debouncedSearchTerm, ticket.ticket_id]);
+  
+
   const { data, loading } = useQuery(GET_TICKETS_QUERY, {
-    variables: { searchVal: debouncedSearchTerm, ticket_id: ticket.ticket_id },
-    skip: !debouncedSearchTerm, // Skip query if search term is empty
-  });
+    variables
+   });
+
+
+  
+
+  useEffect(() => {
+    setSelectedRows(data?.tickets.selected_ticket_id || [])
+
+    const initialRows = data?.tickets.tickets.map((ticket, index) => ({
+      ...ticket,
+      id: ticket.ticket_id || index,
+    })) || [];
+    
+    setRows(initialRows);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [data]); 
+  
 
   const [addLinkedTicket] = useMutation(ADD_LINKED_TICKET_MUTATION);
 
@@ -74,15 +103,14 @@ function LinkedTicketsList(props) {
 
   const handleSearch = (event) => {
     const value = event.target.value;
-    setSelectedRows([]);
     setSearchText(value);
   };
 
   const handleCancelSearch = (event) => {
     setSearchText("");
-    setSelectedRows([]);
     setShowSearch(false);
   };
+
 
   const handelSaveLinkedTicket = () => {
     const linkedTicketIds = selectedRows
@@ -97,83 +125,78 @@ function LinkedTicketsList(props) {
     saveLinkedTicket(ticket.ticket_id, linkedTicketInput);
   };
 
-  const handlCloseContentDrawer= ()=>{
+  const handlCloseContentDrawer = () => {
     setSubmitting(false);
     setSearchText("");
     setShowSearch(false);
     setSelectedRows([]);
     closeDrawer(false);
-  }
+  };
 
-  return (
+ return (
     <>
-      <Grid container className="p-3">
-        <Grid item xs={8} className="">
-          <TickeLinkType
-            tickeLinkType={tickeLinkType}
-            setTicketLinkType={setTicketLinkType}
-          ></TickeLinkType>
+      <div className="p-3 drawer-wrapper">
+        <Grid container>
+          <Grid item xs={8} className="">
+            <TickeLinkType
+              tickeLinkType={tickeLinkType}
+              setTicketLinkType={setTicketLinkType}
+            ></TickeLinkType>
+          </Grid>
+          <Grid item xs={4} className="text-right">
+            {showSearch ? (
+              <TextField
+                variant="standard"
+                value={searchText}
+                onChange={handleSearch}
+                placeholder="Search…"
+                fullWidth
+                InputProps={{
+                  endAdornment: !isEmpty(searchText) && (
+                    <InputAdornment
+                      className="equipment-adornment"
+                      position="end"
+                    >
+                      <IconButton onClick={handleCancelSearch} size="large">
+                        <Close className="f-14" />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                  inputProps: { className: "px-2 py-1" },
+                }}
+                InputLabelProps={{ shrink: false }}
+                label=""
+              />
+            ) : (
+              <IconButton onClick={() => setShowSearch(true)}>
+                <Search />
+              </IconButton>
+            )}
+          </Grid>
         </Grid>
-        <Grid
-          item
-          xs={4}
-          style={{ display: "flex" }}
-          justifyContent="flex-end"
-          className="pr-2"
-        >
-          {showSearch ? (
-            <TextField
-              variant="standard"
-              value={searchText}
-              onChange={handleSearch}
-              placeholder="Search…"
-              InputProps={{
-                endAdornment: !isEmpty(searchText) && (
-                  <InputAdornment
-                    className="equipment-adornment"
-                    position="end"
-                  >
-                    <IconButton onClick={handleCancelSearch} size="large">
-                      <Close className="f-14" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                inputProps: { className: "px-2 py-1" },
-              }}
-              InputLabelProps={{ shrink: false }}
-              label=""
-            />
-          ) : (
-            <IconButton onClick={() => setShowSearch(true)}>
-              <Search />
-            </IconButton>
-          )}
-        </Grid>
-      </Grid>
 
-      <Grid item xs="auto" className="p-3">
         <DataGrid
-          rows={
-            data?.tickets.map((ticket, index) => ({
-              ...ticket,
-              id: ticket.ticket_id || index,
-            })) || []
-          }
+          rows={rows}
+          initialState={{
+            ...rows,
+            pagination: { paginationModel: { pageSize: 10 } },
+          }}
           columns={columns}
-          pageSize={25}
-          loading={loading}
+          pageSize={pageSize}
+          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
           pageSizeOptions={[10, 25, 50, 100]}
+          loading={loading}
           autoHeight
           checkboxSelection
           disableColumnMenu={true}
           onRowSelectionModelChange={(newSelection) => {
             setSelectedRows(newSelection);
           }}
+          rowSelectionModel={selectedRows}
+      
         />
-      </Grid>
-      <Grid item xs={12} className="text-right p-3" >
-        
-        
+      </div>
+      <div className="drawer-footer">
         <ProgressButton
           color="primary"
           variant="outlined"
@@ -181,6 +204,7 @@ function LinkedTicketsList(props) {
           onClick={() => {
             handelSaveLinkedTicket();
           }}
+          disabled={selectedRows.length === 0}
           isSubmitting={submitting}
           style={{ padding: "5px" }}
         >
@@ -197,10 +221,7 @@ function LinkedTicketsList(props) {
         >
           Cancel
         </Button>
-     
-
-     
-      </Grid>
+      </div>
     </>
   );
 }
