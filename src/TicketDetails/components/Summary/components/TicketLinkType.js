@@ -5,6 +5,8 @@ import { preventEvent } from "../../../../Common/helper";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import { useQuery } from "@apollo/client";
 import { GET_TICKET_LINK_TYPES } from "TicketDetails/TicketGraphQL";
+import { capitalize } from "lodash";
+
 
 const useStyles = makeStyles((theme) => ({
   paperHeight: {
@@ -71,7 +73,8 @@ const TickeLinkType = (props) => {
             handlePopoverClose(event, type)
           }
         >
-          {type.name.toUpperCase()}
+          {capitalize(type.name)
+          }
         </MenuItem>
       ))}
         
