@@ -199,8 +199,8 @@ export const GET_FOLLOWERS = gql`
 `;
 
 export const GET_TICKETS_QUERY = gql`
-  query GetTickets($searchVal: String!, $ticket_id: Int!) {
-    tickets(searchVal: $searchVal, ticket_id: $ticket_id) {
+  query GetTickets($searchVal: String!, $ticket_id: Int!, $selected_ticket_id: [Int]) {
+    tickets(searchVal: $searchVal, ticket_id: $ticket_id, selected_ticket_id: $selected_ticket_id) {
       ticket_id
       description
       status

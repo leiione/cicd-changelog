@@ -22,8 +22,9 @@ const TickeLinkType = (props) => {
     setAnchorEl(event.currentTarget);
   };
   const handlePopoverClose = (event, taskType) => {
-   
-    setTicketLinkType(taskType);
+    if (taskType !== "backdropClick") {
+      setTicketLinkType(taskType);
+    }
     preventEvent(event);
     setAnchorEl(null);
   };
@@ -70,7 +71,7 @@ const TickeLinkType = (props) => {
             handlePopoverClose(event, type)
           }
         >
-          {type.name}
+          {type.name.toUpperCase()}
         </MenuItem>
       ))}
         

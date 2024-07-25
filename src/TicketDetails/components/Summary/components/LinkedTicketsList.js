@@ -27,8 +27,14 @@ function LinkedTicketsList(props) {
   const [selectedRows, setSelectedRows] = useState([]);
   const [tickeLinkType, setTicketLinkType] = useState({});
   const [submitting, setSubmitting] = useState(false);
+
+  const linkedTicketIds = selectedRows
+  .map((id) => parseInt(id, 10))
+  .filter((id) => !isNaN(id));
+
+
   const { data, loading } = useQuery(GET_TICKETS_QUERY, {
-    variables: { searchVal: debouncedSearchTerm, ticket_id: ticket.ticket_id },
+    variables: { searchVal: debouncedSearchTerm, ticket_id: ticket.ticket_id, selected_ticket_id: linkedTicketIds  },
     skip: !debouncedSearchTerm, // Skip query if search term is empty
   });
 
@@ -74,13 +80,11 @@ function LinkedTicketsList(props) {
 
   const handleSearch = (event) => {
     const value = event.target.value;
-    setSelectedRows([]);
     setSearchText(value);
   };
 
   const handleCancelSearch = (event) => {
     setSearchText("");
-    setSelectedRows([]);
     setShowSearch(false);
   };
 
@@ -174,6 +178,7 @@ function LinkedTicketsList(props) {
           onClick={() => {
             handelSaveLinkedTicket();
           }}
+          disabled={selectedRows.length === 0}
           isSubmitting={submitting}
           style={{ padding: "5px" }}
         >
