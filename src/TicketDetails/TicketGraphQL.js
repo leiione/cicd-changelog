@@ -201,14 +201,18 @@ export const GET_FOLLOWERS = gql`
 export const GET_TICKETS_QUERY = gql`
   query GetTickets($searchVal: String!, $ticket_id: Int!, $selected_ticket_id: [Int]) {
     tickets(searchVal: $searchVal, ticket_id: $ticket_id, selected_ticket_id: $selected_ticket_id) {
-      ticket_id
-      description
-      status
-      priority
-      type
+      tickets {
+        ticket_id
+        description
+        status
+        priority
+        type
+      }
+      selected_ticket_id
     }
   }
 `;
+
 
 export const GET_TICKET_LINK_TYPES = gql`
   query GetTicketLinkTypes {

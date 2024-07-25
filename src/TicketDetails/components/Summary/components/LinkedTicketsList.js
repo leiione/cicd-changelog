@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, {  useEffect, useMemo, useState } from "react";
 import TextField from "@mui/material/TextField";
 import { InputAdornment, IconButton, Grid, Button } from "@mui/material";
 import { Close, Search } from "@mui/icons-material";
@@ -27,21 +27,39 @@ function LinkedTicketsList(props) {
   const [selectedRows, setSelectedRows] = useState([]);
   const [tickeLinkType, setTicketLinkType] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [rows, setRows] = useState([]);
+  const [pageSize, setPageSize] = useState(10);
 
-  const linkedTicketIds = selectedRows
-  .map((id) => parseInt(id, 10))
-  .filter((id) => !isNaN(id));
+ 
 
   const variables = useMemo(() => ({
     searchVal: debouncedSearchTerm,
     ticket_id: ticket.ticket_id,
-    selected_ticket_id: linkedTicketIds,
+    selected_ticket_id: selectedRows
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [debouncedSearchTerm, ticket.ticket_id]);
+  
 
   const { data, loading } = useQuery(GET_TICKETS_QUERY, {
-    variables,
-    skip: !debouncedSearchTerm, // Skip query if search term is empty
-  });
+    variables
+   });
+
+
+  
+
+  useEffect(() => {
+    setSelectedRows(data?.tickets.selected_ticket_id || [])
+
+    const initialRows = data?.tickets.tickets.map((ticket, index) => ({
+      ...ticket,
+      id: ticket.ticket_id || index,
+    })) || [];
+    
+    setRows(initialRows);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [data]); 
+  
 
   const [addLinkedTicket] = useMutation(ADD_LINKED_TICKET_MUTATION);
 
@@ -93,6 +111,7 @@ function LinkedTicketsList(props) {
     setShowSearch(false);
   };
 
+
   const handelSaveLinkedTicket = () => {
     const linkedTicketIds = selectedRows
       .map((id) => parseInt(id, 10))
@@ -114,7 +133,7 @@ function LinkedTicketsList(props) {
     closeDrawer(false);
   };
 
-  return (
+ return (
     <>
       <div className="p-3 drawer-wrapper">
         <Grid container>
@@ -157,16 +176,16 @@ function LinkedTicketsList(props) {
         </Grid>
 
         <DataGrid
-          rows={
-            data?.tickets.map((ticket, index) => ({
-              ...ticket,
-              id: ticket.ticket_id || index,
-            })) || []
-          }
+          rows={rows}
+          initialState={{
+            ...rows,
+            pagination: { paginationModel: { pageSize: 10 } },
+          }}
           columns={columns}
-          pageSize={25}
-          loading={loading}
+          pageSize={pageSize}
+          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
           pageSizeOptions={[10, 25, 50, 100]}
+          loading={loading}
           autoHeight
           checkboxSelection
           disableColumnMenu={true}
