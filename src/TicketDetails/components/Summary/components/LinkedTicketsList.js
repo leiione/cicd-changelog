@@ -168,6 +168,7 @@ function LinkedTicketsList(props) {
           onRowSelectionModelChange={(newSelection) => {
             setSelectedRows(newSelection);
           }}
+          rowSelectionModel={selectedRows}
         />
       </div>
       <div className="drawer-footer">
