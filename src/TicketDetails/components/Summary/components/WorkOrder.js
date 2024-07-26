@@ -6,6 +6,7 @@ import { Button, Paper, Typography } from "@mui/material";
 
 const WorkOrder = ({ ticket_id }) => {
     const [detailText, setDetailText] = useState("");
+    const [ticket_type_id, setTicketTypeID] = useState("");
     const [detail_id, setDetailID] = useState("");
     const [isEditing, setIsEditing] = useState(false);
 
@@ -16,6 +17,7 @@ const WorkOrder = ({ ticket_id }) => {
             if (data && data.workflowOrder) {
                 setDetailText(data.workflowOrder.detail_text);
                 setDetailID(data.workflowOrder.detail_id);
+                setTicketTypeID(data.workflowOrder.ticket_type_id);
             }
         },
     });
@@ -33,6 +35,7 @@ const WorkOrder = ({ ticket_id }) => {
                     input_ticket: {
                         ticket_id,
                         detail_id,
+                        ticket_type_id: ticket_type_id,
                         detail_text: detailText,
                     },
                 },
