@@ -4,8 +4,9 @@ import { Editor } from "@tinymce/tinymce-react";
 import { GET_DETAIL_TEXT, UPDATE_DETAIL_TEXT } from "TicketDetails/TicketGraphQL";
 import { Button, Paper, Typography } from "@mui/material";
 
-const WorkOrder = ({ ticket_id, detail_id }) => {
+const WorkOrder = ({ ticket_id }) => {
     const [detailText, setDetailText] = useState("");
+    const [detail_id, setDetailID] = useState("");
     const [isEditing, setIsEditing] = useState(false);
 
     const { loading } = useQuery(GET_DETAIL_TEXT, {
@@ -14,6 +15,7 @@ const WorkOrder = ({ ticket_id, detail_id }) => {
         onCompleted: (data) => {
             if (data && data.workflowOrder) {
                 setDetailText(data.workflowOrder.detail_text);
+                setDetailID(data.workflowOrder.detail_id);
             }
         },
     });
