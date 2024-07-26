@@ -3,17 +3,16 @@ import { Typography, Popover, Button, FormControlLabel, Radio, Divider, Grid, To
 import { AccessTime } from "@mui/icons-material";
 import moment from "moment-timezone";
 import ProgressButton from "Common/ProgressButton";
-import { includes } from "lodash";
 
 const PreferredArrival = (props) => {
   const { isSubmitting, classes, ticket, updateTicket } = props;
-  const earliestArrivalTime = moment(!includes(ticket.earliest_arrival_time, "00:00:00") && moment(ticket.earliest_arrival_time, [moment.ISO_8601, "HH:mm"]).isValid() ? ticket.earliest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
-  const latestArrivalTime = moment(!includes(ticket.latest_arrival_time, "00:00:00") && moment(ticket.latest_arrival_time, [moment.ISO_8601, "HH:mm"]).isValid() ? ticket.latest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
+  const earliestArrivalTime = moment(ticket.earliest_arrival_time && moment(ticket.earliest_arrival_time, [moment.ISO_8601, "HH:mm"]).isValid() ? ticket.earliest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
+  const latestArrivalTime = moment(ticket.earliest_arrival_time && ticket.latest_arrival_time && moment(ticket.latest_arrival_time, [moment.ISO_8601, "HH:mm"]).isValid() ? ticket.latest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
   const arrivalTime = moment(earliestArrivalTime).isSame(latestArrivalTime) ? moment(earliestArrivalTime).format("LT") : `${moment(earliestArrivalTime).format("LT")} - ${moment(latestArrivalTime).format("LT")}`;
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [preferred, setPreferred] = useState(moment(earliestArrivalTime).isSame(latestArrivalTime) ? "exact" : "window")
-  const [startTime, setStartTime] = useState(ticket.earliest_arrival_time)
+  const [startTime, setStartTime] = useState(ticket.earliest_arrival_time || "8:00:00")
   const [endTime, setEndTime] = useState(ticket.latest_arrival_time)
   const [err, setErr] = useState({ start: "", end: "" })
 
