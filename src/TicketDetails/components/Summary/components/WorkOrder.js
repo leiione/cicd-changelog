@@ -3,8 +3,11 @@ import { useQuery, useMutation } from "@apollo/client";
 import { Editor } from "@tinymce/tinymce-react";
 import { GET_DETAIL_TEXT, UPDATE_DETAIL_TEXT } from "TicketDetails/TicketGraphQL";
 import { Button, Paper, Typography } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { showSnackbar } from "config/store";
 
 const WorkOrder = ({ ticket_id }) => {
+    const dispatch = useDispatch()
     const [detailText, setDetailText] = useState("");
     const [ticket_type_id, setTicketTypeID] = useState("");
     const [detail_id, setDetailID] = useState("");
@@ -41,10 +44,10 @@ const WorkOrder = ({ ticket_id }) => {
                 },
             });
             if (data.updateTicket.ticket_id) {
-                alert("Detail text updated successfully!");
+                dispatch(showSnackbar({ message: "The work order saved successfully", severity: "success" }))
                 setIsEditing(false);
             } else {
-                alert("Failed to update detail text.");
+                dispatch(showSnackbar({ message: "Failed to save work order.", severity: "error" }))
             }
         } catch (error) {
             console.error("There was an error updating the detail text!", error);
