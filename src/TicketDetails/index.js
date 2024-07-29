@@ -15,7 +15,23 @@ import ErrorPage from "components/ErrorPage";
 import { useSelector } from "react-redux";
 import GlobalSnackbar from "Common/GlobalSnackbar";
 
+
+
 const TicketDetails = (props) => {
+  const handlePrint = (detailText) => {
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+            <html>
+            <head><title>Print Work Order</title></head>
+            <body>${detailText}</body>
+            </html>
+        `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+  const [ticketDetail, setTicketDetail] = React.useState(null);
+
   const {
     lablesVisible,
     ticket: ticketData,
@@ -55,13 +71,12 @@ const TicketDetails = (props) => {
     setopen1(null);
   };
 
-
   const renderChildComponent = () => {
     switch (open1) {
       case "Notes and Alerts":
         return "Coming Soon";
       case "Work Order":
-        return <WorkOrder ticket_id={ticket_id} />;
+        return <WorkOrder ticket_id={ticket_id} setTicketDetail={setTicketDetail} />;
       default:
         return (
           <div className="drawer-wapper-full p-3 tex-center">
@@ -115,7 +130,7 @@ const TicketDetails = (props) => {
       <ChildDrawers
         open={Boolean(open1)}
         handleDrawerClose1={handleDrawerClose1}
-        title={open1}
+        title={open1} handlePrint={handlePrint} ticketDetail={ticketDetail}
       >
         {renderChildComponent()}
       </ChildDrawers>

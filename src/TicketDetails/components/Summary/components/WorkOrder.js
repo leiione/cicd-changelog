@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client";
 import { Editor } from "@tinymce/tinymce-react";
 import { GET_DETAIL_TEXT, UPDATE_DETAIL_TEXT } from "TicketDetails/TicketGraphQL";
-import { Button, Paper, Typography } from "@mui/material";
+import { Button } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 
-const WorkOrder = ({ ticket_id }) => {
+const WorkOrder = ({ ticket_id, setTicketDetail }) => {
     const dispatch = useDispatch();
     const [initialDetailText, setInitialDetailText] = useState("");
     const [detailText, setDetailText] = useState("");
@@ -20,6 +20,7 @@ const WorkOrder = ({ ticket_id }) => {
             if (data && data.workflowOrder) {
                 setInitialDetailText(data.workflowOrder.detail_text);
                 setDetailText(data.workflowOrder.detail_text);
+                setTicketDetail(data.workflowOrder.detail_text);
                 setDetailID(data.workflowOrder.detail_id);
                 setTicketTypeID(data.workflowOrder.ticket_type_id);
             }
@@ -57,18 +58,6 @@ const WorkOrder = ({ ticket_id }) => {
 
     const handleCancel = () => {
         setDetailText(initialDetailText);
-    };
-
-    const handlePrint = () => {
-        const printWindow = window.open("", "_blank");
-        printWindow.document.write(`
-            <html>
-            <head><title>Print Work Order</title></head>
-            <body>${detailText}</body>
-            </html>
-        `);
-        printWindow.document.close();
-        printWindow.print();
     };
 
     const handleFilePicker = (callback, value, meta) => {
@@ -114,10 +103,7 @@ const WorkOrder = ({ ticket_id }) => {
                         'file'
                     ],
                     toolbar:
-                        'undo redo | formatselect | bold italic backcolor | \
-                        alignleft aligncenter alignright alignjustify | \
-                        bullist numlist outdent indent | removeformat | help | image | file',
-                    file_picker_callback: handleFilePicker,
+                        'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help | image | file',file_picker_callback: handleFilePicker,
                 }}
                 onEditorChange={handleEditorChange}
             />
@@ -139,9 +125,6 @@ const WorkOrder = ({ ticket_id }) => {
                     disabled={detailText === initialDetailText}
                 >
                     Cancel
-                </Button>
-                <Button variant="contained" onClick={handlePrint}>
-                    Print
                 </Button>
             </div>
         </div>
