@@ -40,7 +40,7 @@ const WorkOrder = ({ ticket_id, setTicketDetail }) => {
                     input_ticket: {
                         ticket_id,
                         detail_id,
-                        type: type,
+                        type,
                         detail_text: detailText,
                     },
                 },
