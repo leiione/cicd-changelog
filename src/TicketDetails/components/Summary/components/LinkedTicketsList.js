@@ -1,4 +1,4 @@
-import React, {  useEffect, useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import { InputAdornment, IconButton, Grid, Button } from "@mui/material";
 import { Close, Search } from "@mui/icons-material";
@@ -24,42 +24,17 @@ function LinkedTicketsList(props) {
   const [searchText, setSearchText] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [debouncedSearchTerm] = useDebounce(searchText, 500); // Debounce search term
-  const [selectedRows, setSelectedRows] = useState([]);
+  const [userSelectedRows, setUserSelectedRows] = useState([]);
   const [tickeLinkType, setTicketLinkType] = useState({});
   const [submitting, setSubmitting] = useState(false);
-  const [rows, setRows] = useState([]);
   const [pageSize, setPageSize] = useState(10);
-
- 
-
-  const variables = useMemo(() => ({
-    searchVal: debouncedSearchTerm,
-    ticket_id: ticket.ticket_id,
-    selected_ticket_id: selectedRows
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [debouncedSearchTerm, ticket.ticket_id]);
-  
+  const [mergedTickets, setMergedTickets] = useState([]);
 
   const { data, loading } = useQuery(GET_TICKETS_QUERY, {
-    variables
-   });
-
-
-  
-
-  useEffect(() => {
-    setSelectedRows(data?.tickets.selected_ticket_id || [])
-
-    const initialRows = data?.tickets.tickets.map((ticket, index) => ({
-      ...ticket,
-      id: ticket.ticket_id || index,
-    })) || [];
-    
-    setRows(initialRows);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-   }, [data]); 
-  
+    variables: { searchVal: debouncedSearchTerm, ticket_id: ticket.ticket_id },
+    fetchPolicy: "network-only",
+    skip: !debouncedSearchTerm, // Skip the query if debouncedSearchTerm is empty
+  });
 
   const [addLinkedTicket] = useMutation(ADD_LINKED_TICKET_MUTATION);
 
@@ -85,7 +60,6 @@ function LinkedTicketsList(props) {
       setSubmitting(false);
       setSearchText("");
       setShowSearch(false);
-      setSelectedRows([]);
       closeDrawer(false);
     } catch (error) {
       const msg = error.message.replace("GraphQL error: ", "");
@@ -106,19 +80,13 @@ function LinkedTicketsList(props) {
     setSearchText(value);
   };
 
-  const handleCancelSearch = (event) => {
-    setSearchText("");
+  const handleCancelSearch = () => {
     setShowSearch(false);
   };
 
-
   const handelSaveLinkedTicket = () => {
-    const linkedTicketIds = selectedRows
-      .map((id) => parseInt(id, 10))
-      .filter((id) => !isNaN(id));
-
     const linkedTicketInput = {
-      linked_ticket_id: linkedTicketIds,
+      linked_ticket_id: userSelectedRows.map((row) => row.ticket_id),
       ticket_id: ticket.ticket_id,
       ticket_link_type_id: tickeLinkType.id,
     };
@@ -129,11 +97,27 @@ function LinkedTicketsList(props) {
     setSubmitting(false);
     setSearchText("");
     setShowSearch(false);
-    setSelectedRows([]);
     closeDrawer(false);
   };
+  const getRowId = (row) => row.id || row.ticket_id; // Assuming each ticket has a unique ticketId
 
- return (
+  const handleSelectionModelChange = (newSelectionModel, type) => {
+    const selectedRows = mergedTickets.filter((row) =>
+      newSelectionModel.includes(row.ticket_id)
+    );
+
+    setUserSelectedRows(selectedRows);
+  };
+
+  useEffect(() => {
+    if (data) {
+      const updatedTickets = [...data.tickets.tickets, ...userSelectedRows];
+      setMergedTickets(updatedTickets);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  return (
     <>
       <div className="p-3 drawer-wrapper">
         <Grid container>
@@ -176,9 +160,10 @@ function LinkedTicketsList(props) {
         </Grid>
 
         <DataGrid
-          rows={rows}
+          rows={mergedTickets || []}
+          getRowId={getRowId}
           initialState={{
-            ...rows,
+            ...(mergedTickets || []),
             pagination: { paginationModel: { pageSize: 10 } },
           }}
           columns={columns}
@@ -188,12 +173,10 @@ function LinkedTicketsList(props) {
           loading={loading}
           autoHeight
           checkboxSelection
+          keepNonExistentRowsSelected
           disableColumnMenu={true}
-          onRowSelectionModelChange={(newSelection) => {
-            setSelectedRows(newSelection);
-          }}
-          rowSelectionModel={selectedRows}
-      
+          onRowSelectionModelChange={handleSelectionModelChange}
+          rowSelectionModel={userSelectedRows.map((row) => row.ticket_id)}
         />
       </div>
       <div className="drawer-footer">
@@ -204,7 +187,7 @@ function LinkedTicketsList(props) {
           onClick={() => {
             handelSaveLinkedTicket();
           }}
-          disabled={selectedRows.length === 0}
+          disabled={userSelectedRows.length === 0}
           isSubmitting={submitting}
           style={{ padding: "5px" }}
         >
