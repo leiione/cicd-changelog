@@ -6,6 +6,7 @@ import {
   RemoveCircleOutlineOutlined,
 } from "@mui/icons-material";
 import { preventEvent } from "../../../../Common/helper";
+import { getPriorityIcon } from "utils/getPriorityIcon";
 
 const TicketPriority = (props) => {
   const { customer, handleUpdate } = props;
@@ -37,23 +38,10 @@ const TicketPriority = (props) => {
     setAnchorEl(null);
   };
 
-  function displayIconBasedOnPriority(priority) {
-    switch (priority) {
-      case "Low":
-        return <ArrowCircleDownOutlined className="text-secondary" />;
-      case "Normal":
-        return <RemoveCircleOutlineOutlined className="mr-2 text-warning" />;
-      case "High":
-        return <ArrowCircleUpOutlined className="mr-2 text-success" />;
-      default:
-        return <ArrowCircleDownOutlined className="text-secondary" />; // or a default icon
-    }
-  }
-
   return (
     <>
       <IconButton color="default" onClick={handleClick}>
-        {displayIconBasedOnPriority(priority)}
+        {getPriorityIcon(priority)}
       </IconButton>
 
       <Popover
