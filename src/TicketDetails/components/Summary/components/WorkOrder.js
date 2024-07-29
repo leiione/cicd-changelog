@@ -63,7 +63,11 @@ const WorkOrder = ({ ticket_id, setTicketDetail }) => {
     const handleFilePicker = (callback, value, meta) => {
         const input = document.createElement("input");
         input.setAttribute("type", "file");
-        input.setAttribute("accept", "image/*");
+
+        // Handle different file types
+        if (meta.filetype === 'image') {
+            input.setAttribute("accept", "image/*");
+        }
 
         input.onchange = function () {
             const file = this.files[0];
@@ -71,12 +75,17 @@ const WorkOrder = ({ ticket_id, setTicketDetail }) => {
 
             reader.onload = function () {
                 const id = `blobid${new Date().getTime()}`;
-                const blobCache = window.tinymce.activeEditor.editorUpload.blobCache;
                 const base64 = reader.result.split(",")[1];
+                const blobCache = window.tinymce.activeEditor.editorUpload.blobCache;
                 const blobInfo = blobCache.create(id, file, base64);
                 blobCache.add(blobInfo);
 
-                callback(blobInfo.blobUri(), { title: file.name });
+                // Call the callback and populate the appropriate type in the editor
+                if (meta.filetype === 'image') {
+                    callback(blobInfo.blobUri(), { title: file.name });
+                } else if (meta.filetype === 'media' || meta.filetype === 'file') {
+                    callback(blobInfo.blobUri(), { text: file.name });
+                }
             };
             reader.readAsDataURL(file);
         };
@@ -84,13 +93,14 @@ const WorkOrder = ({ ticket_id, setTicketDetail }) => {
         input.click();
     };
 
+
     if (loading) {
         return <div>Loading...</div>;
     }
 
     return (
         <div>
-            <Editor
+            {/*<Editor
                 apiKey="rv98fsqigjw4pj7zsbawye8jrdpgxrrhzznj01jou3tgj7ti" // replace with your TinyMCE API key
                 value={detailText}
                 init={{
@@ -106,7 +116,31 @@ const WorkOrder = ({ ticket_id, setTicketDetail }) => {
                         'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help | image | file',file_picker_callback: handleFilePicker,
                 }}
                 onEditorChange={handleEditorChange}
+            />*/}
+
+            <Editor
+                apiKey="rv98fsqigjw4pj7zsbawye8jrdpgxrrhzznj01jou3tgj7ti" // replace with your TinyMCE API key
+                value={detailText}
+                init={{
+                    height: 500,
+                    menubar: false,
+                    plugins: [
+                        'advlist autolink lists link image charmap print preview anchor',
+                        'searchreplace visualblocks code fullscreen',
+                        'insertdatetime media table paste code help wordcount',
+                        'image', 'link', 'media'
+                    ],
+                    toolbar:
+                        'undo redo | formatselect | bold italic backcolor | image | link | media | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+                    image_title: true,
+                    automatic_uploads: true,
+                    file_picker_types: 'file image media',
+                    file_picker_callback: handleFilePicker,
+                }}
+                onEditorChange={handleEditorChange}
             />
+
+
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
                 <Button
                     color="primary"
