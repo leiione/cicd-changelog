@@ -158,7 +158,7 @@ export const GET_DETAIL_TEXT = gql`
     query workflowOrder($ticket_id: Int!) {
       workflowOrder(ticket_id: $ticket_id) {
         ticket_id
-        ticket_type
+        type
         detail_id
         detail_text
       }

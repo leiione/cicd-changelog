@@ -10,7 +10,7 @@ const WorkOrder = ({ ticket_id, setTicketDetail }) => {
     const dispatch = useDispatch();
     const [initialDetailText, setInitialDetailText] = useState("");
     const [detailText, setDetailText] = useState("");
-    const [ticket_type, setTicketType] = useState("");
+    const [type, setTicketType] = useState("");
     const [detail_id, setDetailID] = useState("");
 
     const { loading } = useQuery(GET_DETAIL_TEXT, {
@@ -22,7 +22,7 @@ const WorkOrder = ({ ticket_id, setTicketDetail }) => {
                 setDetailText(data.workflowOrder.detail_text);
                 setTicketDetail(data.workflowOrder.detail_text);
                 setDetailID(data.workflowOrder.detail_id);
-                setTicketType(data.workflowOrder.ticket_type);
+                setTicketType(data.workflowOrder.type);
             }
         },
     });
@@ -40,7 +40,7 @@ const WorkOrder = ({ ticket_id, setTicketDetail }) => {
                     input_ticket: {
                         ticket_id,
                         detail_id,
-                        type: ticket_type,
+                        type: type,
                         detail_text: detailText,
                     },
                 },
