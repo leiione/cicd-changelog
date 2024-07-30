@@ -21,9 +21,9 @@ function stringToColor(string) {
   return color;
 }
 
-function stringAvatar(name, rest) {
+function stringAvatar(name, rest, charCount) {
   const matches = name.match(/\b(\w)/g);
-  const acronym = matches.join('').substring(0, 2);
+  const acronym = matches.join('').substring(0, charCount);
   return {
     sx: {
       bgcolor: stringToColor(name),
@@ -34,6 +34,6 @@ function stringAvatar(name, rest) {
 }
 
 export default function AvatarText(props) {
-  const {title, ...rest} = props;
-  return <Avatar {...rest} {...stringAvatar(title, rest)} />;
+  const {title, charCount = 2, ...rest} = props;
+  return <Avatar {...rest} {...stringAvatar(title, rest, charCount)} />;
 }

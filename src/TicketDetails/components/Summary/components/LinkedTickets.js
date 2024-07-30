@@ -12,6 +12,7 @@ import DialogAlert from "components/DialogAlert";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 import { preventEvent } from "Common/helper";
+import AvatarText from "Common/AvatarText";
 
 const LinkedTicketContent = (props) => {
   const dispatch = useDispatch()
@@ -87,6 +88,11 @@ const LinkedTicketContent = (props) => {
                               {getPriorityIcon(item.priority)}
                             </Tooltip>
                           </span>
+                          <AvatarText
+                            title={item.assigned_name}
+                            charCount={1}
+                            sx={{ width: 16, height: 16, margin: "3px 10px", background: "#4b89ff", fontSize: "11px" }}
+                          />
                           <Typography variant="subtitle1" className="text-dark">{item.status}</Typography>
                           <IconButton style={{ padding: 0, marginLeft: 15 }} onClick={e => handleRemoveTicket(e, item.id)}>
                             <HighlightOff className="f-18" />
@@ -133,7 +139,7 @@ const LinkedTickets = (props) => {
   const { ticket, handleOpenTicket } = props;
   const [expandCollapse, setExpandCollapse] = useState("");
   const [isLinkedTicketDrawerOpen, setIsLinkedTicketDrawerOpen] = useState(false);
-  
+
 
   const { loading, error, data } = useQuery(GET_LINKED_TICKETS, {
     variables: { ticket_id: ticket.ticket_id },
@@ -159,7 +165,7 @@ const LinkedTickets = (props) => {
     setExpandCollapse(!expandCollapse);
   };
 
-  const handleLinkButtonClick =()=>{
+  const handleLinkButtonClick = () => {
     setIsLinkedTicketDrawerOpen(!isLinkedTicketDrawerOpen);
   }
 
@@ -183,7 +189,7 @@ const LinkedTickets = (props) => {
           className="bg-light"
         />
         <IconButton onClick={handleLinkButtonClick}>
-          <Link className="text-muted f-19" style={{ transform: "rotate(135deg)", }}  />
+          <Link className="text-muted f-19" style={{ transform: "rotate(135deg)", }} />
         </IconButton>
         <Collapse in={expandCollapse} style={{ paddingLeft: "25px", position: "relative" }}>
           <LinkedTicketContent ticket_id={ticket.ticket_id} loading={loading} error={error} linkedTickets={linkedTickets} handleOpenTicket={handleOpenTicket} />
@@ -192,7 +198,7 @@ const LinkedTickets = (props) => {
 
       {isLinkedTicketDrawerOpen &&
         <InnerDrawer header={"Linked Tickets"} open={isLinkedTicketDrawerOpen} onCloseDrawer={() => onCloseLinkedTicketDrawer(false)}>
-           <LinkedTicketsList ticket={ticket} closeDrawer={onCloseLinkedTicketDrawer} ></LinkedTicketsList>
+          <LinkedTicketsList ticket={ticket} closeDrawer={onCloseLinkedTicketDrawer} ></LinkedTicketsList>
         </InnerDrawer>
       }
     </Grid>

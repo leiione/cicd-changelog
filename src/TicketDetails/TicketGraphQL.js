@@ -133,6 +133,7 @@ export const GET_LINKED_TICKETS = gql`
       description
       status
       priority
+      assigned_name
     }
   }
 `;
