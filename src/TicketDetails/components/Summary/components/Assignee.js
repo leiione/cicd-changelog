@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Grid,
   Typography,
@@ -13,6 +13,16 @@ import { preventEvent } from "Common/helper";
 import { useQuery } from "@apollo/client";
 import { GET_ASSIGNEES } from "TicketDetails/TicketGraphQL";
 
+const fetchAssigneeName = (assigneeID, data) => {
+  if (data && data.assignees) {
+    const assignee = data.assignees.find(
+        (assignee) => assignee.appuser_id === assigneeID
+    );
+    return assignee ? assignee.realname : "Undefined";
+  }
+  return assigneeID;
+};
+
 const Assignee = (props) => {
   const { ticket, updateTicket } = props;
   const [anchorEl, setAnchorEl] = useState(null);
@@ -23,34 +33,32 @@ const Assignee = (props) => {
     fetchPolicy: "network-only",
   });
 
+  const fetchAssigneeNameCallback = useCallback(
+      (assigneeID) => fetchAssigneeName(assigneeID, data),
+      [data]
+  );
+
   useEffect(() => {
-    if (ticket && ticket.assignees && Array.isArray(ticket.assignees)) {
+    if (ticket && ticket.assignees && Array.isArray(ticket.assignees) && data && data.assignees) {
       const initialAssignees = ticket.assignees.map((assigneeId) => ({
         appuser_id: assigneeId,
-        realname: fetchAssigneeName(assigneeId),
+        realname: fetchAssigneeNameCallback(assigneeId),
       }));
       setAssignees(initialAssignees);
     }
-  }, [ticket, data]);
+  }, [ticket, data, fetchAssigneeNameCallback]);
 
-  const fetchAssigneeName = (assigneeID) => {
-    if (data && data.assignees) {
-      const assignee = data.assignees.find(
-          (assignee) => assignee.appuser_id === assigneeID
-      );
-      return assignee ? assignee.realname : "Undefined";
-    }
-    return assigneeID;
+  const handlePopoverClose = (event) => {
+    preventEvent(event);
+    setAnchorEl(null);
   };
 
-  const handlePopoverClose = async (event) => {
+  const handleSave = async () => {
     const assigneesIDs = selectedAssignees.map((assignee) => assignee.appuser_id);
-
     await updateTicket({
       ticket_id: ticket.ticket_id,
       assignees: assigneesIDs,
     });
-    preventEvent(event);
     setAnchorEl(null);
   };
 
@@ -125,11 +133,11 @@ const Assignee = (props) => {
                 ticket.assignees.map((assigneeId) => (
                     <Typography variant="subtitle1" className="d-flex align-items-center" key={assigneeId}>
                       <Avatar
-                          {...stringAvatar(fetchAssigneeName(assigneeId))}
+                          {...stringAvatar(fetchAssigneeNameCallback(assigneeId))}
                           sx={{ width: 24, height: 24 }}
                           className="mr-2"
                       />
-                      {fetchAssigneeName(assigneeId)}
+                      {fetchAssigneeNameCallback(assigneeId)}
                     </Typography>
                 ))
             ) : (
@@ -163,7 +171,7 @@ const Assignee = (props) => {
                     <FormControlLabel
                         control={
                           <Checkbox
-                              style={{ display: "none" }}
+                              style={{ display: "none" }} // Hide the checkbox visually
                               checked={selectedAssignees.some(
                                   (a) => a.appuser_id === assignee.appuser_id
                               )}
@@ -175,10 +183,10 @@ const Assignee = (props) => {
                   </MenuItem>
               ))}
               <div className="drawer-footer">
-                <Button color="primary" variant="outlined" onClick={handlePopoverClose}>
+                <Button color="primary" variant="outlined" onClick={handleSave}>
                   Save
                 </Button>
-                <Button color="default" variant="outlined" onClick={() => setAnchorEl(null)}>
+                <Button color="default" variant="outlined" onClick={handlePopoverClose}>
                   Cancel
                 </Button>
               </div>
