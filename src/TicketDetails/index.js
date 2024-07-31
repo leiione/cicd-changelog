@@ -14,8 +14,8 @@ import ErrorPage from "components/ErrorPage";
 // import { faHouse } from '@awesome.me/kit-bf5f144381/icons/classic/solid'
 import { useSelector } from "react-redux";
 import GlobalSnackbar from "Common/GlobalSnackbar";
-
-
+import Messages from "./components/Messages";
+import Attachments from "./components/Attachments";
 
 const TicketDetails = (props) => {
   const handlePrint = (detailText) => {
@@ -39,13 +39,11 @@ const TicketDetails = (props) => {
     hideContentDrawer,
     toggleOffCRMDrawer,
     handleOpenTicket,
-    appuser_id
+    appuser_id,
   } = props;
-  const snackbar = useSelector(state => state.snackbar)
+  const snackbar = useSelector((state) => state.snackbar);
 
-  const { ticket_id } = ticketData
-  const openSignature = true // this should be from ticket type setting
-  const showBoM = true // this should be from ticket type setting
+  const { ticket_id } = ticketData;
 
   const [open1, setopen1] = React.useState(null);
 
@@ -53,14 +51,18 @@ const TicketDetails = (props) => {
     variables: { id: ticket_id },
     fetchPolicy: "network-only",
     skip: !ticket_id,
-  })
+  });
 
+  const ticket = useMemo(
+    () => (!loading && data && data.ticket ? data.ticket : ticketData),
+    [loading, data, ticketData]
+  );
+  if (error) return <ErrorPage error={error} />;
 
-  const ticket = useMemo(() => !loading && data && data.ticket ? data.ticket : ticketData, [loading, data, ticketData]);
-  if (error) return <ErrorPage error={error} />
-
-  const ticketTypes = !loading && data && data.ticketTypes ? data.ticketTypes : [];
-  const ticketStatuses = !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
+  const ticketTypes =
+    !loading && data && data.ticketTypes ? data.ticketTypes : [];
+  const ticketStatuses =
+    !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
 
   const handleIconButton = (event, childDrawer) => {
     preventEvent(event);
@@ -76,7 +78,9 @@ const TicketDetails = (props) => {
       case "Notes and Alerts":
         return "Coming Soon";
       case "Work Order":
-        return <WorkOrder ticket_id={ticket_id} setTicketDetail={setTicketDetail} />;
+        return (
+          <WorkOrder ticket_id={ticket_id} setTicketDetail={setTicketDetail} />
+        );
       default:
         return (
           <div className="drawer-wapper-full p-3 tex-center">
@@ -104,7 +108,6 @@ const TicketDetails = (props) => {
           ticketTypes={ticketTypes}
           ticketStatuses={ticketStatuses}
           lablesVisible={lablesVisible}
-          showSignature={openSignature}
           handleOpenTicket={handleOpenTicket}
         />
 
@@ -113,14 +116,21 @@ const TicketDetails = (props) => {
           customer={ticket}
           lablesVisible={lablesVisible}
         />
-        {showBoM && (
-          <BillsOfMaterial
-            handleIconButton={handleIconButton}
-            customer={ticket}
-            showBoM={showBoM}
-            lablesVisible={lablesVisible}
-          />
-        )}
+        <Messages
+          handleIconButton={handleIconButton}
+          customer={ticket}
+          lablesVisible={lablesVisible}
+        />
+        <Attachments
+          handleIconButton={handleIconButton}
+          customer={ticket}
+          lablesVisible={lablesVisible}
+        />
+        <BillsOfMaterial
+          handleIconButton={handleIconButton}
+          customer={ticket}
+          lablesVisible={lablesVisible}
+        />
         <Activity
           handleIconButton={handleIconButton}
           customer={ticket}
@@ -130,7 +140,9 @@ const TicketDetails = (props) => {
       <ChildDrawers
         open={Boolean(open1)}
         handleDrawerClose1={handleDrawerClose1}
-        title={open1} handlePrint={handlePrint} ticketDetail={ticketDetail}
+        title={open1}
+        handlePrint={handlePrint}
+        ticketDetail={ticketDetail}
       >
         {renderChildComponent()}
       </ChildDrawers>

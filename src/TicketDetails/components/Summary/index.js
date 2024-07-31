@@ -5,7 +5,7 @@ import TicketPriority from "./components/TicketPriority";
 import TicketType from "./components/TicketType";
 import TicketStatus from "./components/TicketStatus";
 import { Grid, IconButton, Skeleton, Typography } from "@mui/material";
-import { ChevronLeft } from "@mui/icons-material";
+import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { preventEvent } from "Common/helper";
 import Followers from "./components/Followers";
 import Assignee from "./components/Assignee";
@@ -14,14 +14,24 @@ import Description from "./components/Description";
 import Schedule from "./components/Schedule";
 import ServiceContact from "./components/ServiceContact";
 import LinkedTickets from "./components/LinkedTickets";
-import { GET_TICKET, UPDATE_TICKET_MUTATION } from "TicketDetails/TicketGraphQL";
+import {
+  GET_TICKET,
+  UPDATE_TICKET_MUTATION,
+} from "TicketDetails/TicketGraphQL";
 import { useMutation } from "@apollo/client";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 const Summary = (props) => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-  const { loading, customer, showSignature, ticketTypes, ticketStatuses, handleOpenTicket } = props;
+  const {
+    loading,
+    customer,
+    showSignature,
+    ticketTypes,
+    ticketStatuses,
+    handleOpenTicket,
+  } = props;
   const [showFilters, setShowFilters] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
   const handleFilterVisibility = (event) => {
@@ -31,23 +41,29 @@ const Summary = (props) => {
 
   const [updateTicket] = useMutation(UPDATE_TICKET_MUTATION);
 
-
   // 3. Function to execute the mutation
   const handleUpdate = async (input_ticket) => {
-    setSubmitting(true)
+    setSubmitting(true);
     try {
       await updateTicket({
         variables: {
           input_ticket: input_ticket,
         },
-        refetchQueries: [{ query: GET_TICKET, variables: { id: customer.ticket_id } }]
+        refetchQueries: [
+          { query: GET_TICKET, variables: { id: customer.ticket_id } },
+        ],
       });
-      dispatch(showSnackbar({ message: "Ticket updated successfully", severity: "success" }))
-      setSubmitting(false)
+      dispatch(
+        showSnackbar({
+          message: "Ticket updated successfully",
+          severity: "success",
+        })
+      );
+      setSubmitting(false);
     } catch (error) {
-      const msg = error.message.replace("GraphQL error: ", "")
-      dispatch(showSnackbar({ message: msg, severity: "error" }))
-      setSubmitting(false)
+      const msg = error.message.replace("GraphQL error: ", "");
+      dispatch(showSnackbar({ message: msg, severity: "error" }));
+      setSubmitting(false);
     }
   };
 
@@ -56,26 +72,59 @@ const Summary = (props) => {
       label="Summary"
       className="py-0"
       iconButtons={
-        loading ?
-          <Skeleton animation="wave" style={{ height: 25, backgroundColor: "##dfdede", width: "150px" }} />
-          : <>
+        loading ? (
+          <Skeleton
+            animation="wave"
+            style={{ height: 25, backgroundColor: "##dfdede", width: "150px" }}
+          />
+        ) : (
+          <>
             <TicketPriority customer={customer} handleUpdate={handleUpdate} />
-            <TicketType customer={customer} ticketTypes={ticketTypes} handleUpdate={handleUpdate} />
-            <TicketStatus customer={customer} ticketStatuses={ticketStatuses} handleUpdate={handleUpdate} />
+            <TicketType
+              customer={customer}
+              ticketTypes={ticketTypes}
+              handleUpdate={handleUpdate}
+            />
+            <TicketStatus
+              customer={customer}
+              ticketStatuses={ticketStatuses}
+              handleUpdate={handleUpdate}
+            />
           </>
+        )
       }
       menuOption={<HeaderMenuOptions />}
     >
-      {loading ?
-        <Skeleton animation="wave" style={{ height: 200, backgroundColor: "##dfdede", width: "80%", marginTop: "-20px" }} />
-        : <Grid container spacing={1}>
+      {loading ? (
+        <Skeleton
+          animation="wave"
+          style={{
+            height: 200,
+            backgroundColor: "##dfdede",
+            width: "80%",
+            marginTop: "-20px",
+          }}
+        />
+      ) : (
+        <Grid container spacing={1}>
           <Grid item xs className="h-100">
             <div className="py-3 pr-5">
               <Description ticket={customer} updateTicket={handleUpdate} />
               <div className="border-top mt-3 pt-3">
-                <Schedule isSubmitting={isSubmitting} ticket={customer} updateTicket={handleUpdate} />
-                <ServiceContact ticket={customer} updateTicket={handleUpdate} isSubmitting={isSubmitting} />
-                <LinkedTickets ticket={customer} handleOpenTicket={handleOpenTicket} />
+                <Schedule
+                  isSubmitting={isSubmitting}
+                  ticket={customer}
+                  updateTicket={handleUpdate}
+                />
+                <ServiceContact
+                  ticket={customer}
+                  updateTicket={handleUpdate}
+                  isSubmitting={isSubmitting}
+                />
+                <LinkedTickets
+                  ticket={customer}
+                  handleOpenTicket={handleOpenTicket}
+                />
               </div>
             </div>
           </Grid>
@@ -86,7 +135,11 @@ const Summary = (props) => {
               className="border rounded-0 position-absolute"
               style={{ left: showFilters ? -4 : -21, top: 15 }}
             >
-              <ChevronLeft className="f-18" />
+              {showFilters ? (
+                <ChevronLeft className="f-18" />
+              ) : (
+                <ChevronRight className="f-18" />
+              )}
             </IconButton>
             {!showFilters && (
               <div className="border-left pl-3 py-3 h-100">
@@ -98,14 +151,14 @@ const Summary = (props) => {
                   {customer.created_by_time}
                 </Typography>
                 <Typography variant="caption">
-                  Last updated by: <strong>{customer.last_updated_by}</strong> on{" "}
-                  {customer.last_updated_by_time}
+                  Last updated by: <strong>{customer.last_updated_by}</strong>{" "}
+                  on {customer.last_updated_by_time}
                 </Typography>
               </div>
             )}
           </Grid>
         </Grid>
-      }
+      )}
     </AccordionCard>
   );
 };

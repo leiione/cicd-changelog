@@ -63,7 +63,7 @@ const Followers = (props) => {
 
   return (
     <>
-      <Grid container spacing={1} alignItems="center">
+      <Grid container spacing={1}>
         <Grid item xs="auto">
           <Typography variant="subtitle1">Followers: </Typography>
         </Grid>

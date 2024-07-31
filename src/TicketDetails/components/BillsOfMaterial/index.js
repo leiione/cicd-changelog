@@ -5,22 +5,21 @@ import HeaderMenuOptions from "./components/HeaderMenuOptions";
 import { IconButton } from "@mui/material";
 
 const BillsOfMaterial = (props) => {
-
   return (
     <AccordionCard
       label="Bills Of Material"
       iconButtons={
         <>
-          <IconButton className="ml-5">
+          <IconButton>
             <OpenInNew />
           </IconButton>
         </>
       }
       menuOption={
         <>
-            <IconButton >
-              <Visibility />
-            </IconButton>
+          <IconButton>
+            <Visibility />
+          </IconButton>
           <HeaderMenuOptions />
         </>
       }

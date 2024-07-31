@@ -77,7 +77,7 @@ const Assignee = (props) => {
   }
   return (
     <>
-      <Grid container spacing={1} alignItems="center">
+      <Grid container spacing={1}>
         <Grid item xs="auto">
           <Typography variant="subtitle1">Assignee: </Typography>
         </Grid>
