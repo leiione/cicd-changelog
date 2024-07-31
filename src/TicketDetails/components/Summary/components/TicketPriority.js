@@ -1,10 +1,5 @@
 import React from "react";
 import { IconButton, MenuItem, Popover } from "@mui/material";
-import {
-  ArrowCircleDownOutlined,
-  ArrowCircleUpOutlined,
-  RemoveCircleOutlineOutlined,
-} from "@mui/icons-material";
 import { preventEvent } from "../../../../Common/helper";
 import { getPriorityIcon } from "utils/getPriorityIcon";
 
@@ -58,21 +53,21 @@ const TicketPriority = (props) => {
           onClick={(event) => handlePopoverClose(event, "Low")}
           color="default"
         >
-          <ArrowCircleDownOutlined className="mr-2 text-secondary" /> Priority:
-          Low
+          {getPriorityIcon("Low")}
+          Priority: Low
         </MenuItem>
         <MenuItem
           onClick={(event) => handlePopoverClose(event, "Normal")}
           color="default"
         >
-          <RemoveCircleOutlineOutlined className="mr-2 text-warning" />
+          {getPriorityIcon("Normal")}
           Priority: Normal
         </MenuItem>
         <MenuItem
           onClick={(event) => handlePopoverClose(event, "High")}
           color="default"
         >
-          <ArrowCircleUpOutlined className="mr-2 text-success" /> Priority: High
+          {getPriorityIcon("High")} Priority: High
         </MenuItem>
       </Popover>
     </>
