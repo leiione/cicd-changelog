@@ -130,7 +130,9 @@ export const GET_LINKED_TICKETS = gql`
       type_id
       ticket_id
       option_label
+      type
       description
+      summary: description
       status
       priority
       assigned_name
