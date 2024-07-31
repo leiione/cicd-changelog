@@ -15,6 +15,7 @@ export const GET_TICKET = gql`
       ticket_type_id
       assigned_name
       followers
+      assignees
       due_by_date
       earliest_arrival_time
       latest_arrival_time
