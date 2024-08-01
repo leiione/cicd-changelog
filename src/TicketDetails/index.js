@@ -16,18 +16,31 @@ import { useSelector } from "react-redux";
 import GlobalSnackbar from "Common/GlobalSnackbar";
 import Messages from "./components/Messages";
 import Attachments from "./components/Attachments";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
 const TicketDetails = (props) => {
-  const handlePrint = (detailText) => {
-    const printWindow = window.open("", "_blank");
-    printWindow.document.write(`
-            <html>
-            <head><title>Print Work Order</title></head>
-            <body>${detailText}</body>
-            </html>
-        `);
-    printWindow.document.close();
-    printWindow.print();
+  const handlePrint = async (detailText) => {
+    // Create a temporary DOM element to hold the HTML content
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = detailText;
+    document.body.appendChild(tempDiv);
+
+    // Use html2canvas to convert the content to a canvas
+    const canvas = await html2canvas(tempDiv);
+    const imgData = canvas.toDataURL("image/png");
+
+    // Remove the temporary element from the DOM
+    document.body.removeChild(tempDiv);
+
+    // Create a PDF and add the image to it
+    const doc = new jsPDF();
+    doc.addImage(imgData, "PNG", 10, 10);
+
+    // Create a Blob from the PDF and open it in a new tab
+    const pdfBlob = doc.output("blob");
+    const url = URL.createObjectURL(pdfBlob);
+    window.open(url, "_blank");
   };
 
   const [ticketDetail, setTicketDetail] = React.useState(null);
