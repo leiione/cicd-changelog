@@ -8,6 +8,7 @@ import {
   Checkbox,
   FormControlLabel,
   Button,
+  Tooltip,
 } from "@mui/material";
 import { useQuery } from "@apollo/client";
 import { GET_FOLLOWERS } from "TicketDetails/TicketGraphQL";
@@ -156,34 +157,45 @@ const Followers = (props) => {
                   horizontal: "left",
                 }}
             >
-              {data && data.followers && data.followers.map((follower) => (
-                  <MenuItem
-                      key={follower.appuser_id}
-                      onClick={() => handleSelectFollower(follower)}
-                      style={{
-                        backgroundColor: selectedFollowers.some(
-                            (a) => a.appuser_id === follower.appuser_id
-                        )
-                            ? "#f0f0f0"
-                            : "transparent",
-                        pointerEvents: !follower.email ? "none" : "auto", // Disable interaction if follower has an email
-                      }}
-                  >
-                    <FormControlLabel
-                        control={
-                          <Checkbox
-                              style={{ display: "none" }} // Hide the checkbox visually
-                              checked={selectedFollowers.some(
-                                  (a) => a.appuser_id === follower.appuser_id
-                              )}
-                              name={follower.realname}
-                              disabled={!follower.email}
-                          />
-                        }
-                        label={`${follower.realname}`}
-                    />
-                  </MenuItem>
-              ))}
+              {data && data.followers && data.followers.map((follower) => {
+                const isDisabled = !follower.email;
+                return (
+                    <Tooltip
+                        key={follower.appuser_id}
+                        title={isDisabled ? "This appuser does not have an associated email account." : follower.email}
+                        placement="top"
+                    >
+                  <span>
+                    <MenuItem
+                        onClick={() => handleSelectFollower(follower)}
+                        style={{
+                          backgroundColor: selectedFollowers.some(
+                              (a) => a.appuser_id === follower.appuser_id
+                          )
+                              ? "#f0f0f0"
+                              : "transparent",
+                          pointerEvents: isDisabled ? "none" : "auto", // Disable interaction if follower has no email
+                        }}
+                        disabled={isDisabled}
+                    >
+                      <FormControlLabel
+                          control={
+                            <Checkbox
+                                style={{ display: "none" }} // Hide the checkbox visually
+                                checked={selectedFollowers.some(
+                                    (a) => a.appuser_id === follower.appuser_id
+                                )}
+                                name={follower.realname}
+                                disabled={isDisabled}
+                            />
+                          }
+                          label={`${follower.realname}`}
+                      />
+                    </MenuItem>
+                  </span>
+                    </Tooltip>
+                );
+              })}
               <div className="drawer-footer">
                 <Button color="primary" variant="outlined" onClick={handleSave}>
                   Save
