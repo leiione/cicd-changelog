@@ -166,6 +166,7 @@ const Followers = (props) => {
                         )
                             ? "#f0f0f0"
                             : "transparent",
+                        pointerEvents: !follower.email ? "none" : "auto", // Disable interaction if follower has an email
                       }}
                   >
                     <FormControlLabel
