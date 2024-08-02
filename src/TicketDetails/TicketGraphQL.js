@@ -137,6 +137,7 @@ export const GET_LINKED_TICKETS = gql`
       status
       priority
       assigned_name
+      technician
     }
   }
 `;

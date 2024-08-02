@@ -88,11 +88,13 @@ const LinkedTicketContent = (props) => {
                               {getPriorityIcon(item.priority)}
                             </Tooltip>
                           </span>
-                          <AvatarText
-                            title={item.assigned_name}
-                            charCount={1}
-                            sx={{ width: 16, height: 16, margin: "3px 10px", background: "#4b89ff", fontSize: "11px" }}
-                          />
+                          {item.technician &&
+                            <AvatarText
+                              title={item.technician}
+                              charCount={1}
+                              sx={{ width: 16, height: 16, margin: "3px 10px", background: "#4b89ff", fontSize: "11px" }}
+                            />
+                          }
                           <Typography variant="subtitle1" className="text-dark">{item.status}</Typography>
                           <IconButton style={{ padding: 0, marginLeft: 15 }} onClick={e => handleRemoveTicket(e, item.id)}>
                             <HighlightOff className="f-18" />
