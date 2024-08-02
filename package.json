@@ -1,5 +1,5 @@
 {
-  "name": "subscriber-microfrontend",
+  "name": "tickets-microfrontend",
   "version": "0.1.0",
   "private": true,
   "config-overrides-path": "node_modules/react-app-rewired/config-overrides.js",
