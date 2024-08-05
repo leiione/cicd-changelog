@@ -54,10 +54,16 @@ const Assignee = (props) => {
   };
 
   const handleSave = async () => {
-    const assigneesIDs = selectedAssignees.map((assignee) => assignee.appuser_id);
+    // const assigneesIDs = selectedAssignees.map((assignee) => assignee.appuser_id);
+
+    const assignees = selectedAssignees.map((assignee) => ({
+      appuser_id: assignee.appuser_id,
+      realname: assignee.realname,
+    }));
+
     await updateTicket({
       ticket_id: ticket.ticket_id,
-      assignees: assigneesIDs,
+      assignees: assignees,
     });
     setAnchorEl(null);
   };
