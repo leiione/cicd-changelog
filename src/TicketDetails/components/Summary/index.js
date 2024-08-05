@@ -21,17 +21,19 @@ import {
 import { useMutation } from "@apollo/client";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
+
 const Summary = (props) => {
   const dispatch = useDispatch();
-
   const {
     loading,
     customer,
-    showSignature,
     ticketTypes,
     ticketStatuses,
     handleOpenTicket,
   } = props;
+
+  const showSignature = true; // this should come from ticket type settings
+
   const [showFilters, setShowFilters] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
   const handleFilterVisibility = (event) => {
@@ -145,7 +147,7 @@ const Summary = (props) => {
               <div className="border-left pl-3 py-3 h-100">
                 <Assignee ticket={customer} updateTicket={handleUpdate} />
                 <Followers ticket={customer} updateTicket={handleUpdate} />
-                {showSignature && <Signature showSignature={showSignature} />}
+                {showSignature && <Signature ticket={customer} />}
                 <Typography variant="caption" className="d-block mt-2">
                   Created by: <strong>{customer.created_by}</strong> on{" "}
                   {customer.created_by_time}

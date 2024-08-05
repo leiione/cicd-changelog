@@ -10,6 +10,7 @@ export const GET_TICKET = gql`
       created_by_time
       last_updated_by
       last_updated_by_time
+      signature_url
       status
       type
       ticket_type_id
@@ -235,3 +236,15 @@ export const ADD_LINKED_TICKET_MUTATION = gql`
     }
   }
 `;
+
+
+export const ADD_TICKET_SIGNATURE = gql`
+  mutation addTicketSignature($ticket_id: Int!, $signature: String!, $signature_date: String) {
+    addTicketSignature(ticket_id: $ticket_id, signature: $signature, signature_date: $signature_date) {
+      ticket_id
+      status
+      signature_url
+      signature_date
+    }
+  }
+` 
