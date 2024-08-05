@@ -14,27 +14,58 @@ import { useSelector } from "react-redux";
 import GlobalSnackbar from "Common/GlobalSnackbar";
 import Messages from "./components/Messages";
 import Attachments from "./components/Attachments";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 import DialogAlert from "components/DialogAlert"; // Import DialogAlert
 
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+import htmlToPdfmake from "html-to-pdfmake";
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
 const TicketDetails = (props) => {
-  const handlePrint = async (detailText) => {
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = detailText;
-    document.body.appendChild(tempDiv);
+  const removeDuplicateIds = (htmlContent) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+    const elementsWithId = doc.querySelectorAll('[id]');
 
-    const canvas = await html2canvas(tempDiv);
-    const imgData = canvas.toDataURL("image/png");
+    elementsWithId.forEach((element, index) => {
+      // Append a unique suffix to each duplicate id
+      element.id += `-${index}`;
+    });
 
-    document.body.removeChild(tempDiv);
+    return doc.body.innerHTML;
+  };
 
-    const doc = new jsPDF();
-    doc.addImage(imgData, "PNG", 10, 10);
+  const handlePrint = (detailText) => {
+    try {
+      // Remove duplicate IDs from the HTML content
+      const cleanedHtml = removeDuplicateIds(detailText);
 
-    const pdfBlob = doc.output("blob");
-    const url = URL.createObjectURL(pdfBlob);
-    window.open(url, "_blank");
+      // Convert cleaned HTML to pdfmake format
+      const pdfContent = htmlToPdfmake(cleanedHtml, {
+        window: window, // Required for html-to-pdfmake to work correctly
+      });
+
+      // Create a document definition for pdfmake
+      const docDefinition = {
+        content: pdfContent,
+        styles: {
+          header: {
+            fontSize: 18,
+            bold: true,
+            margin: [0, 0, 0, 10]
+          },
+          htmlContent: {
+            fontSize: 12,
+            margin: [0, 0, 0, 10]
+          }
+        }
+      };
+
+      // Open the PDF in a new window
+      pdfMake.createPdf(docDefinition).open();
+    } catch (error) {
+      console.error("Failed to create and open PDF:", error);
+    }
   };
 
   const [ticketDetail, setTicketDetail] = useState(null);
