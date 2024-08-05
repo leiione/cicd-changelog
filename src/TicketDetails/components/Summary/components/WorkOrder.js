@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import { Editor } from "@tinymce/tinymce-react";
 import {
@@ -9,7 +9,7 @@ import { Button } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 
-const WorkOrder = ({ ticket_id, setTicketDetail }) => {
+const WorkOrder = ({ ticket_id, setTicketDetail, setEditorContentChanged, setHandleSave }) => {
   const dispatch = useDispatch();
   const editorRef = useRef(null);
   const [initialDetailText, setInitialDetailText] = useState("");
@@ -44,10 +44,12 @@ const WorkOrder = ({ ticket_id, setTicketDetail }) => {
   const handleEditorChange = (content) => {
     const normalizedContent = normalizeContent(content);
     setDetailText(normalizedContent);
-    setIsChanged(normalizedContent !== initialDetailText);
+    const changed = normalizedContent !== initialDetailText;
+    setIsChanged(changed);
+    setEditorContentChanged(changed); // Update parent state
   };
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     try {
       const { data } = await updateDetailText({
         variables: {
@@ -61,23 +63,36 @@ const WorkOrder = ({ ticket_id, setTicketDetail }) => {
       });
       if (data.updateTicket.ticket_id) {
         dispatch(
-          showSnackbar({
-            message: "The work order saved successfully",
-            severity: "success",
-          })
+            showSnackbar({
+              message: "The work order saved successfully",
+              severity: "success",
+            })
         );
         setInitialDetailText(detailText);
         setIsChanged(false);
+        setEditorContentChanged(false); // Update parent state
       } else {
-        dispatch.showSnackbar({
-          message: "Failed to save work order.",
-          severity: "error",
-        });
+        dispatch(
+            showSnackbar({
+              message: "Failed to save work order.",
+              severity: "error",
+            })
+        );
       }
     } catch (error) {
       console.error("There was an error updating the detail text!", error);
+      dispatch(
+          showSnackbar({
+            message: "Failed to save work order.",
+            severity: "error",
+          })
+      );
     }
-  };
+  }, [detailText, detail_id, type, ticket_id, updateDetailText, dispatch, setEditorContentChanged]);
+
+  useEffect(() => {
+    setHandleSave(() => handleSave);
+  }, [handleSave, setHandleSave]);
 
   const handleCancel = () => {
     setDetailText(initialDetailText);
@@ -86,6 +101,7 @@ const WorkOrder = ({ ticket_id, setTicketDetail }) => {
     }
     setTimeout(() => {
       setIsChanged(false);
+      setEditorContentChanged(false); // Update parent state
     }, 0); // Ensuring state update after content set
   };
 
@@ -137,51 +153,51 @@ const WorkOrder = ({ ticket_id, setTicketDetail }) => {
   }
 
   return (
-    <div>
-      <div className="drawer-wrapper p-3">
-        <Editor
-          apiKey="rv98fsqigjw4pj7zsbawye8jrdpgxrrhzznj01jou3tgj7ti" // replace with your TinyMCE API key
-          value={detailText}
-          init={{
-            height: 500,
-            menubar: false,
-            plugins: [
-              "advlist autolink lists link image charmap print preview anchor",
-              "searchreplace visualblocks code fullscreen",
-              "insertdatetime media table paste code help wordcount",
-              "image",
-              "link",
-              "media",
-            ],
-            toolbar:
-              "undo redo | formatselect | bold italic backcolor | image | link | media | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help",
-            image_title: true,
-            automatic_uploads: true,
-            file_picker_types: "file image media",
-            file_picker_callback: handleFilePicker,
-            setup: handleEditorSetup,
-          }}
-        />
+      <div>
+        <div className="drawer-wrapper p-3">
+          <Editor
+              apiKey="rv98fsqigjw4pj7zsbawye8jrdpgxrrhzznj01jou3tgj7ti" // replace with your TinyMCE API key
+              value={detailText}
+              init={{
+                height: 500,
+                menubar: false,
+                plugins: [
+                  "advlist autolink lists link image charmap print preview anchor",
+                  "searchreplace visualblocks code fullscreen",
+                  "insertdatetime media table paste code help wordcount",
+                  "image",
+                  "link",
+                  "media",
+                ],
+                toolbar:
+                    "undo redo | formatselect | bold italic backcolor | image | link | media | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help",
+                image_title: true,
+                automatic_uploads: true,
+                file_picker_types: "file image media",
+                file_picker_callback: handleFilePicker,
+                setup: handleEditorSetup,
+              }}
+          />
+        </div>
+        <div className="drawer-footer">
+          <Button
+              color="primary"
+              variant="outlined"
+              onClick={handleSave}
+              disabled={!isLoaded || !isChanged}
+          >
+            Save
+          </Button>
+          <Button
+              variant="outlined"
+              color="default"
+              onClick={handleCancel}
+              disabled={!isLoaded}
+          >
+            Cancel
+          </Button>
+        </div>
       </div>
-      <div className="drawer-footer">
-        <Button
-          color="primary"
-          variant="outlined"
-          onClick={handleSave}
-          disabled={!isLoaded || !isChanged}
-        >
-          Save
-        </Button>
-        <Button
-          variant="outlined"
-          color="default"
-          onClick={handleCancel}
-          disabled={!isLoaded || !isChanged}
-        >
-          Cancel
-        </Button>
-      </div>
-    </div>
   );
 };
 

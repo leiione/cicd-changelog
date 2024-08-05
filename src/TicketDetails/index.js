@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { preventEvent } from "../Common/helper";
 import Header from "./components/Header";
 import ChildDrawers from "../Common/ChildDrawers";
@@ -10,40 +10,37 @@ import BillsOfMaterial from "./components/BillsOfMaterial";
 import { GET_TICKET } from "./TicketGraphQL";
 import { useQuery } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-// import { faHouse } from '@awesome.me/kit-bf5f144381/icons/classic/solid'
 import { useSelector } from "react-redux";
 import GlobalSnackbar from "Common/GlobalSnackbar";
 import Messages from "./components/Messages";
 import Attachments from "./components/Attachments";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import DialogAlert from "components/DialogAlert"; // Import DialogAlert
 
 const TicketDetails = (props) => {
   const handlePrint = async (detailText) => {
-    // Create a temporary DOM element to hold the HTML content
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = detailText;
     document.body.appendChild(tempDiv);
 
-    // Use html2canvas to convert the content to a canvas
     const canvas = await html2canvas(tempDiv);
     const imgData = canvas.toDataURL("image/png");
 
-    // Remove the temporary element from the DOM
     document.body.removeChild(tempDiv);
 
-    // Create a PDF and add the image to it
     const doc = new jsPDF();
     doc.addImage(imgData, "PNG", 10, 10);
 
-    // Create a Blob from the PDF and open it in a new tab
     const pdfBlob = doc.output("blob");
     const url = URL.createObjectURL(pdfBlob);
     window.open(url, "_blank");
   };
 
-  const [ticketDetail, setTicketDetail] = React.useState(null);
+  const [ticketDetail, setTicketDetail] = useState(null);
+  const [editorContentChanged, setEditorContentChanged] = useState(false); // State to track editor changes
+  const [dialogOpen, setDialogOpen] = useState(false); // State for DialogAlert
+  const [handleSave, setHandleSave] = useState(null); // State to hold handleSave function
 
   const {
     lablesVisible,
@@ -58,7 +55,7 @@ const TicketDetails = (props) => {
 
   const { ticket_id } = ticketData;
 
-  const [open1, setopen1] = React.useState(null);
+  const [open1, setopen1] = useState(null);
 
   const { loading, error, data } = useQuery(GET_TICKET, {
     variables: { id: ticket_id },
@@ -67,15 +64,15 @@ const TicketDetails = (props) => {
   });
 
   const ticket = useMemo(
-    () => (!loading && data && data.ticket ? data.ticket : ticketData),
-    [loading, data, ticketData]
+      () => (!loading && data && data.ticket ? data.ticket : ticketData),
+      [loading, data, ticketData]
   );
   if (error) return <ErrorPage error={error} />;
 
   const ticketTypes =
-    !loading && data && data.ticketTypes ? data.ticketTypes : [];
+      !loading && data && data.ticketTypes ? data.ticketTypes : [];
   const ticketStatuses =
-    !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
+      !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
 
   const handleIconButton = (event, childDrawer) => {
     preventEvent(event);
@@ -83,7 +80,28 @@ const TicketDetails = (props) => {
   };
 
   const handleDrawerClose1 = () => {
-    setopen1(null);
+    if (editorContentChanged) {
+      setDialogOpen(true); // Open the dialog if there are unsaved changes
+    } else {
+      setopen1(null);
+    }
+  };
+
+  const handleDialogClose = (action) => {
+    if (action === "save") {
+      if (handleSave) {
+        handleSave().then(() => {
+          setopen1(null);
+        });
+      }
+    } else if (action === "discard") {
+      // Reset states to ensure subsequent changes are detected
+      setEditorContentChanged(false);
+      setTimeout(() => {
+        setopen1(null); // Discard changes and close drawer
+      }, 100); // Small delay to ensure state is reset
+    }
+    setDialogOpen(false);
   };
 
   const renderChildComponent = () => {
@@ -92,74 +110,105 @@ const TicketDetails = (props) => {
         return "Coming Soon";
       case "Work Order":
         return (
-          <WorkOrder ticket_id={ticket_id} setTicketDetail={setTicketDetail} />
+            <WorkOrder
+                ticket_id={ticket_id}
+                setTicketDetail={setTicketDetail}
+                setEditorContentChanged={setEditorContentChanged} // Pass the state setter to the WorkOrder component
+                setHandleSave={setHandleSave} // Pass the setHandleSave function to the WorkOrder component
+            />
         );
       default:
         return (
-          <div className="drawer-wapper-full p-3 tex-center">
-            {open1} Coming Soon
-          </div>
+            <div className="drawer-wapper-full p-3 tex-center">
+              {open1} Coming Soon
+            </div>
         );
     }
   };
-  return (
-    <div>
-      {snackbar && snackbar.open && <GlobalSnackbar {...snackbar} />}
-      <Header
-        ticket={ticket}
-        category={category}
-        setopen1={setopen1}
-        hideContentDrawer={hideContentDrawer}
-        appuser_id={appuser_id}
-        toggleOffCRMDrawer={toggleOffCRMDrawer}
-      />
-      <div className="drawer-wrapper-full p-3">
-        <Summary
-          loading={loading}
-          handleIconButton={handleIconButton}
-          customer={ticket}
-          ticketTypes={ticketTypes}
-          ticketStatuses={ticketStatuses}
-          lablesVisible={lablesVisible}
-          handleOpenTicket={handleOpenTicket}
-        />
 
-        <Tasks
-          handleIconButton={handleIconButton}
-          customer={ticket}
-          lablesVisible={lablesVisible}
+  return (
+      <div>
+        {snackbar && snackbar.open && <GlobalSnackbar {...snackbar} />}
+        <Header
+            ticket={ticket}
+            category={category}
+            setopen1={setopen1}
+            hideContentDrawer={hideContentDrawer}
+            appuser_id={appuser_id}
+            toggleOffCRMDrawer={toggleOffCRMDrawer}
         />
-        <Messages
-          handleIconButton={handleIconButton}
-          customer={ticket}
-          lablesVisible={lablesVisible}
-        />
-        <Attachments
-          handleIconButton={handleIconButton}
-          customer={ticket}
-          lablesVisible={lablesVisible}
-        />
-        <BillsOfMaterial
-          handleIconButton={handleIconButton}
-          customer={ticket}
-          lablesVisible={lablesVisible}
-        />
-        <Activity
-          handleIconButton={handleIconButton}
-          customer={ticket}
-          lablesVisible={lablesVisible}
-        />
+        <div className="drawer-wrapper-full p-3">
+          <Summary
+              loading={loading}
+              handleIconButton={handleIconButton}
+              customer={ticket}
+              ticketTypes={ticketTypes}
+              ticketStatuses={ticketStatuses}
+              lablesVisible={lablesVisible}
+              handleOpenTicket={handleOpenTicket}
+          />
+
+          <Tasks
+              handleIconButton={handleIconButton}
+              customer={ticket}
+              lablesVisible={lablesVisible}
+          />
+          <Messages
+              handleIconButton={handleIconButton}
+              customer={ticket}
+              lablesVisible={lablesVisible}
+          />
+          <Attachments
+              handleIconButton={handleIconButton}
+              customer={ticket}
+              lablesVisible={lablesVisible}
+          />
+          <BillsOfMaterial
+              handleIconButton={handleIconButton}
+              customer={ticket}
+              lablesVisible={lablesVisible}
+          />
+          <Activity
+              handleIconButton={handleIconButton}
+              customer={ticket}
+              lablesVisible={lablesVisible}
+          />
+        </div>
+        <ChildDrawers
+            open={Boolean(open1)}
+            handleDrawerClose1={handleDrawerClose1}
+            title={open1}
+            handlePrint={handlePrint}
+            ticketDetail={ticketDetail}
+            editorContentChanged={editorContentChanged} // Pass the state to ChildDrawers
+        >
+          {renderChildComponent()}
+        </ChildDrawers>
+        {dialogOpen && (
+            <DialogAlert
+                open={dialogOpen}
+                message={
+                  <span>
+              You have unsaved changes. Would you like to save or discard them?
+            </span>
+                }
+                buttonsList={[
+                  {
+                    label: "Save",
+                    size: "medium",
+                    color: "primary",
+                    onClick: () => handleDialogClose("save"),
+                  },
+                  {
+                    label: "Discard",
+                    size: "medium",
+                    color: "default",
+                    onClick: () => handleDialogClose("discard"),
+                  },
+                ]}
+            />
+        )}
       </div>
-      <ChildDrawers
-        open={Boolean(open1)}
-        handleDrawerClose1={handleDrawerClose1}
-        title={open1}
-        handlePrint={handlePrint}
-        ticketDetail={ticketDetail}
-      >
-        {renderChildComponent()}
-      </ChildDrawers>
-    </div>
   );
 };
 
