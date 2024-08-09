@@ -189,18 +189,22 @@ const LinkedTickets = (props) => {
           style={{ textAlign: "center", height: "22px" }}
           className="bg-light"
         />
-        <IconButton onClick={handleLinkButtonClick}>
-          <Link className="text-muted f-19" style={{ transform: "rotate(135deg)", }} />
-        </IconButton>
+        {expandCollapse &&
+            <IconButton onClick={handleLinkButtonClick}>
+            <Link className="text-muted f-19" style={{ transform: "rotate(135deg)", }} />
+            </IconButton> 
+        }
+       
         <Collapse in={expandCollapse} style={{ paddingLeft: "25px", position: "relative" }}>
+        {isLinkedTicketDrawerOpen &&
+          <LinkedTicketNew ticket={ticket} onCloseLinkedTicket={onCloseLinkedTicketDrawer} ></LinkedTicketNew> 
+       
+      }
           <LinkedTicketContent ticket_id={ticket.ticket_id} loading={loading} error={error} linkedTickets={linkedTickets} handleOpenTicket={handleOpenTicket} />
         </Collapse>
       </Grid>
 
-      {isLinkedTicketDrawerOpen &&
-          <LinkedTicketNew ticket={ticket} onCloseLinkedTicket={onCloseLinkedTicketDrawer} ></LinkedTicketNew> 
-       
-      }
+     
     </Grid>
   );
 };

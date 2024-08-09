@@ -19,6 +19,7 @@ function LinkedTicketNew(props) {
   const [tickeLinkType, setTicketLinkType] = useState({});
   const [userSelectedRows, setUserSelectedRows] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const [inputValue, setInputValue] = useState("");
 
   const [addLinkedTicket] = useMutation(ADD_LINKED_TICKET_MUTATION);
 
@@ -42,7 +43,8 @@ function LinkedTicketNew(props) {
         })
       );
       setSubmitting(false);
-      onCloseLinkedTicket()
+      setUserSelectedRows([])
+      setInputValue("")
     } catch (error) {
       const msg = error.message.replace("GraphQL error: ", "");
       dispatch(showSnackbar({ message: msg, severity: "error" }));
@@ -76,6 +78,8 @@ function LinkedTicketNew(props) {
               ticket={ticket}
               setUserSelectedRows={setUserSelectedRows}
               userSelectedRows={userSelectedRows}
+              inputValue={inputValue}
+              setInputValue={setInputValue}
             ></LinkedTicketField>
 
             <div
@@ -93,7 +97,7 @@ function LinkedTicketNew(props) {
                 disabled={userSelectedRows.length === 0}
                 isSubmitting={submitting}
               >
-                Save
+                Link
               </ProgressButton>
 
               <Button

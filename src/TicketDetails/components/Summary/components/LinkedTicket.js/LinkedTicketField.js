@@ -16,11 +16,10 @@ import AvatarText from "Common/AvatarText";
 // import AvatarText from "Common/AvatarText";
 
 const LinkedTicketField = (props) => {
-  const { ticket, setUserSelectedRows } = props;
+  const { ticket, setUserSelectedRows,inputValue,setInputValue,userSelectedRows } = props;
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [inputValue, setInputValue] = useState("");
 
   const debouncedSetInputValue = debounce((newInputValue) => {
     setInputValue(newInputValue);
@@ -82,6 +81,7 @@ const LinkedTicketField = (props) => {
     <div style={{ marginLeft: "3%" }}>
       <Autocomplete
         multiple
+        value={userSelectedRows}
         open={open}
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
