@@ -208,7 +208,8 @@ export const GET_TICKETS_QUERY = gql`
         description
         status
         priority
-        type
+        type,
+        technician
       }
       selected_ticket_id
     }

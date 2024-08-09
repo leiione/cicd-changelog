@@ -1,7 +1,5 @@
 import React, { useMemo, useState } from "react";
 import { ExpandLess, ExpandMore, HighlightOff, Link } from "@mui/icons-material";
-import InnerDrawer from "Common/InnerDrawer";
-import LinkedTicketsList from "./LinkedTicketsList";
 import { Chip, Collapse, Grid, IconButton, MenuItem, MenuList, Skeleton, Tooltip, Typography } from "@mui/material";
 import { GET_LINKED_TICKETS, GET_TICKET, REMOVE_LINKED_TICKET } from "TicketDetails/TicketGraphQL";
 import { useMutation, useQuery } from "@apollo/client";
@@ -13,6 +11,7 @@ import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 import { preventEvent } from "Common/helper";
 import AvatarText from "Common/AvatarText";
+import LinkedTicketNew from "./LinkedTicketNew";
 
 const LinkedTicketContent = (props) => {
   const dispatch = useDispatch()
@@ -171,7 +170,7 @@ const LinkedTickets = (props) => {
     setIsLinkedTicketDrawerOpen(!isLinkedTicketDrawerOpen);
   }
 
-  const onCloseLinkedTicketDrawer = (skipDirty, equipId) => {
+  const onCloseLinkedTicketDrawer = () => {
     setIsLinkedTicketDrawerOpen(false);
   };
 
@@ -199,9 +198,8 @@ const LinkedTickets = (props) => {
       </Grid>
 
       {isLinkedTicketDrawerOpen &&
-        <InnerDrawer header={"Linked Tickets"} open={isLinkedTicketDrawerOpen} onCloseDrawer={() => onCloseLinkedTicketDrawer(false)}>
-          <LinkedTicketsList ticket={ticket} closeDrawer={onCloseLinkedTicketDrawer} ></LinkedTicketsList>
-        </InnerDrawer>
+          <LinkedTicketNew ticket={ticket} onCloseLinkedTicket={onCloseLinkedTicketDrawer} ></LinkedTicketNew> 
+       
       }
     </Grid>
   );

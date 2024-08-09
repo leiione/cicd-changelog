@@ -1,34 +1,18 @@
 import React, { useEffect } from "react";
-import { Button, Menu, MenuItem } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { MenuItem, Select, FormControl } from "@mui/material";
 import { preventEvent } from "../../../../Common/helper";
-import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import { useQuery } from "@apollo/client";
 import { GET_TICKET_LINK_TYPES } from "TicketDetails/TicketGraphQL";
 import { capitalize } from "lodash";
 
-
-const useStyles = makeStyles((theme) => ({
-  paperHeight: {
-    maxHeight: 300,
-  },
-}));
 const TickeLinkType = (props) => {
-  const classes = useStyles();
-  const [anchorEl, setAnchorEl] = React.useState(null);
   const { tickeLinkType, setTicketLinkType } = props;
- 
-  const openMenu = Boolean(anchorEl);
-  const handleClick = (event) => {
-    preventEvent(event);
-    setAnchorEl(event.currentTarget);
-  };
+
   const handlePopoverClose = (event, taskType) => {
     if (taskType !== "backdropClick") {
       setTicketLinkType(taskType);
     }
     preventEvent(event);
-    setAnchorEl(null);
   };
 
   const { loading, error, data } = useQuery(GET_TICKET_LINK_TYPES);
@@ -38,49 +22,31 @@ const TickeLinkType = (props) => {
       // Assuming data.ticketLinkTypes is the array of ticket link types
       setTicketLinkType(data.ticketLinkTypes[0]);
     }
-  }, [data,setTicketLinkType]); // This effect depends on 'data', it runs when 'data' changes
-
+  }, [data, setTicketLinkType]); // This effect depends on 'data', it runs when 'data' changes
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :</p>;
 
   return (
     <>
-
-      <span className="text-dark font-weight-normal">Ticket Type Relationship:</span>
-      <Button
-        color="default"
-        onClick={handleClick}
-        endIcon={openMenu ? <KeyboardArrowDown /> : <KeyboardArrowUp />}
-      >
-        <span className="text-dark font-weight-normal">{tickeLinkType && tickeLinkType.name && tickeLinkType.name}</span>
-      </Button>
-
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        open={openMenu}
-        onClose={handlePopoverClose}
-        classes={{ paper: classes.paperHeight }}
-        MenuListProps={{
-          "aria-labelledby": "basic-button",
-        }}
-      >
-          {data.ticketLinkTypes.map((type) => (
-        <MenuItem
-          key={type.id}
-          onClick={(event) =>
-            handlePopoverClose(event, type)
-          }
+      <FormControl variant="standard" fullWidth  style={{ marginTop: '11%' }} >
+        <Select
+          labelId="select-label"
+          value={tickeLinkType}
+          label="Select Item"
         >
-          {capitalize(type.name)
-          }
-        </MenuItem>
-      ))}
-        
-      </Menu>
-
-         </>
+          {data.ticketLinkTypes.map((type) => (
+            <MenuItem
+              key={type.id}
+              value={type}
+              onClick={(event) => handlePopoverClose(event, type)}
+            >
+              {capitalize(type.name)}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </>
   );
 };
 export default TickeLinkType;
