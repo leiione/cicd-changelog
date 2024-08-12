@@ -77,6 +77,11 @@ const LinkedTicketField = (props) => {
     fetchData();
   }, [inputValue, ticket.ticket_id]);
 
+  const filterOptions = (options) => {
+    const selectedTicketIds = userSelectedRows.map(row => row.ticket_id);
+    return options.filter(option => !selectedTicketIds.includes(option.ticket_id));
+  };
+
   return (
     <div style={{ marginLeft: "3%" }}>
       <Autocomplete
@@ -94,13 +99,17 @@ const LinkedTicketField = (props) => {
         onChange={(event, newValue) => setUserSelectedRows(newValue)}
         options={options}
         loading={loading}
+        filterOptions={filterOptions}
         getOptionLabel={(option) => `${option.ticket_id}`}
         renderOption={(props, option) => {
           const { key, ...otherProps } = props;
+          const isSelected = userSelectedRows.some(row => row.ticket_id === option.ticket_id);
+
           return (
             <MenuItem
               key={option.ticket_id} // Pass the key directly here
               style={{ height: 40 }}
+              disabled={isSelected}
               {...otherProps}
             >
               <Grid container spacing={1}>
