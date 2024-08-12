@@ -105,7 +105,7 @@ const Header = (props) => {
             <IconButton className="text-light" onClick={copyText}>
               <ContentCopy className="f-18" />
             </IconButton>
-            <Typography variant="h6" className="font-weight-bold">{ticket.assigned_name}</Typography>
+            <Typography variant="h6">{ticket.assigned_name}</Typography>
             <Tooltip title="Work Order" placement="top">
               <IconButton className="text-light" onClick={() => setopen1("Work Order")}>
                 <DescriptionOutlined className="f-18" />
