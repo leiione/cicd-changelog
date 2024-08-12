@@ -27,6 +27,7 @@ const Assignee = (props) => {
   const { ticket, updateTicket } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedAssignees, setAssignees] = useState([]);
+  const [tempAssignees, setTempAssignees] = useState([]); // Temporary state for editing
   const openMenu = Boolean(anchorEl);
 
   const { data } = useQuery(GET_ASSIGNEES, {
@@ -45,20 +46,23 @@ const Assignee = (props) => {
         realname: fetchAssigneeNameCallback(assigneeId),
       }));
       setAssignees(initialAssignees);
+      setTempAssignees(initialAssignees); // Initialize tempAssignees
     }
   }, [ticket, data, fetchAssigneeNameCallback]);
 
   const handlePopoverClose = (event) => {
     preventEvent(event);
+    setTempAssignees(selectedAssignees); // Reset changes if not saved
     setAnchorEl(null);
   };
 
   const handleSave = async () => {
-    const assignees = selectedAssignees.map((assignee) => ({
+    // Map the tempAssignees to only include fields expected by the AssigneeInput type
+    const assignees = tempAssignees.map((assignee) => ({
       appuser_id: assignee.appuser_id,
       realname: assignee.realname,
     }));
-
+  
     await updateTicket({
       ticket_id: ticket.ticket_id,
       assignees: assignees,
@@ -67,15 +71,15 @@ const Assignee = (props) => {
   };
 
   const handleSelectAssignee = (assignee) => {
-    const isSelected = selectedAssignees.some(
+    const isSelected = tempAssignees.some(
       (a) => a.appuser_id === assignee.appuser_id
     );
     if (isSelected) {
-      setAssignees(
-        selectedAssignees.filter((a) => a.appuser_id !== assignee.appuser_id)
+      setTempAssignees(
+        tempAssignees.filter((a) => a.appuser_id !== assignee.appuser_id)
       );
     } else {
-      setAssignees([...selectedAssignees, assignee]);
+      setTempAssignees([...tempAssignees, assignee]);
     }
   };
 
@@ -170,7 +174,7 @@ const Assignee = (props) => {
                 key={assignee.appuser_id}
                 onClick={() => handleSelectAssignee(assignee)}
                 style={{
-                  backgroundColor: selectedAssignees.some(
+                  backgroundColor: tempAssignees.some(
                     (a) => a.appuser_id === assignee.appuser_id
                   )
                     ? "#f0f0f0"
@@ -181,7 +185,7 @@ const Assignee = (props) => {
                   control={
                     <Checkbox
                       style={{ display: "none" }} // Hide the checkbox visually
-                      checked={selectedAssignees.some(
+                      checked={tempAssignees.some(
                         (a) => a.appuser_id === assignee.appuser_id
                       )}
                       name={assignee.realname}
