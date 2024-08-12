@@ -16,11 +16,11 @@ import { GET_ASSIGNEES } from "TicketDetails/TicketGraphQL";
 const fetchAssigneeName = (assigneeID, data) => {
   if (data && data.assignees) {
     const assignee = data.assignees.find(
-        (assignee) => assignee.appuser_id === assigneeID
+      (assignee) => assignee.appuser_id === assigneeID
     );
     return assignee ? assignee.realname : "Undefined";
   }
-  return assigneeID;
+  return ""; // Return blank instead of the ID
 };
 
 const Assignee = (props) => {
@@ -34,8 +34,8 @@ const Assignee = (props) => {
   });
 
   const fetchAssigneeNameCallback = useCallback(
-      (assigneeID) => fetchAssigneeName(assigneeID, data),
-      [data]
+    (assigneeID) => fetchAssigneeName(assigneeID, data),
+    [data]
   );
 
   useEffect(() => {
@@ -54,8 +54,6 @@ const Assignee = (props) => {
   };
 
   const handleSave = async () => {
-    // const assigneesIDs = selectedAssignees.map((assignee) => assignee.appuser_id);
-
     const assignees = selectedAssignees.map((assignee) => ({
       appuser_id: assignee.appuser_id,
       realname: assignee.realname,
@@ -70,11 +68,11 @@ const Assignee = (props) => {
 
   const handleSelectAssignee = (assignee) => {
     const isSelected = selectedAssignees.some(
-        (a) => a.appuser_id === assignee.appuser_id
+      (a) => a.appuser_id === assignee.appuser_id
     );
     if (isSelected) {
       setAssignees(
-          selectedAssignees.filter((a) => a.appuser_id !== assignee.appuser_id)
+        selectedAssignees.filter((a) => a.appuser_id !== assignee.appuser_id)
       );
     } else {
       setAssignees([...selectedAssignees, assignee]);
@@ -116,9 +114,9 @@ const Assignee = (props) => {
 
     const nameParts = name.split(" ");
     const initials =
-        nameParts.length > 1
-            ? `${nameParts[0][0]}${nameParts[1][0]}`
-            : `${nameParts[0][0]}`;
+      nameParts.length > 1
+        ? `${nameParts[0][0]}${nameParts[1][0]}`
+        : `${nameParts[0][0]}`;
 
     return {
       sx: {
@@ -129,77 +127,82 @@ const Assignee = (props) => {
   }
 
   return (
-      <>
-        <Grid container spacing={1}>
-          <Grid item xs="auto">
-            <Typography variant="subtitle1">Assignees: </Typography>
-          </Grid>
-          <Grid item xs="auto" onClick={handleClick}>
-            {ticket && ticket.assignees && Array.isArray(ticket.assignees) && ticket.assignees.length > 0 ? (
-                ticket.assignees.map((assigneeId) => (
-                    <Typography variant="subtitle1" className="d-flex align-items-center" key={assigneeId}>
-                      <Avatar
-                          {...stringAvatar(fetchAssigneeNameCallback(assigneeId))}
-                          sx={{ width: 24, height: 24 }}
-                          className="mr-2"
-                      />
-                      {fetchAssigneeNameCallback(assigneeId)}
-                    </Typography>
-                ))
-            ) : (
-                <Typography variant="body2" color="primary" onClick={handleClick}>
-                  Add Assignees
-                </Typography>
-            )}
-
-            <Popover
-                open={openMenu}
-                anchorEl={anchorEl}
-                onClose={handlePopoverClose}
-                classes={{ paper: "overflow-hidden" }}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-            >
-              {data && data.assignees && data.assignees.map((assignee) => (
-                  <MenuItem
-                      key={assignee.appuser_id}
-                      onClick={() => handleSelectAssignee(assignee)}
-                      style={{
-                        backgroundColor: selectedAssignees.some(
-                            (a) => a.appuser_id === assignee.appuser_id
-                        )
-                            ? "#f0f0f0"
-                            : "transparent",
-                      }}
-                  >
-                    <FormControlLabel
-                        control={
-                          <Checkbox
-                              style={{ display: "none" }} // Hide the checkbox visually
-                              checked={selectedAssignees.some(
-                                  (a) => a.appuser_id === assignee.appuser_id
-                              )}
-                              name={assignee.realname}
-                          />
-                        }
-                        label={`${assignee.realname}`}
-                    />
-                  </MenuItem>
-              ))}
-              <div className="drawer-footer">
-                <Button color="primary" variant="outlined" onClick={handleSave}>
-                  Save
-                </Button>
-                <Button color="default" variant="outlined" onClick={handlePopoverClose}>
-                  Cancel
-                </Button>
-              </div>
-            </Popover>
-          </Grid>
+    <>
+      <Grid container spacing={1}>
+        <Grid item xs="auto">
+          <Typography variant="subtitle1">Assignees: </Typography>
         </Grid>
-      </>
+        <Grid item xs="auto" onClick={handleClick}>
+          {ticket && ticket.assignees && Array.isArray(ticket.assignees) && ticket.assignees.length > 0 ? (
+            ticket.assignees.map((assigneeId) => {
+              const assigneeName = fetchAssigneeNameCallback(assigneeId);
+              return (
+                <Typography variant="subtitle1" className="d-flex align-items-center" key={assigneeId}>
+                  {assigneeName && (
+                    <Avatar
+                      {...stringAvatar(assigneeName)}
+                      sx={{ width: 24, height: 24 }}
+                      className="mr-2"
+                    />
+                  )}
+                  {assigneeName || ""}
+                </Typography>
+              );
+            })
+          ) : (
+            <Typography variant="body2" color="primary" onClick={handleClick}>
+              Add Assignees
+            </Typography>
+          )}
+
+          <Popover
+            open={openMenu}
+            anchorEl={anchorEl}
+            onClose={handlePopoverClose}
+            classes={{ paper: "overflow-hidden" }}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+          >
+            {data && data.assignees && data.assignees.map((assignee) => (
+              <MenuItem
+                key={assignee.appuser_id}
+                onClick={() => handleSelectAssignee(assignee)}
+                style={{
+                  backgroundColor: selectedAssignees.some(
+                    (a) => a.appuser_id === assignee.appuser_id
+                  )
+                    ? "#f0f0f0"
+                    : "transparent",
+                }}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      style={{ display: "none" }} // Hide the checkbox visually
+                      checked={selectedAssignees.some(
+                        (a) => a.appuser_id === assignee.appuser_id
+                      )}
+                      name={assignee.realname}
+                    />
+                  }
+                  label={`${assignee.realname}`}
+                />
+              </MenuItem>
+            ))}
+            <div className="drawer-footer">
+              <Button color="primary" variant="outlined" onClick={handleSave}>
+                Save
+              </Button>
+              <Button color="default" variant="outlined" onClick={handlePopoverClose}>
+                Cancel
+              </Button>
+            </div>
+          </Popover>
+        </Grid>
+      </Grid>
+    </>
   );
 };
 
