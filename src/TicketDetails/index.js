@@ -72,6 +72,7 @@ const TicketDetails = (props) => {
   const [editorContentChanged, setEditorContentChanged] = useState(false); // State to track editor changes
   const [dialogOpen, setDialogOpen] = useState(false); // State for DialogAlert
   const [handleSave, setHandleSave] = useState(null); // State to hold handleSave function
+  const hideInprogress = true // just mark this false during development
 
   const {
     lablesVisible,
@@ -94,16 +95,13 @@ const TicketDetails = (props) => {
     skip: !ticket_id,
   });
 
-  const ticket = useMemo(
-      () => (!loading && data && data.ticket ? data.ticket : ticketData),
-      [loading, data, ticketData]
+  const ticket = useMemo(() => (!loading && data && data.ticket ? data.ticket : ticketData),
+    [loading, data, ticketData]
   );
   if (error) return <ErrorPage error={error} />;
 
-  const ticketTypes =
-      !loading && data && data.ticketTypes ? data.ticketTypes : [];
-  const ticketStatuses =
-      !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
+  const ticketTypes = !loading && data && data.ticketTypes ? data.ticketTypes : [];
+  const ticketStatuses = !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
 
   const handleIconButton = (event, childDrawer) => {
     preventEvent(event);
@@ -141,105 +139,109 @@ const TicketDetails = (props) => {
         return "Coming Soon";
       case "Work Order":
         return (
-            <WorkOrder
-                ticket_id={ticket_id}
-                setTicketDetail={setTicketDetail}
-                setEditorContentChanged={setEditorContentChanged} // Pass the state setter to the WorkOrder component
-                setHandleSave={setHandleSave} // Pass the setHandleSave function to the WorkOrder component
-            />
+          <WorkOrder
+            ticket_id={ticket_id}
+            setTicketDetail={setTicketDetail}
+            setEditorContentChanged={setEditorContentChanged} // Pass the state setter to the WorkOrder component
+            setHandleSave={setHandleSave} // Pass the setHandleSave function to the WorkOrder component
+          />
         );
       default:
         return (
-            <div className="drawer-wapper-full p-3 tex-center">
-              {open1} Coming Soon
-            </div>
+          <div className="drawer-wapper-full p-3 tex-center">
+            {open1} Coming Soon
+          </div>
         );
     }
   };
 
   return (
-      <div>
-        {snackbar && snackbar.open && <GlobalSnackbar {...snackbar} />}
-        <Header
-            ticket={ticket}
-            category={category}
-            setopen1={setopen1}
-            hideContentDrawer={hideContentDrawer}
-            appuser_id={appuser_id}
-            toggleOffCRMDrawer={toggleOffCRMDrawer}
+    <div>
+      {snackbar && snackbar.open && <GlobalSnackbar {...snackbar} />}
+      <Header
+        ticket={ticket}
+        category={category}
+        setopen1={setopen1}
+        hideContentDrawer={hideContentDrawer}
+        appuser_id={appuser_id}
+        toggleOffCRMDrawer={toggleOffCRMDrawer}
+      />
+      <div className="drawer-wrapper-full p-3">
+        <Summary
+          loading={loading}
+          handleIconButton={handleIconButton}
+          customer={ticket}
+          ticketTypes={ticketTypes}
+          ticketStatuses={ticketStatuses}
+          lablesVisible={lablesVisible}
+          handleOpenTicket={handleOpenTicket}
         />
-        <div className="drawer-wrapper-full p-3">
-          <Summary
-              loading={loading}
-              handleIconButton={handleIconButton}
-              customer={ticket}
-              ticketTypes={ticketTypes}
-              ticketStatuses={ticketStatuses}
-              lablesVisible={lablesVisible}
-              handleOpenTicket={handleOpenTicket}
-          />
 
-          <Tasks
+        {!hideInprogress &&
+          <>
+            <Tasks
               handleIconButton={handleIconButton}
               customer={ticket}
               lablesVisible={lablesVisible}
-          />
-          <Messages
+            />
+            <Messages
               handleIconButton={handleIconButton}
               customer={ticket}
               lablesVisible={lablesVisible}
-          />
-          <Attachments
+            />
+            <Attachments
               handleIconButton={handleIconButton}
               customer={ticket}
               lablesVisible={lablesVisible}
-          />
-          <BillsOfMaterial
+            />
+            <BillsOfMaterial
               handleIconButton={handleIconButton}
               customer={ticket}
               lablesVisible={lablesVisible}
-          />
-          <Activity
+            />
+            <Activity
               handleIconButton={handleIconButton}
               customer={ticket}
               lablesVisible={lablesVisible}
-          />
-        </div>
-        <ChildDrawers
-            open={Boolean(open1)}
-            handleDrawerClose1={handleDrawerClose1}
-            title={open1}
-            handlePrint={handlePrint}
-            ticketDetail={ticketDetail}
-            editorContentChanged={editorContentChanged} // Pass the state to ChildDrawers
-        >
-          {renderChildComponent()}
-        </ChildDrawers>
-        {dialogOpen && (
-            <DialogAlert
-                open={dialogOpen}
-                message={
-                  <span>
+            />
+          </>
+        }
+      </div>
+      <ChildDrawers
+        open={Boolean(open1)}
+        handleDrawerClose1={handleDrawerClose1}
+        title={open1}
+        handlePrint={handlePrint}
+        ticketDetail={ticketDetail}
+        editorContentChanged={editorContentChanged} // Pass the state to ChildDrawers
+      >
+        {renderChildComponent()}
+      </ChildDrawers>
+      {dialogOpen && (
+        <DialogAlert
+          open={dialogOpen}
+          message={
+            <span>
               You have unsaved changes. Would you like to save or discard them?
             </span>
-                }
-                buttonsList={[
-                  {
-                    label: "Save",
-                    size: "medium",
-                    color: "primary",
-                    onClick: () => handleDialogClose("save"),
-                  },
-                  {
-                    label: "Discard",
-                    size: "medium",
-                    color: "default",
-                    onClick: () => handleDialogClose("discard"),
-                  },
-                ]}
-            />
-        )}
-      </div>
+          }
+          buttonsList={[
+            {
+              label: "Save",
+              size: "medium",
+              color: "primary",
+              onClick: () => handleDialogClose("save"),
+            },
+            {
+              label: "Discard",
+              size: "medium",
+              color: "default",
+              onClick: () => handleDialogClose("discard"),
+            },
+          ]}
+        />
+      )}
+    </div>
   );
 };
 
