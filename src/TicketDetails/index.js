@@ -72,7 +72,7 @@ const TicketDetails = (props) => {
   const [editorContentChanged, setEditorContentChanged] = useState(false); // State to track editor changes
   const [dialogOpen, setDialogOpen] = useState(false); // State for DialogAlert
   const [handleSave, setHandleSave] = useState(null); // State to hold handleSave function
-  const hideInprogress = true // just mark this false during development
+  const hideInprogress = false // just mark this false during development
 
   const {
     lablesVisible,
