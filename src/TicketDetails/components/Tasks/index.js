@@ -3,7 +3,15 @@ import { AddCircleOutline } from "@mui/icons-material";
 import AccordionCard from "../../../Common/AccordionCard";
 import ButtonWithLable from "../../../Common/ButtonWithLable";
 import HeaderMenuOptions from "./components/HeaderMenuOptions";
-import { Checkbox, FormControlLabel, FormGroup } from "@mui/material";
+import {
+  Checkbox,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
+import { data } from "./components/helper";
+import TaskMenuOptions from "./components/TaskMenuOptions";
 
 const Tasks = (props) => {
   const { lablesVisible, open1, handleIconButton } = props;
@@ -19,21 +27,31 @@ const Tasks = (props) => {
             onClick={(event) => handleIconButton(event, "Add Task")}
             open1={open1}
             buttonIcon={<AddCircleOutline />}
-          /> 
+          />
           <span className="text-muted ml-3">3/5 task completed</span>
         </>
       }
       menuOption={<HeaderMenuOptions />}
     >
-
-<FormGroup>
-  <FormControlLabel control={<Checkbox defaultChecked />} label="Payments" />
-  <FormControlLabel control={<Checkbox />} label="Lorem Ipsum is simply dummy text of the Lprinting and typesetting industry. " />
-  <FormControlLabel control={<Checkbox />} label="Lorem Ipsum has been the industry's standard dummy text ever since the 1500s." />
-  <FormControlLabel control={<Checkbox defaultChecked/>} label="LAldus PageMaker including versions of Lorem Ipsum." />
-  <FormControlLabel control={<Checkbox defaultChecked/>} label="It is a long established fact that a reader" />
-</FormGroup>
-
+      <List dense>
+        {data.map((task) => {
+          return (
+            <ListItem key={task.id} className="visible-on-hover">
+              <TaskMenuOptions />
+              <ListItemIcon>
+                <Checkbox checked={task.value} />
+              </ListItemIcon>
+              <ListItemText
+                id={task.id}
+                primary={task.name}
+                className={
+                  task.value === true ? "text-decoration-line-through" : ""
+                }
+              />
+            </ListItem>
+          );
+        })}
+      </List>
     </AccordionCard>
   );
 };
