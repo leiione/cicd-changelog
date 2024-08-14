@@ -182,9 +182,8 @@ const TicketDetails = (props) => {
           <>
             <Tasks
               loading={loading}
-              appuser_id={appuser_id}
-              handleIconButton={handleIconButton}
               ticket={ticket}
+              appuser_id={appuser_id}
               lablesVisible={lablesVisible}
             />
             <Messages

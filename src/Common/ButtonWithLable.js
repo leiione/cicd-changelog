@@ -2,7 +2,7 @@ import { IconButton, Tooltip } from "@mui/material";
 import React from "react";
 
 const ButtonWithLable = (props) => {
-  const { buttonLabel, buttonIcon, color, lablesVisible, onClick } = props;
+  const { buttonLabel, buttonIcon, color, lablesVisible, onClick, disabled } = props;
   return (
     <>
       <Tooltip title={!lablesVisible && buttonLabel} placement="top">
@@ -13,6 +13,7 @@ const ButtonWithLable = (props) => {
           <IconButton
             color={color ? color : "default"}
             className={lablesVisible ? "pr-1" : ""}
+            disabled={disabled}
           >
             {buttonIcon}
           </IconButton>
