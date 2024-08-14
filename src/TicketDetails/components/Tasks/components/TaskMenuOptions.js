@@ -3,7 +3,7 @@ import { IconButton, MenuItem, Popover } from "@mui/material";
 import { MoreVert } from "@mui/icons-material";
 import { preventEvent } from "../../../../Common/helper";
 
-const TaskMenuOptions = (props) => {
+const TaskMenuOptions = ({ show }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openMenu = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -17,23 +17,24 @@ const TaskMenuOptions = (props) => {
 
   return (
     <>
-      <IconButton color="default" className="invisible" onClick={handleClick}>
-        <MoreVert />
+      <IconButton color="default" onClick={handleClick}>
+        <MoreVert style={!show ? { visibility: "hidden" } : {}} />
       </IconButton>
-
-      <Popover
-        open={openMenu}
-        anchorEl={anchorEl}
-        onClose={handlePopoverClose}
-        classes={{ paper: "overflow-hidden" }}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-      >
-        <MenuItem onClick={handlePopoverClose}> Convert to ticket</MenuItem>
-        <MenuItem onClick={handlePopoverClose}> Delete</MenuItem>
-      </Popover>
+      {openMenu &&
+        <Popover
+          open={openMenu}
+          anchorEl={anchorEl}
+          onClose={handlePopoverClose}
+          classes={{ paper: "overflow-hidden" }}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+        >
+          <MenuItem onClick={handlePopoverClose}> Convert to ticket</MenuItem>
+          <MenuItem onClick={handlePopoverClose}> Delete</MenuItem>
+        </Popover>
+      }
     </>
   );
 };

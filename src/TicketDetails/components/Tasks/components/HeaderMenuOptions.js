@@ -1,9 +1,11 @@
 import React from "react";
 import { IconButton, MenuItem, Popover } from "@mui/material";
-import { MoreVert, SentimentSatisfiedAlt } from "@mui/icons-material";
+import { MoreVert } from "@mui/icons-material";
 import { preventEvent } from "../../../../Common/helper";
+import CSAT from "Common/CSAT";
 
 const HeaderMenuOptions = (props) => {
+  const { appuser_id, category } = props
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openMenu = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -31,8 +33,8 @@ const HeaderMenuOptions = (props) => {
           horizontal: "left",
         }}
       >
-        <MenuItem onClick={handlePopoverClose} color="default">
-          <SentimentSatisfiedAlt className="mr-2" /> Feedback
+        <MenuItem color="default" onClick={(event) => preventEvent(event)}>
+          <CSAT appuser_id={appuser_id} category={category} key={category} isSettings={false} />
         </MenuItem>
       </Popover>
     </>

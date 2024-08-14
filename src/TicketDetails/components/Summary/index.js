@@ -26,6 +26,7 @@ const Summary = (props) => {
   const dispatch = useDispatch();
   const {
     loading,
+    appuser_id,
     customer,
     ticketTypes,
     ticketStatuses,
@@ -95,7 +96,7 @@ const Summary = (props) => {
           </>
         )
       }
-      menuOption={<HeaderMenuOptions />}
+      menuOption={<HeaderMenuOptions appuser_id={appuser_id} category="Summary Card" />}
     >
       {loading ? (
         <Skeleton

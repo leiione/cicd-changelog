@@ -169,6 +169,7 @@ const TicketDetails = (props) => {
       <div className="drawer-wrapper-full p-3">
         <Summary
           loading={loading}
+          appuser_id={appuser_id}
           handleIconButton={handleIconButton}
           customer={ticket}
           ticketTypes={ticketTypes}
@@ -180,8 +181,10 @@ const TicketDetails = (props) => {
         {!hideInprogress &&
           <>
             <Tasks
+              loading={loading}
+              appuser_id={appuser_id}
               handleIconButton={handleIconButton}
-              customer={ticket}
+              ticket={ticket}
               lablesVisible={lablesVisible}
             />
             <Messages
