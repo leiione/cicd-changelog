@@ -15,8 +15,12 @@ import {
 } from "@mui/material";
 import TaskMenuOptions from "./components/TaskMenuOptions";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import { cloneDeep, isEmpty } from "lodash";
+import { cloneDeep, get, isEmpty, omit, sortBy } from "lodash";
 import { preventEvent } from "Common/helper";
+import { useMutation } from "@apollo/client";
+import { GET_TICKET, SAVE_TICKET_TASKS } from "TicketDetails/TicketGraphQL";
+import { useDispatch } from "react-redux";
+import { showSnackbar } from "config/store";
 
 const getItemStyle = (isDragging, draggableStyle) => ({
   userSelect: "none",
@@ -33,14 +37,17 @@ const taskData = {
 }
 
 const Tasks = (props) => {
+  const dispatch = useDispatch();
   const { ticket, appuser_id, lablesVisible, loading } = props;
   const [ticketTasks, setTicketTasks] = useState(ticket.tasks || [])
   const [isHovered, setHover] = useState(-1)
   const [onEditMode, setOnEditMode] = useState({ index: -1, value: '' })
+  const [saveTicketTasks] = useMutation(SAVE_TICKET_TASKS)
 
   useEffect(() => {
     if (!loading && ticket.tasks !== ticketTasks) {
-      setTicketTasks(ticket.tasks)
+      const tasks = sortBy(ticket.tasks, "rank")
+      setTicketTasks(tasks)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, ticket.ticket_id])
@@ -66,9 +73,10 @@ const Tasks = (props) => {
       const items = reorder(ticketTasks, result.source.index, result.destination.index)
 
       const newRanks = items.map((x, index) => {
-        return { ...x, rank_order: index + 1 }
+        return { ...x, rank: index + 1 }
       })
       setTicketTasks(newRanks);
+      onSaveTaskChanges(newRanks)
     }
   }
 
@@ -76,12 +84,14 @@ const Tasks = (props) => {
     const newTasks = cloneDeep(ticketTasks)
     newTasks[index].is_completed = !newTasks[index].is_completed
     setTicketTasks(newTasks)
+    onSaveTaskChanges(newTasks)
   }
 
   const addTicketTask = (event) => {
     preventEvent(event);
-    const newTasks = cloneDeep(ticketTasks)
+    let newTasks = cloneDeep(ticketTasks)
     newTasks.unshift(taskData)
+    newTasks = newTasks.map((x, index) => ({ ...x, rank: index + 1 }))
     setTicketTasks(newTasks)
     setOnEditMode({ index: 0, value: '' })
   }
@@ -89,8 +99,11 @@ const Tasks = (props) => {
   const onTaskNameChange = (index) => {
     if (!isEmpty(onEditMode.value)) {
       const newTasks = cloneDeep(ticketTasks)
-      newTasks[index].task = onEditMode.value
-      setTicketTasks(newTasks)
+      if (newTasks[index].task !== onEditMode.value) {
+        newTasks[index].task = onEditMode.value
+        setTicketTasks(newTasks)
+        onSaveTaskChanges(newTasks)
+      }
       setOnEditMode({ index: -1, value: '' })
     }
   }
@@ -102,6 +115,44 @@ const Tasks = (props) => {
 
     if (!isEmpty(onEditMode.value) || onEditMode.index < 0) {
       setOnEditMode({ index, value: task.task })
+    }
+  }
+
+  const onSaveTaskChanges = async (newTasks) => {
+    try {
+      const tasks = newTasks.map((x, index) => ({
+        ...omit(x, ["__typename"]),
+        rank: index + 1
+      }))
+
+      const hasNewTask = tasks.some(x => x.task_id === 0)
+      await saveTicketTasks({
+        variables: {
+          ticket_id: ticket.ticket_id,
+          tasks
+        },
+        update: (cache, { data }) => {
+          if (hasNewTask) {
+            setTicketTasks(data.saveTicketTasks)
+          }
+        },
+        refetchQueries: [
+          { query: GET_TICKET, variables: { id: ticket.ticket_id } },
+        ],
+      });
+      dispatch(showSnackbar({
+        message: "Ticket task updated successfully",
+        severity: "success",
+      }));
+    } catch (error) {
+      const msg = error.message.replace("GraphQL error: ", "");
+      dispatch(showSnackbar({ message: msg, severity: "error" }));
+    }
+  }
+
+  const onEnter = (e, index) => {
+    if (get(e, 'key', '').toLowerCase() === "enter") {
+      onTaskNameChange(index)
     }
   }
 
@@ -148,7 +199,13 @@ const Tasks = (props) => {
                               onMouseLeave={() => setHover(-1)}
                               secondaryAction={<DragIndicator className="text-lighter f-20" />}
                             >
-                              {<TaskMenuOptions show={isHovered === index} />}
+                              <TaskMenuOptions
+                                show={isHovered === index}
+                                task={task}
+                                ticketTasks={ticketTasks}
+                                setTicketTasks={setTicketTasks}
+                                onSaveTaskChanges={onSaveTaskChanges}
+                              />
                               <ListItemIcon >
                                 <Checkbox
                                   checked={task.is_completed}
@@ -167,12 +224,22 @@ const Tasks = (props) => {
                                   onChange={e => setOnEditMode({ index, value: e.target.value })}
                                   onBlur={() => onTaskNameChange(index)}
                                   error={error}
+                                  onKeyDown={(e) => onEnter(e, index)}
                                 />
                                 : <ListItemText
                                   id={task.id}
-                                  primary={task.task}
-                                  className={task.is_completed ? "text-decoration-line-through" : ""}
-                                  onClick={() => onNameClick(index, task)}
+                                  primary={
+                                    <Typography
+                                      variant="body2"
+                                      onClick={() => onNameClick(index, task)}
+                                      className={task.is_completed ? "text-decoration-line-through" : ""}
+                                      style={{ cursor: "text", width: "max-content" }}
+                                    >
+                                      {task.task}
+                                    </Typography>
+                                  }
+
+
                                 />
                               }
                             </ListItem>

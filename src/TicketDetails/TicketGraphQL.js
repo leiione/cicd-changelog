@@ -32,8 +32,8 @@ export const GET_TICKET = gql`
       tasks {
         task_id
         task
-        is_default
         is_completed
+        rank
       }
       infrastructure {
         id
@@ -255,3 +255,14 @@ export const ADD_TICKET_SIGNATURE = gql`
     }
   }
 ` 
+
+export const SAVE_TICKET_TASKS = gql`
+  mutation saveTicketTasks($ticket_id: Int!, $tasks: [TicketTaskInput]) {
+    saveTicketTasks(tasks: $tasks, ticket_id: $ticket_id) {
+      task_id
+      task
+      is_completed
+      rank
+    }
+  }
+`
