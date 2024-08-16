@@ -266,3 +266,14 @@ export const SAVE_TICKET_TASKS = gql`
     }
   }
 `
+
+export const CONVERT_TAST_TO_TICKET = gql`
+  mutation convertTaskToTicket($input_ticket: TicketInput) {
+    convertTaskToTicket(input_ticket: $input_ticket) {
+      ticket_id
+      priority
+      status
+      description
+    }
+  }
+`

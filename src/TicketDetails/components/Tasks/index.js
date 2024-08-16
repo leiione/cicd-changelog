@@ -38,7 +38,7 @@ const taskData = {
 
 const Tasks = (props) => {
   const dispatch = useDispatch();
-  const { ticket, appuser_id, lablesVisible, loading } = props;
+  const { ticket, appuser_id, lablesVisible, loading, handleOpenTicket } = props;
   const [ticketTasks, setTicketTasks] = useState(ticket.tasks || [])
   const [isHovered, setHover] = useState(-1)
   const [onEditMode, setOnEditMode] = useState({ index: -1, value: '' })
@@ -50,7 +50,7 @@ const Tasks = (props) => {
       setTicketTasks(tasks)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, ticket.ticket_id])
+  }, [loading, ticket.ticket_id, ticket.ticket_type_id])
 
   const completed = (ticketTasks.filter(x => x.is_completed)).length
   const taskCount = ticketTasks.length
@@ -200,11 +200,13 @@ const Tasks = (props) => {
                               secondaryAction={<DragIndicator className="text-lighter f-20" />}
                             >
                               <TaskMenuOptions
+                                ticket={ticket}
                                 show={isHovered === index}
                                 task={task}
                                 ticketTasks={ticketTasks}
                                 setTicketTasks={setTicketTasks}
                                 onSaveTaskChanges={onSaveTaskChanges}
+                                handleOpenTicket={handleOpenTicket}
                               />
                               <ListItemIcon >
                                 <Checkbox

@@ -2,13 +2,20 @@ import React from "react";
 import { IconButton, MenuItem, Popover } from "@mui/material";
 import { MoreVert } from "@mui/icons-material";
 import { preventEvent } from "../../../../Common/helper";
-import { cloneDeep } from "lodash";
+import { cloneDeep, isEmpty, pick } from "lodash";
 import DialogAlert from "components/DialogAlert";
+import { useMutation } from "@apollo/client";
+import { CONVERT_TAST_TO_TICKET } from "TicketDetails/TicketGraphQL";
+import { useDispatch } from "react-redux";
+import { showSnackbar } from "config/store";
 
 const TaskMenuOptions = (props) => {
-  const { show, task, ticketTasks, setTicketTasks, onSaveTaskChanges } = props;
+  const dispatch = useDispatch()
+  const { show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, ticket, handleOpenTicket } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [openAlert, setOpenAlert] = React.useState(false);
+  const [openAlert, setOpenAlert] = React.useState(null);
+  const [isSubmitting, setSubmitting] = React.useState(null);
+  const [convertTaskToTicket] = useMutation(CONVERT_TAST_TO_TICKET);
 
   const openMenu = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -27,11 +34,47 @@ const TaskMenuOptions = (props) => {
     onSaveTaskChanges(newTasks)
   }
 
-  const onOpenAlert = () => {
+  const onOpenAlert = (action) => {
     if (task.task_id > 0) {
-      setOpenAlert(true);
+      setOpenAlert(action);
     } else {
       onDeleteTask()
+    }
+  }
+
+  const onConvertTask = async () => {
+    setSubmitting(true)
+    let input_ticket = {
+      ...pick(ticket, [
+        "category_type",
+        "priority",
+        "ticket_type_id",
+        "equipment_id",
+        "location_id",
+        "assigned_name",
+        "address",
+      ]),
+      description: task.task,
+      customer_id: ticket.subscriber ? ticket.subscriber.customer_id : 0,
+      assignee_ids: ticket.assignees,
+      ticket_contact_numbers: ticket.ticket_contact_numbers || '',
+      ticket_contact_name: ticket.ticket_contact_name || '',
+      ticket_contact_emails: ticket.ticket_contact_email || '',
+    }
+    input_ticket.followers = !isEmpty(ticket.followers) ? ticket.followers.split(",") : []
+    try {
+      await convertTaskToTicket({
+        variables: { input_ticket },
+        update: (cache, { data }) => {
+          handleOpenTicket({ ...data.convertTaskToTicket })
+        },
+      });
+      dispatch(showSnackbar({ message: "The task was converted to a ticket successfully", severity: "success" }))
+      setSubmitting(false)
+    } catch (error) {
+      const msg = error.message.replace("GraphQL error: ", "")
+      dispatch(showSnackbar({ message: msg, severity: "error" }))
+      setSubmitting(false)
     }
   }
 
@@ -51,26 +94,29 @@ const TaskMenuOptions = (props) => {
             horizontal: "left",
           }}
         >
-          <MenuItem onClick={handlePopoverClose}> Convert to ticket</MenuItem>
-          <MenuItem onClick={onOpenAlert}> Delete</MenuItem>
+          <MenuItem onClick={() => onOpenAlert("convert")}> Convert to ticket</MenuItem>
+          <MenuItem onClick={() => onOpenAlert("delete")}> Delete</MenuItem>
         </Popover>
       }
       {openAlert && (
         <DialogAlert
           open={openAlert}
-          message={"Are you sure you want to delete this task?"}
+          message={`Are you sure you want to ${openAlert === "delete" ? 'delete this task' : 'convert this to a ticket'} ?`}
           buttonsList={[
             {
               label: "Yes",
               size: "medium",
               color: "primary",
-              onClick: () => onDeleteTask(),
+              isProgress: true,
+              isSubmitting,
+              onClick: () => openAlert === "delete" ? onDeleteTask() : onConvertTask(),
             },
             {
               label: "No",
               size: "medium",
               color: "default",
-              onClick: () => setOpenAlert(false),
+              disabled: isSubmitting,
+              onClick: () => setOpenAlert(null),
             },
           ]}
         />
@@ -78,4 +124,4 @@ const TaskMenuOptions = (props) => {
     </>
   );
 };
-export default TaskMenuOptions;
+export default React.memo(TaskMenuOptions);

@@ -185,6 +185,7 @@ const TicketDetails = (props) => {
               ticket={ticket}
               appuser_id={appuser_id}
               lablesVisible={lablesVisible}
+              handleOpenTicket={handleOpenTicket}
             />
             <Messages
               handleIconButton={handleIconButton}
