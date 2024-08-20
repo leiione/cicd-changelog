@@ -20,7 +20,7 @@ const useStyles = makeStyles(() => ({
 const Schedule = (props) => {
   const classes = useStyles();
   const { ticket, updateTicket, isSubmitting } = props;
-  const [expandCollapse, setExpandCollapse] = useState("");
+  const [expandCollapse, setExpandCollapse] = useState(true);
 
   const handleCollapse = () => {
     setExpandCollapse(!expandCollapse);

@@ -4,7 +4,7 @@ import HeaderMenuOptions from "./components/HeaderMenuOptions";
 import TicketPriority from "./components/TicketPriority";
 import TicketType from "./components/TicketType";
 import TicketStatus from "./components/TicketStatus";
-import { Grid, IconButton, Skeleton, Typography } from "@mui/material";
+import { Grid, IconButton, Typography } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { preventEvent } from "Common/helper";
 import Followers from "./components/Followers";
@@ -21,6 +21,7 @@ import {
 import { useMutation } from "@apollo/client";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
+import { HeaderSkeletonLoader, SummarySkeletonLoader } from "./components/SkeletonLoader";
 
 const Summary = (props) => {
   const dispatch = useDispatch();
@@ -72,14 +73,12 @@ const Summary = (props) => {
 
   return (
     <AccordionCard
+      defaultExpanded
       label="Summary"
       className="py-0"
       iconButtons={
         loading ? (
-          <Skeleton
-            animation="wave"
-            style={{ height: 25, backgroundColor: "##dfdede", width: "150px" }}
-          />
+          <HeaderSkeletonLoader />
         ) : (
           <>
             <TicketPriority customer={customer} handleUpdate={handleUpdate} />
@@ -99,15 +98,7 @@ const Summary = (props) => {
       menuOption={<HeaderMenuOptions appuser_id={appuser_id} category="Summary Card" />}
     >
       {loading ? (
-        <Skeleton
-          animation="wave"
-          style={{
-            height: 200,
-            backgroundColor: "##dfdede",
-            width: "80%",
-            marginTop: "-20px",
-          }}
-        />
+        <SummarySkeletonLoader />
       ) : (
         <Grid container spacing={1}>
           <Grid item xs className="h-100">

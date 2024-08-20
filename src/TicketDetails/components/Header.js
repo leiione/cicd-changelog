@@ -102,9 +102,11 @@ const Header = (props) => {
         <Typography variant="h6" className="font-weight-light">{ticket.ticket_id > 0 ? `Ticket #${ticket.ticket_id}` : 'Add Ticket'}</Typography>
         {ticket.ticket_id > 0 &&
           <>
-            <IconButton className="text-light" onClick={copyText}>
-              <ContentCopy className="f-18" />
-            </IconButton>
+            <Tooltip title="Copy" placement="top">
+              <IconButton className="text-light" onClick={copyText}>
+                <ContentCopy className="f-18" />
+              </IconButton>
+            </Tooltip>
             <Typography variant="h6">{ticket.assigned_name}</Typography>
             <Tooltip title="Work Order" placement="top">
               <IconButton className="text-light" onClick={() => setopen1("Work Order")}>
