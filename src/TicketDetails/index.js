@@ -98,7 +98,6 @@ const TicketDetails = (props) => {
   const ticket = useMemo(() => (!loading && data && data.ticket ? data.ticket : ticketData),
     [loading, data, ticketData]
   );
-  if (error) return <ErrorPage error={error} />;
 
   const ticketTypes = !loading && data && data.ticketTypes ? data.ticketTypes : [];
   const ticketStatuses = !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
@@ -166,7 +165,8 @@ const TicketDetails = (props) => {
         appuser_id={appuser_id}
         toggleOffCRMDrawer={toggleOffCRMDrawer}
       />
-      <div className="drawer-wrapper-full p-3">
+      {error && <ErrorPage error={error} />}
+      <div className="drawer-wrapper-full p-3" hidden={error}>
         <Summary
           loading={loading}
           appuser_id={appuser_id}

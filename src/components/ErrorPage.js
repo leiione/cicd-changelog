@@ -20,7 +20,7 @@ export const ErrorPage = props => {
   const classes = useStyles()
   const { error } = props
 
-  let errorMessage = "We're sorry, but something went wrong.";
+  let errorMessage = "This ticket is not available in the BETA version.";
   if (process.env.REACT_APP_HOST_ENV === 'development' && error) {
     errorMessage = error;
   }
