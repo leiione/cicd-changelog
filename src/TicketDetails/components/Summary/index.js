@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import AccordionCard from "../../../Common/AccordionCard";
-import HeaderMenuOptions from "./components/HeaderMenuOptions";
 import TicketPriority from "./components/TicketPriority";
 import TicketType from "./components/TicketType";
 import TicketStatus from "./components/TicketStatus";
@@ -22,6 +21,7 @@ import { useMutation } from "@apollo/client";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 import { HeaderSkeletonLoader, SummarySkeletonLoader } from "./components/SkeletonLoader";
+import HeaderMenuOptions from "components/HeaderMenuOptions";
 
 const Summary = (props) => {
   const dispatch = useDispatch();

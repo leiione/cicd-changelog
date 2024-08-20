@@ -191,21 +191,25 @@ const TicketDetails = (props) => {
               handleIconButton={handleIconButton}
               customer={ticket}
               lablesVisible={lablesVisible}
+              appuser_id={appuser_id}
             />
             <Attachments
               handleIconButton={handleIconButton}
               customer={ticket}
               lablesVisible={lablesVisible}
+              appuser_id={appuser_id}
             />
             <BillsOfMaterial
               handleIconButton={handleIconButton}
               customer={ticket}
               lablesVisible={lablesVisible}
+              appuser_id={appuser_id}
             />
             <Activity
               handleIconButton={handleIconButton}
               customer={ticket}
               lablesVisible={lablesVisible}
+              appuser_id={appuser_id}
             />
           </>
         }

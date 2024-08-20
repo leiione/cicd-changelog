@@ -15,9 +15,10 @@ import {
   Typography,
   Collapse,
   Grid,
+  FormControl,
+  RadioGroup,
 } from "@mui/material";
 import ProgressButton from "Common/ProgressButton";
-import HookRadioGroup from "../hookFields/HookRadioGroup";
 import HookTextField from "../hookFields/HookTextField";
 import { showSnackbar } from "../../config/store";
 
@@ -75,6 +76,7 @@ const CSATForm = props => {
     onSubmit,
     form
   } = props
+  console.log('props: ', props);
   const {
     control,
     setValue,
@@ -83,6 +85,7 @@ const CSATForm = props => {
   } = form
 
   const values = watch()
+  console.log('values: ', values);
   const handleClose = isCancelled => e => {
     setAnchorEl(null)
     if (isCancelled) {
@@ -96,6 +99,7 @@ const CSATForm = props => {
   const handleChange = event => {
     let score = 0
 
+    console.log('event.target.value: ', event.target.value);
     if (event.target.value === "dissatisfied") {
       score = 1
       setTargetIcon(dissatisfiedIcon)
@@ -177,40 +181,40 @@ const CSATForm = props => {
             <Typography className="text-white pr-4 pl-2 py-1">{sayThanks ? "Thanks for your feedback" : "How’s this experience?"}</Typography>
           </Grid>
           <Grid item xs="auto">
-
-            <HookRadioGroup row aria-label="score"
-              control={control}
-              name="score"
-              onChange={handleChange}
-            >
-              <FormControlLabel
-                className="dissatisfied"
-                value="dissatisfied"
-                control={<Radio />}
-                onClick={() => {
-                  setFeedbackBox(true)
-                }}
-                label={dissatisfiedIcon}
-              />
-              <FormControlLabel
-                className="neutral"
-                value="neutral"
-                control={<Radio />}
-                onClick={() => {
-                  setFeedbackBox(true)
-                }}
-                label={neutralIcon}
-              />
-              <FormControlLabel
-                className="satisfied"
-                value="satisfied"
-                control={<Radio />}
-                onClick={() => {
-                  setFeedbackBox(true)
-                }}
-                label={satisfiedIcon}
-              />
-            </HookRadioGroup>
+            <FormControl component="fieldset">
+              <RadioGroup row aria-label="score" name="score" value={emojiValues[values.score]} onChange={handleChange}>
+                <FormControlLabel
+                  className="dissatisfied"
+                  value="dissatisfied"
+                  control={<Radio />}
+                  onClick={(event) => {
+                    setFeedbackBox(true)
+                    handleChange(event)
+                  }}
+                  label={dissatisfiedIcon}
+                />
+                <FormControlLabel
+                  className="neutral"
+                  value="neutral"
+                  control={<Radio />}
+                  onClick={(event) => {
+                    setFeedbackBox(true)
+                    handleChange(event)
+                  }}
+                  label={neutralIcon}
+                />
+                <FormControlLabel
+                  className="satisfied"
+                  value="satisfied"
+                  control={<Radio />}
+                  onClick={(event) => {
+                    setFeedbackBox(true)
+                    handleChange(event)
+                  }}
+                  label={satisfiedIcon}
+                />
+              </RadioGroup>
+            </FormControl>
           </Grid>
         </Grid>
       </Box>
@@ -253,7 +257,7 @@ const CSATForm = props => {
 }
 
 const CSAT = props => {
-  const { category, isSettings, appuser_id } = props
+  const { category, isSettings, appuser_id, handlePopoverClose } = props
   const classes = useStyles()
   const dispatch = useDispatch()
   const defaultCsatValues = useMemo(() => ({ score: 0, note: "" }), []);
@@ -305,6 +309,7 @@ const CSAT = props => {
           setbtnColor(null)
         }, 2500)
         dispatch(showSnackbar({ message: "Feedback successfully submitted", severity: "success" }))
+        handlePopoverClose()
       } catch (err) {
         const msg = err.message.replace("GraphQL error: ", "")
         dispatch(showSnackbar({ message: msg, severity: "error" }))

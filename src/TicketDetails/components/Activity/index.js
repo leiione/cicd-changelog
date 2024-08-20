@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import AccordionCard from "../../../Common/AccordionCard";
-import HeaderMenuOptions from "./components/HeaderMenuOptions";
+import HeaderMenuOptions from "components/HeaderMenuOptions";
 
 const Activity = (props) => {
+  const { appuser_id } = props;
   const [filters, SetFilters] = useState(() => ["Message"]);
   const handleFilter = (event, newFilters) => {
     SetFilters(newFilters);
@@ -15,7 +16,7 @@ const Activity = (props) => {
       className={"pt-0"}
       menuOption={
         <div className="d-flex align-items-center">
-          <HeaderMenuOptions />
+          <HeaderMenuOptions appuser_id={appuser_id} category="Activity Card" />
         </div>
       }
     >
@@ -43,8 +44,8 @@ const Activity = (props) => {
           </ToggleButton>
         </ToggleButtonGroup>
 
+        Coming Soon!
 
-        
       </div>
     </AccordionCard>
   );

@@ -1,10 +1,12 @@
 import React from "react";
 import { OpenInNew, Visibility } from "@mui/icons-material";
 import AccordionCard from "../../../Common/AccordionCard";
-import HeaderMenuOptions from "./components/HeaderMenuOptions";
 import { IconButton } from "@mui/material";
+import HeaderMenuOptions from "components/HeaderMenuOptions";
+
 
 const BillsOfMaterial = (props) => {
+  const { appuser_id } = props;
   return (
     <AccordionCard
       label="Bills Of Material"
@@ -20,11 +22,11 @@ const BillsOfMaterial = (props) => {
           <IconButton>
             <Visibility />
           </IconButton>
-          <HeaderMenuOptions />
+          <HeaderMenuOptions appuser_id={appuser_id} category="Bill Of Materials Card" />
         </>
       }
     >
-      BOM Card
+      Coming Soon!
     </AccordionCard>
   );
 };

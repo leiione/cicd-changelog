@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { AddCircleOutline, DragIndicator } from "@mui/icons-material";
 import AccordionCard from "../../../Common/AccordionCard";
 import ButtonWithLable from "../../../Common/ButtonWithLable";
-import HeaderMenuOptions from "./components/HeaderMenuOptions";
+import HeaderMenuOptions from "../../../components/HeaderMenuOptions";
 import {
   Checkbox,
   List,
