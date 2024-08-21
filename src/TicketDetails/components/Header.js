@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { FormControlLabel, IconButton, MenuItem, Popover, Switch, Toolbar, Tooltip, Typography } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { ContentCopy, DescriptionOutlined, MoreVert } from "@mui/icons-material";
@@ -29,6 +29,8 @@ const Header = (props) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const [openDelete, toggleDelete] = useState(null);
   const [loading, setLoading] = useState(false)
+  const [copyTicket, setCopyTicket] = useState(false)
+
   const [deleteTicket] = useMutation(DELETE_TICKET)
 
   const handleClick = (event) => {
@@ -36,9 +38,11 @@ const Header = (props) => {
     setAnchorEl(Boolean(anchorEl) ? null : event.currentTarget)
   }
 
-  const copyText = () => {
+
+  const copyText = useCallback(() => {
     navigator.clipboard.writeText(ticket.ticket_id)
-  }
+    setCopyTicket(!copyTicket)
+  }, [copyTicket, ticket.ticket_id])
 
   const onDeleteTicket = async () => {
     try {
@@ -62,6 +66,10 @@ const Header = (props) => {
     toggleOffCRMDrawer()
     setAnchorEl(null)
   }
+
+  setTimeout(() => {
+    setCopyTicket(false)
+  }, 4000)
 
   return (
     <>
@@ -102,7 +110,7 @@ const Header = (props) => {
         <Typography variant="h6" className="font-weight-light">{ticket.ticket_id > 0 ? `Ticket #${ticket.ticket_id}` : 'Add Ticket'}</Typography>
         {ticket.ticket_id > 0 &&
           <>
-            <Tooltip title="Copy" placement="top">
+            <Tooltip title={!copyTicket ? "Copy Ticket ID" : "Copied!"} placement="top">
               <IconButton className="text-light" onClick={copyText}>
                 <ContentCopy className="f-18" />
               </IconButton>
