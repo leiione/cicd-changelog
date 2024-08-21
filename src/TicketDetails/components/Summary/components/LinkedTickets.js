@@ -65,7 +65,7 @@ const LinkedTicketContent = (props) => {
             <Grid item xs={12}>
               <Typography variant="subtitle1" className="text-muted">{startCase(link.linked_tickets[0].option_label)}</Typography>
             </Grid>
-            <Grid item xs={8}>
+            <Grid item xs={9}>
               <MenuList>
                 {link.linked_tickets.map((item, index) => (
                   <MenuItem
@@ -74,13 +74,13 @@ const LinkedTicketContent = (props) => {
                     onClick={() => onLinkedTicketClick(item)}
                   >
                     <Grid container spacing={1} key={index}>
-                      <Grid item xs={1.5}>
+                      <Grid item xs="auto">
                         <Typography variant="subtitle1" className="text-primary">{item.ticket_id}</Typography>
                       </Grid>
                       <Grid item xs={6}>
-                        <Typography variant="subtitle1" className="text-dark">{item.description}</Typography>
+                        <Typography variant="body1" className="text-dark">{item.description}</Typography>
                       </Grid>
-                      <Grid item xs={4.5} className="text-right">
+                      <Grid item xs={4} className="text-right">
                         <div className="d-inline-flex">
                           <span style={{ margin: "0px 10px" }}>
                             <Tooltip title={item.priority} placement="top">
