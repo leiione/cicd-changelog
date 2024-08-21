@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import TaskMenuOptions from "./components/TaskMenuOptions";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import { cloneDeep, get, isEmpty, omit, sortBy } from "lodash";
+import { cloneDeep, get, isEmpty, omit, sortBy, trim } from "lodash";
 import { preventEvent } from "Common/helper";
 import { useMutation } from "@apollo/client";
 import { GET_TICKET, SAVE_TICKET_TASKS } from "TicketDetails/TicketGraphQL";
@@ -54,7 +54,7 @@ const Tasks = (props) => {
 
   const completed = (ticketTasks.filter(x => x.is_completed)).length
   const taskCount = ticketTasks.length
-  const error = onEditMode.index > -1 && isEmpty(onEditMode.value)
+  const error = onEditMode.index > -1 && isEmpty(trim(onEditMode.value))
 
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list)
@@ -97,7 +97,7 @@ const Tasks = (props) => {
   }
 
   const onTaskNameChange = (index) => {
-    if (!isEmpty(onEditMode.value)) {
+    if (!isEmpty(trim(onEditMode.value))) {
       const newTasks = cloneDeep(ticketTasks)
       if (newTasks[index].task !== onEditMode.value) {
         newTasks[index].task = onEditMode.value
@@ -113,7 +113,7 @@ const Tasks = (props) => {
       onTaskNameChange(onEditMode.index)
     }
 
-    if (!isEmpty(onEditMode.value) || onEditMode.index < 0) {
+    if (!isEmpty(trim(onEditMode.value)) || onEditMode.index < 0) {
       setOnEditMode({ index, value: task.task })
     }
   }
@@ -202,11 +202,13 @@ const Tasks = (props) => {
                               <TaskMenuOptions
                                 ticket={ticket}
                                 show={isHovered === index}
+                                disabled={onEditMode.index === index}
                                 task={task}
                                 ticketTasks={ticketTasks}
                                 setTicketTasks={setTicketTasks}
                                 onSaveTaskChanges={onSaveTaskChanges}
                                 handleOpenTicket={handleOpenTicket}
+                                setOnEditMode={setOnEditMode}
                               />
                               <ListItemIcon >
                                 <Checkbox
@@ -214,6 +216,7 @@ const Tasks = (props) => {
                                   onChange={() => onCompleteTask(index)}
                                   inputProps={{ 'aria-label': 'controlled' }}
                                   style={{ padding: 0 }}
+                                  disabled={onEditMode.index === index}
                                 />
                               </ListItemIcon>
                               {onEditMode.index === index ?
