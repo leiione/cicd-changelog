@@ -109,7 +109,7 @@ const Signature = props => {
         <Grid item xs="auto">
           {ticket && ticket.signature_url ?
             <img src={ticket.signature_url} alt="signature" style={{ width: "100px", height: "50px" }} />
-            : <Link component={"button"} onClick={() => toggleSignature(true)} disable>Add Signature</Link>
+            : <Link component={"button"} onClick={() => toggleSignature(true)} disable>Add</Link>
           }
         </Grid>
       </Grid>

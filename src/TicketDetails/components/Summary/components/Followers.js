@@ -151,8 +151,8 @@ const Followers = (props) => {
               );
             })
           ) : (
-            <Typography variant="body2" color="primary" onClick={handleClick}>
-              Add Followers
+            <Typography variant="subtitle2" color="primary" onClick={handleClick}>
+              Add
             </Typography>
           )}
 

@@ -20,7 +20,10 @@ import {
 import { useMutation } from "@apollo/client";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
-import { HeaderSkeletonLoader, SummarySkeletonLoader } from "./components/SkeletonLoader";
+import {
+  HeaderSkeletonLoader,
+  SummarySkeletonLoader,
+} from "./components/SkeletonLoader";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
 
 const Summary = (props) => {
@@ -95,7 +98,9 @@ const Summary = (props) => {
           </>
         )
       }
-      menuOption={<HeaderMenuOptions appuser_id={appuser_id} category="Summary Card" />}
+      menuOption={
+        <HeaderMenuOptions appuser_id={appuser_id} category="Summary Card" />
+      }
     >
       {loading ? (
         <SummarySkeletonLoader />
@@ -105,15 +110,15 @@ const Summary = (props) => {
             <div className="py-3 pr-5">
               <Description ticket={customer} updateTicket={handleUpdate} />
               <div className="border-top mt-3 pt-3">
-                <Schedule
-                  isSubmitting={isSubmitting}
-                  ticket={customer}
-                  updateTicket={handleUpdate}
-                />
                 <ServiceContact
                   ticket={customer}
                   updateTicket={handleUpdate}
                   isSubmitting={isSubmitting}
+                />
+                <Schedule
+                  isSubmitting={isSubmitting}
+                  ticket={customer}
+                  updateTicket={handleUpdate}
                 />
                 <LinkedTickets
                   ticket={customer}
@@ -127,15 +132,15 @@ const Summary = (props) => {
               onClick={handleFilterVisibility}
               size="small"
               className="border rounded-0 position-absolute"
-              style={{ left: showFilters ? -4 : -21, top: 15 }}
+              style={{ left: !showFilters ? -4 : -21, top: 15 }}
             >
               {showFilters ? (
-                <ChevronLeft className="f-18" />
-              ) : (
                 <ChevronRight className="f-18" />
+              ) : (
+                <ChevronLeft className="f-18" />
               )}
             </IconButton>
-            {!showFilters && (
+            {showFilters && (
               <div className="border-left pl-3 py-3 h-100">
                 <Assignee ticket={customer} updateTicket={handleUpdate} />
                 <Followers ticket={customer} updateTicket={handleUpdate} />

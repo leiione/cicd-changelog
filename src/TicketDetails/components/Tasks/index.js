@@ -222,9 +222,9 @@ const Tasks = (props) => {
                               {onEditMode.index === index ?
                                 <TextField
                                   autoFocus
-                                  variant="standard"
+                                  variant="outlined"
+                                  fullWidth
                                   value={onEditMode.value}
-                                  style={{ marginTop: "5px" }}
                                   placeholder="Add text here"
                                   onChange={e => setOnEditMode({ index, value: e.target.value })}
                                   onBlur={() => onTaskNameChange(index)}
