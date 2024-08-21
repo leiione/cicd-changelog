@@ -65,7 +65,7 @@ const LinkedTicketContent = (props) => {
             <Grid item xs={12}>
               <Typography variant="subtitle1" className="text-muted">{startCase(link.linked_tickets[0].option_label)}</Typography>
             </Grid>
-            <Grid item xs={9}>
+            <Grid item xs={10}>
               <MenuList>
                 {link.linked_tickets.map((item, index) => (
                   <MenuItem
