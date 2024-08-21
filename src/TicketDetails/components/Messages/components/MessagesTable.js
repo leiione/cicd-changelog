@@ -41,7 +41,7 @@ const MessagesTable = (props) => {
             </ListItemAvatar>
             <ListItemText
               primary={
-                <Grid container spacing={1} className="align-items-center">
+                <Grid container spacing={1} className="align-items-center mb-1">
                   <Grid item xs>
                     <Typography variant="body2">{message.sender}</Typography>
                   </Grid>
