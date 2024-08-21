@@ -21,7 +21,7 @@ import { useQuery } from "@apollo/client";
 const ServiceContact = (props) => {
   const { ticket, updateTicket, isSubmitting } = props
   const { infrastructure = {} } = ticket
-  const [expandCollapse, setExpandCollapse] = useState(false);
+  const [expandCollapse, setExpandCollapse] = useState(true);
   const [onEditMode, setEditMode] = useState(false);
   const isSubscriber = ticket.category_type === "SUBSCRIBER"
 

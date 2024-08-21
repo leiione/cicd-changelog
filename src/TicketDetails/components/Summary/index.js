@@ -127,7 +127,7 @@ const Summary = (props) => {
               </div>
             </div>
           </Grid>
-          <Grid item xs="auto" className="h-100 position-relative">
+          <Grid item xs="auto" className="min-h-100 position-relative">
             <IconButton
               onClick={handleFilterVisibility}
               size="small"
@@ -141,7 +141,7 @@ const Summary = (props) => {
               )}
             </IconButton>
             {showFilters && (
-              <div className="border-left pl-3 py-3 h-100">
+              <div className="border-left pl-3 py-3 h-100 d-flex flex-column">
                 <Assignee ticket={customer} updateTicket={handleUpdate} />
                 <Followers ticket={customer} updateTicket={handleUpdate} />
                 {showSignature && <Signature ticket={customer} />}
