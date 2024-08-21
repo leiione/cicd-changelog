@@ -145,14 +145,16 @@ const Summary = (props) => {
                 <Assignee ticket={customer} updateTicket={handleUpdate} />
                 <Followers ticket={customer} updateTicket={handleUpdate} />
                 {showSignature && <Signature ticket={customer} />}
-                <Typography variant="caption" className="d-block mt-2">
-                  Created by: <strong>{customer.created_by}</strong> on{" "}
-                  {customer.created_by_time}
-                </Typography>
-                <Typography variant="caption">
-                  Last updated by: <strong>{customer.last_updated_by}</strong>{" "}
-                  on {customer.last_updated_by_time}
-                </Typography>
+                <div className="mt-auto">
+                  <Typography variant="caption" className="d-block mt-2">
+                    Created by: <strong>{customer.created_by}</strong> on{" "}
+                    {customer.created_by_time}
+                  </Typography>
+                  <Typography variant="caption">
+                    Last updated by: <strong>{customer.last_updated_by}</strong>{" "}
+                    on {customer.last_updated_by_time}
+                  </Typography>
+                </div>
               </div>
             )}
           </Grid>
