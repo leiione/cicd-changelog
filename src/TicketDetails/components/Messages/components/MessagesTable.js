@@ -12,7 +12,12 @@ import {
   Typography,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faNote, faTrash } from "@fortawesome/pro-light-svg-icons";
+import {
+  faMessagePlus,
+  faNote,
+  faTrash,
+} from "@fortawesome/pro-light-svg-icons";
+import { faReply } from "@fortawesome/free-solid-svg-icons";
 const MessagesTable = (props) => {
   const [page, setPage] = React.useState(2);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -28,15 +33,15 @@ const MessagesTable = (props) => {
 
   return (
     <div>
-      <List>
+      <List className="overflow-y-auto paper-height-500">
         {data.map((message) => (
-          <ListItem key={message.id} alignItems="start">
-            <ListItemAvatar>
+          <ListItem key={message.id} alignItems="flex-start">
+            <ListItemAvatar sx={{ width: 24, height: 24, minWidth:24 }}>
               <FontAwesomeIcon icon={faNote} />
             </ListItemAvatar>
             <ListItemText
               primary={
-                <Grid container className="align-items-center">
+                <Grid container spacing={1} className="align-items-center">
                   <Grid item xs>
                     <Typography variant="body2">{message.sender}</Typography>
                   </Grid>
@@ -45,7 +50,12 @@ const MessagesTable = (props) => {
                   </Grid>
                   <Grid item xs="auto">
                     <IconButton size="small">
-                      <FontAwesomeIcon icon={faTrash} />
+                      <FontAwesomeIcon icon={faReply} />
+                    </IconButton>
+                  </Grid>
+                  <Grid item xs="auto">
+                    <IconButton size="small">
+                      <FontAwesomeIcon icon={faMessagePlus} />
                     </IconButton>
                   </Grid>
                   <Grid item xs="auto">
