@@ -102,7 +102,7 @@ const Header = (props) => {
             </MenuItem>
           }
           <MenuItem className="pl-2">
-            <CSAT appuser_id={appuser_id} category={category} key={category} isSettings={false} />
+            <CSAT appuser_id={appuser_id} category={category} key={category} isSettings={false} handlePopoverClose={() => setAnchorEl(null)} />
           </MenuItem>
         </Popover>
       </div>
