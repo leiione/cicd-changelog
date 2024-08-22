@@ -165,55 +165,56 @@ const TicketDetails = (props) => {
         appuser_id={appuser_id}
         toggleOffCRMDrawer={toggleOffCRMDrawer}
       />
-      {error && <ErrorPage error={error} />}
-      <div className="drawer-wrapper-full p-3" hidden={error}>
-        <Summary
-          loading={loading}
-          appuser_id={appuser_id}
-          handleIconButton={handleIconButton}
-          customer={ticket}
-          ticketTypes={ticketTypes}
-          ticketStatuses={ticketStatuses}
-          lablesVisible={lablesVisible}
-          handleOpenTicket={handleOpenTicket}
-        />
+      {error ? <ErrorPage error={error} />
+        : <div className="drawer-wrapper-full p-3" hidden={error}>
+          <Summary
+            loading={loading}
+            appuser_id={appuser_id}
+            handleIconButton={handleIconButton}
+            customer={ticket}
+            ticketTypes={ticketTypes}
+            ticketStatuses={ticketStatuses}
+            lablesVisible={lablesVisible}
+            handleOpenTicket={handleOpenTicket}
+          />
 
-        {!hideInprogress &&
-          <>
-            <Tasks
-              loading={loading}
-              ticket={ticket}
-              appuser_id={appuser_id}
-              lablesVisible={lablesVisible}
-              handleOpenTicket={handleOpenTicket}
-            />
-            <Messages
-              handleIconButton={handleIconButton}
-              customer={ticket}
-              lablesVisible={lablesVisible}
-              appuser_id={appuser_id}
-            />
-            <Attachments
-              handleIconButton={handleIconButton}
-              customer={ticket}
-              lablesVisible={lablesVisible}
-              appuser_id={appuser_id}
-            />
-            <BillsOfMaterial
-              handleIconButton={handleIconButton}
-              customer={ticket}
-              lablesVisible={lablesVisible}
-              appuser_id={appuser_id}
-            />
-            <Activity
-              handleIconButton={handleIconButton}
-              customer={ticket}
-              lablesVisible={lablesVisible}
-              appuser_id={appuser_id}
-            />
-          </>
-        }
-      </div>
+          {!hideInprogress &&
+            <>
+              <Tasks
+                loading={loading}
+                ticket={ticket}
+                appuser_id={appuser_id}
+                lablesVisible={lablesVisible}
+                handleOpenTicket={handleOpenTicket}
+              />
+              <Messages
+                handleIconButton={handleIconButton}
+                customer={ticket}
+                lablesVisible={lablesVisible}
+                appuser_id={appuser_id}
+              />
+              <Attachments
+                handleIconButton={handleIconButton}
+                customer={ticket}
+                lablesVisible={lablesVisible}
+                appuser_id={appuser_id}
+              />
+              <BillsOfMaterial
+                handleIconButton={handleIconButton}
+                customer={ticket}
+                lablesVisible={lablesVisible}
+                appuser_id={appuser_id}
+              />
+              <Activity
+                handleIconButton={handleIconButton}
+                customer={ticket}
+                lablesVisible={lablesVisible}
+                appuser_id={appuser_id}
+              />
+            </>
+          }
+        </div>
+      }
       <ChildDrawers
         open={Boolean(open1)}
         handleDrawerClose1={handleDrawerClose1}
