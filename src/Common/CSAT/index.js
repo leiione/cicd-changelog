@@ -182,7 +182,7 @@ const CSATForm = props => {
           </Grid>
           <Grid item xs="auto">
             <FormControl component="fieldset">
-              <RadioGroup row aria-label="score" name="score" value={emojiValues[values.score]} onChange={handleChange}>
+              <RadioGroup row aria-label="score" name="score" value={String(emojiValues[values.score])} onChange={handleChange}>
                 <FormControlLabel
                   className="dissatisfied"
                   value="dissatisfied"
