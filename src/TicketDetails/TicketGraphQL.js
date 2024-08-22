@@ -284,6 +284,7 @@ export const GET_TICKET_MESSAGES = gql`
       ticket_id
       message
       to_email
+      integration_id
       date
     }
   }
