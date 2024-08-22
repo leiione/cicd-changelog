@@ -222,7 +222,8 @@ const Tasks = (props) => {
                               {onEditMode.index === index ?
                                 <TextField
                                   autoFocus
-                                  variant="outlined"
+                                  variant="standard"
+                                  className="m-0"
                                   fullWidth
                                   value={onEditMode.value}
                                   placeholder="Add text here"
