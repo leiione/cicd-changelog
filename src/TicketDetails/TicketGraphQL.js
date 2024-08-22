@@ -254,7 +254,7 @@ export const ADD_TICKET_SIGNATURE = gql`
       signature_date
     }
   }
-` 
+`
 
 export const SAVE_TICKET_TASKS = gql`
   mutation saveTicketTasks($ticket_id: Int!, $tasks: [TicketTaskInput]) {
@@ -274,6 +274,17 @@ export const CONVERT_TAST_TO_TICKET = gql`
       priority
       status
       description
+    }
+  }
+`
+
+export const GET_TICKET_MESSAGES = gql`
+  query ticketMessages($ticket_id: Int!) {
+    ticketMessages(ticket_id: $ticket_id) {
+      ticket_id
+      message
+      to_email
+      date
     }
   }
 `

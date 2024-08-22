@@ -189,7 +189,7 @@ const TicketDetails = (props) => {
               />
               <Messages
                 handleIconButton={handleIconButton}
-                customer={ticket}
+                ticket={ticket}
                 lablesVisible={lablesVisible}
                 appuser_id={appuser_id}
               />
