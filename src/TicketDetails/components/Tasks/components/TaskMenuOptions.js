@@ -63,6 +63,7 @@ const TaskMenuOptions = (props) => {
       ticket_contact_numbers: ticket.ticket_contact_numbers || '',
       ticket_contact_name: ticket.ticket_contact_name || '',
       ticket_contact_emails: ticket.ticket_contact_email || '',
+      ticket_id: ticket.ticket_id,
     }
     input_ticket.followers = !isEmpty(ticket.followers) ? ticket.followers.split(",") : []
     try {

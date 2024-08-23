@@ -88,12 +88,14 @@ const Tasks = (props) => {
   }
 
   const addTicketTask = (event) => {
-    preventEvent(event);
-    let newTasks = cloneDeep(ticketTasks)
-    newTasks.unshift(taskData)
-    newTasks = newTasks.map((x, index) => ({ ...x, rank: index + 1 }))
-    setTicketTasks(newTasks)
-    setOnEditMode({ index: 0, value: '' })
+    if (error) {
+      preventEvent(event);
+      let newTasks = cloneDeep(ticketTasks)
+      newTasks.unshift(taskData)
+      newTasks = newTasks.map((x, index) => ({ ...x, rank: index + 1 }))
+      setTicketTasks(newTasks)
+      setOnEditMode({ index: 0, value: '' })
+    }
   }
 
   const onTaskNameChange = (index) => {
