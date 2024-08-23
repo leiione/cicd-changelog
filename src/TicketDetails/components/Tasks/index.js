@@ -233,6 +233,8 @@ const Tasks = (props) => {
                                   onBlur={() => onTaskNameChange(index)}
                                   error={error}
                                   onKeyDown={(e) => onEnter(e, index)}
+                                  inputProps={{ maxLength: 100 }}
+                                  style={{ width: "90%"}}
                                 />
                                 : <ListItemText
                                   id={task.id}
@@ -241,7 +243,7 @@ const Tasks = (props) => {
                                       variant="body2"
                                       onClick={() => onNameClick(index, task)}
                                       className={task.is_completed ? "text-decoration-line-through" : ""}
-                                      style={{ cursor: "text", width: "max-content" }}
+                                      style={{ cursor: "text", width: "90%" }}
                                     >
                                       {task.task}
                                     </Typography>
