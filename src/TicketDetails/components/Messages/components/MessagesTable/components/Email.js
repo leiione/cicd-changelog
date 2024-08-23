@@ -86,7 +86,7 @@ const Email = props => {
   const { message } = props
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [more, toggleMore] = React.useState(false)
-  const toEmail = message.to_email.split(",")
+  const toEmail = message.to_email ? message.to_email.split(",") : []
 
   const lineLen = message.message.split(/\r|\r\n|\n/g).length
 
@@ -148,7 +148,7 @@ const Email = props => {
                 />
               }
               {lineLen > 6 &&
-                <div style={{ margin: "5px 0px" }}>
+                <div style={{ marginTop: "5px" }}>
                   <Link variant="caption" onClick={() => toggleMore(!more)}>{more ? 'Simplify...' : 'More...'}</Link>
                 </div>
               }
