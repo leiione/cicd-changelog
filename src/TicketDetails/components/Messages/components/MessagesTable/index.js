@@ -4,10 +4,11 @@ import { List, Typography } from "@mui/material";
 
 import Note from "./components/Note";
 import Email from "./components/Email";
-// import SMS from "./components/SMS";
+import SMS from "./components/SMS";
 
 const MessagesTable = (props) => {
   const { messages } = props;
+  console.log("message: "+messages)
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
@@ -27,8 +28,8 @@ const MessagesTable = (props) => {
           switch (message.integration_id) {
             case 1:
               return <Email message={message} />
-            // case 3:
-            //   return <SMS message={message} />
+            case 3:
+              return <SMS message={message} />
             default:
               return <Note message={message} />
           }
