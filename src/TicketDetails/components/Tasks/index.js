@@ -88,8 +88,8 @@ const Tasks = (props) => {
   }
 
   const addTicketTask = (event) => {
-    if (error) {
-      preventEvent(event);
+    preventEvent(event);
+    if (!error) {
       let newTasks = cloneDeep(ticketTasks)
       newTasks.unshift(taskData)
       newTasks = newTasks.map((x, index) => ({ ...x, rank: index + 1 }))
