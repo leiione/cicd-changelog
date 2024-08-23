@@ -3,8 +3,8 @@ import TablePagination from "@mui/material/TablePagination";
 import { List } from "@mui/material";
 
 import Note from "./components/Note";
-import { Email } from "@mui/icons-material";
-import SMS from "./components/SMS";
+import Email from "./components/Email";
+// import SMS from "./components/SMS";
 
 const MessagesTable = (props) => {
   const { messages } = props;
@@ -24,11 +24,11 @@ const MessagesTable = (props) => {
     <div>
       <List className="overflow-y-auto paper-height-500">
         {messages.map((message) => {
-          switch (message.type) {
-            case 'email':
+          switch (message.integration_id) {
+            case 1:
               return <Email message={message} />
-            case 'sms':
-              return <SMS message={message} />
+            // case 3:
+            //   return <SMS message={message} />
             default:
               return <Note message={message} />
           }

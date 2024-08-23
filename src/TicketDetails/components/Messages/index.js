@@ -17,8 +17,7 @@ const Messages = (props) => {
   });
 
   if (error) return <ErrorPage error={error} />
-  if (loading) return <Loader />
-  
+
   const messages = !loading && data && data.ticketMessages ? data.ticketMessages : [];
 
   return (
@@ -31,9 +30,12 @@ const Messages = (props) => {
         </>
       }
     >
-      <Filter />
-
-      <MessagesTable messages={messages} />
+      {loading ? <Loader />
+        : <>
+          <Filter />
+          <MessagesTable messages={messages} />
+        </>
+      }
     </AccordionCard>
   );
 };
