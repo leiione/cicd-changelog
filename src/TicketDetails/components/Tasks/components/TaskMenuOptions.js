@@ -56,6 +56,7 @@ const TaskMenuOptions = (props) => {
         "location_id",
         "assigned_name",
         "address",
+        "type"
       ]),
       description: task.task,
       customer_id: ticket.subscriber ? ticket.subscriber.customer_id : 0,

@@ -290,6 +290,7 @@ export const CONVERT_TAST_TO_TICKET = gql`
       priority
       status
       description
+      summary: description
     }
   }
 `;
