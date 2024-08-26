@@ -9,9 +9,21 @@ import {
 } from "@mui/material";
 
 const AccordionCard = (props) => {
-  const { children, label, iconButtons, menuOption, cardFooter,className ,defaultExpanded} = props;
+  const { children, label, iconButtons, menuOption, cardFooter, className, defaultExpanded = false, expanded, setExpanded } = props;
+
+  let accordionProps = {}
+  if (setExpanded) {
+    accordionProps = {
+      expanded: expanded,
+      onChange: () => setExpanded(!expanded)
+    }
+  }
+
   return (
-    <Accordion defaultExpanded={defaultExpanded}>
+    <Accordion
+      defaultExpanded={defaultExpanded}
+      {...accordionProps}
+    >
       <AccordionSummary
         expandIcon={<ExpandMore />}
         aria-controls="panel1a-content"
@@ -26,4 +38,4 @@ const AccordionCard = (props) => {
     </Accordion>
   );
 };
-export default AccordionCard;
+export default React.memo(AccordionCard);

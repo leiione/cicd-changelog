@@ -43,14 +43,16 @@ const Tasks = (props) => {
   const [isHovered, setHover] = useState(-1)
   const [onEditMode, setOnEditMode] = useState({ index: -1, value: '' })
   const [saveTicketTasks] = useMutation(SAVE_TICKET_TASKS)
+  const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
     if (!loading && ticket.tasks !== ticketTasks) {
       const tasks = sortBy(ticket.tasks, "rank")
       setTicketTasks(tasks)
+      setOnEditMode({ index: -1, value: '' })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, ticket.ticket_id, ticket.ticket_type_id])
+  }, [loading, ticket.ticket_id, ticket.ticket_type_id, ticket.tasks])
 
   const completed = (ticketTasks.filter(x => x.is_completed)).length
   const taskCount = ticketTasks.length
@@ -94,6 +96,7 @@ const Tasks = (props) => {
       newTasks.unshift(taskData)
       newTasks = newTasks.map((x, index) => ({ ...x, rank: index + 1 }))
       setTicketTasks(newTasks)
+      setExpanded(true)
       setOnEditMode({ index: 0, value: '' })
     }
   }
@@ -161,6 +164,8 @@ const Tasks = (props) => {
   return (
     <AccordionCard
       label="Tasks"
+      expanded={expanded}
+      setExpanded={setExpanded}
       iconButtons={
         <>
           <ButtonWithLable
@@ -234,7 +239,7 @@ const Tasks = (props) => {
                                   error={error}
                                   onKeyDown={(e) => onEnter(e, index)}
                                   inputProps={{ maxLength: 100 }}
-                                  style={{ width: "90%"}}
+                                  style={{ width: "90%" }}
                                 />
                                 : <ListItemText
                                   id={task.id}

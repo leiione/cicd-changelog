@@ -65,7 +65,7 @@ const EmailPopover = props => {
             <Typography variant="subtitle1">{ }</Typography>
           </Grid>
           <Grid item xs={3} style={{ textAlign: "end" }}>
-            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>Ncc:</Typography>
+            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>Bcc:</Typography>
           </Grid>
           <Grid item xs={9}>
             <Typography variant="subtitle1">{ }</Typography>
