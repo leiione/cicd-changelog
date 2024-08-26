@@ -6,7 +6,7 @@ export const GET_TICKET = gql`
       ticket_id
       description
       priority
-      created_by 
+      created_by
       created_by_time
       last_updated_by
       last_updated_by_time
@@ -167,23 +167,23 @@ export const REMOVE_LINKED_TICKET = gql`
 `;
 
 export const GET_DETAIL_TEXT = gql`
-    query workflowOrder($ticket_id: Int!) {
-      workflowOrder(ticket_id: $ticket_id) {
-        ticket_id
-        type
-        detail_id
-        detail_text
-      }
+  query workflowOrder($ticket_id: Int!) {
+    workflowOrder(ticket_id: $ticket_id) {
+      ticket_id
+      type
+      detail_id
+      detail_text
     }
+  }
 `;
 
 export const UPDATE_DETAIL_TEXT = gql`
-mutation UpdateTicket($input_ticket: TicketInput!) {
+  mutation UpdateTicket($input_ticket: TicketInput!) {
     updateTicket(input_ticket: $input_ticket) {
-        ticket_id
-        __typename
+      ticket_id
+      __typename
     }
-}
+  }
 `;
 
 export const GET_ASSIGNEES = gql`
@@ -207,21 +207,28 @@ export const GET_FOLLOWERS = gql`
 `;
 
 export const GET_TICKETS_QUERY = gql`
-  query GetTickets($searchVal: String!, $ticket_id: Int!, $selected_ticket_id: [Int]) {
-    tickets(searchVal: $searchVal, ticket_id: $ticket_id, selected_ticket_id: $selected_ticket_id) {
+  query GetTickets(
+    $searchVal: String!
+    $ticket_id: Int!
+    $selected_ticket_id: [Int]
+  ) {
+    tickets(
+      searchVal: $searchVal
+      ticket_id: $ticket_id
+      selected_ticket_id: $selected_ticket_id
+    ) {
       tickets {
         ticket_id
         description
         status
         priority
-        type,
+        type
         technician
       }
       selected_ticket_id
     }
   }
 `;
-
 
 export const GET_TICKET_LINK_TYPES = gql`
   query GetTicketLinkTypes {
@@ -235,26 +242,35 @@ export const GET_TICKET_LINK_TYPES = gql`
   }
 `;
 
-
 export const ADD_LINKED_TICKET_MUTATION = gql`
-  mutation AddLinkedTicket($ticket_id: Int!, $linked_input: LinkedTicketInput!) {
+  mutation AddLinkedTicket(
+    $ticket_id: Int!
+    $linked_input: LinkedTicketInput!
+  ) {
     addLinkedTicket(ticket_id: $ticket_id, linked_input: $linked_input) {
       id
     }
   }
 `;
 
-
 export const ADD_TICKET_SIGNATURE = gql`
-  mutation addTicketSignature($ticket_id: Int!, $signature: String!, $signature_date: String) {
-    addTicketSignature(ticket_id: $ticket_id, signature: $signature, signature_date: $signature_date) {
+  mutation addTicketSignature(
+    $ticket_id: Int!
+    $signature: String!
+    $signature_date: String
+  ) {
+    addTicketSignature(
+      ticket_id: $ticket_id
+      signature: $signature
+      signature_date: $signature_date
+    ) {
       ticket_id
       status
       signature_url
       signature_date
     }
   }
-`
+`;
 
 export const SAVE_TICKET_TASKS = gql`
   mutation saveTicketTasks($ticket_id: Int!, $tasks: [TicketTaskInput]) {
@@ -265,7 +281,7 @@ export const SAVE_TICKET_TASKS = gql`
       rank
     }
   }
-`
+`;
 
 export const CONVERT_TAST_TO_TICKET = gql`
   mutation convertTaskToTicket($input_ticket: TicketInput) {
@@ -276,7 +292,7 @@ export const CONVERT_TAST_TO_TICKET = gql`
       description
     }
   }
-`
+`;
 
 export const GET_TICKET_MESSAGES = gql`
   query ticketMessages($ticket_id: Int!) {
@@ -290,4 +306,16 @@ export const GET_TICKET_MESSAGES = gql`
       subject
     }
   }
-`
+`;
+export const GET_TICKET_NOTES = gql`
+  query ticketNotes($ticket_id: Int!) {
+    ticketNotes(ticket_id: $ticket_id) {
+      note_id
+      date_added
+      appuser_id
+      isp_id
+      content
+      appuser_name
+    }
+  }
+`;

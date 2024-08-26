@@ -3,7 +3,10 @@ import AccordionCard from "../../../Common/AccordionCard";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
 import Filter from "./components/Filter";
 import MessagesTable from "./components/MessagesTable";
-import { GET_TICKET_MESSAGES } from "TicketDetails/TicketGraphQL";
+import {
+  GET_TICKET_MESSAGES,
+  GET_TICKET_NOTES,
+} from "TicketDetails/TicketGraphQL";
 import { useQuery } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
 import Loader from "components/Loader";
@@ -18,11 +21,56 @@ const Messages = (props) => {
     fetchPolicy: "cache-and-network",
     skip: !ticket.ticket_id || filter === "notes",
   });
-  const cacheExists = checkIfCacheExists(client, { query: GET_TICKET_MESSAGES, variables: { ticket_id: ticket.ticket_id } })
+  const cacheExists = checkIfCacheExists(client, {
+    query: GET_TICKET_MESSAGES,
+    variables: { ticket_id: ticket.ticket_id },
+  });
 
-  if (error) return <ErrorPage error={error} />
+  const {
+    loading: loadingNotes,
+    error: errorNotes,
+    data: dataNotes,
+    client: clientNotes,
+  } = useQuery(GET_TICKET_NOTES, {
+    variables: { ticket_id: ticket.ticket_id },
+    fetchPolicy: "cache-and-network",
+    skip: !ticket.ticket_id,
+  });
+  const cacheExistsNotes = checkIfCacheExists(clientNotes, {
+    query: GET_TICKET_NOTES,
+    variables: { ticket_id: ticket.ticket_id },
+  });
 
-  const messages = filter !== "notes" && (!loading || cacheExists) && data && data.ticketMessages ? data.ticketMessages : [];
+  if (error || errorNotes) return <ErrorPage error={error} />;
+
+  let messages = [];
+
+  if (
+    filter === "notes" &&
+    (!loadingNotes || cacheExistsNotes) &&
+    dataNotes &&
+    dataNotes.ticketNotes
+  ) {
+    messages = dataNotes.ticketNotes;
+  } else if (
+    filter === "message" &&
+    (!loading || cacheExists) &&
+    data &&
+    data.ticketMessages
+  ) {
+    messages = data.ticketMessages;
+  } else if (
+    filter === "all" &&
+    (!loading || cacheExists) &&
+    data &&
+    data.ticketMessages &&
+    (!loadingNotes || cacheExistsNotes) &&
+    dataNotes &&
+    dataNotes.ticketNotes
+  ) {
+    messages = [...data.ticketMessages, ...dataNotes.ticketNotes];
+  }
+
 
   return (
     <AccordionCard
@@ -34,12 +82,14 @@ const Messages = (props) => {
         </>
       }
     >
-      {(loading && !cacheExists) ? <Loader loaderStyle={{ position: "static" }} />
-        : <>
+      {(loading || loadingNotes) && (!cacheExists || !cacheExistsNotes) ? (
+        <Loader loaderStyle={{ position: "static" }} />
+      ) : (
+        <>
           <Filter filter={filter} setFilter={setFilter} />
           <MessagesTable messages={messages} />
         </>
-      }
+      )}
     </AccordionCard>
   );
 };

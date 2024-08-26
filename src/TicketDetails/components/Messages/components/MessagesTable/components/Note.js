@@ -20,7 +20,7 @@ const Note = props => {
   const { message } = props
 
   return (
-    <ListItem key={message.id} alignItems="flex-start">
+    <ListItem key={message.note_id} alignItems="flex-start">
       <ListItemAvatar sx={{ width: 24, height: 24, minWidth: 24 }}>
         <FontAwesomeIcon icon={faNote} />
       </ListItemAvatar>
@@ -28,10 +28,10 @@ const Note = props => {
         primary={
           <Grid container spacing={1} className="align-items-center mb-1">
             <Grid item xs>
-              <Typography variant="body2">{message.to_email}</Typography>
+              <Typography variant="subtitle1">{message.appuser_name ? message.appuser_name : ""}</Typography>
             </Grid>
             <Grid item xs="auto">
-              <Typography variant="caption">{moment(message.date).format("MMM DD, YYYY hh:mm")}</Typography>
+              <Typography variant="caption">{moment(message.date_added).format("MMM DD, YYYY hh:mm")}</Typography>
             </Grid>
             <Grid item xs="auto">
               <IconButton size="small">
@@ -52,10 +52,7 @@ const Note = props => {
         }
         secondary={
           <React.Fragment>
-            <div className="bg-lightest p-2">
-              <Typography variant="body1">{message.message}</Typography>
-            </div>
-            {message.message}
+             {message.content && <Typography variant="caption">{message.content}</Typography>}
           </React.Fragment>
         }
       />

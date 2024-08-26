@@ -28,7 +28,7 @@ const MessagesTable = (props) => {
           switch (message.integration_id) {
             case 1:
               return <Email message={message} />
-            case 3:
+            case 2:
               return <SMS message={message} />
             default:
               return <Note message={message} />
