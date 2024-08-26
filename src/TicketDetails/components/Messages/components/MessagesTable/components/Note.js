@@ -21,7 +21,7 @@ import LinesEllipsis from "react-lines-ellipsis";
 const Note = props => {
   const { message } = props
   const [more, toggleMore] = React.useState(false)
-  const lineLen = message.content.split(/\r|\r\n|\n/g).length
+  const lineLen = message.content ? message.content.split(/\r|\r\n|\n/g).length : 1
 
   return (
     <ListItem key={message.note_id} alignItems="flex-start">
