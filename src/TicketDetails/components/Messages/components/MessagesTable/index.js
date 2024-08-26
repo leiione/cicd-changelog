@@ -8,7 +8,6 @@ import SMS from "./components/SMS";
 
 const MessagesTable = (props) => {
   const { messages } = props;
-  console.log("message: "+messages)
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 

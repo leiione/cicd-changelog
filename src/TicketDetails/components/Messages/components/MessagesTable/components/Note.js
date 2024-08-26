@@ -2,6 +2,7 @@ import React from "react";
 import {
   Grid,
   IconButton,
+  Link,
   ListItem,
   ListItemAvatar,
   ListItemText,
@@ -15,9 +16,12 @@ import {
 } from "@fortawesome/pro-light-svg-icons";
 import { faReply } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment-timezone";
+import LinesEllipsis from "react-lines-ellipsis";
 
 const Note = props => {
   const { message } = props
+  const [more, toggleMore] = React.useState(false)
+  const lineLen = message.content.split(/\r|\r\n|\n/g).length
 
   return (
     <ListItem key={message.note_id} alignItems="flex-start">
@@ -51,9 +55,24 @@ const Note = props => {
           </Grid>
         }
         secondary={
-          <React.Fragment>
-             {message.content && <Typography variant="caption">{message.content}</Typography>}
-          </React.Fragment>
+          <>
+              {more || lineLen < 6 ?
+                <Typography variant="caption" style={{ whiteSpace: "pre-line" }}>
+                  {message.content}
+                </Typography>
+                : <LinesEllipsis
+                  text={message.content}
+                  maxLine={5}
+                  ellipsis=''
+                  style={{ whiteSpace: "pre-line", color: '#0009' }}
+                />
+              }
+              {lineLen > 6 &&
+                <div style={{ marginTop: "5px" }}>
+                  <Link variant="caption" onClick={() => toggleMore(!more)}>{more ? 'Simplify...' : 'More...'}</Link>
+                </div>
+              }
+            </>
         }
       />
     </ListItem>
