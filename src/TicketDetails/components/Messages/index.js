@@ -83,7 +83,7 @@ const Messages = (props) => {
       }
     >
       {(loading || loadingNotes) && (!cacheExists || !cacheExistsNotes) ? (
-        <Loader loaderStyle={{ position: "static" }} />
+        <Loader loaderStyle={{ position: "static", textAlign: "center" }} />
       ) : (
         <>
           <Filter filter={filter} setFilter={setFilter} />

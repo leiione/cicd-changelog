@@ -20,7 +20,7 @@ import { preventEvent } from "Common/helper";
 import { useMutation } from "@apollo/client";
 import { GET_TICKET, SAVE_TICKET_TASKS } from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
-import { showSnackbar } from "config/store";
+import { setCardPreferences, showSnackbar } from "config/store";
 
 const getItemStyle = (isDragging, draggableStyle) => ({
   userSelect: "none",
@@ -43,7 +43,6 @@ const Tasks = (props) => {
   const [isHovered, setHover] = useState(-1)
   const [onEditMode, setOnEditMode] = useState({ index: -1, value: '' })
   const [saveTicketTasks] = useMutation(SAVE_TICKET_TASKS)
-  const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
     if (!loading && ticket.tasks !== ticketTasks) {
@@ -96,7 +95,7 @@ const Tasks = (props) => {
       newTasks.unshift(taskData)
       newTasks = newTasks.map((x, index) => ({ ...x, rank: index + 1 }))
       setTicketTasks(newTasks)
-      setExpanded(true)
+      dispatch(setCardPreferences({ card: 'tasksCard', preferences: { expanded: true } }))
       setOnEditMode({ index: 0, value: '' })
     }
   }
@@ -164,8 +163,6 @@ const Tasks = (props) => {
   return (
     <AccordionCard
       label="Tasks"
-      expanded={expanded}
-      setExpanded={setExpanded}
       iconButtons={
         <>
           <ButtonWithLable

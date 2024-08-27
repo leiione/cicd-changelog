@@ -1,7 +1,7 @@
 import { Button, Grid } from "@mui/material";
 import React, { useState } from "react";
-import TickeLinkType from "./TicketLinkType";
-import LinkedTicketField from "./LinkedTicket.js/LinkedTicketField";
+import TickeLinkType from "../../TicketLinkType";
+import LinkedTicketField from "./LinkedTicketField";
 import {
   ADD_LINKED_TICKET_MUTATION,
   GET_LINKED_TICKETS,

@@ -16,15 +16,39 @@ const counterSlice = createSlice({
     contentDrawer: {
       open: false,
       id: 0,
-    },    
-    unsavedFormStatus: { category: null, isFormDirty: false, open: false, handleContinue: null }
+    },
+    unsavedFormStatus: { category: null, isFormDirty: false, open: false, handleContinue: null },
+    summaryCard: {
+      expanded: true,
+      subComponent: {
+        service: true,
+        schedule: false,
+        linkedTickets: false,
+        assignee: false,
+      }
+    },
+    tasksCard: {
+      expanded: false
+    },
+    messagesCard: {
+      expanded: false,
+      filter: "all"
+    },
+    attachmentsCard: {
+      expanded: false,
+    },
+    billofmaterialCard: {
+      expanded: false,
+    },
+    activityCard: {
+      expanded: false,
+    },
   },
   reducers: {
     setInitialUserPreferences: (state, action) => {
       return {
         ...state,
-        ...action.payload.irmMicroserviceTablePreferences,
-        ...action.payload.irmMicroserviceCardPreferences,
+        ...action.payload.crmDrawerPreferences,
         setPreferences: true
       }
     },
@@ -57,12 +81,6 @@ const counterSlice = createSlice({
         },
       }
     },
-    setContentDrawer: (state, action) => {
-      return {
-        ...state,
-        contentDrawer: action.payload
-      }
-    },
     setUnsavedFormStatus: (state, action) => {
       let status = { ...action.payload }
       if (action.payload.open) {
@@ -71,12 +89,22 @@ const counterSlice = createSlice({
           isFormDirty: true
         }
       } else if (!action.payload.isFormDirty) {
-        status = {  category: null, isFormDirty: false, open: false, handleContinue: null }
+        status = { category: null, isFormDirty: false, open: false, handleContinue: null }
       }
 
       return {
         ...state,
         unsavedFormStatus: status
+      }
+    },
+    setCardPreferences: (state, action) => {
+      return {
+        ...state,
+        [action.payload.card]: {
+          ...state[action.payload.card],
+          ...action.payload.preferences
+        },
+        userPreferencesTimeStamp: new Date()
       }
     }
   }
@@ -89,7 +117,8 @@ export const {
   showSnackbar,
   hideSnackbar,
   setContentDrawer,
-  setUnsavedFormStatus
+  setUnsavedFormStatus,
+  setCardPreferences,
 } = counterSlice.actions
 
 const store = configureStore({

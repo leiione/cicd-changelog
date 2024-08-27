@@ -17,11 +17,16 @@ import SiteContactDropdown from "./components/SiteContactDropdown";
 import ProgressButton from "Common/ProgressButton";
 import { GET_SITE_CONTACTS } from "TicketDetails/TicketGraphQL";
 import { useQuery } from "@apollo/client";
+import { useDispatch, useSelector } from "react-redux";
+import { setCardPreferences } from "config/store";
 
 const ServiceContact = (props) => {
+  const dispatch = useDispatch();
+  const summaryCard = useSelector(state => state.summaryCard);
+  const preferences = summaryCard ? summaryCard.subComponent : {}
+
   const { ticket, updateTicket, isSubmitting } = props
   const { infrastructure = {} } = ticket
-  const [expandCollapse, setExpandCollapse] = useState(true);
   const [onEditMode, setEditMode] = useState(false);
   const isSubscriber = ticket.category_type === "SUBSCRIBER"
 
@@ -76,7 +81,16 @@ const ServiceContact = (props) => {
   }, [ticket.site_contact_id, onEditMode])
 
   const handleCollapse = () => {
-    setExpandCollapse(!expandCollapse);
+    dispatch(setCardPreferences({
+      card: "summaryCard",
+      preferences: {
+        ...summaryCard,
+        subComponent: {
+          ...preferences,
+          service: !preferences.service
+        }
+      }
+    }))
   };
 
   const onSaveContact = async () => {
@@ -92,7 +106,7 @@ const ServiceContact = (props) => {
     <Grid container spacing={0}>
       <Grid item xs={12}>
         <IconButton onClick={handleCollapse} className="p-2 text-muted">
-          {expandCollapse ? (
+          {preferences.service ? (
             <ExpandMore className="mr-1" />
           ) : (
             <ExpandLess className="mr-1" />
@@ -101,14 +115,14 @@ const ServiceContact = (props) => {
             Service Contact
           </Typography>
         </IconButton>
-        {expandCollapse &&
+        {preferences.service &&
           <IconButton style={{ padding: 0, marginBottom: "5px" }} onClick={() => setEditMode(!onEditMode)}>
             <Edit className="text-muted f-18" />
           </IconButton>
         }
       </Grid>
       <Grid item xs={12}>
-        <Collapse in={expandCollapse} style={{ paddingLeft: "25px", position: "relative" }}>
+        <Collapse in={preferences.service} style={{ paddingLeft: "25px", position: "relative" }}>
           <Grid container spacing={1}>
             {onEditMode && !isSubscriber &&
               <Grid item xs={12}>

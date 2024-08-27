@@ -7,11 +7,11 @@ import ErrorPage from "components/ErrorPage";
 import { startCase, uniq } from "lodash";
 import { getPriorityIcon } from "utils/getPriorityIcon";
 import DialogAlert from "components/DialogAlert";
-import { useDispatch } from "react-redux";
-import { showSnackbar } from "config/store";
+import { useDispatch, useSelector } from "react-redux";
+import { setCardPreferences, showSnackbar } from "config/store";
 import { preventEvent } from "Common/helper";
 import AvatarText from "Common/AvatarText";
-import LinkedTicketNew from "./LinkedTicketNew";
+import LinkedTicketNew from "./components/LinkedTicketNew";
 
 const LinkedTicketContent = (props) => {
   const dispatch = useDispatch()
@@ -137,15 +137,17 @@ const LinkedTicketContent = (props) => {
 }
 
 const LinkedTickets = (props) => {
+  const dispatch = useDispatch();
   const { ticket, handleOpenTicket } = props;
-  const [expandCollapse, setExpandCollapse] = useState("");
-  const [isLinkedTicketDrawerOpen, setIsLinkedTicketDrawerOpen] = useState(false);
+  const summaryCard = useSelector(state => state.summaryCard);
+  const preferences = summaryCard ? summaryCard.subComponent : {}
 
+  const [isLinkedTicketDrawerOpen, setIsLinkedTicketDrawerOpen] = useState(false);
 
   const { loading, error, data } = useQuery(GET_LINKED_TICKETS, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: "network-only",
-    skip: !ticket.ticket_id || !expandCollapse // fetch only when expanded
+    skip: !ticket.ticket_id || !preferences.linkedTickets // fetch only when expanded
   })
 
   const linkedTickets = useMemo(() => {
@@ -163,7 +165,16 @@ const LinkedTickets = (props) => {
   }, [loading, data]);
 
   const handleCollapse = () => {
-    setExpandCollapse(!expandCollapse);
+    dispatch(setCardPreferences({
+      card: "summaryCard",
+      preferences: {
+        ...summaryCard,
+        subComponent: {
+          ...preferences,
+          linkedTickets: !preferences.linkedTickets
+        }
+      }
+    }))
   };
 
   const handleLinkButtonClick = () => {
@@ -178,7 +189,7 @@ const LinkedTickets = (props) => {
     <Grid container spacing={0}>
       <Grid item xs={12}>
         <IconButton onClick={handleCollapse} className="p-2 text-muted">
-          {expandCollapse ? <ExpandMore className="mr-1" /> : <ExpandLess className="mr-1" />}
+          {preferences.linkedTickets ? <ExpandMore className="mr-1" /> : <ExpandLess className="mr-1" />}
           <Typography variant="body1">
             Linked Tickets
           </Typography>
@@ -189,22 +200,18 @@ const LinkedTickets = (props) => {
           style={{ textAlign: "center", height: "22px" }}
           className="bg-light"
         />
-        {expandCollapse &&
-            <IconButton onClick={handleLinkButtonClick}>
+        {preferences.linkedTickets &&
+          <IconButton onClick={handleLinkButtonClick}>
             <Link className="text-muted f-19" style={{ transform: "rotate(135deg)", }} />
-            </IconButton> 
+          </IconButton>
         }
-       
-        <Collapse in={expandCollapse} style={{ paddingLeft: "25px", position: "relative" }}>
-        {isLinkedTicketDrawerOpen &&
-          <LinkedTicketNew ticket={ticket} onCloseLinkedTicket={onCloseLinkedTicketDrawer} ></LinkedTicketNew> 
-       
-      }
+        <Collapse in={preferences.linkedTickets} style={{ paddingLeft: "25px", position: "relative" }}>
+          {isLinkedTicketDrawerOpen &&
+            <LinkedTicketNew ticket={ticket} onCloseLinkedTicket={onCloseLinkedTicketDrawer} ></LinkedTicketNew>
+          }
           <LinkedTicketContent ticket_id={ticket.ticket_id} loading={loading} error={error} linkedTickets={linkedTickets} handleOpenTicket={handleOpenTicket} />
         </Collapse>
       </Grid>
-
-     
     </Grid>
   );
 };
