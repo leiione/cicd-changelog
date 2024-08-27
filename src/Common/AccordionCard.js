@@ -9,13 +9,13 @@ import {
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { setCardPreferences } from "config/store";
-import { toLower, trim } from "lodash";
+import { includes, toLower, trim } from "lodash";
 import { useSelector } from "react-redux";
 
 const AccordionCard = (props) => {
   const dispatch = useDispatch()
   const { children, label, iconButtons, menuOption, cardFooter, className } = props;
-  const card = `${trim(toLower(label))}Card`;
+  const card = includes(label, "Bill") ? "billOfMaterialCard": `${trim(toLower(label))}Card`;
   const cardPreferences = useSelector(state => state[card]);
   const expanded = cardPreferences ? cardPreferences.expanded : false;
 

@@ -37,7 +37,7 @@ const counterSlice = createSlice({
     attachmentsCard: {
       expanded: false,
     },
-    billofmaterialCard: {
+    billOfMaterialCard: {
       expanded: false,
     },
     activityCard: {
