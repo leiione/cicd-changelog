@@ -112,6 +112,7 @@ const AddTicket = (props) => {
       ...initialValues,
       customer_id: ticket.initSelectedCustId,
       category_type: 'Subscriber',
+      assigned_name: `${ticket.first_name} ${ticket.last_name} (${ticket.initSelectedCustId})`,
       initSelected: {
         value: ticket.initSelectedCustId,
         customer_id: ticket.initSelectedCustId,
