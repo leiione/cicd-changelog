@@ -219,8 +219,8 @@ const Tasks = (props) => {
                                   checked={task.is_completed}
                                   onChange={() => onCompleteTask(index)}
                                   inputProps={{ 'aria-label': 'controlled' }}
-                                  style={{ padding: 0 }}
                                   disabled={onEditMode.index === index}
+                                  size="small"
                                 />
                               </ListItemIcon>
                               {onEditMode.index === index ?

@@ -73,7 +73,7 @@ const LinkedTicketContent = (props) => {
                     style={{ height: 40 }}
                     onClick={() => onLinkedTicketClick(item)}
                   >
-                    <Grid container spacing={1} key={index}>
+                    <Grid container spacing={1} key={index} alignItems="center">
                       <Grid item xs="auto">
                         <Typography variant="subtitle1" className="text-primary">{item.ticket_id}</Typography>
                       </Grid>
