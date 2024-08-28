@@ -6,15 +6,21 @@ const Description = (props) => {
     const [openInline, setOpenInline] = useState(false);
     const [description, setDescription] = useState(ticket.description);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(""); // State to track error
 
     const handleInlineEdit = () => setOpenInline(true);
 
     const handleCancel = () => {
         setOpenInline(false);
         setDescription(ticket.description);
+        setError(""); // Reset error on cancel
     };
 
     const handleSave = async () => {
+        if (description.length > 100) {
+            setError("Must not exceed 100 characters");
+            return; // Prevent save if error
+        }
         setLoading(true);
         let toUpdate = { description: description };
         try {
@@ -27,12 +33,21 @@ const Description = (props) => {
         }
     };
 
+    const handleChange = (e) => {
+        const value = e.target.value;
+        if (value.length <= 100) {
+            setDescription(value);
+            setError(""); // Clear error if within limit
+        } else {
+            setError("Must not exceed 100 characters");
+        }
+    };
+
     return (
         <>
             {!openInline ? (
                 ticket.description ? (
                     <div className="cursor-pointer" onClick={handleInlineEdit}>
-                        {/*<Typography variant="body2">Description</Typography>*/}
                         <Typography variant="body1">{ticket.description}</Typography>
                     </div>
                 ) : (
@@ -48,8 +63,10 @@ const Description = (props) => {
                         className="mb-0"
                         fullWidth
                         value={description}
-                        onChange={(e) => setDescription(e.target.value)}
+                        onChange={handleChange}
                         disabled={loading}
+                        error={!!error} // Indicate error in TextField
+                        helperText={error} // Display error message
                     />
                     <div
                         className="position-absolute right-0 bg-white rounded shadow"
@@ -79,4 +96,5 @@ const Description = (props) => {
         </>
     );
 };
+
 export default Description;
