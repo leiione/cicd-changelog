@@ -154,7 +154,6 @@ const CSATForm = props => {
       className={`${classes.experiencePopoverBtn} ${value !== null ? btnColor : ""}`}
       size="large">
       {value === null ? <SentimentSatisfiedAlt /> : TargetIcon}
-      <Typography className="font-weight-normal" style={{ paddingLeft: 10 }}>Feedback</Typography>
     </IconButton>
     <Popover
       id="mouse-over-popover"
@@ -181,7 +180,7 @@ const CSATForm = props => {
             <Typography className="text-white pr-4 pl-2 py-1">{sayThanks ? "Thanks for your feedback" : "How’s this experience?"}</Typography>
           </Grid>
           <Grid item xs="auto">
-            <FormControl component="fieldset">
+            <FormControl component="fieldset" className="mb-0">
               <RadioGroup row aria-label="score" name="score" value={String(emojiValues[values.score])} onChange={handleChange}>
                 <FormControlLabel
                   className="dissatisfied"

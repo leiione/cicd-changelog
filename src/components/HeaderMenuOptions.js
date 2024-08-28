@@ -19,7 +19,8 @@ const HeaderMenuOptions = (props) => {
 
   return (
     <>
-      <IconButton color="default" onClick={handleClick}>
+    {/* Using feedback icon directly, as there is currently only one option */}
+      <IconButton color="default" onClick={handleClick} className="d-none"> 
         <MoreVert />
       </IconButton>
 
@@ -37,6 +38,8 @@ const HeaderMenuOptions = (props) => {
           <CSAT appuser_id={appuser_id} category={category} key={category} isSettings={false} handlePopoverClose={() => setAnchorEl(null)} />
         </MenuItem>
       </Popover>
+
+      <CSAT appuser_id={appuser_id} category={category} key={category} isSettings={false} handlePopoverClose={() => setAnchorEl(null)} />
     </>
   );
 };
