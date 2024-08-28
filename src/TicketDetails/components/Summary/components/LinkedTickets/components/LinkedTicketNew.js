@@ -43,8 +43,8 @@ function LinkedTicketNew(props) {
         })
       );
       setSubmitting(false);
-      setUserSelectedRows([])
-      setInputValue("")
+      setUserSelectedRows([]);
+      setInputValue("");
     } catch (error) {
       const msg = error.message.replace("GraphQL error: ", "");
       dispatch(showSnackbar({ message: msg, severity: "error" }));
@@ -61,18 +61,16 @@ function LinkedTicketNew(props) {
     saveLinkedTicket(ticket.ticket_id, linkedTicketInput);
   };
 
-
   return (
     <>
-      {" "}
-      <Grid container className="mb-5">
-        <Grid item xs={2}>
+      <Grid container spacing={2} className="align-items-end">
+        <Grid item xs={3}>
           <TickeLinkType
             tickeLinkType={tickeLinkType}
             setTicketLinkType={setTicketLinkType}
-          ></TickeLinkType>
+          />
         </Grid>
-        <Grid item xs={10}>
+        <Grid item xs={9}>
           <div className="position-relative">
             <LinkedTicketField
               ticket={ticket}
@@ -80,13 +78,12 @@ function LinkedTicketNew(props) {
               userSelectedRows={userSelectedRows}
               inputValue={inputValue}
               setInputValue={setInputValue}
-            ></LinkedTicketField>
+            />
 
             <div
               className="position-absolute right-0 bg-white rounded shadow"
-              style={{ bottom: -32 }}
+              style={{ bottom: -22 }}
             >
-             
               <ProgressButton
                 color="primary"
                 size="small"

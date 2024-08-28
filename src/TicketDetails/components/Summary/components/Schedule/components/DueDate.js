@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import DialogAlert from "components/DialogAlert";
 
 const DueDate = (props) => {
-  const { classes, ticket, updateTicket } = props;
+  const { ticket, updateTicket } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [tempDueDate, setTempDueDate] = React.useState(ticket.due_by_date || moment().format("YYYY-MM-DD"));
   const [tempDate, setTempDate] = React.useState(ticket.due_by_date);
@@ -49,9 +49,9 @@ const DueDate = (props) => {
   }
   return (
     <>
-      <Typography variant="subtitle1" onClick={handleClick}>
+      <Typography variant="subtitle1" onClick={handleClick} className="pointer">
         <CalendarToday className="text-muted f-20" style={{ marginRight: 5 }} /> Due Date
-        <Typography variant="subtitle1" className={`${classes.dueDate} ${!ticket.due_by_date ? 'font-italic' : ''} d-inline-block ml-3`}>
+        <Typography variant="subtitle1" className={`primary-on-hover d-inline-block ml-2`}>
           {dueDate}
         </Typography>
       </Typography>

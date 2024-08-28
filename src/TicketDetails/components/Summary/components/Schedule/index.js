@@ -3,25 +3,12 @@ import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { Collapse, Grid, IconButton, Typography } from "@mui/material";
 import DueDate from "./components/DueDate";
 import PreferredArrival from "./components/PreferredArrival";
-import { makeStyles } from "@mui/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { setCardPreferences } from "config/store";
 
-const useStyles = makeStyles(() => ({
-  dueDate: {
-    "&:hover": {
-      color: "#0053F4"
-    }
-  },
-  tooltip: {
-    backgroundColor: "#d32f2f",
-    color: "#fff"
-  }
-}))
 
 const Schedule = (props) => {
   const dispatch = useDispatch();
-  const classes = useStyles();
   const { ticket, updateTicket, isSubmitting } = props;
   const summaryCard = useSelector(state => state.summaryCard);
   const preferences = summaryCard ? summaryCard.subComponent : {}
@@ -54,13 +41,13 @@ const Schedule = (props) => {
         </IconButton>
       </Grid>
       <Grid item xs={12}>
-        <Collapse in={preferences.schedule} style={{ paddingLeft: "25px", position: "relative" }}>
+        <Collapse in={preferences.schedule} className="ml-3 pl-3 position-relative">
           <Grid container spacing={1}>
             <Grid item xs={12} >
-              <DueDate classes={classes} ticket={ticket} updateTicket={updateTicket} />
+              <DueDate ticket={ticket} updateTicket={updateTicket} />
             </Grid>
             <Grid item xs={12} >
-              <PreferredArrival isSubmitting={isSubmitting} classes={classes} ticket={ticket} updateTicket={updateTicket} />
+              <PreferredArrival isSubmitting={isSubmitting} ticket={ticket} updateTicket={updateTicket} />
             </Grid>
           </Grid>
         </Collapse>

@@ -202,10 +202,10 @@ const LinkedTickets = (props) => {
         />
         {preferences.linkedTickets &&
           <IconButton onClick={handleLinkButtonClick}>
-            <Link className="text-muted f-19" style={{ transform: "rotate(135deg)", }} />
+            <Link style={{ transform: "rotate(135deg)", }} />
           </IconButton>
         }
-        <Collapse in={preferences.linkedTickets} style={{ paddingLeft: "25px", position: "relative" }}>
+        <Collapse in={preferences.linkedTickets} className="ml-3 pl-3 position-relative">
           {isLinkedTicketDrawerOpen &&
             <LinkedTicketNew ticket={ticket} onCloseLinkedTicket={onCloseLinkedTicketDrawer} ></LinkedTicketNew>
           }

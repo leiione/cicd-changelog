@@ -29,7 +29,7 @@ const TickeLinkType = (props) => {
 
   return (
     <>
-      <FormControl variant="standard" fullWidth  style={{ marginTop: '11%' }} >
+      <FormControl variant="standard" fullWidth label="">
         <Select
           labelId="select-label"
           value={tickeLinkType}

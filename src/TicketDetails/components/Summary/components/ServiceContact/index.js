@@ -122,7 +122,7 @@ const ServiceContact = (props) => {
         }
       </Grid>
       <Grid item xs={12}>
-        <Collapse in={preferences.service} style={{ paddingLeft: "25px", position: "relative" }}>
+        <Collapse in={preferences.service}  className="ml-3 pl-3 position-relative">
           <Grid container spacing={1}>
             {onEditMode && !isSubscriber &&
               <Grid item xs={12}>

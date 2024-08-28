@@ -83,7 +83,7 @@ const LinkedTicketField = (props) => {
   };
 
   return (
-    <div style={{ marginLeft: "3%" }}>
+    <div>
       <Autocomplete
         multiple
         value={userSelectedRows}
