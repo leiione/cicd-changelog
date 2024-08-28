@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AddCircleOutline, DragIndicator } from "@mui/icons-material";
 import AccordionCard from "../../../Common/AccordionCard";
-import ButtonWithLable from "../../../Common/ButtonWithLable";
+import ButtonWithLabel from "../../../Common/ButtonWithLabel";
 import HeaderMenuOptions from "../../../components/HeaderMenuOptions";
 import {
   Checkbox,
@@ -165,7 +165,7 @@ const Tasks = (props) => {
       label="Tasks"
       iconButtons={
         <>
-          <ButtonWithLable
+          <ButtonWithLabel
             buttonLabel="Add Task"
             lablesVisible={lablesVisible}
             onClick={addTicketTask}

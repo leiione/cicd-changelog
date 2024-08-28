@@ -11,10 +11,13 @@ import { useQuery } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
 import Loader from "components/Loader";
 import { checkIfCacheExists } from "config/apollo";
+import AddMessageButton from "./components/AddMessageButton";
+import AddEmailForm from "./components/AddEmailForm";
 
 const Messages = (props) => {
   const { appuser_id, ticket } = props;
   const [filter, setFilter] = React.useState("all");
+  const [addNew, setAddNew] = React.useState(null);
 
   const { loading, error, data, client } = useQuery(GET_TICKET_MESSAGES, {
     variables: { ticket_id: ticket.ticket_id },
@@ -75,17 +78,18 @@ const Messages = (props) => {
   return (
     <AccordionCard
       label="Messages"
-      iconButtons={<></>}
-      menuOption={
+      iconButtons={
         <>
-          <HeaderMenuOptions appuser_id={appuser_id} category="Message Card" />
+          <AddMessageButton setAddNew={setAddNew} />
         </>
       }
+      menuOption={<HeaderMenuOptions appuser_id={appuser_id} category="Message Card" />}
     >
       {(loading || loadingNotes) && (!cacheExists || !cacheExistsNotes) ? (
         <Loader loaderStyle={{ position: "static", textAlign: "center" }} />
       ) : (
         <>
+        {addNew === "email" && <AddEmailForm ticket={ticket} />}
           <Filter filter={filter} setFilter={setFilter} />
           <MessagesTable messages={messages} />
         </>
@@ -93,4 +97,4 @@ const Messages = (props) => {
     </AccordionCard>
   );
 };
-export default Messages;
+export default React.memo(Messages);
