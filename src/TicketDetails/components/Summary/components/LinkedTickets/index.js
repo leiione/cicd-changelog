@@ -299,7 +299,7 @@ const LinkedTickets = (props) => {
           <LinkedTicketNew
             ticket={ticket}
             onCloseLinkedTicket={onCloseLinkedTicketDrawer}
-          ></LinkedTicketNew>
+         />
         )}
         <LinkedTicketContent
           ticket_id={ticket.ticket_id}
