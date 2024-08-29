@@ -125,7 +125,10 @@ const LinkedTicketContent = (props) => {
                         </Typography>
                       </Grid>
                       <Grid item xs={6}>
-                        <Typography variant="body1" className="text-dark">
+                        <Typography
+                          variant="body1"
+                          className="text-dark break-word text-truncate"
+                        >
                           {item.description}
                         </Typography>
                       </Grid>
@@ -271,8 +274,8 @@ const LinkedTickets = (props) => {
         <Grid item xs="auto">
           <Chip
             label={ticket.linked_count || 0}
-            sx={{height:20, width:20}}
-            classes={{label:"p-0"}}
+            sx={{ height: 20, width: 20 }}
+            classes={{ label: "p-0" }}
             className="bg-light text-white"
           />
         </Grid>
