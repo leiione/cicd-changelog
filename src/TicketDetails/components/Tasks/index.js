@@ -4,6 +4,7 @@ import AccordionCard from "../../../Common/AccordionCard";
 import ButtonWithLabel from "../../../Common/ButtonWithLabel";
 import HeaderMenuOptions from "../../../components/HeaderMenuOptions";
 import {
+  Button,
   Checkbox,
   List,
   ListItem,
@@ -27,138 +28,150 @@ const getItemStyle = (isDragging, draggableStyle) => ({
   padding: 0,
   // styles we need to apply on draggables
   backgroundColor: isDragging ? "khaki" : "", // not working
-  ...draggableStyle
-})
+  ...draggableStyle,
+});
 
 const taskData = {
   task_id: 0,
   task: "",
-  is_completed: false
-}
+  is_completed: false,
+};
 
 const Tasks = (props) => {
   const dispatch = useDispatch();
-  const { ticket, appuser_id, lablesVisible, loading, handleOpenTicket } = props;
-  const [ticketTasks, setTicketTasks] = useState(ticket.tasks || [])
-  const [isHovered, setHover] = useState(-1)
-  const [onEditMode, setOnEditMode] = useState({ index: -1, value: '' })
-  const [saveTicketTasks] = useMutation(SAVE_TICKET_TASKS)
+  const { ticket, appuser_id, lablesVisible, loading, handleOpenTicket } =
+    props;
+  const [ticketTasks, setTicketTasks] = useState(ticket.tasks || []);
+  const [isHovered, setHover] = useState(-1);
+  const [onEditMode, setOnEditMode] = useState({ index: -1, value: "" });
+  const [saveTicketTasks] = useMutation(SAVE_TICKET_TASKS);
 
   useEffect(() => {
     if (!loading && ticket.tasks !== ticketTasks) {
-      const tasks = sortBy(ticket.tasks, "rank")
-      setTicketTasks(tasks)
-      setOnEditMode({ index: -1, value: '' })
+      const tasks = sortBy(ticket.tasks, "rank");
+      setTicketTasks(tasks);
+      setOnEditMode({ index: -1, value: "" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, ticket.ticket_id, ticket.ticket_type_id, ticket.tasks])
+  }, [loading, ticket.ticket_id, ticket.ticket_type_id, ticket.tasks]);
 
-  const completed = (ticketTasks.filter(x => x.is_completed)).length
-  const taskCount = ticketTasks.length
-  const error = onEditMode.index > -1 && isEmpty(trim(onEditMode.value))
+  const completed = ticketTasks.filter((x) => x.is_completed).length;
+  const taskCount = ticketTasks.length;
+  const error = onEditMode.index > -1 && isEmpty(trim(onEditMode.value));
 
   const reorder = (list, startIndex, endIndex) => {
-    const result = Array.from(list)
-    const [removed] = result.splice(startIndex, 1)
-    result.splice(endIndex, 0, removed)
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
 
-    return result
-  }
+    return result;
+  };
 
-  const onDragEnd = result => {
+  const onDragEnd = (result) => {
     if (!result.destination) {
-      return
+      return;
     }
 
     if (result.source.index !== result.destination.index) {
-      const items = reorder(ticketTasks, result.source.index, result.destination.index)
+      const items = reorder(
+        ticketTasks,
+        result.source.index,
+        result.destination.index
+      );
 
       const newRanks = items.map((x, index) => {
-        return { ...x, rank: index + 1 }
-      })
+        return { ...x, rank: index + 1 };
+      });
       setTicketTasks(newRanks);
-      onSaveTaskChanges(newRanks)
+      onSaveTaskChanges(newRanks);
     }
-  }
+  };
 
   const onCompleteTask = (index) => {
-    const newTasks = cloneDeep(ticketTasks)
-    newTasks[index].is_completed = !newTasks[index].is_completed
-    setTicketTasks(newTasks)
-    onSaveTaskChanges(newTasks)
-  }
+    const newTasks = cloneDeep(ticketTasks);
+    newTasks[index].is_completed = !newTasks[index].is_completed;
+    setTicketTasks(newTasks);
+    onSaveTaskChanges(newTasks);
+  };
 
   const addTicketTask = (event) => {
     preventEvent(event);
     if (!error) {
-      let newTasks = cloneDeep(ticketTasks)
-      newTasks.unshift(taskData)
-      newTasks = newTasks.map((x, index) => ({ ...x, rank: index + 1 }))
-      setTicketTasks(newTasks)
-      dispatch(setCardPreferences({ card: 'tasksCard', preferences: { expanded: true } }))
-      setOnEditMode({ index: 0, value: '' })
+      let newTasks = cloneDeep(ticketTasks);
+      newTasks.unshift(taskData);
+      newTasks = newTasks.map((x, index) => ({ ...x, rank: index + 1 }));
+      setTicketTasks(newTasks);
+      dispatch(
+        setCardPreferences({
+          card: "tasksCard",
+          preferences: { expanded: true },
+        })
+      );
+      setOnEditMode({ index: 0, value: "" });
     }
-  }
+  };
 
   const onTaskNameChange = (index) => {
     if (!isEmpty(trim(onEditMode.value))) {
-      const newTasks = cloneDeep(ticketTasks)
+      const newTasks = cloneDeep(ticketTasks);
       if (newTasks[index].task !== onEditMode.value) {
-        newTasks[index].task = onEditMode.value
-        setTicketTasks(newTasks)
-        onSaveTaskChanges(newTasks)
+        newTasks[index].task = onEditMode.value;
+        setTicketTasks(newTasks);
+        onSaveTaskChanges(newTasks);
       }
-      setOnEditMode({ index: -1, value: '' })
+      setOnEditMode({ index: -1, value: "" });
     }
-  }
+  };
 
   const onNameClick = (index, task) => {
     if (onEditMode.index > -1) {
-      onTaskNameChange(onEditMode.index)
+      onTaskNameChange(onEditMode.index);
     }
 
     if (!isEmpty(trim(onEditMode.value)) || onEditMode.index < 0) {
-      setOnEditMode({ index, value: task.task })
+      setOnEditMode({ index, value: task.task });
     }
-  }
+  };
 
   const onSaveTaskChanges = async (newTasks) => {
     try {
       const tasks = newTasks.map((x, index) => ({
         ...omit(x, ["__typename"]),
-        rank: index + 1
-      }))
+        rank: index + 1,
+      }));
 
-      const hasNewTask = tasks.some(x => x.task_id === 0)
+      const hasNewTask = tasks.some((x) => x.task_id === 0);
       await saveTicketTasks({
         variables: {
           ticket_id: ticket.ticket_id,
-          tasks
+          tasks,
         },
         update: (cache, { data }) => {
           if (hasNewTask) {
-            setTicketTasks(data.saveTicketTasks)
+            setTicketTasks(data.saveTicketTasks);
           }
         },
         refetchQueries: [
           { query: GET_TICKET, variables: { id: ticket.ticket_id } },
         ],
       });
-      dispatch(showSnackbar({
-        message: "Ticket task updated successfully",
-        severity: "success",
-      }));
+      dispatch(
+        showSnackbar({
+          message: "Ticket task updated successfully",
+          severity: "success",
+        })
+      );
     } catch (error) {
       const msg = error.message.replace("GraphQL error: ", "");
       dispatch(showSnackbar({ message: msg, severity: "error" }));
     }
-  }
+  };
 
   const onEnter = (e, index) => {
-    if (get(e, 'key', '').toLowerCase() === "enter") {
-      onTaskNameChange(index)
+    if (get(e, "key", "").toLowerCase() === "enter") {
+      onTaskNameChange(index);
     }
-  }
+  };
 
   return (
     <AccordionCard
@@ -173,104 +186,159 @@ const Tasks = (props) => {
             buttonIcon={<AddCircleOutline />}
           />
           <span className="text-muted ml-3">
-            {loading ?
-              <Skeleton animation="wave" style={{ height: 25, backgroundColor: "##dfdede", width: "130px" }} />
-              : `${completed}/${taskCount} task completed`
-            }</span>
+            {loading ? (
+              <Skeleton
+                animation="wave"
+                style={{
+                  height: 25,
+                  backgroundColor: "##dfdede",
+                  width: "130px",
+                }}
+              />
+            ) : (
+              `${completed}/${taskCount} task completed`
+            )}
+          </span>
         </>
       }
-      menuOption={<HeaderMenuOptions appuser_id={appuser_id} category="Task Card" />}
-    >
-      {loading ?
-        <Skeleton animation="wave" style={{ height: 30, backgroundColor: "##dfdede", width: "60%" }} />
-        : (taskCount > 0 ?
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="droppable">
-              {(provided, snapshot) => (
-                <List dense {...provided.droppableProps} ref={provided.innerRef}>
-                  {ticketTasks.length > 0 &&
-                    ticketTasks.map((task, index) => (
-                      <Draggable key={index} draggableId={`draggable-${index}`} index={index}>
-                        {provided => {
-                          return (
-                            <ListItem
-                              key={task.task_id}
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
-                              onMouseOver={() => setHover(index)}
-                              onMouseLeave={() => setHover(-1)}
-                              secondaryAction={<DragIndicator className="text-lighter f-20" />}
-                            >
-                              <TaskMenuOptions
-                                ticket={ticket}
-                                show={isHovered === index}
-                                disabled={onEditMode.index === index}
-                                task={task}
-                                ticketTasks={ticketTasks}
-                                setTicketTasks={setTicketTasks}
-                                onSaveTaskChanges={onSaveTaskChanges}
-                                handleOpenTicket={handleOpenTicket}
-                                setOnEditMode={setOnEditMode}
-                              />
-                              <ListItemIcon >
-                                <Checkbox
-                                  checked={task.is_completed}
-                                  onChange={() => onCompleteTask(index)}
-                                  inputProps={{ 'aria-label': 'controlled' }}
-                                  disabled={onEditMode.index === index}
-                                  size="small"
-                                />
-                              </ListItemIcon>
-                              {onEditMode.index === index ?
-                                <TextField
-                                  autoFocus
-                                  variant="standard"
-                                  className="m-0"
-                                  fullWidth
-                                  value={onEditMode.value}
-                                  placeholder="Add text here"
-                                  onChange={e => setOnEditMode({ index, value: e.target.value })}
-                                  onBlur={() => onTaskNameChange(index)}
-                                  error={error}
-                                  onKeyDown={(e) => onEnter(e, index)}
-                                  inputProps={{ maxLength: 100 }}
-                                  style={{ width: "90%" }}
-                                />
-                                : <ListItemText
-                                  id={task.id}
-                                  primary={
-                                    <Typography
-                                      variant="body2"
-                                      onClick={() => onNameClick(index, task)}
-                                      className={task.is_completed ? "text-decoration-line-through" : ""}
-                                      style={{ cursor: "text", width: "90%" }}
-                                    >
-                                      {task.task}
-                                    </Typography>
-                                  }
-
-
-                                />
-                              }
-                            </ListItem>
-                          )
-                        }}
-                      </Draggable>
-                    ))
-                  }
-                  {provided.placeholder}
-                </List>
-              )}
-            </Droppable>
-          </DragDropContext>
-          : <Typography className="text-muted">
-            No Task Added.
-          </Typography>
-        )
+      menuOption={
+        <HeaderMenuOptions appuser_id={appuser_id} category="Task Card" />
       }
-    </AccordionCard >
+    >
+      {loading ? (
+        <Skeleton
+          animation="wave"
+          style={{ height: 30, backgroundColor: "##dfdede", width: "60%" }}
+        />
+      ) : taskCount > 0 ? (
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="droppable">
+            {(provided, snapshot) => (
+              <List dense {...provided.droppableProps} ref={provided.innerRef}>
+                {ticketTasks.length > 0 &&
+                  ticketTasks.map((task, index) => (
+                    <Draggable
+                      key={index}
+                      draggableId={`draggable-${index}`}
+                      index={index}
+                    >
+                      {(provided) => {
+                        return (
+                          <ListItem
+                            key={task.task_id}
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            style={getItemStyle(
+                              snapshot.isDragging,
+                              provided.draggableProps.style
+                            )}
+                            onMouseOver={() => setHover(index)}
+                            onMouseLeave={() => setHover(-1)}
+                            secondaryAction={
+                              <DragIndicator
+                                className="text-lighter f-20"
+                                hidden={onEditMode.index === index}
+                              />
+                            }
+                          >
+                            <TaskMenuOptions
+                              ticket={ticket}
+                              show={isHovered === index}
+                              disabled={onEditMode.index === index}
+                              task={task}
+                              ticketTasks={ticketTasks}
+                              setTicketTasks={setTicketTasks}
+                              onSaveTaskChanges={onSaveTaskChanges}
+                              handleOpenTicket={handleOpenTicket}
+                              setOnEditMode={setOnEditMode}
+                            />
+                            <ListItemIcon>
+                              <Checkbox
+                                checked={task.is_completed}
+                                onChange={() => onCompleteTask(index)}
+                                inputProps={{ "aria-label": "controlled" }}
+                                disabled={onEditMode.index === index}
+                                size="small"
+                              />
+                            </ListItemIcon>
+                            {onEditMode.index === index ? (
+                              <ListItemText>
+                                <div className="position-relative">
+                                  <TextField
+                                    autoFocus
+                                    variant="standard"
+                                    className="m-0"
+                                    fullWidth
+                                    value={onEditMode.value}
+                                    placeholder="Add text here"
+                                    onChange={(e) =>
+                                      setOnEditMode({
+                                        index,
+                                        value: e.target.value,
+                                      })
+                                    }
+                                    onBlur={() => onTaskNameChange(index)}
+                                    error={error}
+                                    onKeyDown={(e) => onEnter(e, index)}
+                                    inputProps={{ maxLength: 100 }}
+                                  />
+                                  <div
+                                    className="position-absolute right-0 bg-white rounded shadow"
+                                    style={{ bottom: -32, zIndex: 99 }}
+                                  >
+                                    <Button
+                                      color="primary"
+                                      size="small"
+                                      className="my-1"
+                                      disabled={loading}
+                                    >
+                                      Save
+                                    </Button>
+                                    <Button
+                                      color="default"
+                                      size="small"
+                                      className="my-1"
+                                      disabled={loading}
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                </div>
+                              </ListItemText>
+                            ) : (
+                              <ListItemText
+                                id={task.id}
+                                primary={
+                                  <Typography
+                                    variant="body2"
+                                    onClick={() => onNameClick(index, task)}
+                                    className={
+                                      task.is_completed
+                                        ? "text-decoration-line-through"
+                                        : ""
+                                    }
+                                    style={{ cursor: "text", width: "90%" }}
+                                  >
+                                    {task.task}
+                                  </Typography>
+                                }
+                              />
+                            )}
+                          </ListItem>
+                        );
+                      }}
+                    </Draggable>
+                  ))}
+                {provided.placeholder}
+              </List>
+            )}
+          </Droppable>
+        </DragDropContext>
+      ) : (
+        <Typography className="text-muted">No Task Added.</Typography>
+      )}
+    </AccordionCard>
   );
 };
 export default Tasks;
