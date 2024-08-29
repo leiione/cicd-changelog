@@ -56,6 +56,7 @@ const TaskMenuOptions = (props) => {
         "location_id",
         "assigned_name",
         "address",
+        "type"
       ]),
       description: task.task,
       customer_id: ticket.subscriber ? ticket.subscriber.customer_id : 0,
@@ -63,6 +64,7 @@ const TaskMenuOptions = (props) => {
       ticket_contact_numbers: ticket.ticket_contact_numbers || '',
       ticket_contact_name: ticket.ticket_contact_name || '',
       ticket_contact_emails: ticket.ticket_contact_email || '',
+      ticket_id: ticket.ticket_id,
     }
     input_ticket.followers = !isEmpty(ticket.followers) ? ticket.followers.split(",") : []
     try {

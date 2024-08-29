@@ -47,7 +47,7 @@ const TicketStatus = (props) => {
         onClick={handleClick}
         endIcon={openMenu ? <KeyboardArrowDown /> : <KeyboardArrowUp />}
       >
-        <span className="text-dark font-weight-normal f-13">{status}</span>
+        <span className="text-dark font-weight-normal">{status}</span>
       </Button>
       <Menu
         id="basic-menu"

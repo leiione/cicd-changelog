@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { preventEvent } from "../Common/helper";
 import Header from "./components/Header";
 import ChildDrawers from "../Common/ChildDrawers";
@@ -8,9 +8,9 @@ import WorkOrder from "./components/Summary/components/WorkOrder";
 import Tasks from "./components/Tasks";
 import BillsOfMaterial from "./components/BillsOfMaterial";
 import { GET_TICKET } from "./TicketGraphQL";
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import GlobalSnackbar from "Common/GlobalSnackbar";
 import Messages from "./components/Messages";
 import Attachments from "./components/Attachments";
@@ -19,6 +19,12 @@ import BomDrawer from "./components/BillsOfMaterial/components/BomDrawer";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import htmlToPdfmake from "html-to-pdfmake";
+import { GET_USER_PREFERENCES, SAVE_USER_PREFERENCES } from "components/UserPreferences/UserPreferencesGraphQL";
+import { saveUserPreferences } from "components/UserPreferences/savePreferencesUtils";
+import moment from "moment-timezone";
+import { setInitialUserPreferences } from "config/store";
+import UserPreferences from "components/UserPreferences";
+
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 const TicketDetails = (props) => {
@@ -253,4 +259,53 @@ const TicketDetails = (props) => {
   );
 };
 
-export default TicketDetails;
+const TicketContainer = props => {
+  const dispatch = useDispatch()
+  const { isSigningOut } = props
+  const userPreferencesTimeStamp = useSelector(state => state.userPreferencesTimeStamp)
+  const summaryCard = useSelector(state => state.summaryCard)
+  const tasksCard = useSelector(state => state.tasksCard)
+  const messagesCard = useSelector(state => state.messagesCard)
+  const attachmentsCard = useSelector(state => state.attachmentsCard)
+  const billOfMaterialCard = useSelector(state => state.billOfMaterialCard)
+  const activityCard = useSelector(state => state.activityCard)
+
+  const [saveCRMUserPreferences] = useMutation(SAVE_USER_PREFERENCES)
+
+  const { data, loading } = useQuery(GET_USER_PREFERENCES, {
+    fetchPolicy: "cache-and-network",
+    skip: isSigningOut
+  });
+
+  useEffect(() => {
+    // save user preferences when user is about to sign out
+    if (isSigningOut && (userPreferencesTimeStamp !== null && moment().diff(moment(userPreferencesTimeStamp)) < 3000)) {
+      saveUserPreferences(saveCRMUserPreferences, {
+        summaryCard,
+        tasksCard,
+        messagesCard,
+        attachmentsCard,
+        billOfMaterialCard,
+        activityCard
+      })
+    }
+    // eslint-disable-next-line
+  }, [isSigningOut])
+
+  useEffect(() => {
+    // initialize redux based on saved user preferences
+    if (data && !loading && !isSigningOut) {
+      const userPreferences = data.getCRMUserPreferences;
+      dispatch(setInitialUserPreferences(userPreferences));
+    }
+  }, [data, loading, dispatch, isSigningOut])
+
+  return (
+    <>
+      <UserPreferences />
+      <TicketDetails {...props} />
+    </>
+  )
+}
+
+export default TicketContainer;

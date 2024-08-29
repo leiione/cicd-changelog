@@ -18,8 +18,8 @@ import {
   UPDATE_TICKET_MUTATION,
 } from "TicketDetails/TicketGraphQL";
 import { useMutation } from "@apollo/client";
-import { useDispatch } from "react-redux";
-import { showSnackbar } from "config/store";
+import { useDispatch, useSelector } from "react-redux";
+import { setCardPreferences, showSnackbar } from "config/store";
 import {
   HeaderSkeletonLoader,
   SummarySkeletonLoader,
@@ -28,6 +28,9 @@ import HeaderMenuOptions from "components/HeaderMenuOptions";
 
 const Summary = (props) => {
   const dispatch = useDispatch();
+  const summaryCard = useSelector((state) => state.summaryCard);
+  const preferences = summaryCard ? summaryCard.subComponent : {};
+
   const {
     loading,
     appuser_id,
@@ -38,12 +41,22 @@ const Summary = (props) => {
   } = props;
 
   const showSignature = true; // this should come from ticket type settings
-
-  const [showFilters, setShowFilters] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
-  const handleFilterVisibility = (event) => {
+
+  const handlePullTab = (event) => {
     preventEvent(event);
-    setShowFilters(!showFilters);
+    dispatch(
+      setCardPreferences({
+        card: "summaryCard",
+        preferences: {
+          ...summaryCard,
+          subComponent: {
+            ...preferences,
+            assignee: !preferences.assignee,
+          },
+        },
+      })
+    );
   };
 
   const [updateTicket] = useMutation(UPDATE_TICKET_MUTATION);
@@ -106,7 +119,7 @@ const Summary = (props) => {
         <SummarySkeletonLoader />
       ) : (
         <Grid container spacing={1}>
-          <Grid item xs className="h-100">
+          <Grid item xs={preferences.assignee ? 8 : true} className="h-100">
             <div className="py-3 pr-5">
               <Description ticket={customer} updateTicket={handleUpdate} />
               <div className="border-top mt-3 pt-3">
@@ -127,20 +140,24 @@ const Summary = (props) => {
               </div>
             </div>
           </Grid>
-          <Grid item xs="auto" className="min-h-100 position-relative">
+          <Grid
+            item
+            xs={preferences.assignee ? 4 : "auto"}
+            className="min-h-100 position-relative"
+          >
             <IconButton
-              onClick={handleFilterVisibility}
+              onClick={handlePullTab}
               size="small"
               className="border rounded-0 position-absolute"
-              style={{ left: !showFilters ? -4 : -21, top: 15 }}
+              style={{ left: !preferences.assignee ? -4 : -21, top: 15 }}
             >
-              {showFilters ? (
+              {preferences.assignee ? (
                 <ChevronRight className="f-18" />
               ) : (
                 <ChevronLeft className="f-18" />
               )}
             </IconButton>
-            {showFilters && (
+            {preferences.assignee && (
               <div className="border-left pl-3 py-3 h-100 d-flex flex-column">
                 <Assignee ticket={customer} updateTicket={handleUpdate} />
                 <Followers ticket={customer} updateTicket={handleUpdate} />

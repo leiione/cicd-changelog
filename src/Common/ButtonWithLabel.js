@@ -1,7 +1,7 @@
 import { IconButton, Tooltip } from "@mui/material";
 import React from "react";
 
-const ButtonWithLable = (props) => {
+const ButtonWithLabel = (props) => {
   const { buttonLabel, buttonIcon, color, lablesVisible, onClick, disabled } = props;
   return (
     <>
@@ -23,4 +23,4 @@ const ButtonWithLable = (props) => {
     </>
   );
 };
-export default ButtonWithLable;
+export default ButtonWithLabel;

@@ -2,6 +2,7 @@ import React from "react";
 import {
   Grid,
   IconButton,
+  Link,
   ListItem,
   ListItemAvatar,
   ListItemText,
@@ -15,12 +16,15 @@ import {
 } from "@fortawesome/pro-light-svg-icons";
 import { faReply } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment-timezone";
+import LinesEllipsis from "react-lines-ellipsis";
 
 const Note = props => {
   const { message } = props
+  const [more, toggleMore] = React.useState(false)
+  const lineLen = message.content ? message.content.split(/\r|\r\n|\n/g).length : 1
 
   return (
-    <ListItem key={message.id} alignItems="flex-start">
+    <ListItem key={message.note_id} alignItems="flex-start">
       <ListItemAvatar sx={{ width: 24, height: 24, minWidth: 24 }}>
         <FontAwesomeIcon icon={faNote} />
       </ListItemAvatar>
@@ -28,10 +32,10 @@ const Note = props => {
         primary={
           <Grid container spacing={1} className="align-items-center mb-1">
             <Grid item xs>
-              <Typography variant="body2">{message.to_email}</Typography>
+              <Typography variant="subtitle1">{message.appuser_name ? message.appuser_name : ""}</Typography>
             </Grid>
             <Grid item xs="auto">
-              <Typography variant="caption">{moment(message.date).format("MMM DD, YYYY hh:mm")}</Typography>
+              <Typography variant="caption">{moment(message.date_added).format("MMM DD, YYYY hh:mm")}</Typography>
             </Grid>
             <Grid item xs="auto">
               <IconButton size="small">
@@ -51,12 +55,24 @@ const Note = props => {
           </Grid>
         }
         secondary={
-          <React.Fragment>
-            <div className="bg-lightest p-2">
-              <Typography variant="body1">{message.message}</Typography>
-            </div>
-            {message.message}
-          </React.Fragment>
+          <>
+              {more || lineLen < 6 ?
+                <Typography variant="caption" style={{ whiteSpace: "pre-line" }}>
+                  {message.content}
+                </Typography>
+                : <LinesEllipsis
+                  text={message.content}
+                  maxLine={5}
+                  ellipsis=''
+                  style={{ whiteSpace: "pre-line", color: '#0009' }}
+                />
+              }
+              {lineLen > 6 &&
+                <div style={{ marginTop: "5px" }}>
+                  <Link variant="caption" onClick={() => toggleMore(!more)}>{more ? 'Simplify...' : 'More...'}</Link>
+                </div>
+              }
+            </>
         }
       />
     </ListItem>

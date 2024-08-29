@@ -1,9 +1,9 @@
 import React from "react";
 import TablePagination from "@mui/material/TablePagination";
-import { List } from "@mui/material";
+import { List, Typography } from "@mui/material";
 
 import Note from "./components/Note";
-import { Email } from "@mui/icons-material";
+import Email from "./components/Email";
 import SMS from "./components/SMS";
 
 const MessagesTable = (props) => {
@@ -22,17 +22,19 @@ const MessagesTable = (props) => {
 
   return (
     <div>
-      <List className="overflow-y-auto paper-height-500">
-        {messages.map((message) => {
-          switch (message.type) {
-            case 'email':
+      <List className="overflow-y-auto paper-height-500" style={messages.length === 0 ? { textAlign: "center" } : {}}>
+        {messages.length > 0 ? messages.map((message) => {
+          switch (message.integration_id) {
+            case 1:
               return <Email message={message} />
-            case 'sms':
+            case 2:
               return <SMS message={message} />
             default:
               return <Note message={message} />
           }
-        })}
+        })
+          : <Typography variant="caption">No message available.</Typography>
+        }
       </List>
       <TablePagination
         component="div"

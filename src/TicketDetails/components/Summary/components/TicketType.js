@@ -49,7 +49,7 @@ const TicketType = (props) => {
         onClick={handleClick}
         endIcon={openMenu ? <KeyboardArrowDown /> : <KeyboardArrowUp />}
       >
-        <span className="text-dark font-weight-normal f-13">{type}</span>
+        <span className="text-dark font-weight-normal">{type}</span>
       </Button>
 
       <Menu

@@ -161,6 +161,8 @@ const WorkOrder = ({ ticket_id, setTicketDetail, setEditorContentChanged, setHan
               init={{
                 height: 500,
                 menubar: false,
+                branding: false,
+                statusbar: false,
                 plugins: [
                   "advlist autolink lists link image charmap print preview anchor",
                   "searchreplace visualblocks code fullscreen",

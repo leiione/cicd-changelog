@@ -7,11 +7,27 @@ import {
   AccordionSummary,
   Typography,
 } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { setCardPreferences } from "config/store";
+import { includes, toLower, trim } from "lodash";
+import { useSelector } from "react-redux";
 
 const AccordionCard = (props) => {
-  const { children, label, iconButtons, menuOption, cardFooter,className ,defaultExpanded} = props;
+  const dispatch = useDispatch()
+  const { children, label, iconButtons, menuOption, cardFooter, className } = props;
+  const card = includes(label, "Bill") ? "billOfMaterialCard": `${trim(toLower(label))}Card`;
+  const cardPreferences = useSelector(state => state[card]);
+  const expanded = cardPreferences ? cardPreferences.expanded : false;
+
+  const handleChange = () => {
+    dispatch(setCardPreferences({ card, preferences: { expanded: !expanded } }))
+  }
+
   return (
-    <Accordion defaultExpanded={defaultExpanded}>
+    <Accordion
+      expanded={expanded}
+      onChange={handleChange}
+    >
       <AccordionSummary
         expandIcon={<ExpandMore />}
         aria-controls="panel1a-content"
@@ -26,4 +42,4 @@ const AccordionCard = (props) => {
     </Accordion>
   );
 };
-export default AccordionCard;
+export default React.memo(AccordionCard);

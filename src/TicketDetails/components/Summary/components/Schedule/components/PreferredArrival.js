@@ -5,7 +5,7 @@ import moment from "moment-timezone";
 import ProgressButton from "Common/ProgressButton";
 
 const PreferredArrival = (props) => {
-  const { isSubmitting, classes, ticket, updateTicket } = props;
+  const { isSubmitting, ticket, updateTicket } = props;
   const earliestArrivalTime = moment(ticket.earliest_arrival_time && moment(ticket.earliest_arrival_time, [moment.ISO_8601, "HH:mm"]).isValid() ? ticket.earliest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
   const latestArrivalTime = moment(ticket.earliest_arrival_time && ticket.latest_arrival_time && moment(ticket.latest_arrival_time, [moment.ISO_8601, "HH:mm"]).isValid() ? ticket.latest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
   const arrivalTime = moment(earliestArrivalTime).isSame(latestArrivalTime) ? moment(earliestArrivalTime).format("LT") : `${moment(earliestArrivalTime).format("LT")} - ${moment(latestArrivalTime).format("LT")}`;
@@ -65,9 +65,9 @@ const PreferredArrival = (props) => {
 
   return (
     <>
-      <Typography variant="subtitle1" onClick={handleClick}>
+      <Typography variant="subtitle1" onClick={handleClick} className="pointer">
         <AccessTime className="text-muted f-20" style={{ marginRight: 5 }} /> Preferred Arrival
-        <Typography variant="subtitle1" className={`${classes.dueDate} d-inline-block ml-3`}>
+        <Typography variant="subtitle1" className={`primary-on-hover d-inline-block ml-2`}>
           {arrivalTime}
         </Typography>
       </Typography>
@@ -104,7 +104,7 @@ const PreferredArrival = (props) => {
             />
           </Grid>
           <Grid item xs={6} style={{ paddingLeft: 18 }}>
-            <Tooltip placement="top" title={err.start > "" ? err.start : ""} classes={{ tooltip: classes.tooltip }}>
+            <Tooltip placement="top" title={err.start > "" ? err.start : ""}>
               <TextField
                 error={err.start > ""}
                 type="time"
@@ -119,7 +119,7 @@ const PreferredArrival = (props) => {
           </Grid>
           {preferred === "window" &&
             <Grid item xs={6} style={{ paddingLeft: 18 }}>
-              <Tooltip placement="top" title={err.end > "" ? err.end : ""} classes={{ tooltip: classes.tooltip }}>
+              <Tooltip placement="top" title={err.end > "" ? err.end : ""}>
                 <TextField
                   error={err.end > ""}
                   type="time"

@@ -35,7 +35,7 @@ const TicketPriority = (props) => {
 
   return (
     <>
-      <IconButton color="default" onClick={handleClick}>
+      <IconButton color="default" size="small" onClick={handleClick}>
         {getPriorityIcon(priority)}
       </IconButton>
 
