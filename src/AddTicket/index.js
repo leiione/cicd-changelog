@@ -33,7 +33,6 @@ const AddTicketForm = props => {
     handleSubmit
   } = form;
   const values = watch()
-  console.log('values: ', values);
 
   const commonProps = {
     values,

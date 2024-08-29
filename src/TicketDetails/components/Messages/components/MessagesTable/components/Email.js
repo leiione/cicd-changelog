@@ -18,6 +18,8 @@ import { faReply } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment-timezone";
 import { EmailOutlined } from "@mui/icons-material";
 import LinesEllipsis from "react-lines-ellipsis";
+import h2p from "html2plaintext"
+import parse from 'html-react-parser';
 
 const EmailPopover = props => {
   const { anchorEl, message, handleClose, toEmail } = props
@@ -87,8 +89,12 @@ const Email = props => {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [more, toggleMore] = React.useState(false)
   const toEmail = message.to_email ? message.to_email.split(",") : []
+  const text = message.message
 
-  const lineLen = message.message.split(/\r|\r\n|\n/g).length
+  const linePlainLen = text.split(/\r|\r\n|\n/g).length
+  const lineHtmlLen = h2p(text).split(/\r|\r\n|\n/g).length
+  const lineLen = linePlainLen > lineHtmlLen ? linePlainLen : lineHtmlLen
+  const isHtml = /<\/?[a-z][\s\S]*>/i.test(text)
 
   return (
     <>
@@ -136,18 +142,18 @@ const Email = props => {
           }
           secondary={
             <>
-              {more || lineLen < 6 ?
+              {more || lineLen < 4 ?
                 <Typography variant="caption" style={{ whiteSpace: "pre-line" }}>
-                  {message.message}
+                  {parse(text)}
                 </Typography>
                 : <LinesEllipsis
-                  text={message.message}
-                  maxLine={5}
+                  text={isHtml ? h2p(text) : text}
+                  maxLine={4}
                   ellipsis=''
                   style={{ whiteSpace: "pre-line", color: '#0009' }}
                 />
               }
-              {lineLen > 6 &&
+              {lineLen > 4 &&
                 <div style={{ marginTop: "5px" }}>
                   <Link variant="caption" onClick={() => toggleMore(!more)}>{more ? 'Simplify...' : 'More...'}</Link>
                 </div>

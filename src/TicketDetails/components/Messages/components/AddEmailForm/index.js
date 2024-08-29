@@ -1,12 +1,17 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Button, Divider, Grid, Typography } from "@mui/material";
-import HookTextField from "Common/hookFields/HookTextField";
+import { Button, Grid } from "@mui/material";
+// import HookTextField from "Common/hookFields/HookTextField";
 import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
 import HookCheckbox from "Common/hookFields/HookCheckbox";
+import { useMutation } from "@apollo/client";
+import { ADD_NEW_TICKET_EMAIL, GET_TICKET_MESSAGES } from "TicketDetails/TicketGraphQL";
+import { omit } from "lodash";
+import { useDispatch } from "react-redux";
+import { showSnackbar } from "config/store";
 
-const defaultMoreFields = ["Cc", "Bcc"]
+// const defaultMoreFields = ["Cc", "Bcc"]
 
 const AddEmailFields = props => {
   const { form, handleCancel, onSubmit } = props
@@ -17,7 +22,7 @@ const AddEmailFields = props => {
     formState: { isSubmitting },
     handleSubmit
   } = form
-  const [moreFields, setMoreFields] = React.useState([])
+  // const [moreFields, setMoreFields] = React.useState([])
 
   const values = watch()
 
@@ -27,7 +32,7 @@ const AddEmailFields = props => {
 
   return (
     <Grid container spacing={1} style={{ padding: "0px 10px 10px" }}>
-      <Grid item xs={9} style={{ display: "inline-flex" }}>
+      {/* <Grid item xs={9} style={{ display: "inline-flex" }}>
         <Typography variant="subtitle1">To: </Typography>
         <HookTextField
           label=""
@@ -75,8 +80,8 @@ const AddEmailFields = props => {
       <Divider style={{ width: "100%", marginLeft: "10px" }} />
       <Grid item xs={12}>
         <Typography variant="subtitle1">{`Subject: ${values.subject}`}</Typography>
-      </Grid>
-      <Divider style={{ width: "100%", marginLeft: "10px" }} />
+      </Grid> 
+      <Divider style={{ width: "100%", marginLeft: "10px" }} /> */}
       <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
         <div style={{ position: "absolute", right: "38px", zIndex: 99, padding: "13px 3px" }}>
           <HookCheckbox
@@ -112,13 +117,15 @@ const AddEmailFields = props => {
 }
 
 const AddEmailForm = props => {
+  const dispatch = useDispatch()
   const { ticket, handleCancel } = props
+  const [sendTicketEmail] = useMutation(ADD_NEW_TICKET_EMAIL)
 
   const initialValues = React.useMemo(() => ({
     to: ticket.ticket_contact_email || "",
     cc: "",
     bcc: "",
-    subject: ticket.description,
+    subject: `[Ticket#${ticket.ticket_id}] ${ticket.description}`,
     message: "",
     flag_internal: false
   }), [ticket])
@@ -130,8 +137,28 @@ const AddEmailForm = props => {
     reValidateMode: "onSubmit"
   });
 
-  const onSubmit = values => {
-    console.log("saveeeeeee", values)
+  const onSubmit = async values => {
+    try {
+      await sendTicketEmail({
+        variables: {
+          ticket_id: ticket.ticket_id,
+          customer_id: ticket.customer_id || 0,
+          ...omit(values, ["cc", 'bcc']),
+        },
+        refetchQueries: [{ query: GET_TICKET_MESSAGES, variables: { ticket_id: ticket.ticket_id } }],
+        update: (cache, { data }) => {
+          if (data.sendTicketEmail && data.sendTicketEmail.status === "failed") {
+            dispatch(showSnackbar({ message: "Email failed to send.", severity: "error" }))
+          } else {
+            dispatch(showSnackbar({ message: "Email was sent successdully.", severity: "success" }))
+          }
+        }
+      });
+      handleCancel()
+    } catch (error) {
+      const msg = error.message.replace("GraphQL error: ", "")
+      dispatch(showSnackbar({ message: msg, severity: "error" }))
+    }
   }
 
   return (

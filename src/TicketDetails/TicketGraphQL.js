@@ -320,3 +320,24 @@ export const GET_TICKET_NOTES = gql`
     }
   }
 `;
+
+
+export const ADD_NEW_TICKET_EMAIL = gql`
+  mutation sendTicketEmail(
+    $ticket_id: Int!
+    $to: String!
+    $message: String!
+    $subject: String!
+    $flag_internal: Boolean
+    $customer_id: Int
+  ) {
+    sendTicketEmail(
+      ticket_id: $ticket_id
+      to: $to
+      message: $message
+      subject: $subject
+      flag_internal: $flag_internal
+      customer_id: $customer_id
+    ) 
+  }
+`

@@ -76,7 +76,6 @@ const CSATForm = props => {
     onSubmit,
     form
   } = props
-  console.log('props: ', props);
   const {
     control,
     setValue,
@@ -85,7 +84,7 @@ const CSATForm = props => {
   } = form
 
   const values = watch()
-  console.log('values: ', values);
+
   const handleClose = isCancelled => e => {
     setAnchorEl(null)
     if (isCancelled) {
@@ -98,8 +97,6 @@ const CSATForm = props => {
 
   const handleChange = event => {
     let score = 0
-
-    console.log('event.target.value: ', event.target.value);
     if (event.target.value === "dissatisfied") {
       score = 1
       setTargetIcon(dissatisfiedIcon)

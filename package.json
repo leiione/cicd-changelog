@@ -43,6 +43,7 @@
     "dayjs": "^1.11.10",
     "graphql": "^16.8.1",
     "graphql-ws": "^5.16.0",
+    "html-react-parser": "^5.1.15",
     "html-to-pdfmake": "^2.5.12",
     "html2plaintext": "^2.1.4",
     "jspdf": "^2.5.1",
