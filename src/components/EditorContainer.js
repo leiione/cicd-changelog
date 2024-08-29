@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { Editor } from "@tinymce/tinymce-react";
 
 const EditorContainer = props => {
-  const { content, setContent } = props;
+  const { content, setContent, background = "white" } = props;
   const editorRef = useRef(null);
 
   const normalizeContent = (content) => {
@@ -37,10 +37,12 @@ const EditorContainer = props => {
           "image",
           "link",
           "media",
+          "lists"
         ],
-        toolbar:
-          "bold italic underline | alignleft aligncenter alignright alignjustify | bullist | link",
+        toolbar: "bold italic underline fontfamily | numlist bullist alignleft link",
         setup: handleEditorSetup,
+        content_css: 'default',
+        content_style: `body { font-family:Helvetica,Arial,sans-serif; font-size:12px; background-color: ${background}; }`,
       }}
     />
   )

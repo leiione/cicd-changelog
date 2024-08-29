@@ -1,17 +1,21 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
-import { Divider, Grid, Typography } from "@mui/material";
+import { Button, Divider, Grid, Typography } from "@mui/material";
 import HookTextField from "Common/hookFields/HookTextField";
 import EditorContainer from "components/EditorContainer";
+import ProgressButton from "Common/ProgressButton";
+import HookCheckbox from "Common/hookFields/HookCheckbox";
 
 const defaultMoreFields = ["Cc", "Bcc"]
 
 const AddEmailFields = props => {
-  const { form } = props
+  const { form, handleCancel, onSubmit } = props
   const {
     control,
     setValue,
     watch,
+    formState: { isSubmitting },
+    handleSubmit
   } = form
   const [moreFields, setMoreFields] = React.useState([])
 
@@ -73,15 +77,42 @@ const AddEmailFields = props => {
         <Typography variant="subtitle1">{`Subject: ${values.subject}`}</Typography>
       </Grid>
       <Divider style={{ width: "100%", marginLeft: "10px" }} />
+      <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
+        <div style={{ position: "absolute", right: "38px", zIndex: 99, padding: "13px 3px" }}>
+          <HookCheckbox
+            control={control}
+            name={"flag_internal"}
+            label={"Mark as Private"}
+          />
+        </div>
+      </Grid>
       <Grid item xs={12}>
-        <EditorContainer content={values.message} setContent={handleMessageChange} />
+        <EditorContainer
+          content={values.message}
+          setContent={handleMessageChange}
+          background={"#fcefef"}
+        />
+      </Grid>
+      <Grid item xs={12} style={{ textAlign: "end", marginTop: "-10px" }}>
+        <ProgressButton
+          color="primary"
+          size="small"
+          onClick={handleSubmit(onSubmit)}
+          isSubmitting={isSubmitting}
+        // disabled={!isFormValid}
+        >
+          Save
+        </ProgressButton>
+        <Button color="default" size="small" style={{ padding: "5px" }} onClick={handleCancel}>
+          Cancel
+        </Button>
       </Grid>
     </Grid>
   )
 }
 
 const AddEmailForm = props => {
-  const { ticket } = props
+  const { ticket, handleCancel } = props
 
   const initialValues = React.useMemo(() => ({
     to: ticket.ticket_contact_email || "",
@@ -99,13 +130,17 @@ const AddEmailForm = props => {
     reValidateMode: "onSubmit"
   });
 
-  useEffect(() => {
-    form.reset(initialValues)
-    // eslint-disable-next-line
-  }, [ticket.ticket_id])
+  const onSubmit = values => {
+    console.log("saveeeeeee", values)
+  }
 
   return (
-    <AddEmailFields form={form} ticket={ticket} />
+    <AddEmailFields
+      form={form}
+      ticket={ticket}
+      handleCancel={handleCancel}
+      onSubmit={onSubmit}
+    />
   )
 }
 

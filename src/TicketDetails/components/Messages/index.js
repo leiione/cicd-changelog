@@ -89,7 +89,7 @@ const Messages = (props) => {
         <Loader loaderStyle={{ position: "static", textAlign: "center" }} />
       ) : (
         <>
-        {addNew === "email" && <AddEmailForm ticket={ticket} />}
+          {addNew === "email" && <AddEmailForm ticket={ticket} handleCancel={() => setAddNew(null)} />}
           <Filter filter={filter} setFilter={setFilter} />
           <MessagesTable messages={messages} />
         </>
