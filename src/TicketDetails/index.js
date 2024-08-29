@@ -15,7 +15,7 @@ import GlobalSnackbar from "Common/GlobalSnackbar";
 import Messages from "./components/Messages";
 import Attachments from "./components/Attachments";
 import DialogAlert from "components/DialogAlert"; // Import DialogAlert
-
+import BomDrawer from "./components/BillsOfMaterial/components/BomDrawer"; 
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import htmlToPdfmake from "html-to-pdfmake";
@@ -134,8 +134,8 @@ const TicketDetails = (props) => {
 
   const renderChildComponent = () => {
     switch (open1) {
-      case "Notes and Alerts":
-        return "Coming Soon";
+      case "Bills of Material":
+        return <BomDrawer />;
       case "Work Order":
         return (
           <WorkOrder

@@ -179,11 +179,7 @@ const Attachments = (props) => {
         {/* Image Preview Modal */}
         <Modal open={openPreview} onClose={handlePreviewClose}>
           <Box className="box-modal-preview">
-            <img
-              src={previewImage}
-              alt="Preview"
-              style={{ width: "100%", height: "auto" }}
-            />
+            <img src={previewImage} alt="Preview" />
             <Typography variant="body2" className="mt-2">
               {
                 selectedFiles.find(
