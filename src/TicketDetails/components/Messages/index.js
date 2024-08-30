@@ -13,6 +13,7 @@ import Loader from "components/Loader";
 import { checkIfCacheExists } from "config/apollo";
 import AddMessageButton from "./components/AddMessageButton";
 import AddEmailForm from "./components/AddEmailForm";
+import AddSMSForm from "./components/AddSMSForm";
 
 const Messages = (props) => {
   const { appuser_id, ticket } = props;
@@ -74,7 +75,7 @@ const Messages = (props) => {
     messages = [...data.ticketMessages, ...dataNotes.ticketNotes];
   }
 
-
+  console.log('addNew:', addNew); // Debugging line
   return (
     <AccordionCard
       label="Messages"
@@ -90,6 +91,7 @@ const Messages = (props) => {
       ) : (
         <>
           {addNew === "email" && <AddEmailForm ticket={ticket} handleCancel={() => setAddNew(null)} />}
+          {addNew === "sms" && <AddSMSForm ticket={ticket} handleCancel={() => setAddNew(null)} />}
           <Filter filter={filter} setFilter={setFilter} />
           <MessagesTable messages={messages} />
         </>

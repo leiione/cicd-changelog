@@ -15,6 +15,8 @@ import {
   faTrash,
 } from "@fortawesome/pro-light-svg-icons";
 import { faReply } from "@fortawesome/free-solid-svg-icons";
+import h2p from "html2plaintext"
+import parse from 'html-react-parser';
 import moment from "moment-timezone";
 import { SmsOutlined } from "@mui/icons-material";
 import LinesEllipsis from "react-lines-ellipsis";
@@ -75,10 +77,16 @@ const SMS = props => {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [more, toggleMore] = React.useState(false)
   const toEmail = message.to_email ? message.to_email.split(",") : []
-  const lineLen = message.message.split(/\r|\r\n|\n/g).length
 
   // Remove the specific text from the message
-  const cleanedMessage = message.message.replace(/To reply to this ticket, send TICKET.*<your reply>/, '');
+  const text = message.message.replace(/To reply to this ticket, send TICKET.*<your reply>/, '');
+
+  const linePlainLen = text.split(/\r|\r\n|\n/g).length
+  const lineHtmlLen = h2p(text).split(/\r|\r\n|\n/g).length
+  const lineLen = linePlainLen > lineHtmlLen ? linePlainLen : lineHtmlLen
+  const isHtml = /<\/?[a-z][\s\S]*>/i.test(text)
+
+  // const lineLen = message.message.split(/\r|\r\n|\n/g).length
 
   return (
     <>
@@ -128,10 +136,10 @@ const SMS = props => {
             <>
               {more || lineLen < 6 ?
                 <Typography variant="caption" style={{ whiteSpace: "pre-line" }}>
-                  {cleanedMessage}
+                  {parse(text)}
                 </Typography>
                 : <LinesEllipsis
-                  text={cleanedMessage}
+                text={isHtml ? h2p(text) : text}
                   maxLine={5}
                   ellipsis=''
                   style={{ whiteSpace: "pre-line", color: '#0009' }}
