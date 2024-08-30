@@ -71,7 +71,7 @@ const AddSMSFields = props => {
           isSubmitting={isSubmitting}
           disabled={!isFormValid || isSubmitting}
         >
-          Save
+          Send
         </ProgressButton>
         <Button color="default" size="medium" style={{ padding: "5px" }} onClick={handleCancel}>
           Cancel
