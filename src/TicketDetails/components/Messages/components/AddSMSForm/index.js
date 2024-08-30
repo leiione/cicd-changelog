@@ -124,7 +124,7 @@ const AddSMSForm = props => {
           if (data.sendTicketSMS && data.sendTicketSMS.status === "failed") {
             dispatch(showSnackbar({ message: "SMS failed to send.", severity: "error" }))
           } else {
-            dispatch(showSnackbar({ message: "SMS was sent successdully.", severity: "success" }))
+            dispatch(showSnackbar({ message: "SMS was sent successfully.", severity: "success" }))
           }
         }
       });
