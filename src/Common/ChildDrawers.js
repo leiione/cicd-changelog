@@ -5,7 +5,7 @@ import { Close, LocalPrintshop } from "@mui/icons-material";
 
 const useStyles = makeStyles({
     drawerPaper: {
-        width: "35vw",
+        width: "37vw",
     },
 });
 
