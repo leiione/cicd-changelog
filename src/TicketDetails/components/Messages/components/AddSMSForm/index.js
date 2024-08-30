@@ -103,7 +103,6 @@ const AddSMSForm = props => {
 
   const form = useForm({
     defaultValues: initialValues,
-    // resolver: yupResolver(validationSchemaSubLocation),
     mode: "onChange",
     reValidateMode: "onSubmit"
   });
