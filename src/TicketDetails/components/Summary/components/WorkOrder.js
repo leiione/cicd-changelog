@@ -8,8 +8,14 @@ import {
 import { Button } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
+import Loader from "components/Loader";
 
-const WorkOrder = ({ ticket_id, setTicketDetail, setEditorContentChanged, setHandleSave }) => {
+const WorkOrder = ({
+  ticket_id,
+  setTicketDetail,
+  setEditorContentChanged,
+  setHandleSave,
+}) => {
   const dispatch = useDispatch();
   const editorRef = useRef(null);
   const [initialDetailText, setInitialDetailText] = useState("");
@@ -63,32 +69,40 @@ const WorkOrder = ({ ticket_id, setTicketDetail, setEditorContentChanged, setHan
       });
       if (data.updateTicket.ticket_id) {
         dispatch(
-            showSnackbar({
-              message: "The work order saved successfully",
-              severity: "success",
-            })
+          showSnackbar({
+            message: "The work order saved successfully",
+            severity: "success",
+          })
         );
         setInitialDetailText(detailText);
         setIsChanged(false);
         setEditorContentChanged(false); // Update parent state
       } else {
         dispatch(
-            showSnackbar({
-              message: "Failed to save work order.",
-              severity: "error",
-            })
+          showSnackbar({
+            message: "Failed to save work order.",
+            severity: "error",
+          })
         );
       }
     } catch (error) {
       console.error("There was an error updating the detail text!", error);
       dispatch(
-          showSnackbar({
-            message: "Failed to save work order.",
-            severity: "error",
-          })
+        showSnackbar({
+          message: "Failed to save work order.",
+          severity: "error",
+        })
       );
     }
-  }, [detailText, detail_id, type, ticket_id, updateDetailText, dispatch, setEditorContentChanged]);
+  }, [
+    detailText,
+    detail_id,
+    type,
+    ticket_id,
+    updateDetailText,
+    dispatch,
+    setEditorContentChanged,
+  ]);
 
   useEffect(() => {
     setHandleSave(() => handleSave);
@@ -149,57 +163,57 @@ const WorkOrder = ({ ticket_id, setTicketDetail, setEditorContentChanged, setHan
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 
   return (
-      <div>
-        <div className="drawer-wrapper p-3">
-          <Editor
-              apiKey="rv98fsqigjw4pj7zsbawye8jrdpgxrrhzznj01jou3tgj7ti" // replace with your TinyMCE API key
-              value={detailText}
-              init={{
-                height: 500,
-                menubar: false,
-                branding: false,
-                statusbar: false,
-                plugins: [
-                  "advlist autolink lists link image charmap print preview anchor",
-                  "searchreplace visualblocks code fullscreen",
-                  "insertdatetime media table paste code help wordcount",
-                  "image",
-                  "link",
-                  "media",
-                ],
-                toolbar:
-                    "undo redo | formatselect | bold italic backcolor | image | link | media | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help",
-                image_title: true,
-                automatic_uploads: true,
-                file_picker_types: "file image media",
-                file_picker_callback: handleFilePicker,
-                setup: handleEditorSetup,
-              }}
-          />
-        </div>
-        <div className="drawer-footer">
-          <Button
-              color="primary"
-              variant="outlined"
-              onClick={handleSave}
-              disabled={!isLoaded || !isChanged}
-          >
-            Save
-          </Button>
-          <Button
-              variant="outlined"
-              color="default"
-              onClick={handleCancel}
-              disabled={!isLoaded}
-          >
-            Cancel
-          </Button>
-        </div>
+    <div>
+      <div className="drawer-wrapper p-3">
+        <Editor
+          apiKey="rv98fsqigjw4pj7zsbawye8jrdpgxrrhzznj01jou3tgj7ti" // replace with your TinyMCE API key
+          value={detailText}
+          init={{
+            height: 500,
+            menubar: false,
+            branding: false,
+            statusbar: false,
+            plugins: [
+              "advlist autolink lists link image charmap print preview anchor",
+              "searchreplace visualblocks code fullscreen",
+              "insertdatetime media table paste code help wordcount",
+              "image",
+              "link",
+              "media",
+            ],
+            toolbar:
+              "undo redo | formatselect | bold italic underline | link media | bullist numlist | alignleft aligncenter alignright alignjustify |  outdent indent | removeformat | help",
+            image_title: true,
+            automatic_uploads: true,
+            file_picker_types: "file image media",
+            file_picker_callback: handleFilePicker,
+            setup: handleEditorSetup,
+          }}
+        />
       </div>
+      <div className="drawer-footer">
+        <Button
+          color="primary"
+          variant="outlined"
+          onClick={handleSave}
+          disabled={!isLoaded || !isChanged}
+        >
+          Save
+        </Button>
+        <Button
+          variant="outlined"
+          color="default"
+          onClick={handleCancel}
+          disabled={!isLoaded}
+        >
+          Cancel
+        </Button>
+      </div>
+    </div>
   );
 };
 
