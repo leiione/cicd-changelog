@@ -176,6 +176,7 @@ const WorkOrder = ({
             height: 500,
             menubar: false,
             branding: false,
+            icons: 'material',
             statusbar: false,
             plugins: [
               "advlist autolink lists link image charmap print preview anchor",
@@ -186,7 +187,7 @@ const WorkOrder = ({
               "media",
             ],
             toolbar:
-              "undo redo | formatselect | bold italic underline | link media | bullist numlist | alignleft aligncenter alignright alignjustify |  outdent indent | removeformat | help",
+              "undo redo | bold italic underline forecolor backcolor | link image code | align | bullist numlist",
             image_title: true,
             automatic_uploads: true,
             file_picker_types: "file image media",
