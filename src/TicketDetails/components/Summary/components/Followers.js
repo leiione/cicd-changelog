@@ -2,17 +2,21 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   Grid,
   Typography,
-  MenuItem,
   Popover,
-  Avatar,
-  Checkbox,
-  FormControlLabel,
   Button,
   Tooltip,
+  IconButton,
+  List,
+  ListItemAvatar,
+  ListItemText,
+  ListItemButton,
 } from "@mui/material";
 import { useQuery } from "@apollo/client";
 import { GET_FOLLOWERS } from "TicketDetails/TicketGraphQL";
 import { preventEvent } from "Common/helper";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlusCircle } from "@fortawesome/pro-light-svg-icons";
+import AvatarText from "Common/AvatarText";
 
 const fetchFollowerName = (followerEmail, data) => {
   if (data && data.followers) {
@@ -42,10 +46,19 @@ const Followers = (props) => {
 
   useEffect(() => {
     if (ticket && ticket.followers && data && data.followers) {
-      const initialFollowers = ticket.followers.split(",").map((followerEmail) => {
-        const follower = data.followers.find(f => f.email === followerEmail);
-        return follower ? follower : { email: followerEmail, realname: fetchFollowerNameCallback(followerEmail) };
-      });
+      const initialFollowers = ticket.followers
+        .split(",")
+        .map((followerEmail) => {
+          const follower = data.followers.find(
+            (f) => f.email === followerEmail
+          );
+          return follower
+            ? follower
+            : {
+                email: followerEmail,
+                realname: fetchFollowerNameCallback(followerEmail),
+              };
+        });
       setFollowers(initialFollowers);
       setTempFollowers(initialFollowers); // Initialize tempFollowers
     }
@@ -68,13 +81,9 @@ const Followers = (props) => {
   };
 
   const handleSelectFollower = (follower) => {
-    const isSelected = tempFollowers.some(
-      (a) => a.email === follower.email
-    );
+    const isSelected = tempFollowers.some((a) => a.email === follower.email);
     if (isSelected) {
-      setTempFollowers(
-        tempFollowers.filter((a) => a.email !== follower.email)
-      );
+      setTempFollowers(tempFollowers.filter((a) => a.email !== follower.email));
     } else {
       setTempFollowers([...tempFollowers, follower]);
     }
@@ -85,51 +94,9 @@ const Followers = (props) => {
     setAnchorEl(event.currentTarget);
   };
 
-  function stringToColor(string) {
-    let hash = 0;
-    let i;
-
-    for (i = 0; i < string.length; i += 1) {
-      hash = string.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    let color = "#";
-
-    for (i = 0; i < 3; i += 1) {
-      const value = (hash >> (i * 8)) & 0xff;
-      color += `00${value.toString(16)}`.slice(-2);
-    }
-
-    return color;
-  }
-
-  function stringAvatar(name) {
-    if (!name || typeof name !== "string") {
-      return {
-        sx: {
-          bgcolor: stringToColor("Anonymous"),
-        },
-        children: "A",
-      };
-    }
-
-    const nameParts = name.split(" ");
-    const initials =
-      nameParts.length > 1
-        ? `${nameParts[0][0]}${nameParts[1][0]}`
-        : `${nameParts[0][0]}`;
-
-    return {
-      sx: {
-        bgcolor: stringToColor(name),
-      },
-      children: initials,
-    };
-  }
-
   return (
     <>
-      <Grid container spacing={1}>
+      <Grid container spacing={1} className="mb-2">
         <Grid item xs="auto">
           <Typography variant="subtitle1">Followers: </Typography>
         </Grid>
@@ -138,12 +105,20 @@ const Followers = (props) => {
             ticket.followers.split(",").map((follower) => {
               const followerName = fetchFollowerNameCallback(follower);
               return (
-                <Typography variant="subtitle1" className="d-flex align-items-center" key={follower}>
+                <Typography
+                  variant="subtitle1"
+                  className="d-flex align-items-center mb-1"
+                  key={follower}
+                >
                   {followerName && (
-                    <Avatar
-                      {...stringAvatar(followerName)}
-                      sx={{ width: 24, height: 24 }}
-                      className="ml-1 mr-2"
+                    <AvatarText
+                      title={followerName}
+                      charCount={1}
+                      sx={{
+                        width: 20,
+                        height: 20,
+                      }}
+                      className="mr-2"
                     />
                   )}
                   {followerName || ""}
@@ -151,9 +126,9 @@ const Followers = (props) => {
               );
             })
           ) : (
-            <Typography variant="subtitle2" color="primary" onClick={handleClick}>
-              Add
-            </Typography>
+            <IconButton color="primary" onClick={handleClick} size="small">
+              <FontAwesomeIcon icon={faPlusCircle} />
+            </IconButton>
           )}
 
           <Popover
@@ -166,50 +141,55 @@ const Followers = (props) => {
               horizontal: "left",
             }}
           >
-            {data && data.followers && data.followers.map((follower) => {
-              const isDisabled = !follower.email;
-              return (
-                <Tooltip
-                  key={follower.appuser_id}
-                  title={isDisabled ? "This appuser does not have an associated email account." : follower.email}
-                  placement="top"
-                >
-                  <span>
-                    <MenuItem
-                      onClick={() => handleSelectFollower(follower)}
-                      style={{
-                        backgroundColor: tempFollowers.some(
-                          (a) => a.email === follower.email
-                        )
-                          ? "#f0f0f0"
-                          : "transparent",
-                        pointerEvents: isDisabled ? "none" : "auto", // Disable interaction if follower has no email
-                      }}
-                      disabled={isDisabled}
+            <List className="paper-height-300 overflow-y-auto">
+              {data &&
+                data.followers &&
+                data.followers.map((follower) => {
+                  const isDisabled = !follower.email;
+                  return (
+                    <Tooltip
+                      key={follower.appuser_id}
+                      title={
+                        isDisabled
+                          ? "This appuser does not have an associated email account."
+                          : follower.email
+                      }
+                      placement="top"
                     >
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            style={{ display: "none" }} // Hide the checkbox visually
-                            checked={tempFollowers.some(
-                              (a) => a.email === follower.email
-                            )}
-                            name={follower.realname}
-                            disabled={isDisabled}
+                      <ListItemButton
+                        disablePadding
+                        disabled={isDisabled}
+                        selected={tempFollowers.some(
+                          (a) => a.email === follower.email
+                        )}
+                        onClick={() => handleSelectFollower(follower)}
+                      >
+                        <ListItemAvatar>
+                          <AvatarText
+                            title={follower.realname}
+                            charCount={1}
+                            className="mx-auto"
+                            sx={{
+                              width: 20,
+                              height: 20,
+                            }}
                           />
-                        }
-                        label={`${follower.realname}`}
-                      />
-                    </MenuItem>
-                  </span>
-                </Tooltip>
-              );
-            })}
+                        </ListItemAvatar>
+                        <ListItemText primary={follower.realname} />
+                      </ListItemButton>
+                    </Tooltip>
+                  );
+                })}
+            </List>
             <div className="drawer-footer">
               <Button color="primary" variant="outlined" onClick={handleSave}>
                 Save
               </Button>
-              <Button color="default" variant="outlined" onClick={handlePopoverClose}>
+              <Button
+                color="default"
+                variant="outlined"
+                onClick={handlePopoverClose}
+              >
                 Cancel
               </Button>
             </div>

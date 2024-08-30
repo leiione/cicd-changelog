@@ -9,8 +9,7 @@ import {
   IconButton,
   Grid,
   Typography,
-  Link,
-} from "@mui/material"
+} from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import SignatureCanvas from "react-signature-canvas";
 import { Close } from "@mui/icons-material";
@@ -20,6 +19,8 @@ import { useMutation } from "@apollo/client";
 import { ADD_TICKET_SIGNATURE, GET_TICKET } from "TicketDetails/TicketGraphQL";
 import moment from "moment-timezone";
 import ProgressButton from "Common/ProgressButton";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlusCircle } from "@fortawesome/pro-light-svg-icons";
 
 const useStyles = makeStyles(() => ({
   canvasBox: {
@@ -31,101 +32,115 @@ const useStyles = makeStyles(() => ({
     maxWidth: 500,
     margin: "auto",
     borderRadius: 5,
-    border: "2px solid #e4e4e4"
-  }
+    border: "2px solid #e4e4e4",
+  },
 }));
 
-const Signature = props => {
-  const classes = useStyles()
-  const dispatch = useDispatch()
-  const [addTicketSignature] = useMutation(ADD_TICKET_SIGNATURE)
+const Signature = (props) => {
+  const classes = useStyles();
+  const dispatch = useDispatch();
+  const [addTicketSignature] = useMutation(ADD_TICKET_SIGNATURE);
 
-  const { ticket } = props
+  const { ticket } = props;
 
-  const [openSignature, toggleSignature] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [isValidSign, setIsValidSign] = useState(false)
+  const [openSignature, toggleSignature] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isValidSign, setIsValidSign] = useState(false);
 
-  let signPad = null
-  let intervalVal = 0
+  let signPad = null;
+  let intervalVal = 0;
 
   const handleCloseSignature = () => {
-    toggleSignature(false)
-    setIsValidSign(false)
-  }
+    toggleSignature(false);
+    setIsValidSign(false);
+  };
 
   const onClearSignature = () => {
-    signPad.clear()
-    setIsValidSign(false)
-  }
+    signPad.clear();
+    setIsValidSign(false);
+  };
 
   const handleSaveSignature = async () => {
     if (!signPad) {
-      dispatch(showSnackbar({ message: "Please sign before saving", severity: "error" }))
+      dispatch(
+        showSnackbar({
+          message: "Please sign before saving",
+          severity: "error",
+        })
+      );
     } else {
       try {
-        setLoading(true)
-        const imgData = signPad.getTrimmedCanvas().toDataURL("image/png")
-        const data = imgData.split(",")[1]
+        setLoading(true);
+        const imgData = signPad.getTrimmedCanvas().toDataURL("image/png");
+        const data = imgData.split(",")[1];
         await addTicketSignature({
           variables: {
             ticket_id: ticket.ticket_id,
             signature: data,
-            signature_date: moment()
-              .format("YYYY-MM-DD hh:mm:ss")
-              .toString()
+            signature_date: moment().format("YYYY-MM-DD hh:mm:ss").toString(),
           },
-          refetchQueries: [{ query: GET_TICKET, variables: { id: ticket.ticket_id } }]
+          refetchQueries: [
+            { query: GET_TICKET, variables: { id: ticket.ticket_id } },
+          ],
         }).finally(() => {
-          setLoading(false)
-          setIsValidSign(false)
-          toggleSignature(false)
-        })
+          setLoading(false);
+          setIsValidSign(false);
+          toggleSignature(false);
+        });
       } catch (e) {
-        setLoading(false)
-        const message = e.message.split("GraphQL error:")
-        dispatch(showSnackbar({ message, severity: "error" }))
+        setLoading(false);
+        const message = e.message.split("GraphQL error:");
+        dispatch(showSnackbar({ message, severity: "error" }));
       }
     }
-  }
+  };
 
   const checkSignPad = () => {
     if (signPad) {
       if (!signPad.isEmpty()) {
-        setIsValidSign(true)
+        setIsValidSign(true);
       }
     }
-  }
+  };
 
-  clearInterval(intervalVal)
-  intervalVal = setInterval(checkSignPad, 1000)
+  clearInterval(intervalVal);
+  intervalVal = setInterval(checkSignPad, 1000);
 
   return (
     <>
-      <Grid container spacing={1} alignItems="center">
+      <Grid container spacing={1} className="mb-2">
         <Grid item xs="auto">
           <Typography variant="subtitle1">Signature: </Typography>
         </Grid>
         <Grid item xs="auto">
-          {ticket && ticket.signature_url ?
-            <img src={ticket.signature_url} alt="signature" style={{ width: "100px", height: "50px" }} />
-            : <Link component={"button"} onClick={() => toggleSignature(true)} disable>Add</Link>
-          }
+          {ticket && ticket.signature_url ? (
+            <img
+              src={ticket.signature_url}
+              alt="signature"
+              style={{ width: "100px", height: "50px" }}
+            />
+          ) : (
+            <IconButton
+              color="primary"
+              size="small"
+              onClick={() => toggleSignature(true)}
+              disable
+            >
+              <FontAwesomeIcon icon={faPlusCircle} />
+            </IconButton>
+          )}
         </Grid>
       </Grid>
-      <Dialog
-        open={openSignature}
-        onClose={handleCloseSignature}
-      >
+      <Dialog open={openSignature} onClose={handleCloseSignature}>
         <DialogTitle className="bg-white text-dark">Signature</DialogTitle>
         <IconButton
           aria-label="close"
+          color="default"
           onClick={handleCloseSignature}
           sx={{
-            position: 'absolute',
+            position: "absolute",
             right: 5,
             top: 5,
-            color: (theme) => theme.palette.grey[500],
           }}
         >
           <Close />
@@ -134,17 +149,23 @@ const Signature = props => {
           <Box className={classes.canvasBox}>
             <SignatureCanvas
               penColor="black"
-              ref={ref => {
-                signPad = ref
+              ref={(ref) => {
+                signPad = ref;
               }}
               canvasProps={{ width: 350, height: 130 }}
             />
           </Box>
         </DialogContent>
         <DialogActions>
-          <div style={{ left: "10px", position: "absolute" }}>
-            <Button variant="outlined" className="text-muted" disabled={!isValidSign || loading} onClick={onClearSignature}>Clear</Button>
-          </div>
+          <Button
+            variant="outlined"
+            color="default"
+            disabled={!isValidSign || loading}
+            onClick={onClearSignature}
+            className="mr-auto"
+          >
+            Clear
+          </Button>
           <ProgressButton
             variant="outlined"
             color="primary"
@@ -154,11 +175,17 @@ const Signature = props => {
           >
             Accept and Sign
           </ProgressButton>
-          <Button variant="outlined" className="text-muted" onClick={handleCloseSignature}>Cancel</Button>
+          <Button
+            color="default"
+            variant="outlined"
+            onClick={handleCloseSignature}
+          >
+            Cancel
+          </Button>
         </DialogActions>
       </Dialog>
     </>
-  )
-}
+  );
+};
 
 export default Signature;

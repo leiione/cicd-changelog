@@ -1,5 +1,5 @@
-import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
+import * as React from "react";
+import Avatar from "@mui/material/Avatar";
 
 function stringToColor(string) {
   let hash = 0;
@@ -10,7 +10,7 @@ function stringToColor(string) {
     hash = string.charCodeAt(i) + ((hash << 5) - hash);
   }
 
-  let color = '#';
+  let color = "#";
 
   for (i = 0; i < 3; i += 1) {
     const value = (hash >> (i * 8)) & 0xff;
@@ -23,17 +23,23 @@ function stringToColor(string) {
 
 function stringAvatar(name, rest, charCount) {
   const matches = name.match(/\b(\w)/g);
-  const acronym = matches.join('').substring(0, charCount);
+  const acronym = matches.join("").substring(0, charCount);
   return {
     sx: {
       bgcolor: stringToColor(name),
-      ...rest.sx
+      ...rest.sx,
     },
     children: acronym,
   };
 }
 
 export default function AvatarText(props) {
-  const {title, charCount = 2, ...rest} = props;
-  return <Avatar {...rest} {...stringAvatar(title, rest, charCount)} />;
+  const { title, charCount = 2, className, ...rest } = props;
+  return (
+    <Avatar
+      {...rest}
+      {...stringAvatar(title, rest, charCount, className)}
+      className={`f-12 ${className}`}
+    />
+  );
 }

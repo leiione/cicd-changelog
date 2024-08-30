@@ -3,15 +3,20 @@ import {
   Grid,
   Typography,
   Popover,
-  Avatar,
   Button,
-  MenuItem,
-  FormControlLabel,
-  Checkbox,
+  IconButton,
+  List,
+  Tooltip,
+  ListItemButton,
+  ListItemAvatar,
+  ListItemText,
 } from "@mui/material";
 import { preventEvent } from "Common/helper";
 import { useQuery } from "@apollo/client";
 import { GET_ASSIGNEES } from "TicketDetails/TicketGraphQL";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlusCircle } from "@fortawesome/pro-light-svg-icons";
+import AvatarText from "Common/AvatarText";
 
 const fetchAssigneeName = (assigneeID, data) => {
   if (data && data.assignees) {
@@ -40,7 +45,13 @@ const Assignee = (props) => {
   );
 
   useEffect(() => {
-    if (ticket && ticket.assignees && Array.isArray(ticket.assignees) && data && data.assignees) {
+    if (
+      ticket &&
+      ticket.assignees &&
+      Array.isArray(ticket.assignees) &&
+      data &&
+      data.assignees
+    ) {
       const initialAssignees = ticket.assignees.map((assigneeId) => ({
         appuser_id: assigneeId,
         realname: fetchAssigneeNameCallback(assigneeId),
@@ -62,7 +73,7 @@ const Assignee = (props) => {
       appuser_id: assignee.appuser_id,
       realname: assignee.realname,
     }));
-  
+
     await updateTicket({
       ticket_id: ticket.ticket_id,
       assignees: assignees,
@@ -88,64 +99,33 @@ const Assignee = (props) => {
     setAnchorEl(event.currentTarget);
   };
 
-  function stringToColor(string) {
-    let hash = 0;
-    let i;
-
-    for (i = 0; i < string.length; i += 1) {
-      hash = string.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    let color = "#";
-
-    for (i = 0; i < 3; i += 1) {
-      const value = (hash >> (i * 8)) & 0xff;
-      color += `00${value.toString(16)}`.slice(-2);
-    }
-
-    return color;
-  }
-
-  function stringAvatar(name) {
-    if (!name || typeof name !== "string") {
-      return {
-        sx: {
-          bgcolor: stringToColor("Anonymous"),
-        },
-        children: "A",
-      };
-    }
-
-    const nameParts = name.split(" ");
-    const initials =
-      nameParts.length > 1
-        ? `${nameParts[0][0]}${nameParts[1][0]}`
-        : `${nameParts[0][0]}`;
-
-    return {
-      sx: {
-        bgcolor: stringToColor(name),
-      },
-      children: initials,
-    };
-  }
-
   return (
     <>
-      <Grid container spacing={1}>
+      <Grid container spacing={1} className="mb-2">
         <Grid item xs="auto">
           <Typography variant="subtitle1">Assignees: </Typography>
         </Grid>
         <Grid item xs="auto" onClick={handleClick}>
-          {ticket && ticket.assignees && Array.isArray(ticket.assignees) && ticket.assignees.length > 0 ? (
+          {ticket &&
+          ticket.assignees &&
+          Array.isArray(ticket.assignees) &&
+          ticket.assignees.length > 0 ? (
             ticket.assignees.map((assigneeId) => {
               const assigneeName = fetchAssigneeNameCallback(assigneeId);
               return (
-                <Typography variant="subtitle1" className="d-flex align-items-center" key={assigneeId}>
+                <Typography
+                  variant="subtitle1"
+                  className="d-flex align-items-center mb-1"
+                  key={assigneeId}
+                >
                   {assigneeName && (
-                    <Avatar
-                      {...stringAvatar(assigneeName)}
-                      sx={{ width: 24, height: 24 }}
+                    <AvatarText
+                      title={assigneeName}
+                      charCount={1}
+                      sx={{
+                        width: 20,
+                        height: 20,
+                      }}
                       className="mr-2"
                     />
                   )}
@@ -154,9 +134,9 @@ const Assignee = (props) => {
               );
             })
           ) : (
-            <Typography variant="subtitle2" color="primary" onClick={handleClick}>
-              Add
-            </Typography>
+            <IconButton color="primary" onClick={handleClick} size="small">
+              <FontAwesomeIcon icon={faPlusCircle} />
+            </IconButton>
           )}
 
           <Popover
@@ -169,37 +149,49 @@ const Assignee = (props) => {
               horizontal: "left",
             }}
           >
-            {data && data.assignees && data.assignees.map((assignee) => (
-              <MenuItem
-                key={assignee.appuser_id}
-                onClick={() => handleSelectAssignee(assignee)}
-                style={{
-                  backgroundColor: tempAssignees.some(
-                    (a) => a.appuser_id === assignee.appuser_id
-                  )
-                    ? "#f0f0f0"
-                    : "transparent",
-                }}
-              >
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      style={{ display: "none" }} // Hide the checkbox visually
-                      checked={tempAssignees.some(
-                        (a) => a.appuser_id === assignee.appuser_id
-                      )}
-                      name={assignee.realname}
-                    />
-                  }
-                  label={`${assignee.realname}`}
-                />
-              </MenuItem>
-            ))}
+            <List className="paper-height-300 overflow-y-auto">
+              {data &&
+                data.assignees &&
+                data.assignees.map((assignee) => {
+                  return (
+                    <Tooltip
+                      key={assignee.appuser_id}
+                      title={assignee.email}
+                      placement="top"
+                    >
+                      <ListItemButton
+                        disablePadding
+                        selected={tempAssignees.some(
+                          (a) => a.appuser_id === assignee.appuser_id
+                        )}
+                        onClick={() => handleSelectAssignee(assignee)}
+                      >
+                        <ListItemAvatar>
+                          <AvatarText
+                            title={assignee.realname}
+                            charCount={1}
+                            className="mx-auto"
+                            sx={{
+                              width: 20,
+                              height: 20,
+                            }}
+                          />
+                        </ListItemAvatar>
+                        <ListItemText primary={assignee.realname} />
+                      </ListItemButton>
+                    </Tooltip>
+                  );
+                })}
+            </List>
             <div className="drawer-footer">
               <Button color="primary" variant="outlined" onClick={handleSave}>
                 Save
               </Button>
-              <Button color="default" variant="outlined" onClick={handlePopoverClose}>
+              <Button
+                color="default"
+                variant="outlined"
+                onClick={handlePopoverClose}
+              >
                 Cancel
               </Button>
             </div>
