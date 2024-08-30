@@ -1,17 +1,16 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Button, Grid } from "@mui/material";
-// import HookTextField from "Common/hookFields/HookTextField";
+import { Button, Divider, Grid, Typography } from "@mui/material";
 import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
 import HookCheckbox from "Common/hookFields/HookCheckbox";
 import { useMutation } from "@apollo/client";
 import { ADD_NEW_TICKET_EMAIL, GET_TICKET_MESSAGES } from "TicketDetails/TicketGraphQL";
-import { omit } from "lodash";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
+import HookTypeAheadEmailField from "Common/hookFields/HookTypeAheadEmailField";
 
-// const defaultMoreFields = ["Cc", "Bcc"]
+const defaultMoreFields = ["Cc"]
 
 const AddEmailFields = props => {
   const { form, handleCancel, onSubmit } = props
@@ -22,7 +21,7 @@ const AddEmailFields = props => {
     formState: { isSubmitting },
     handleSubmit
   } = form
-  // const [moreFields, setMoreFields] = React.useState([])
+  const [moreFields, setMoreFields] = React.useState([])
 
   const values = watch()
 
@@ -30,21 +29,24 @@ const AddEmailFields = props => {
     setValue("message", content, { shouldValidate: true })
   }
 
+  const isFormValid = React.useMemo(() => (
+    values.to.length > 0 && values.message && !values.toFreeFieldText && !values.ccFreeFieldText && !values.bccFreeFieldText
+  ), [values])
+
   return (
-    <Grid container spacing={1} style={{ padding: "0px 10px 10px" }}>
-      {/* <Grid item xs={9} style={{ display: "inline-flex" }}>
-        <Typography variant="subtitle1">To: </Typography>
-        <HookTextField
-          label=""
-          name="to"
-          required
+    <Grid container spacing={0} style={{ padding: "0px 10px 10px" }}>
+      <Grid item xs={9} style={{ display: "inline-flex" }}>
+        <Typography variant="subtitle1" style={{ margin: "7px 10px 0px 0px" }}>To: </Typography>
+        <HookTypeAheadEmailField
           control={control}
-          InputProps={{ disableUnderline: true }}
-          style={{ margin: "-2px 5px" }}
+          name="to"
+          labelKey="to"
+          setValue={setValue}
+          errorFieldFreeText="toFreeFieldText"
         />
       </Grid>
       <Grid item xs={3} style={{ textAlign: "end" }}>
-        <div style={{ display: "inline-flex" }}>
+        <div style={{ display: "inline-flex", marginTop: "7px" }}>
           {defaultMoreFields.map((item, index) => {
             if (!moreFields.includes(item)) {
               return (
@@ -64,26 +66,27 @@ const AddEmailFields = props => {
       </Grid>
       {moreFields.map((item, index) => (
         <>
-          <Divider style={{ width: "100%", marginLeft: "10px" }} />
+          <Divider style={{ width: "100%" }} />
           <Grid item xs={12} key={index} style={{ display: "inline-flex" }}>
-            <Typography variant="subtitle1">{`${item}: `}</Typography>
-            <HookTextField
-              label=""
-              name={item.toLowerCase()}
+            <Typography variant="subtitle1" style={{ margin: "7px 10px 0px 0px" }}>{`${item}: `}</Typography>
+            <HookTypeAheadEmailField
               control={control}
-              InputProps={{ disableUnderline: true }}
-              style={{ margin: "-2px 5px" }}
+              name={item.toLowerCase()}
+              labelKey={item.toLowerCase()}
+              setValue={setValue}
+              errorFieldFreeText={`${item.toLowerCase()}FreeFieldText`}
             />
           </Grid>
         </>
       ))}
-      <Divider style={{ width: "100%", marginLeft: "10px" }} />
-      <Grid item xs={12}>
+      <Divider style={{ width: "100%" }} />
+      {/* <Grid item xs={12}>
         <Typography variant="subtitle1">{`Subject: ${values.subject}`}</Typography>
       </Grid> 
-      <Divider style={{ width: "100%", marginLeft: "10px" }} /> */}
+      <Divider style={{ width: "100%", marginLeft: "10px" }} /> 
+      */}
       <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
-        <div style={{ position: "absolute", right: "38px", zIndex: 99, padding: "13px 3px" }}>
+        <div style={{ position: "absolute", right: "38px", zIndex: 99, padding: "23px 3px" }}>
           <HookCheckbox
             control={control}
             name={"flag_internal"}
@@ -91,24 +94,25 @@ const AddEmailFields = props => {
           />
         </div>
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={12} style={{ marginTop: "10px" }}>
         <EditorContainer
           content={values.message}
           setContent={handleMessageChange}
           background={"#fcefef"}
+          disabled={isSubmitting}
         />
       </Grid>
       <Grid item xs={12} style={{ textAlign: "end", marginTop: "-10px" }}>
         <ProgressButton
           color="primary"
-          size="small"
+          size="medium"
           onClick={handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}
-        // disabled={!isFormValid}
+          disabled={!isFormValid || isSubmitting}
         >
           Save
         </ProgressButton>
-        <Button color="default" size="small" style={{ padding: "5px" }} onClick={handleCancel}>
+        <Button color="default" size="medium" style={{ padding: "5px" }} onClick={handleCancel}>
           Cancel
         </Button>
       </Grid>
@@ -121,14 +125,22 @@ const AddEmailForm = props => {
   const { ticket, handleCancel } = props
   const [sendTicketEmail] = useMutation(ADD_NEW_TICKET_EMAIL)
 
-  const initialValues = React.useMemo(() => ({
-    to: ticket.ticket_contact_email || "",
-    cc: "",
-    bcc: "",
-    subject: `[Ticket#${ticket.ticket_id}] ${ticket.description}`,
-    message: "",
-    flag_internal: false
-  }), [ticket])
+  const initialValues = React.useMemo(() => {
+    const toEmail = []
+    const contactEmail = ticket.ticket_contact_email ? ticket.ticket_contact_email.split(",") : []
+    contactEmail.forEach(email => {
+      toEmail.push({ to: email, customOption: true })
+    })
+
+    return {
+      to: toEmail,
+      cc: [],
+      bcc: [],
+      subject: `[Ticket#${ticket.ticket_id}] ${ticket.description}`,
+      message: "",
+      flag_internal: false
+    }
+  }, [ticket])
 
   const form = useForm({
     defaultValues: initialValues,
@@ -139,12 +151,18 @@ const AddEmailForm = props => {
 
   const onSubmit = async values => {
     try {
+      const variables = {
+        ticket_id: ticket.ticket_id,
+        to: (values.to.map(item => item.to).join(",")).replace(/ /g,''),
+        cc: (values.cc.map(item => item.cc).join(",")).replace(/ /g,''),
+        bcc: (values.bcc.map(item => item.bcc).join(",")).replace(/ /g,''),
+        message: values.message,
+        customer_id: ticket.customer_id || 0,
+        subject: values.subject,
+        flag_internal: values.flag_internal
+      }
       await sendTicketEmail({
-        variables: {
-          ticket_id: ticket.ticket_id,
-          customer_id: ticket.customer_id || 0,
-          ...omit(values, ["cc", 'bcc']),
-        },
+        variables,
         refetchQueries: [{ query: GET_TICKET_MESSAGES, variables: { ticket_id: ticket.ticket_id } }],
         update: (cache, { data }) => {
           if (data.sendTicketEmail && data.sendTicketEmail.status === "failed") {

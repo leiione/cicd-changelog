@@ -1,9 +1,12 @@
 import { MessageOutlined } from "@mui/icons-material";
 import { IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import { preventEvent } from "Common/helper";
+import { setCardPreferences } from "config/store";
 import React from "react";
+import { useDispatch } from "react-redux";
 
 const AddMessageButton = props => {
+  const dispatch = useDispatch()
   const { setAddNew } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -16,6 +19,7 @@ const AddMessageButton = props => {
     preventEvent(event)
     setAddNew(type)
     setAnchorEl(null)
+    dispatch(setCardPreferences({ card: "messagesCard", preferences: { expanded: true } }));
   }
 
   return (

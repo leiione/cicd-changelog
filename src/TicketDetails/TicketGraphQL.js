@@ -326,6 +326,8 @@ export const ADD_NEW_TICKET_EMAIL = gql`
   mutation sendTicketEmail(
     $ticket_id: Int!
     $to: String!
+    $cc: String
+    $bcc: String
     $message: String!
     $subject: String!
     $flag_internal: Boolean
@@ -334,6 +336,8 @@ export const ADD_NEW_TICKET_EMAIL = gql`
     sendTicketEmail(
       ticket_id: $ticket_id
       to: $to
+      cc: $cc
+      bcc: $bcc
       message: $message
       subject: $subject
       flag_internal: $flag_internal

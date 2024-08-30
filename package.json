@@ -54,6 +54,7 @@
     "react-app-rewired": "^2.2.1",
     "react-beautiful-dnd": "^13.1.1",
     "react-beforeunload": "^2.6.0",
+    "react-bootstrap-typeahead": "^6.3.2",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-highlight-words": "^0.20.0",
