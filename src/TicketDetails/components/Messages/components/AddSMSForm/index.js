@@ -26,9 +26,7 @@ const AddSMSFields = props => {
     setValue("message", content, { shouldValidate: true })
   }
 
-  const isFormValid = React.useMemo(() => (
-    values.to.length > 0 && values.message && !values.toFreeFieldText && !values.ccFreeFieldText && !values.bccFreeFieldText
-  ), [values])
+  const isFormValid = React.useMemo(() => (values.to.length > 0 && values.message && !values.toFreeFieldText), [values])
 
   return (
     <Grid container spacing={0} style={{ padding: "0px 10px 10px" }}>
