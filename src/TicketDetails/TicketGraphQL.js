@@ -384,4 +384,4 @@ export const ADD_NEW_TICKET_SMS = gql`
       flag_internal: $flag_internal
       customer_id: $customer_id
     ) 
-  }
+  }`

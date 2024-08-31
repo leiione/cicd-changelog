@@ -83,8 +83,8 @@ const Messages = (props) => {
       label="Messages"
       iconButtons={
         <>
+          <AddNoteButton setAddNew={setAddNew} />
           <AddMessageButton setAddNew={setAddNew} />
-           <AddNoteButton setAddNew={setAddNew} />
         </>
       }
       menuOption={<HeaderMenuOptions appuser_id={appuser_id} category="Message Card" />}
