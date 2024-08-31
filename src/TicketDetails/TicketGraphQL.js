@@ -321,7 +321,6 @@ export const GET_TICKET_NOTES = gql`
   }
 `;
 
-
 export const ADD_NEW_TICKET_EMAIL = gql`
   mutation sendTicketEmail(
     $ticket_id: Int!
@@ -342,7 +341,7 @@ export const ADD_NEW_TICKET_EMAIL = gql`
       subject: $subject
       flag_internal: $flag_internal
       customer_id: $customer_id
-    ) 
+    )
   }
 `
 

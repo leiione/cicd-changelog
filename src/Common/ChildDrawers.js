@@ -5,7 +5,7 @@ import { Close, LocalPrintshop } from "@mui/icons-material";
 
 const useStyles = makeStyles({
     drawerPaper: {
-        width: "35vw",
+        width: "37vw",
     },
 });
 
@@ -15,7 +15,7 @@ const ChildDrawers = (props) => {
 
     const getTitle = (title) => {
         if (title === 'Work Order') {
-            return <>{title} <LocalPrintshop className="f-20" onClick={() => { handlePrint(ticketDetail) }} /></>;
+            return <>{title} <LocalPrintshop className="f-20 ml-2" onClick={() => { handlePrint(ticketDetail) }} /></>;
         } else {
             return title;
         }
