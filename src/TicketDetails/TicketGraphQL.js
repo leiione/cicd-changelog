@@ -345,3 +345,25 @@ export const ADD_NEW_TICKET_EMAIL = gql`
     ) 
   }
 `
+
+export const ADD_NEW_TICKET_NOTE = gql`
+  mutation addTicketNote(
+    $ticket_id: Int!
+    $note: String!
+    $flag_internal: Boolean
+    
+  ) {
+    addTicketNote(
+      ticket_id: $ticket_id
+      note: $note
+      flag_internal: $flag_internal
+    ) {
+      note_id
+      date_added
+      appuser_id
+      isp_id
+      content
+      appuser_name
+    }
+  }
+`

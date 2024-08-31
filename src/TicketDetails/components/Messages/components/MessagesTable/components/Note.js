@@ -17,11 +17,16 @@ import {
 import { faReply } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment-timezone";
 import LinesEllipsis from "react-lines-ellipsis";
+import h2p from "html2plaintext"
+import parse from 'html-react-parser';
+
 
 const Note = props => {
   const { message } = props
   const [more, toggleMore] = React.useState(false)
   const lineLen = message.content ? message.content.split(/\r|\r\n|\n/g).length : 1
+  const isHtml = /<\/?[a-z][\s\S]*>/i.test(message.content)
+
 
   return (
     <ListItem key={message.note_id} alignItems="flex-start">
@@ -58,10 +63,10 @@ const Note = props => {
           <>
               {more || lineLen < 6 ?
                 <Typography variant="caption" style={{ whiteSpace: "pre-line" }}>
-                  {message.content}
+                  {parse(message.content)}
                 </Typography>
                 : <LinesEllipsis
-                  text={message.content}
+                  text={isHtml ? h2p(message.content) : message.content}
                   maxLine={5}
                   ellipsis=''
                   style={{ whiteSpace: "pre-line", color: '#0009' }}

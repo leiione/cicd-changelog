@@ -13,6 +13,8 @@ import Loader from "components/Loader";
 import { checkIfCacheExists } from "config/apollo";
 import AddMessageButton from "./components/AddMessageButton";
 import AddEmailForm from "./components/AddEmailForm";
+ import AddNoteButton from "./components/AddNoteButton";
+import AddNoteForm from "./components/AddNoteForm";
 
 const Messages = (props) => {
   const { appuser_id, ticket } = props;
@@ -81,6 +83,7 @@ const Messages = (props) => {
       iconButtons={
         <>
           <AddMessageButton setAddNew={setAddNew} />
+           <AddNoteButton setAddNew={setAddNew} />
         </>
       }
       menuOption={<HeaderMenuOptions appuser_id={appuser_id} category="Message Card" />}
@@ -90,6 +93,7 @@ const Messages = (props) => {
       ) : (
         <>
           {addNew === "email" && <AddEmailForm ticket={ticket} handleCancel={() => setAddNew(null)} />}
+          {addNew === "note" && <AddNoteForm ticket={ticket} handleCancel={() => setAddNew(null)} />}
           <Filter filter={filter} setFilter={setFilter} />
           <MessagesTable messages={messages} />
         </>
