@@ -88,7 +88,7 @@ const AddSMSForm = props => {
 
   const initialValues = React.useMemo(() => {
     const toSMS = []
-    const contactSMS = ticket.ticket_contact_SMS ? ticket.ticket_contact_SMS.split(",") : []
+    const contactSMS = ticket.ticket_contact_numbers ? ticket.ticket_contact_numbers.split(",") : []
     contactSMS.forEach(SMS => {
       toSMS.push({ to: SMS, customOption: true })
     })
