@@ -24,6 +24,7 @@ import { saveUserPreferences } from "components/UserPreferences/savePreferencesU
 import moment from "moment-timezone";
 import { setInitialUserPreferences } from "config/store";
 import UserPreferences from "components/UserPreferences";
+import CustomFields from "./components/CustomFields";
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -186,6 +187,13 @@ const TicketDetails = (props) => {
 
           {!hideInprogress &&
             <>
+             <CustomFields
+                loading={loading}
+                ticket={ticket}
+                appuser_id={appuser_id}
+                lablesVisible={lablesVisible}
+                handleOpenTicket={handleOpenTicket}
+              />
               <Tasks
                 loading={loading}
                 ticket={ticket}
