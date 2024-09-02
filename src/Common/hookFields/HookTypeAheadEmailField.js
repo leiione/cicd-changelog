@@ -22,6 +22,7 @@ const HookTypeAheadEmailField = props => {
   } = props
   const ref = React.useRef()
   const [allowNew, setAllowNew] = React.useState(false)
+  const [isFocused, setIsFocused] = React.useState(false)
 
   const handleSelection = selected => {
     const uniqEmail = uniqBy(selected, labelKey)
@@ -45,6 +46,7 @@ const HookTypeAheadEmailField = props => {
           <Typeahead
             ref={ref}
             id="formik_typeahead"
+            open={isFocused}
             labelKey={labelKey}
             className={emailInput ? "emailInput typeahead_field" : "typeahead_field"}
             multiple
@@ -53,6 +55,8 @@ const HookTypeAheadEmailField = props => {
             placeholder={placeholder}
             selected={value}
             allowNew={allowNew}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             onChange={handleSelection}
             disabled={disabled || isSubmitting}
             onInputChange={(text, event) => {

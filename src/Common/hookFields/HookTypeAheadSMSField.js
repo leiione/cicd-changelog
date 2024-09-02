@@ -23,6 +23,7 @@ const HookTypeAheadSMSField = (props) => {
   } = props;
   const ref = React.useRef();
   const [allowNew, setAllowNew] = React.useState(false);
+  const [isFocused, setIsFocused] = React.useState(false)
 
   const handleSelection = (selected) => {
     const uniqPhoneNumbers = uniqBy(selected, labelKey); // Updated variable name
@@ -46,6 +47,7 @@ const HookTypeAheadSMSField = (props) => {
           <Typeahead
             ref={ref}
             id="formik_typeahead"
+            open={isFocused}
             labelKey={labelKey}
             className={phoneInput ? "phoneInput typeahead_field" : "typeahead_field"} // Updated class name
             multiple
@@ -55,6 +57,8 @@ const HookTypeAheadSMSField = (props) => {
             selected={value}
             allowNew={allowNew}
             onChange={handleSelection}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             disabled={disabled || isSubmitting}
             onInputChange={(text, event) => {
               text = trim(text);

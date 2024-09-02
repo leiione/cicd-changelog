@@ -21,6 +21,7 @@ import {
 import ProgressButton from "Common/ProgressButton";
 import HookTextField from "../hookFields/HookTextField";
 import { showSnackbar } from "../../config/store";
+import { preventEvent } from "Common/helper";
 
 const dissatisfiedIcon = <SentimentDissatisfiedTwoTone />
 const neutralIcon = <SentimentSatisfiedTwoTone />
@@ -138,6 +139,7 @@ const CSATForm = props => {
   }
 
   const handleClick = event => {
+    preventEvent(event)
     setAnchorEl(event.currentTarget)
     setValue("score", scoreMap[value])
   }
