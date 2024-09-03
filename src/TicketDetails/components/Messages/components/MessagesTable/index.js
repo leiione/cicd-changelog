@@ -24,13 +24,16 @@ const MessagesTable = (props) => {
     <div>
       <List className="overflow-y-auto paper-height-500" style={messages.length === 0 ? { textAlign: "center" } : {}}>
         {messages.length > 0 ? messages.map((message) => {
+          if (message.note_id > 0) {
+            return <Note message={message} />
+          }
           switch (message.integration_id) {
             case 1:
               return <Email message={message} />
             case 3:
               return <SMS message={message} />
             default:
-              return <Note message={message} />
+              return null // via FB, etc.
           }
         })
           : <Typography variant="caption">No message available.</Typography>
