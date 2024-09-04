@@ -5,9 +5,10 @@ import { List, Typography } from "@mui/material";
 import Note from "./components/Note";
 import Email from "./components/Email";
 import SMS from "./components/SMS";
+import ErrorPage from "components/ErrorPage";
 
 const MessagesTable = (props) => {
-  const { messages } = props;
+  const { messages, error } = props;
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
@@ -19,6 +20,8 @@ const MessagesTable = (props) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  if (error) return <ErrorPage error={error} />;
 
   return (
     <div>

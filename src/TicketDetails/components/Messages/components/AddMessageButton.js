@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 
 const AddMessageButton = props => {
   const dispatch = useDispatch()
-  const { setAddNew } = props;
+  const { setAddNew, error } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const onIconClick = (event) => {
@@ -24,13 +24,16 @@ const AddMessageButton = props => {
 
   return (
     <>
-      <Tooltip title={"Add Message"} placement="top">
-        <IconButton
-          color={"default"}
-          onClick={onIconClick}
-        >
-          <MessageOutlined />
-        </IconButton>
+      <Tooltip title={error ? error.message : "Add Message"} placement="top">
+        <span>
+          <IconButton
+            color={"default"}
+            onClick={onIconClick}
+            disabled={error}
+          >
+            <MessageOutlined />
+          </IconButton>
+        </span>
       </Tooltip>
       <Menu
         id="basic-menu"

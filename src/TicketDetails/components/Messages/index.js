@@ -8,12 +8,11 @@ import {
   GET_TICKET_NOTES,
 } from "TicketDetails/TicketGraphQL";
 import { useQuery } from "@apollo/client";
-import ErrorPage from "components/ErrorPage";
 import Loader from "components/Loader";
 import { checkIfCacheExists } from "config/apollo";
 import AddMessageButton from "./components/AddMessageButton";
 import AddEmailForm from "./components/AddEmailForm";
- import AddNoteButton from "./components/AddNoteButton";
+import AddNoteButton from "./components/AddNoteButton";
 import AddNoteForm from "./components/AddNoteForm";
 import AddSMSForm from "./components/AddSMSForm";
 
@@ -22,7 +21,7 @@ const Messages = (props) => {
   const [filter, setFilter] = React.useState("all");
   const [addNew, setAddNew] = React.useState(null);
 
-  const { loading, error, data, client } = useQuery(GET_TICKET_MESSAGES, {
+  const { loading, error: messageError, data, client } = useQuery(GET_TICKET_MESSAGES, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: "cache-and-network",
     skip: !ticket.ticket_id || filter === "notes",
@@ -46,8 +45,6 @@ const Messages = (props) => {
     query: GET_TICKET_NOTES,
     variables: { ticket_id: ticket.ticket_id },
   });
-
-  if (error || errorNotes) return <ErrorPage error={error} />;
 
   let messages = [];
 
@@ -77,14 +74,13 @@ const Messages = (props) => {
     messages = [...data.ticketMessages, ...dataNotes.ticketNotes];
   }
 
-  console.log('addNew:', addNew); // Debugging line
   return (
     <AccordionCard
       label="Messages"
       iconButtons={
         <>
           <AddNoteButton setAddNew={setAddNew} />
-          <AddMessageButton setAddNew={setAddNew} />
+          <AddMessageButton setAddNew={setAddNew} error={messageError} />
         </>
       }
       menuOption={<HeaderMenuOptions appuser_id={appuser_id} category="Message Card" />}
@@ -97,7 +93,7 @@ const Messages = (props) => {
           {addNew === "note" && <AddNoteForm ticket={ticket} handleCancel={() => setAddNew(null)} />}
           {addNew === "sms" && <AddSMSForm ticket={ticket} handleCancel={() => setAddNew(null)} />}
           <Filter filter={filter} setFilter={setFilter} />
-          <MessagesTable messages={messages} />
+          <MessagesTable messages={messages} error={errorNotes} />
         </>
       )}
     </AccordionCard>
