@@ -298,6 +298,7 @@ export const CONVERT_TAST_TO_TICKET = gql`
 export const GET_TICKET_MESSAGES = gql`
   query ticketMessages($ticket_id: Int!) {
     ticketMessages(ticket_id: $ticket_id) {
+      id
       ticket_id
       message
       to_email
@@ -385,3 +386,12 @@ export const ADD_NEW_TICKET_SMS = gql`
       customer_id: $customer_id
     ) 
   }`
+
+export const UPDATE_MESSAGE_MUTATION = gql`
+    mutation UpdateMessage($input_message: MessageInput!) {
+      updateMessage(input_message: $input_message) {
+        id
+      __typename
+      }
+    }
+`;

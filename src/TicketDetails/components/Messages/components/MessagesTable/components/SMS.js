@@ -15,14 +15,15 @@ import {
   faTrash,
 } from "@fortawesome/pro-light-svg-icons";
 import { faReply } from "@fortawesome/free-solid-svg-icons";
-import h2p from "html2plaintext"
+import h2p from "html2plaintext";
 import parse from 'html-react-parser';
 import moment from "moment-timezone";
 import { SmsOutlined } from "@mui/icons-material";
 import LinesEllipsis from "react-lines-ellipsis";
+import DialogAlert from "components/DialogAlert";
 
 const SMSPopover = props => {
-  const { anchorEl, message, handleClose, toEmail } = props
+  const { anchorEl, message, handleClose, toEmail } = props;
 
   return (
     <Popover
@@ -69,24 +70,36 @@ const SMSPopover = props => {
         </Grid>
       </Grid>
     </Popover>
-  )
-}
+  );
+};
 
 const SMS = props => {
-  const { message } = props
-  const [anchorEl, setAnchorEl] = React.useState(null)
-  const [more, toggleMore] = React.useState(false)
-  const toEmail = message.to_email ? message.to_email.split(",") : []
+  const { message, onDeleteMessage } = props;
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [more, toggleMore] = React.useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
+  const toEmail = message.to_email ? message.to_email.split(",") : [];
 
   // Remove the specific text from the message
   const text = message.message.replace(/To reply to this ticket, send TICKET.*<your reply>/, '');
 
-  const linePlainLen = text.split(/\r|\r\n|\n/g).length
-  const lineHtmlLen = h2p(text).split(/\r|\r\n|\n/g).length
-  const lineLen = linePlainLen > lineHtmlLen ? linePlainLen : lineHtmlLen
-  const isHtml = /<\/?[a-z][\s\S]*>/i.test(text)
+  const linePlainLen = text.split(/\r|\r\n|\n/g).length;
+  const lineHtmlLen = h2p(text).split(/\r|\r\n|\n/g).length;
+  const lineLen = linePlainLen > lineHtmlLen ? linePlainLen : lineHtmlLen;
+  const isHtml = /<\/?[a-z][\s\S]*>/i.test(text);
 
-  // const lineLen = message.message.split(/\r|\r\n|\n/g).length
+  const handleDeleteClick = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    onDeleteMessage(message.id, message.ticket_id);
+    setOpenDeleteDialog(false);
+  };
+
+  const handleDeleteCancel = () => {
+    setOpenDeleteDialog(false);
+  };
 
   return (
     <>
@@ -126,7 +139,7 @@ const SMS = props => {
                 </IconButton>
               </Grid>
               <Grid item xs="auto">
-                <IconButton size="small">
+                <IconButton size="small" onClick={handleDeleteClick}>
                   <FontAwesomeIcon icon={faTrash} />
                 </IconButton>
               </Grid>
@@ -154,8 +167,27 @@ const SMS = props => {
           }
         />
       </ListItem>
+
+      <DialogAlert
+        open={openDeleteDialog}
+        message={<span>Are you sure you want to delete this message?</span>}
+        buttonsList={[
+          {
+            label: "Yes",
+            size: "medium",
+            color: "primary",
+            onClick: handleDeleteConfirm,
+          },
+          {
+            label: "No",
+            size: "medium",
+            color: "default",
+            onClick: handleDeleteCancel,
+          },
+        ]}
+      />
     </>
-  )
-}
+  );
+};
 
 export default SMS;
