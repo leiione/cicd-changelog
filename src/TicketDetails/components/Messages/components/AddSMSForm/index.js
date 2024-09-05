@@ -8,6 +8,7 @@ import { useMutation } from "@apollo/client";
 import { ADD_NEW_TICKET_SMS, GET_TICKET_MESSAGES } from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
+import h2p from "html2plaintext";
 import HookTypeAheadSMSField from "Common/hookFields/HookTypeAheadSMSField";
 
 const AddSMSFields = props => {
@@ -87,18 +88,22 @@ const AddSMSForm = props => {
   const [sendTicketSMS] = useMutation(ADD_NEW_TICKET_SMS)
 
   const initialValues = React.useMemo(() => {
-    const toSMS = []
-    const contactSMS = ticket.ticket_contact_numbers ? ticket.ticket_contact_numbers.split(",") : []
+    let toSMS = [];
+    const contactSMS = ticket.ticket_contact_numbers ? ticket.ticket_contact_numbers.split(",") : [];
     contactSMS.forEach(SMS => {
-      toSMS.push({ to: SMS, customOption: true })
-    })
+      let cleanedSMS = SMS.replace(/[^\d]/g, ''); // Allow only numbers
+      if (cleanedSMS.length > 10) {
+        cleanedSMS = cleanedSMS.slice(0, 10); // Limit to 10 digits
+      }
+      toSMS.push({ to: cleanedSMS, customOption: true });
+    });
 
     return {
       to: toSMS,
       subject: `[Ticket#${ticket.ticket_id}] ${ticket.description}`,
       message: "",
       flag_internal: false
-    }
+    };
   }, [ticket])
 
   const form = useForm({
@@ -112,7 +117,7 @@ const AddSMSForm = props => {
       const variables = {
         ticket_id: ticket.ticket_id,
         to: (values.to.map(item => item.to).join(",")).replace(/ /g,''),
-        message: values.message,
+        message: h2p(values.message),
         customer_id: ticket.customer_id || 0,
         subject: values.subject,
         flag_internal: values.flag_internal
