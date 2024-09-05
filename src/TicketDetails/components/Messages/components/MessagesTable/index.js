@@ -61,7 +61,7 @@ const MessagesTable = (props) => {
           }
           switch (message.integration_id) {
             case 1:
-              return <Email message={message} />
+              return <Email message={message} onDeleteMessage={onDeleteMessage}/>
             case 3:
               return <SMS message={message} onDeleteMessage={() => onDeleteMessage(message.id, message.ticket_id)} />
             default:

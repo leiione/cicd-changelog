@@ -20,6 +20,7 @@ import { EmailOutlined } from "@mui/icons-material";
 import LinesEllipsis from "react-lines-ellipsis";
 import h2p from "html2plaintext"
 import parse from 'html-react-parser';
+import DialogAlert from "components/DialogAlert";
 
 const EmailPopover = props => {
   const { anchorEl, message, handleClose, toEmail } = props
@@ -85,9 +86,11 @@ const EmailPopover = props => {
 }
 
 const Email = props => {
-  const { message } = props
+  const { message, onDeleteMessage } = props
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [more, toggleMore] = React.useState(false)
+  const [openDialog, setOpenDialog] = React.useState(false)
+  const [isSubmitting, setSubmitting] = React.useState(false)
   const toEmail = message.to_email ? message.to_email.split(",") : []
   const text = message.message
 
@@ -95,6 +98,13 @@ const Email = props => {
   const lineHtmlLen = h2p(text).split(/\r|\r\n|\n/g).length
   const lineLen = linePlainLen > lineHtmlLen ? linePlainLen : lineHtmlLen
   const isHtml = /<\/?[a-z][\s\S]*>/i.test(text)
+
+  const handleOnDelete = async () => {
+    setSubmitting(true)
+    await onDeleteMessage(message.id, message.ticket_id)
+    setOpenDialog(false)
+    setSubmitting(false)
+  }
 
   return (
     <>
@@ -134,7 +144,7 @@ const Email = props => {
                 </IconButton>
               </Grid>
               <Grid item xs="auto">
-                <IconButton size="small">
+                <IconButton size="small" onClick={() => setOpenDialog(true)}>
                   <FontAwesomeIcon icon={faTrash} />
                 </IconButton>
               </Grid>
@@ -162,6 +172,27 @@ const Email = props => {
           }
         />
       </ListItem>
+      <DialogAlert
+        open={openDialog}
+        message={<span>Are you sure you want to delete this message?</span>}
+        buttonsList={[
+          {
+            label: "Yes",
+            size: "medium",
+            color: "primary",
+            onClick: handleOnDelete,
+            isProgress: true,
+            isSubmitting
+          },
+          {
+            label: "No",
+            size: "medium",
+            color: "default",
+            onClick: () => setOpenDialog(false),
+            disabled: isSubmitting,
+          },
+        ]}
+      />
     </>
   )
 }
