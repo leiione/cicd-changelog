@@ -111,13 +111,13 @@ const Header = (props) => {
         {ticket.ticket_id > 0 &&
           <>
             <Tooltip title={!copyTicket ? "Copy Ticket ID" : "Copied!"} placement="top">
-              <IconButton className="text-light" onClick={copyText}>
+              <IconButton className="text-light has-hover-light" onClick={copyText}>
                 <ContentCopy className="f-18" />
               </IconButton>
             </Tooltip>
             <Typography variant="h6">{ticket.assigned_name}</Typography>
             <Tooltip title="Work Order" placement="top">
-              <IconButton className="text-light" onClick={() => setopen1("Work Order")}>
+              <IconButton className="text-light has-hover-light" onClick={() => setopen1("Work Order")}>
                 <DescriptionOutlined className="f-18" />
               </IconButton>
             </Tooltip>
