@@ -93,7 +93,7 @@ const Messages = (props) => {
           {addNew === "note" && <AddNoteForm ticket={ticket} handleCancel={() => setAddNew(null)} />}
           {addNew === "sms" && <AddSMSForm ticket={ticket} handleCancel={() => setAddNew(null)} />}
           <Filter filter={filter} setFilter={setFilter} />
-          <MessagesTable messages={messages} error={errorNotes} />
+          <MessagesTable messages={messages} error={errorNotes} ticket={ticket} />
         </>
       )}
     </AccordionCard>

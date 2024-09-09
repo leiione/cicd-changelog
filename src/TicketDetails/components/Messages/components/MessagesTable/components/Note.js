@@ -33,7 +33,7 @@ const Note = props => {
 
   const handleOnDelete = async () => {
     setSubmitting(true)
-    await onDeleteNote(message.note_id, message.ticket_id)
+    await onDeleteNote(message.note_id)
     setOpenDialog(false)
     setSubmitting(false)
   }

@@ -11,7 +11,7 @@ import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 
 const MessagesTable = (props) => {
-  const { messages, error } = props;
+  const { messages, error , ticket} = props;
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const dispatch = useDispatch()
@@ -52,14 +52,14 @@ const MessagesTable = (props) => {
 
   const [updateNote] = useMutation(UPDATE_NOTE_MUTATION)
 
-  const onDeleteNote = async (noteID, ticketID) => {
+  const onDeleteNote = async (noteID) => {
     try {
       await updateNote({
         variables: {
-          input_note: { id:noteID, ticket_id: ticketID},
+          inputNote: { id:noteID, ticket_id: ticket.ticket_id},
         },
         refetchQueries: [
-          { query: GET_TICKET_NOTES, variables: { ticket_id: ticketID } },
+          { query: GET_TICKET_NOTES, variables: { ticket_id: ticket.ticket_id } },
         ],
       }).finally(() => {
         dispatch(showSnackbar({ message: "Note deleted successfully", severity: "success" }))
