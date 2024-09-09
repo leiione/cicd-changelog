@@ -395,3 +395,13 @@ export const UPDATE_MESSAGE_MUTATION = gql`
       }
     }
 `;
+
+
+export const UPDATE_NOTE_MUTATION = gql`
+   mutation UpdateNote($inputNote: NoteInput) {
+  updateNote(input_note: $inputNote) {
+    id
+    ticket_id
+  }
+}
+`;

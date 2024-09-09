@@ -2,7 +2,7 @@ import React from "react";
 import TablePagination from "@mui/material/TablePagination";
 import { List, Typography } from "@mui/material";
 import { useMutation } from "@apollo/client";
-import { UPDATE_MESSAGE_MUTATION, GET_TICKET_MESSAGES } from "TicketDetails/TicketGraphQL";
+import { UPDATE_MESSAGE_MUTATION, GET_TICKET_MESSAGES,UPDATE_NOTE_MUTATION, GET_TICKET_NOTES } from "TicketDetails/TicketGraphQL";
 import Note from "./components/Note";
 import Email from "./components/Email";
 import SMS from "./components/SMS";
@@ -50,6 +50,33 @@ const MessagesTable = (props) => {
     }
   };
 
+  const [updateNote] = useMutation(UPDATE_NOTE_MUTATION)
+
+  const onDeleteNote = async (noteID, ticketID) => {
+    try {
+      await updateNote({
+        variables: {
+          input_note: { id:noteID, ticket_id: ticketID},
+        },
+        refetchQueries: [
+          { query: GET_TICKET_NOTES, variables: { ticket_id: ticketID } },
+        ],
+      }).finally(() => {
+        dispatch(showSnackbar({ message: "Note deleted successfully", severity: "success" }))
+      });
+    } catch (error) {
+      const errorMessage = error.message.replace("GraphQL error: ", "");
+      dispatch(
+        showSnackbar({
+          message: errorMessage,
+          severity: "error",
+        })
+      );
+    }
+  };
+
+
+
   if (error) return <ErrorPage error={error} />;
 
   return (
@@ -57,7 +84,7 @@ const MessagesTable = (props) => {
       <List className="overflow-y-auto paper-height-500" style={messages.length === 0 ? { textAlign: "center" } : {}}>
         {messages.length > 0 ? messages.map((message) => {
           if (message.note_id > 0) {
-            return <Note message={message} />
+            return <Note message={message} onDeleteNote={onDeleteNote} />
           }
           switch (message.integration_id) {
             case 1:
