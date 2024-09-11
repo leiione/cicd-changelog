@@ -104,7 +104,7 @@ const Summary = (props) => {
               handleUpdate={handleUpdate}
             />
             <TicketStatus
-              customer={customer}
+              ticket={customer}
               ticketStatuses={ticketStatuses}
               handleUpdate={handleUpdate}
             />

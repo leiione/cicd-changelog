@@ -33,6 +33,7 @@ export const GET_TICKET = gql`
         task_id
         task
         is_completed
+        is_default
         rank
       }
       infrastructure {
@@ -60,6 +61,7 @@ export const GET_TICKET = gql`
         }
       }
       linked_count
+      update_requirements
     }
     ticketTypes {
       ticket_type_id
@@ -278,6 +280,7 @@ export const SAVE_TICKET_TASKS = gql`
       task_id
       task
       is_completed
+      is_default
       rank
     }
   }
