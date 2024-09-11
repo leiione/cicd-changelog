@@ -22,6 +22,7 @@ import { useMutation } from "@apollo/client";
 import { GET_TICKET, SAVE_TICKET_TASKS } from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { setCardPreferences, showSnackbar } from "config/store";
+import ProgressButton from "Common/ProgressButton";
 
 const getItemStyle = (isDragging, draggableStyle) => ({
   userSelect: "none",
@@ -44,6 +45,7 @@ const Tasks = (props) => {
   const [ticketTasks, setTicketTasks] = useState(ticket.tasks || []);
   const [isHovered, setHover] = useState(-1);
   const [onEditMode, setOnEditMode] = useState({ index: -1, value: "" });
+  const [isSubmitting, setSubmitting] = useState(false);
   const [saveTicketTasks] = useMutation(SAVE_TICKET_TASKS);
 
   useEffect(() => {
@@ -56,7 +58,7 @@ const Tasks = (props) => {
   }, [loading, ticket.ticket_id, ticket.ticket_type_id, ticket.tasks]);
 
   const completed = ticketTasks.filter((x) => x.is_completed).length;
-  const taskCount = ticketTasks.length;
+  const taskCount = (ticketTasks.filter(x => x.task_id !== 0)).length;
   const error = onEditMode.index > -1 && isEmpty(trim(onEditMode.value));
 
   const reorder = (list, startIndex, endIndex) => {
@@ -111,13 +113,13 @@ const Tasks = (props) => {
     }
   };
 
-  const onTaskNameChange = (index) => {
+  const onTaskNameChange = async (index) => {
     if (!isEmpty(trim(onEditMode.value))) {
       const newTasks = cloneDeep(ticketTasks);
       if (newTasks[index].task !== onEditMode.value) {
         newTasks[index].task = onEditMode.value;
         setTicketTasks(newTasks);
-        onSaveTaskChanges(newTasks);
+        await onSaveTaskChanges(newTasks);
       }
       setOnEditMode({ index: -1, value: "" });
     }
@@ -135,8 +137,9 @@ const Tasks = (props) => {
 
   const onSaveTaskChanges = async (newTasks) => {
     try {
+      setSubmitting(true)
       const tasks = newTasks.map((x, index) => ({
-        ...omit(x, ["__typename"]),
+        ...omit(x, ["is_default", "__typename"]),
         rank: index + 1,
       }));
 
@@ -161,9 +164,11 @@ const Tasks = (props) => {
           severity: "success",
         })
       );
+      setSubmitting(false)
     } catch (error) {
       const msg = error.message.replace("GraphQL error: ", "");
       dispatch(showSnackbar({ message: msg, severity: "error" }));
+      setSubmitting(false)
     }
   };
 
@@ -172,6 +177,13 @@ const Tasks = (props) => {
       onTaskNameChange(index);
     }
   };
+
+  const onCancelTask = () => {
+    let newTasks = cloneDeep(ticketTasks)
+    newTasks = newTasks.filter(x => x.task_id !== 0)
+    setTicketTasks(newTasks);
+    setOnEditMode({ index: -1, value: '' })
+  }
 
   return (
     <AccordionCard
@@ -210,7 +222,7 @@ const Tasks = (props) => {
           animation="wave"
           style={{ height: 30, backgroundColor: "##dfdede", width: "60%" }}
         />
-      ) : taskCount > 0 ? (
+      ) : ticketTasks.length > 0 ? (
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="droppable">
             {(provided, snapshot) => (
@@ -242,29 +254,34 @@ const Tasks = (props) => {
                               />
                             }
                           >
-                            <TaskMenuOptions
-                              ticket={ticket}
-                              show={isHovered === index}
-                              disabled={onEditMode.index === index}
-                              task={task}
-                              ticketTasks={ticketTasks}
-                              setTicketTasks={setTicketTasks}
-                              onSaveTaskChanges={onSaveTaskChanges}
-                              handleOpenTicket={handleOpenTicket}
-                              setOnEditMode={setOnEditMode}
-                            />
-                            <ListItemIcon>
-                              <Checkbox
-                                checked={task.is_completed}
-                                onChange={() => onCompleteTask(index)}
-                                inputProps={{ "aria-label": "controlled" }}
-                                disabled={onEditMode.index === index}
-                                size="small"
-                              />
-                            </ListItemIcon>
+                            {task.task_id > 0 &&
+                              <>
+                                <TaskMenuOptions
+                                  ticket={ticket}
+                                  show={isHovered === index}
+                                  disabled={onEditMode.index === index}
+                                  task={task}
+                                  ticketTasks={ticketTasks}
+                                  setTicketTasks={setTicketTasks}
+                                  onSaveTaskChanges={onSaveTaskChanges}
+                                  handleOpenTicket={handleOpenTicket}
+                                  setOnEditMode={setOnEditMode}
+                                  onEdit={() => onNameClick(index, task)}
+                                />
+                                <ListItemIcon>
+                                  <Checkbox
+                                    checked={task.is_completed}
+                                    onChange={() => onCompleteTask(index)}
+                                    inputProps={{ "aria-label": "controlled" }}
+                                    disabled={onEditMode.index === index}
+                                    size="small"
+                                  />
+                                </ListItemIcon>
+                              </>
+                            }
                             {onEditMode.index === index ? (
                               <ListItemText>
-                                <div className="position-relative">
+                                <div className="position-relative" style={task.task_id === 0 ? { margin: "0px 20px 0px 53px" } : { marginRight: "20px" }}>
                                   <TextField
                                     autoFocus
                                     variant="standard"
@@ -278,7 +295,6 @@ const Tasks = (props) => {
                                         value: e.target.value,
                                       })
                                     }
-                                    onBlur={() => onTaskNameChange(index)}
                                     error={error}
                                     onKeyDown={(e) => onEnter(e, index)}
                                     inputProps={{ maxLength: 100 }}
@@ -287,19 +303,21 @@ const Tasks = (props) => {
                                     className="position-absolute right-0 bg-white rounded shadow"
                                     style={{ bottom: -32, zIndex: 99 }}
                                   >
-                                    <Button
+                                    <ProgressButton
                                       color="primary"
                                       size="small"
                                       className="my-1"
-                                      disabled={loading}
+                                      onClick={() => onTaskNameChange(index)}
+                                      isSubmitting={isSubmitting}
                                     >
                                       Save
-                                    </Button>
+                                    </ProgressButton>
                                     <Button
                                       color="default"
                                       size="small"
                                       className="my-1"
-                                      disabled={loading}
+                                      disabled={isSubmitting}
+                                      onClick={onCancelTask}
                                     >
                                       Cancel
                                     </Button>
@@ -312,15 +330,14 @@ const Tasks = (props) => {
                                 primary={
                                   <Typography
                                     variant="body2"
-                                    onClick={() => onNameClick(index, task)}
                                     className={
                                       task.is_completed
                                         ? "text-decoration-line-through"
                                         : ""
                                     }
-                                    style={{ cursor: "text", width: "90%" }}
+                                    style={{ width: "90%" }}
                                   >
-                                    {task.task}
+                                    {`${task.task}${task.is_default ? " *" : ""}`}
                                   </Typography>
                                 }
                               />

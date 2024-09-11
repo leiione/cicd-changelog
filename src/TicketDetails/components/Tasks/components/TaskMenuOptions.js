@@ -11,7 +11,7 @@ import { showSnackbar } from "config/store";
 
 const TaskMenuOptions = (props) => {
   const dispatch = useDispatch()
-  const { show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, ticket, handleOpenTicket, disabled, setOnEditMode } = props;
+  const { show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, ticket, handleOpenTicket, disabled, setOnEditMode, onEdit } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [openAlert, setOpenAlert] = React.useState(null);
   const [isSubmitting, setSubmitting] = React.useState(null);
@@ -83,6 +83,11 @@ const TaskMenuOptions = (props) => {
     }
   }
 
+  const handleEdit = () => {
+    onEdit()
+    setAnchorEl(null)
+  }
+
   return (
     <>
       <IconButton color="default" onClick={handleClick}>
@@ -100,7 +105,12 @@ const TaskMenuOptions = (props) => {
           }}
         >
           <MenuItem onClick={() => onOpenAlert("convert")} disabled={disabled}> Convert to ticket</MenuItem>
-          <MenuItem onClick={() => onOpenAlert("delete")}> Delete</MenuItem>
+          {!task.is_default &&
+            <>
+              <MenuItem onClick={handleEdit}> Edit</MenuItem>
+              <MenuItem onClick={() => onOpenAlert("delete")}> Delete</MenuItem>
+            </>
+          }
         </Popover>
       }
       {openAlert && (
