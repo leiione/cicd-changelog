@@ -123,7 +123,7 @@ const SMS = props => {
           primary={
             <Grid container spacing={1} className="align-items-center mb-1">
               <Grid item xs>
-                <Typography variant="body2">{toEmail[0]}</Typography>
+                <Typography variant="body2" className="text-truncate" style={{ width: "70%" }}>{message.to_email}</Typography>
               </Grid>
               <Grid item xs="auto">
                 <Typography variant="caption">{moment(message.date).format("MMM DD, YYYY hh:mm")}</Typography>
