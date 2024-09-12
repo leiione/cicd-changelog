@@ -1,7 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button, Divider, Grid, Typography } from "@mui/material";
-import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
 import HookCheckbox from "Common/hookFields/HookCheckbox";
 import { useMutation } from "@apollo/client";
@@ -12,22 +11,25 @@ import h2p from "html2plaintext";
 import HookTypeAheadSMSField from "Common/hookFields/HookTypeAheadSMSField";
 
 const AddSMSFields = props => {
-  const { form, handleCancel, onSubmit } = props
+  const { form, handleCancel, onSubmit } = props;
   const {
     control,
     setValue,
     watch,
     formState: { isSubmitting },
     handleSubmit
-  } = form
+  } = form;
 
-  const values = watch()
+  const values = watch();
 
-  const handleMessageChange = (content) => {
-    setValue("message", content, { shouldValidate: true })
-  }
+  const handleMessageChange = (event) => {
+    const newValue = event.target.value;
+    if (newValue.length <= 160) {
+      setValue("message", newValue, { shouldValidate: true });
+    }
+  };
 
-  const isFormValid = React.useMemo(() => (values.to.length > 0 && values.message && !values.toFreeFieldText), [values])
+  const isFormValid = React.useMemo(() => (values.to.length > 0 && values.message && !values.toFreeFieldText), [values]);
 
   return (
     <Grid container spacing={0} style={{ padding: "0px 10px 10px" }}>
@@ -42,27 +44,34 @@ const AddSMSFields = props => {
         />
       </Grid>
       <Divider style={{ width: "100%" }} />
-      {/* <Grid item xs={12}>
-        <Typography variant="subtitle1">{`Subject: ${values.subject}`}</Typography>
-      </Grid> 
-      <Divider style={{ width: "100%", marginLeft: "10px" }} /> 
-      */}
       <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
-        <div style={{ position: "absolute", right: "38px", zIndex: 99, padding: "23px 3px" }}>
-          <HookCheckbox
-            control={control}
-            name={"flag_internal"}
-            label={"Mark as Private"}
-          />
-        </div>
+        <HookCheckbox
+          control={control}
+          name={"flag_internal"}
+          label={"Mark as Private"}
+          style={{ margin: "10px 0" }}
+        />
       </Grid>
       <Grid item xs={12} style={{ marginTop: "10px" }}>
-        <EditorContainer
-          content={values.message}
-          setContent={handleMessageChange}
-          background={"#fcefef"}
+        <textarea
+          value={values.message}
+          onChange={handleMessageChange}
+          style={{
+            width: "100%",
+            height: "180px",
+            backgroundColor: "#fcefef",
+            fontFamily: "Helvetica, Arial, sans-serif",
+            fontSize: "12px",
+            padding: "10px",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            resize: "none"
+          }}
           disabled={isSubmitting}
         />
+        <Typography variant="caption" style={{ display: "block", textAlign: "right", marginTop: "5px" }}>
+          {values.message.length}/160
+        </Typography>
       </Grid>
       <Grid item xs={12} style={{ textAlign: "end", marginTop: "-10px" }}>
         <ProgressButton
@@ -79,13 +88,13 @@ const AddSMSFields = props => {
         </Button>
       </Grid>
     </Grid>
-  )
-}
+  );
+};
 
 const AddSMSForm = props => {
-  const dispatch = useDispatch()
-  const { ticket, handleCancel } = props
-  const [sendTicketSMS] = useMutation(ADD_NEW_TICKET_SMS)
+  const dispatch = useDispatch();
+  const { ticket, handleCancel } = props;
+  const [sendTicketSMS] = useMutation(ADD_NEW_TICKET_SMS);
 
   const initialValues = React.useMemo(() => {
     let toSMS = [];
@@ -104,7 +113,7 @@ const AddSMSForm = props => {
       message: "",
       flag_internal: false
     };
-  }, [ticket])
+  }, [ticket]);
 
   const form = useForm({
     defaultValues: initialValues,
@@ -121,24 +130,24 @@ const AddSMSForm = props => {
         customer_id: ticket.customer_id || 0,
         subject: values.subject,
         flag_internal: values.flag_internal
-      }
+      };
       await sendTicketSMS({
         variables,
         refetchQueries: [{ query: GET_TICKET_MESSAGES, variables: { ticket_id: ticket.ticket_id } }],
         update: (cache, { data }) => {
           if (data.sendTicketSMS && data.sendTicketSMS.status === "failed") {
-            dispatch(showSnackbar({ message: "SMS failed to send.", severity: "error" }))
+            dispatch(showSnackbar({ message: "SMS failed to send.", severity: "error" }));
           } else {
-            dispatch(showSnackbar({ message: "SMS was sent successfully.", severity: "success" }))
+            dispatch(showSnackbar({ message: "SMS was sent successfully.", severity: "success" }));
           }
         }
       });
-      handleCancel()
+      handleCancel();
     } catch (error) {
-      const msg = error.message.replace("GraphQL error: ", "")
-      dispatch(showSnackbar({ message: msg, severity: "error" }))
+      const msg = error.message.replace("GraphQL error: ", "");
+      dispatch(showSnackbar({ message: msg, severity: "error" }));
     }
-  }
+  };
 
   return (
     <AddSMSFields
@@ -147,7 +156,7 @@ const AddSMSForm = props => {
       handleCancel={handleCancel}
       onSubmit={onSubmit}
     />
-  )
-}
+  );
+};
 
 export default AddSMSForm;
