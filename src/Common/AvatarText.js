@@ -39,7 +39,7 @@ export default function AvatarText(props) {
     <Avatar
       {...rest}
       {...stringAvatar(title, rest, charCount, className)}
-      className={`f-12 ${className}`}
+      className={`f-12 text-center ${className}`}
     />
   );
 }
