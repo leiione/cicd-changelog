@@ -16,7 +16,13 @@ import AvatarText from "Common/AvatarText";
 // import AvatarText from "Common/AvatarText";
 
 const LinkedTicketField = (props) => {
-  const { ticket, setUserSelectedRows,inputValue,setInputValue,userSelectedRows } = props;
+  const {
+    ticket,
+    setUserSelectedRows,
+    inputValue,
+    setInputValue,
+    userSelectedRows,
+  } = props;
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -78,8 +84,10 @@ const LinkedTicketField = (props) => {
   }, [inputValue, ticket.ticket_id]);
 
   const filterOptions = (options) => {
-    const selectedTicketIds = userSelectedRows.map(row => row.ticket_id);
-    return options.filter(option => !selectedTicketIds.includes(option.ticket_id));
+    const selectedTicketIds = userSelectedRows.map((row) => row.ticket_id);
+    return options.filter(
+      (option) => !selectedTicketIds.includes(option.ticket_id)
+    );
   };
 
   return (
@@ -103,7 +111,9 @@ const LinkedTicketField = (props) => {
         getOptionLabel={(option) => `${option.ticket_id}`}
         renderOption={(props, option) => {
           const { key, ...otherProps } = props;
-          const isSelected = userSelectedRows.some(row => row.ticket_id === option.ticket_id);
+          const isSelected = userSelectedRows.some(
+            (row) => row.ticket_id === option.ticket_id
+          );
 
           return (
             <MenuItem
@@ -113,32 +123,33 @@ const LinkedTicketField = (props) => {
               {...otherProps}
             >
               <Grid container spacing={1}>
-                <Grid item xs={1.5}>
+                <Grid item xs={2}>
                   <Typography variant="subtitle1" className="text-primary">
                     {option.ticket_id}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography variant="subtitle1" className="text-dark">
+                  <Typography
+                    variant="subtitle1"
+                    className="text-dark break-word text-truncate"
+                  >
                     {option.description}
                   </Typography>
                 </Grid>
-                <Grid item xs={4.5} className="text-right">
-                  <div className="d-inline-flex">
-                    <span style={{ margin: "0px 10px" }}>
-                      <Tooltip title={option.priority} placement="top">
-                        {getPriorityIcon(option.priority)}
-                      </Tooltip>
-                    </span>
-                        {option.technician &&
-                            <AvatarText
-                              title={option.technician}
-                              charCount={1}
-                              sx={{ width: 16, height: 16, margin: "3px 10px", background: "#4b89ff", fontSize: "11px" }}
-                            />
-                          }
+                <Grid item xs={4}>
+                  <div className="d-flex align-items-center">
+                    <Tooltip title={option.priority} placement="top">
+                      {getPriorityIcon(option.priority)}
+                    </Tooltip>
+                    {option.technician && (
+                      <AvatarText
+                        title={option.technician}
+                        charCount={1}
+                        sx={{ width: 16, height: 16 }}
+                      />
+                    )}
 
-                    <Typography variant="subtitle1" className="text-dark">
+                    <Typography variant="subtitle1" className="mx-2 text-dark">
                       {option.status}
                     </Typography>
                   </div>

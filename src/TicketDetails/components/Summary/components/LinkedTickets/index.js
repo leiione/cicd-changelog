@@ -107,7 +107,7 @@ const LinkedTicketContent = (props) => {
                 {startCase(link.linked_tickets[0].option_label)}
               </Typography>
             </Grid>
-            <Grid item xs={10}>
+            <Grid item xs={12}>
               <MenuList>
                 {link.linked_tickets.map((item, index) => (
                   <MenuItem
@@ -132,13 +132,11 @@ const LinkedTicketContent = (props) => {
                           {item.description}
                         </Typography>
                       </Grid>
-                      <Grid item xs={4} className="text-right">
-                        <div className="d-inline-flex">
-                          <span style={{ margin: "0px 10px" }}>
-                            <Tooltip title={item.priority} placement="top">
-                              {getPriorityIcon(item.priority)}
-                            </Tooltip>
-                          </span>
+                      <Grid item xs={4}>
+                        <div className="d-flex align-items-center">
+                          <Tooltip title={item.priority} placement="top">
+                            {getPriorityIcon(item.priority)}
+                          </Tooltip>
                           {item.technician && (
                             <AvatarText
                               title={item.technician}
@@ -146,20 +144,21 @@ const LinkedTicketContent = (props) => {
                               sx={{
                                 width: 16,
                                 height: 16,
-                                margin: "3px 10px",
-                                background: "#4b89ff",
-                                fontSize: "11px",
                               }}
                             />
                           )}
-                          <Typography variant="subtitle1" className="text-dark">
+                          <Typography
+                            variant="subtitle1"
+                            className="mx-2 text-dark"
+                          >
                             {item.status}
                           </Typography>
                           <IconButton
-                            style={{ padding: 0, marginLeft: 15 }}
+                            className="ml-auto"
+                            size="small"
                             onClick={(e) => handleRemoveTicket(e, item.id)}
                           >
-                            <HighlightOff className="f-18" />
+                            <HighlightOff />
                           </IconButton>
                         </div>
                       </Grid>
@@ -299,7 +298,7 @@ const LinkedTickets = (props) => {
           <LinkedTicketNew
             ticket={ticket}
             onCloseLinkedTicket={onCloseLinkedTicketDrawer}
-         />
+          />
         )}
         <LinkedTicketContent
           ticket_id={ticket.ticket_id}
