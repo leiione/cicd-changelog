@@ -308,6 +308,7 @@ export const GET_TICKET_MESSAGES = gql`
       integration_id
       from_email
       date
+      date_added: date
       subject
     }
   }

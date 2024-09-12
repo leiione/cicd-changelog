@@ -2,7 +2,7 @@ import React from "react";
 import TablePagination from "@mui/material/TablePagination";
 import { List, Typography } from "@mui/material";
 import { useMutation } from "@apollo/client";
-import { UPDATE_MESSAGE_MUTATION, GET_TICKET_MESSAGES,UPDATE_NOTE_MUTATION, GET_TICKET_NOTES } from "TicketDetails/TicketGraphQL";
+import { UPDATE_MESSAGE_MUTATION, GET_TICKET_MESSAGES, UPDATE_NOTE_MUTATION, GET_TICKET_NOTES } from "TicketDetails/TicketGraphQL";
 import Note from "./components/Note";
 import Email from "./components/Email";
 import SMS from "./components/SMS";
@@ -11,7 +11,7 @@ import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 
 const MessagesTable = (props) => {
-  const { messages, error , ticket} = props;
+  const { messages, error, ticket } = props;
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const dispatch = useDispatch()
@@ -56,7 +56,7 @@ const MessagesTable = (props) => {
     try {
       await updateNote({
         variables: {
-          inputNote: { id:noteID, ticket_id: ticket.ticket_id},
+          inputNote: { id: noteID, ticket_id: ticket.ticket_id },
         },
         refetchQueries: [
           { query: GET_TICKET_NOTES, variables: { ticket_id: ticket.ticket_id } },
@@ -75,20 +75,22 @@ const MessagesTable = (props) => {
     }
   };
 
-
-
   if (error) return <ErrorPage error={error} />;
+
+  // sort messages by date
+  let messageList = messages.sort((a, b) => new Date(b.date_added) - new Date(a.date_added))
+  messageList = messageList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   return (
     <div>
-      <List className="overflow-y-auto paper-height-500" style={messages.length === 0 ? { textAlign: "center" } : {}}>
-        {messages.length > 0 ? messages.map((message) => {
+      <List className="overflow-y-auto paper-height-500" style={messageList.length === 0 ? { textAlign: "center" } : {}}>
+        {messageList.length > 0 ? messageList.map((message) => {
           if (message.note_id > 0) {
             return <Note message={message} onDeleteNote={onDeleteNote} />
           }
           switch (message.integration_id) {
             case 1:
-              return <Email message={message} onDeleteMessage={onDeleteMessage}/>
+              return <Email message={message} onDeleteMessage={onDeleteMessage} />
             case 3:
               return <SMS message={message} onDeleteMessage={() => onDeleteMessage(message.id, message.ticket_id)} />
             default:
