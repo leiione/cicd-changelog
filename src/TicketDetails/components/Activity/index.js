@@ -43,9 +43,7 @@ const Activity = (props) => {
             Logs
           </ToggleButton>
         </ToggleButtonGroup>
-
-        Coming Soon!
-
+        <div className="p-3">Coming Soon!</div>
       </div>
     </AccordionCard>
   );
