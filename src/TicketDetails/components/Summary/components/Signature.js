@@ -117,7 +117,6 @@ const Signature = (props) => {
             <img
               src={ticket.signature_url}
               alt="signature"
-              style={{ width: "100px"}}
             />
           ) : (
             <IconButton
