@@ -49,17 +49,17 @@ const AddNoteFields = (props) => {
         setContent={handleMessageChange}
         disabled={isSubmitting}
       />
-      <div className="position-absolute bottom-0 right-0">
+      <div className="text-right">
         <ProgressButton
           color="primary"
-          size="medium"
+          variant="outlined"
           onClick={handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}
           disabled={!isFormValid || isSubmitting}
         >
           Save
         </ProgressButton>
-        <Button color="default" size="medium" onClick={handleCancel}>
+        <Button color="default" variant="outlined" onClick={handleCancel}>
           Cancel
         </Button>
       </div>

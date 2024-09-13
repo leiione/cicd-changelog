@@ -112,11 +112,12 @@ const Signature = (props) => {
         <Grid item xs="auto">
           <Typography variant="subtitle1">Signature: </Typography>
         </Grid>
-        <Grid item xs="auto">
+        <Grid item xs>
           {ticket && ticket.signature_url ? (
             <img
               src={ticket.signature_url}
               alt="signature"
+              style={{ maxHeight: "50px",maxWidth:"75%"}}
             />
           ) : (
             <IconButton

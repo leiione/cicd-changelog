@@ -13,16 +13,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMessagePlus,
   faTrash,
+  faReply,
 } from "@fortawesome/pro-light-svg-icons";
-import { faReply } from "@fortawesome/free-solid-svg-icons";
 import h2p from "html2plaintext";
-import parse from 'html-react-parser';
+import parse from "html-react-parser";
 import moment from "moment-timezone";
 import { SmsOutlined } from "@mui/icons-material";
 import LinesEllipsis from "react-lines-ellipsis";
 import DialogAlert from "components/DialogAlert";
 
-const SMSPopover = props => {
+const SMSPopover = (props) => {
   const { anchorEl, message, handleClose, toEmail } = props;
 
   return (
@@ -36,36 +36,49 @@ const SMSPopover = props => {
         horizontal: "left",
       }}
       slotProps={{
-        paper: { style: { maxWidth: "210px" } }
+        paper: { style: { maxWidth: "210px" } },
       }}
-      sx={{ pointerEvents: 'none' }}
+      sx={{ pointerEvents: "none" }}
       disableRestoreFocus
     >
       <Grid item xs={12}>
         <Grid container spacing={0} style={{ padding: 5 }}>
           <Grid item xs={3} style={{ textAlign: "end" }}>
-            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>From:</Typography>
+            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>
+              From:
+            </Typography>
           </Grid>
           <Grid item xs={9}>
             <Typography variant="subtitle1">{message.from_email}</Typography>
           </Grid>
           <Grid item xs={3} style={{ textAlign: "end" }}>
-            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>To:</Typography>
+            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>
+              To:
+            </Typography>
           </Grid>
           <Grid item xs={9}>
             <Grid container spacing={0}>
               {toEmail.map((email, index) => (
                 <Grid item xs={12} key={index}>
-                  <Typography variant="subtitle1" style={{ wordWrap: "break-word" }} >{email}</Typography>
+                  <Typography
+                    variant="subtitle1"
+                    style={{ wordWrap: "break-word" }}
+                  >
+                    {email}
+                  </Typography>
                 </Grid>
               ))}
             </Grid>
           </Grid>
           <Grid item xs={3} style={{ textAlign: "end" }}>
-            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>Subject:</Typography>
+            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>
+              Subject:
+            </Typography>
           </Grid>
           <Grid item xs={9}>
-            <Typography variant="subtitle1" style={{ wordWrap: "break-word" }}>{message.subject}</Typography>
+            <Typography variant="subtitle1" style={{ wordWrap: "break-word" }}>
+              {message.subject}
+            </Typography>
           </Grid>
         </Grid>
       </Grid>
@@ -73,7 +86,7 @@ const SMSPopover = props => {
   );
 };
 
-const SMS = props => {
+const SMS = (props) => {
   const { message, onDeleteMessage } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [more, toggleMore] = React.useState(false);
@@ -81,7 +94,10 @@ const SMS = props => {
   const toEmail = message.to_email ? message.to_email.split(",") : [];
 
   // Remove the specific text from the message
-  const text = message.message.replace(/To reply to this ticket, send TICKET.*<your reply>/, '');
+  const text = message.message.replace(
+    /To reply to this ticket, send TICKET.*<your reply>/,
+    ""
+  );
 
   const linePlainLen = text.split(/\r|\r\n|\n/g).length;
   const lineHtmlLen = h2p(text).split(/\r|\r\n|\n/g).length;
@@ -106,7 +122,7 @@ const SMS = props => {
       <ListItem key={message.id} alignItems="flex-start">
         <ListItemAvatar
           sx={{ width: 24, height: 24, minWidth: 24 }}
-          onMouseOver={e => setAnchorEl(e.currentTarget)}
+          onMouseOver={(e) => setAnchorEl(e.currentTarget)}
           onMouseLeave={() => setAnchorEl(null)}
         >
           <SmsOutlined className="text-danger" />
@@ -123,10 +139,18 @@ const SMS = props => {
           primary={
             <Grid container spacing={1} className="align-items-center mb-1">
               <Grid item xs>
-                <Typography variant="body2" className="text-truncate" style={{ width: "70%" }}>{message.to_email}</Typography>
+                <Typography
+                  variant="body2"
+                  className="text-truncate"
+                  style={{ width: "70%" }}
+                >
+                  {message.to_email}
+                </Typography>
               </Grid>
               <Grid item xs="auto">
-                <Typography variant="caption">{moment(message.date).format("MMM DD, YYYY hh:mm")}</Typography>
+                <Typography variant="caption">
+                  {moment(message.date).format("MMM DD, YYYY hh:mm")}
+                </Typography>
               </Grid>
               <Grid item xs="auto">
                 <IconButton size="small">
@@ -147,22 +171,28 @@ const SMS = props => {
           }
           secondary={
             <>
-              {more || lineLen < 6 ?
-                <Typography variant="caption" style={{ whiteSpace: "pre-line" }}>
+              {more || lineLen < 6 ? (
+                <Typography
+                  variant="caption"
+                  style={{ whiteSpace: "pre-line" }}
+                >
                   {parse(text)}
                 </Typography>
-                : <LinesEllipsis
-                text={isHtml ? h2p(text) : text}
+              ) : (
+                <LinesEllipsis
+                  text={isHtml ? h2p(text) : text}
                   maxLine={5}
-                  ellipsis=''
-                  style={{ whiteSpace: "pre-line", color: '#0009' }}
+                  ellipsis=""
+                  style={{ whiteSpace: "pre-line", color: "#0009" }}
                 />
-              }
-              {lineLen > 6 &&
+              )}
+              {lineLen > 6 && (
                 <div style={{ marginTop: "5px" }}>
-                  <Link variant="caption" onClick={() => toggleMore(!more)}>{more ? 'Simplify...' : 'More...'}</Link>
+                  <Link variant="caption" onClick={() => toggleMore(!more)}>
+                    {more ? "Simplify..." : "More..."}
+                  </Link>
                 </div>
-              }
+              )}
             </>
           }
         />
