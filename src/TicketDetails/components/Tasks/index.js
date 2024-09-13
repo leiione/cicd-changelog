@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import TaskMenuOptions from "./components/TaskMenuOptions";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import { cloneDeep, get, isEmpty, omit, sortBy, trim } from "lodash";
+import { cloneDeep, find, get, isEmpty, omit, sortBy, trim } from "lodash";
 import { preventEvent } from "Common/helper";
 import { useMutation } from "@apollo/client";
 import { GET_TICKET, SAVE_TICKET_TASKS } from "TicketDetails/TicketGraphQL";
@@ -60,6 +60,14 @@ const Tasks = (props) => {
   const completed = ticketTasks.filter((x) => x.is_completed).length;
   const taskCount = (ticketTasks.filter(x => x.task_id !== 0)).length;
   const error = onEditMode.index > -1 && isEmpty(trim(onEditMode.value));
+  const isTaskRequired = React.useMemo(() => {
+    let required = false
+    if (ticket && ticket.update_requirements && ticket.update_requirements.length > 0) {
+      const taskReq = find(ticket.update_requirements, { requirement_option: "TASKS" })
+      required = taskReq && taskReq.flag_enabled === "Y"
+    }
+    return required
+  }, [ticket])
 
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
@@ -337,7 +345,7 @@ const Tasks = (props) => {
                                     }
                                     style={{ width: "90%" }}
                                   >
-                                    {`${task.task}${task.is_default ? " *" : ""}`}
+                                    {`${task.task}${isTaskRequired ? " *" : ""}`}
                                   </Typography>
                                 }
                               />
