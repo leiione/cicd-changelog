@@ -12,6 +12,7 @@ import { showSnackbar } from "config/store";
 
 const MessagesTable = (props) => {
   const { messages, error, ticket } = props;
+  console.log('messages: ', messages);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const dispatch = useDispatch()
@@ -78,7 +79,7 @@ const MessagesTable = (props) => {
   if (error) return <ErrorPage error={error} />;
 
   // sort messages by date
-  let messageList = messages.sort((a, b) => new Date(b.date_added) - new Date(a.date_added))
+  let messageList = messages.length > 0 ? messages.sort((a, b) => new Date(b.date_added) - new Date(a.date_added)) : []
   messageList = messageList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
   return (
