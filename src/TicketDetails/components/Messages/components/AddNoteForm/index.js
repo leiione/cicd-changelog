@@ -33,7 +33,7 @@ const AddNoteFields = (props) => {
       <div
         style={{
           position: "absolute",
-          right: "38px",
+          right: "15px",
           zIndex: 99,
           top: 4,
         }}
@@ -49,25 +49,20 @@ const AddNoteFields = (props) => {
         setContent={handleMessageChange}
         disabled={isSubmitting}
       />
-     <div className="position-absolute bottom-0 right-0">
-     <ProgressButton
-        color="primary"
-        size="medium"
-        onClick={handleSubmit(onSubmit)}
-        isSubmitting={isSubmitting}
-        disabled={!isFormValid || isSubmitting}
-      >
-        Save
-      </ProgressButton>
-      <Button
-        color="default"
-        size="medium"
-        style={{ padding: "5px" }}
-        onClick={handleCancel}
-      >
-        Cancel
-      </Button>
-     </div>
+      <div className="position-absolute bottom-0 right-0">
+        <ProgressButton
+          color="primary"
+          size="medium"
+          onClick={handleSubmit(onSubmit)}
+          isSubmitting={isSubmitting}
+          disabled={!isFormValid || isSubmitting}
+        >
+          Save
+        </ProgressButton>
+        <Button color="default" size="medium" onClick={handleCancel}>
+          Cancel
+        </Button>
+      </div>
     </div>
   );
 };
