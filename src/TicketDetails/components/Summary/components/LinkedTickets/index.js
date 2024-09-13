@@ -138,21 +138,26 @@ const LinkedTicketContent = (props) => {
                             {getPriorityIcon(item.priority)}
                           </Tooltip>
                           {item.technician && (
-                            <AvatarText
-                              title={item.technician}
-                              charCount={1}
-                              sx={{
-                                width: 16,
-                                height: 16,
-                              }}
-                            />
+                            <Tooltip title={item.technician} placement="top">
+                              <AvatarText
+                                title={item.technician}
+                                charCount={1}
+                                className="mx-3"
+                                sx={{
+                                  width: 16,
+                                  height: 16,
+                                }}
+                              />
+                            </Tooltip>
                           )}
-                          <Typography
+                            <Tooltip title={`Status: ${item.status}`} placement="top">
+                            <Typography
                             variant="subtitle1"
                             className="mx-2 text-dark"
                           >
                             {item.status}
                           </Typography>
+                          </Tooltip>
                           <IconButton
                             className="ml-auto"
                             size="small"
