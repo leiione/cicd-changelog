@@ -30,15 +30,7 @@ const EditorContainer = props => {
         menubar: false,
         branding: false,
         statusbar: false,
-        plugins: [
-          "advlist autolink lists link image charmap print preview anchor",
-          "searchreplace visualblocks code fullscreen",
-          "insertdatetime media table paste code help wordcount",
-          "image",
-          "link",
-          "media",
-          "lists"
-        ],
+        plugins: "link lists",
         toolbar: "bold italic underline fontfamily | numlist bullist alignleft link",
         setup: handleEditorSetup,
         content_css: 'default',
