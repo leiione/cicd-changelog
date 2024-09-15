@@ -3,6 +3,7 @@ import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { Button, Collapse, Grid, Typography } from "@mui/material";
 import DueDate from "./components/DueDate";
 import PreferredArrival from "./components/PreferredArrival";
+import AppointmentDuration from "./components/AppointmentDuration";
 import { useDispatch, useSelector } from "react-redux";
 import { setCardPreferences } from "config/store";
 
@@ -45,6 +46,9 @@ const Schedule = (props) => {
           className="ml-3 pl-3 position-relative"
         >
           <Grid container spacing={1}>
+            <Grid item xs={12}>
+              <AppointmentDuration ticket={ticket} updateTicket={updateTicket} />
+            </Grid>
             <Grid item xs={12}>
               <DueDate ticket={ticket} updateTicket={updateTicket} />
             </Grid>
