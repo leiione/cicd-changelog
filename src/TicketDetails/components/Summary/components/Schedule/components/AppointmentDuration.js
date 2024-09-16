@@ -18,7 +18,9 @@ const AppointmentDuration = (props) => {
   };
 
   const [tempMaxDuration, setMaxDuration] = React.useState(
-    ticket.max_duration !== undefined ? convertMinutesToTime(ticket.max_duration) : dayjs("01:00", "HH:mm") // Default to 1 hour
+    ticket.max_duration !== undefined
+      ? convertMinutesToTime(ticket.max_duration)
+      : dayjs().hour(1).minute(0) // Default to 1 hour (01:00)
   );
 
   useEffect(() => {
@@ -49,15 +51,28 @@ const AppointmentDuration = (props) => {
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
-  const durationDisplay = tempMaxDuration.isValid() ? tempMaxDuration.format("HH:mm") : "Select a duration"; // Ensure valid date display
+  // Customize duration display to remove '00' hour
+  const durationDisplay =
+    tempMaxDuration.isValid()
+      ? tempMaxDuration.hour() === 0
+        ? tempMaxDuration.format("mm [minutes]")
+        : tempMaxDuration.format("HH:mm")
+      : "Select a duration";
 
   return (
     <>
-      <div onClick={handleClick} className="pointer" style={{ display: "flex", alignItems: "center" }}>
+      <div
+        onClick={handleClick}
+        className="pointer"
+        style={{ display: "flex", alignItems: "center" }}
+      >
         <CalendarToday className="text-muted f-20" style={{ marginRight: 5 }} />
         <Typography variant="subtitle1">
           Appointment Duration
-          <Typography variant="subtitle1" className={`primary-on-hover d-inline-block ml-2`}>
+          <Typography
+            variant="subtitle1"
+            className={`primary-on-hover d-inline-block ml-2`}
+          >
             {durationDisplay}
           </Typography>
         </Typography>
@@ -74,16 +89,17 @@ const AppointmentDuration = (props) => {
       >
         <div style={{ padding: "10px 20px" }}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DesktopTimePicker
-            value={tempMaxDuration}
-            onChange={handleTimeChange}
-            ampm={false} // Use 24-hour format
-            views={["hours", "minutes"]} // Only allow selecting hours and minutes
-            renderInput={(params) => <TextField {...params} />} // Render the input field normally
-            slots={{
-              actionBar: () => null, // Removes the OK button by setting the action bar to null
-            }}
-          />
+            <DesktopTimePicker
+              value={tempMaxDuration}
+              onChange={handleTimeChange}
+              ampm={false} // Use 24-hour format
+              views={["hours", "minutes"]} // Only allow selecting hours and minutes
+              renderInput={(params) => <TextField {...params} />} // Render the input field normally
+              minTime={dayjs().hour(1).minute(0)} // Min time is 01:00 to avoid 00 hour
+              slots={{
+                actionBar: () => null, // Removes the OK button by setting the action bar to null
+              }}
+            />
           </LocalizationProvider>
         </div>
         <Divider />
