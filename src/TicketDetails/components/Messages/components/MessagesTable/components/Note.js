@@ -23,7 +23,7 @@ import PropTypes from "prop-types";
 import DialogAlert from "components/DialogAlert";
 
 const Note = (props) => {
-  const { message, onDeleteNote } = props;
+  const { message, onDeleteNote,handleQouteNote } = props;
   const [more, setMore] = React.useState(false);
   const [openDialog, setOpenDialog] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
@@ -65,7 +65,7 @@ const Note = (props) => {
               </Grid>
               <Grid item xs="auto">
                 <IconButton size="small">
-                  <FontAwesomeIcon icon={faMessagePlus} />
+                  <FontAwesomeIcon icon={faMessagePlus}  onClick={()=>handleQouteNote("note", message)}/>
                 </IconButton>
               </Grid>
               <Grid item xs="auto">

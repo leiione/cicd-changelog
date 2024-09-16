@@ -45,7 +45,7 @@ const AddNoteFields = (props) => {
         />
       </div>
       <EditorContainer
-        content={values.message}
+        content={values.note}
         setContent={handleMessageChange}
         disabled={isSubmitting}
       />
@@ -68,17 +68,48 @@ const AddNoteFields = (props) => {
 };
 
 const AddNoteForm = (props) => {
-  const { ticket, handleCancel } = props;
+  const { ticket, handleCancel, qoutedContent } = props;
   const [addTicketNote] = useMutation(ADD_NEW_TICKET_NOTE);
   const dispatch = useDispatch();
 
+
+  const foramteQoutedContent = (qoutedContent) => {
+    if (qoutedContent.from === "email") {
+      return `
+        <div class="non-editable" contenteditable="false">
+         ${qoutedContent.content.to_email} <br/><br/>
+         ${qoutedContent.content.subject} <br/><br/>
+         ${qoutedContent.content.message}
+         </div>
+        `;
+    } else if (qoutedContent.from === "sms") {
+      return `
+        <div class="non-editable" contenteditable="false">
+        ${qoutedContent.content.to_email} <br/><br/>
+         ${qoutedContent.content.message}
+        </div>
+        `;
+    } else if (qoutedContent.from === "note") {
+      return `
+       <div class="non-editable" contenteditable="false">
+       "${qoutedContent.content.appuser_name} wrote:<br/>
+        ${qoutedContent.content.content}"
+      </div>
+      `;
+    }
+  }
+
   const initialValues = React.useMemo(() => {
     return {
-      note: "",
+      note: qoutedContent ? foramteQoutedContent(qoutedContent) : "",
+      qouted_content_id: qoutedContent ? qoutedContent.from === "note" ? qoutedContent.content.note_id : qoutedContent.content.id: null,
+      from: qoutedContent ? qoutedContent.from : null,
       flag_internal: false,
       ticket_id: ticket.id,
     };
-  }, [ticket]);
+  }, [ticket, qoutedContent]);
+
+
 
   const form = useForm({
     defaultValues: initialValues,
@@ -91,6 +122,8 @@ const AddNoteForm = (props) => {
       const variables = {
         ticket_id: ticket.ticket_id,
         note: values.note,
+        qouted_content_id: values.qouted_content_id,
+        from: values.from,
         flag_internal: values.flag_internal,
       };
 
@@ -123,6 +156,7 @@ const AddNoteForm = (props) => {
       form={form}
       ticket={ticket}
       handleCancel={handleCancel}
+      qoutedContent={qoutedContent}
       onSubmit={onSubmit}
     />
   );
