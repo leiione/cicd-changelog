@@ -104,7 +104,7 @@ const AppointmentDuration = (props) => {
           </LocalizationProvider>
         </div>
         <Divider />
-        <div className="text-right" style={{ padding: "10px" }}>
+        <div className="text-right" style={{ padding: "0px" }}>
           <Button color="primary" size="large" onClick={onSaveDuration}>
             Save
           </Button>
