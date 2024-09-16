@@ -103,7 +103,7 @@ const EmailPopover = (props) => {
 };
 
 const Email = (props) => {
-  const { message, onDeleteMessage } = props;
+  const { message, onDeleteMessage, handleQouteNote } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [more, toggleMore] = React.useState(false);
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -123,7 +123,7 @@ const Email = (props) => {
     setSubmitting(false);
   };
 
-  return (
+   return (
     <>
       <ListItem key={message.id} alignItems="flex-start">
         <ListItemAvatar
@@ -165,7 +165,7 @@ const Email = (props) => {
               </Grid>
               <Grid item xs="auto">
                 <IconButton size="small">
-                  <FontAwesomeIcon icon={faMessagePlus} />
+                  <FontAwesomeIcon icon={faMessagePlus}  onClick={()=>handleQouteNote("email", message)} />
                 </IconButton>
               </Grid>
               <Grid item xs="auto">

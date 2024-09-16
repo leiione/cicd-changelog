@@ -11,7 +11,7 @@ import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 
 const MessagesTable = (props) => {
-  const { messages, error, ticket } = props;
+  const { messages, error, ticket, handleQouteNote } = props;
   console.log('messages: ', messages);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -80,20 +80,20 @@ const MessagesTable = (props) => {
 
   // sort messages by date
   let messageList = messages.length > 0 ? messages.sort((a, b) => new Date(b.date_added) - new Date(a.date_added)) : []
-  messageList = messageList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  messageList = messages.length > 0 ? messageList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage):[]
 
   return (
     <div>
       <List className="overflow-y-auto paper-height-500" style={messageList.length === 0 ? { textAlign: "center" } : {}}>
         {messageList.length > 0 ? messageList.map((message) => {
           if (message.note_id > 0) {
-            return <Note message={message} onDeleteNote={onDeleteNote} />
+            return <Note message={message} onDeleteNote={onDeleteNote} handleQouteNote={handleQouteNote} />
           }
           switch (message.integration_id) {
             case 1:
-              return <Email message={message} onDeleteMessage={onDeleteMessage} />
+              return <Email message={message} onDeleteMessage={onDeleteMessage} handleQouteNote={handleQouteNote} />
             case 3:
-              return <SMS message={message} onDeleteMessage={() => onDeleteMessage(message.id, message.ticket_id)} />
+              return <SMS message={message} handleQouteNote={handleQouteNote} onDeleteMessage={() => onDeleteMessage(message.id, message.ticket_id) } />
             default:
               return null // via FB, etc.
           }
