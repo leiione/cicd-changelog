@@ -80,8 +80,8 @@ const AppointmentDuration = (props) => {
             ampm={false} // Use 24-hour format
             views={["hours", "minutes"]} // Only allow selecting hours and minutes
             renderInput={(params) => <TextField {...params} />} // Render the input field normally
-            components={{
-              ActionBar: () => null, // Removes the OK button by setting the action bar to null
+            slots={{
+              actionBar: () => null, // Removes the OK button by setting the action bar to null
             }}
           />
           </LocalizationProvider>
