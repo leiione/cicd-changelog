@@ -76,7 +76,7 @@ const EmailPopover = (props) => {
             </Typography>
           </Grid>
           <Grid item xs={9}>
-            <Typography variant="subtitle1">{}</Typography>
+            <Typography variant="subtitle1">{ }</Typography>
           </Grid>
           <Grid item xs={3} style={{ textAlign: "end" }}>
             <Typography variant="subtitle1" style={{ paddingRight: 5 }}>
@@ -84,7 +84,7 @@ const EmailPopover = (props) => {
             </Typography>
           </Grid>
           <Grid item xs={9}>
-            <Typography variant="subtitle1">{}</Typography>
+            <Typography variant="subtitle1">{ }</Typography>
           </Grid>
           <Grid item xs={3} style={{ textAlign: "end" }}>
             <Typography variant="subtitle1" style={{ paddingRight: 5 }}>
@@ -103,12 +103,13 @@ const EmailPopover = (props) => {
 };
 
 const Email = (props) => {
-  const { message, onDeleteMessage, handleQouteNote } = props;
+  const { message, onDeleteMessage, handleQouteNote, handleReplyEmail } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [more, toggleMore] = React.useState(false);
   const [openDialog, setOpenDialog] = React.useState(false);
   const [isSubmitting, setSubmitting] = React.useState(false);
   const toEmail = message.to_email ? message.to_email.split(",") : [];
+  const replyEmail = message.traffic === 'INBOUND' ? [message.from_email] : (message.to_email ? message.to_email.split(",") : [])
   const text = message.message;
 
   const linePlainLen = text.split(/\r|\r\n|\n/g).length;
@@ -123,7 +124,7 @@ const Email = (props) => {
     setSubmitting(false);
   };
 
-   return (
+  return (
     <>
       <ListItem key={message.id} alignItems="flex-start">
         <ListItemAvatar
@@ -150,7 +151,7 @@ const Email = (props) => {
                   className="text-truncate"
                   style={{ width: "70%" }}
                 >
-                  {message.to_email}
+                  {message.traffic === "INBOUND" ? message.from_email : message.to_email}
                 </Typography>
               </Grid>
               <Grid item xs="auto">
@@ -158,14 +159,14 @@ const Email = (props) => {
                   {moment(message.date).format("MMM DD, YYYY hh:mm")}
                 </Typography>
               </Grid>
-              <Grid item xs="auto">
-                <IconButton size="small">
+              {message.traffic === 'INBOUND' && <Grid item xs="auto">
+                <IconButton size="small" onClick={() => handleReplyEmail(isHtml ? h2p(text) : parse(text), replyEmail)}>
                   <FontAwesomeIcon icon={faReply} />
                 </IconButton>
-              </Grid>
+              </Grid>}
               <Grid item xs="auto">
                 <IconButton size="small">
-                  <FontAwesomeIcon icon={faMessagePlus}  onClick={()=>handleQouteNote("email", message)} />
+                  <FontAwesomeIcon icon={faMessagePlus} onClick={() => handleQouteNote("email", message)} />
                 </IconButton>
               </Grid>
               <Grid item xs="auto">

@@ -311,6 +311,7 @@ export const GET_TICKET_MESSAGES = gql`
       date
       date_added: date
       subject
+      traffic
     }
   }
 `;

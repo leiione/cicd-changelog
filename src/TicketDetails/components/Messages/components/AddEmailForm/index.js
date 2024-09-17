@@ -122,25 +122,31 @@ const AddEmailFields = props => {
 
 const AddEmailForm = props => {
   const dispatch = useDispatch()
-  const { ticket, handleCancel } = props
+  const { ticket, handleCancel, replyMessage } = props
   const [sendTicketEmail] = useMutation(ADD_NEW_TICKET_EMAIL)
 
   const initialValues = React.useMemo(() => {
     const toEmail = []
-    const contactEmail = ticket.ticket_contact_email ? ticket.ticket_contact_email.split(",") : []
-    contactEmail.forEach(email => {
-      toEmail.push({ to: email, customOption: true })
-    })
+    if (replyMessage.recipient && replyMessage.recipient.length > 0) {
+      replyMessage.recipient.forEach(email => {
+        toEmail.push({ to: email, customOption: true })
+      })
+    } else {
+      const contactEmail = ticket.ticket_contact_email ? ticket.ticket_contact_email.split(",") : []
+      contactEmail.forEach(email => {
+        toEmail.push({ to: email, customOption: true })
+      })
+    }
 
     return {
       to: toEmail,
       cc: [],
       bcc: [],
       subject: `[Ticket#${ticket.ticket_id}] ${ticket.description}`,
-      message: "",
+      message: replyMessage ? replyMessage.message : "",
       flag_internal: false
     }
-  }, [ticket])
+  }, [ticket, replyMessage])
 
   const form = useForm({
     defaultValues: initialValues,
@@ -153,9 +159,9 @@ const AddEmailForm = props => {
     try {
       const variables = {
         ticket_id: ticket.ticket_id,
-        to: (values.to.map(item => item.to).join(",")).replace(/ /g,''),
-        cc: (values.cc.map(item => item.cc).join(",")).replace(/ /g,''),
-        bcc: (values.bcc.map(item => item.bcc).join(",")).replace(/ /g,''),
+        to: (values.to.map(item => item.to).join(",")).replace(/ /g, ''),
+        cc: (values.cc.map(item => item.cc).join(",")).replace(/ /g, ''),
+        bcc: (values.bcc.map(item => item.bcc).join(",")).replace(/ /g, ''),
         message: values.message,
         customer_id: ticket.customer_id || 0,
         subject: values.subject,
@@ -189,4 +195,4 @@ const AddEmailForm = props => {
   )
 }
 
-export default AddEmailForm;
+export default React.memo(AddEmailForm);

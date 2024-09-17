@@ -11,8 +11,7 @@ import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 
 const MessagesTable = (props) => {
-  const { messages, error, ticket, handleQouteNote } = props;
-  console.log('messages: ', messages);
+  const { messages, error, ticket, handleQouteNote, handleReplyEmail } = props;
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const dispatch = useDispatch()
@@ -91,7 +90,7 @@ const MessagesTable = (props) => {
           }
           switch (message.integration_id) {
             case 1:
-              return <Email message={message} onDeleteMessage={onDeleteMessage} handleQouteNote={handleQouteNote} />
+              return <Email message={message} onDeleteMessage={onDeleteMessage} handleQouteNote={handleQouteNote} handleReplyEmail={handleReplyEmail} />
             case 3:
               return <SMS message={message} handleQouteNote={handleQouteNote} onDeleteMessage={() => onDeleteMessage(message.id, message.ticket_id) } />
             default:
