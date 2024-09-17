@@ -1,5 +1,5 @@
 import { MessageOutlined } from "@mui/icons-material";
-import { Menu, MenuItem, Tooltip } from "@mui/material";
+import { Menu, MenuItem } from "@mui/material";
 import ButtonWithLabel from "Common/ButtonWithLabel";
 import { preventEvent } from "Common/helper";
 import { setCardPreferences } from "config/store";
@@ -30,17 +30,15 @@ const AddMessageButton = (props) => {
 
   return (
     <>
-      <Tooltip title={error ? error.message : "Add Message"} placement="top">
-        <span>
-          <ButtonWithLabel
-            buttonLabel="Add Note"
-            lablesVisible={lablesVisible}
-            onClick={onIconClick}
-            buttonIcon={<MessageOutlined />}
-            disabled={error}
-          />
-        </span>
-      </Tooltip>
+      <span>
+        <ButtonWithLabel
+          buttonLabel="Add Message"
+          lablesVisible={lablesVisible}
+          onClick={onIconClick}
+          buttonIcon={<MessageOutlined />}
+          disabled={error}
+        />
+      </span>
       <Menu
         id="basic-menu"
         anchorEl={anchorEl}
