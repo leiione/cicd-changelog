@@ -1,20 +1,25 @@
 import React from "react";
-import { OpenInNew, Visibility } from "@mui/icons-material";
+import { Visibility } from "@mui/icons-material";
 import AccordionCard from "../../../Common/AccordionCard";
 import { IconButton } from "@mui/material";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
-
+import ButtonWithLabel from "Common/ButtonWithLabel";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlusCircle } from "@fortawesome/pro-light-svg-icons";
 
 const BillsOfMaterial = (props) => {
-  const { appuser_id } = props;
+  const { appuser_id, lablesVisible } = props;
   return (
     <AccordionCard
       label="Bills Of Material"
       iconButtons={
         <>
-          <IconButton>
-            <OpenInNew />
-          </IconButton>
+          <ButtonWithLabel
+            buttonLabel="Add Bills of Material"
+            lablesVisible={lablesVisible}
+            onClick=""
+            buttonIcon={<FontAwesomeIcon icon={faPlusCircle} />}
+          />
         </>
       }
       menuOption={
@@ -22,7 +27,10 @@ const BillsOfMaterial = (props) => {
           <IconButton>
             <Visibility />
           </IconButton>
-          <HeaderMenuOptions appuser_id={appuser_id} category="Bill Of Materials Card" />
+          <HeaderMenuOptions
+            appuser_id={appuser_id}
+            category="Bill Of Materials Card"
+          />
         </>
       }
     >

@@ -17,13 +17,18 @@ import AddNoteForm from "./components/AddNoteForm";
 import AddSMSForm from "./components/AddSMSForm";
 
 const Messages = (props) => {
-  const { appuser_id, ticket } = props;
+  const { appuser_id, ticket, lablesVisible } = props;
   const [filter, setFilter] = React.useState("all");
   const [addNew, setAddNew] = React.useState(null);
   const [qoutedContent, setQoutedContent] = React.useState(null);
   const [replyMessage, setReplyMessage] = React.useState({});
 
-  const { loading, error: messageError, data, client } = useQuery(GET_TICKET_MESSAGES, {
+  const {
+    loading,
+    error: messageError,
+    data,
+    client,
+  } = useQuery(GET_TICKET_MESSAGES, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: "cache-and-network",
     skip: !ticket.ticket_id || filter === "notes",
@@ -50,13 +55,13 @@ const Messages = (props) => {
 
   let messages = [];
 
-  const handleQouteNote = (from, content) =>{
+  const handleQouteNote = (from, content) => {
     setQoutedContent({
       from,
-      content
+      content,
     });
-    setAddNew('note');
- }
+    setAddNew("note");
+  };
 
   if (
     filter === "notes" &&
@@ -88,37 +93,66 @@ const Messages = (props) => {
     if (addNew) {
       // add warning dialog
     }
-    const formatMessage = `<blockquote style="font-size: 8pt;">${message.replace(/\r|\r\n|\n/g, '<br>')}</blockquote><p>&nbsp;</p>`
+    const formatMessage = `<blockquote style="font-size: 8pt;">${message.replace(
+      /\r|\r\n|\n/g,
+      "<br>"
+    )}</blockquote><p>&nbsp;</p>`;
     setAddNew("email");
     setReplyMessage({ message: formatMessage, recipient });
-  }
+  };
 
   const handleCancel = () => {
-    setAddNew(null)
+    setAddNew(null);
     setQoutedContent(null);
-    setReplyMessage("")
-  }
+    setReplyMessage("");
+  };
 
   return (
     <AccordionCard
       label="Messages"
       iconButtons={
         <>
-          <AddNoteButton setAddNew={setAddNew} />
-          <AddMessageButton setAddNew={setAddNew} error={messageError} />
+          <AddNoteButton setAddNew={setAddNew} lablesVisible={lablesVisible} />
+          <AddMessageButton
+            setAddNew={setAddNew}
+            lablesVisible={lablesVisible}
+            error={messageError}
+          />
         </>
       }
-      menuOption={<HeaderMenuOptions appuser_id={appuser_id} category="Message Card" />}
+      menuOption={
+        <HeaderMenuOptions appuser_id={appuser_id} category="Message Card" />
+      }
     >
       {(loading || loadingNotes) && (!cacheExists || !cacheExistsNotes) ? (
         <Loader loaderStyle={{ position: "static", textAlign: "center" }} />
       ) : (
         <>
-          {addNew === "email" && <AddEmailForm ticket={ticket} handleCancel={handleCancel} replyMessage={replyMessage} />}
-          {addNew === "note" && <AddNoteForm ticket={ticket} handleCancel={handleCancel} qoutedContent={qoutedContent} />}
-          {addNew === "sms" && <AddSMSForm ticket={ticket} handleCancel={handleCancel} />}
+          {addNew === "email" && (
+            <AddEmailForm
+              ticket={ticket}
+              handleCancel={handleCancel}
+              replyMessage={replyMessage}
+            />
+          )}
+          {addNew === "note" && (
+            <AddNoteForm
+              ticket={ticket}
+              handleCancel={handleCancel}
+              qoutedContent={qoutedContent}
+            />
+          )}
+          {addNew === "sms" && (
+            <AddSMSForm ticket={ticket} handleCancel={handleCancel} />
+          )}
           <Filter filter={filter} setFilter={setFilter} />
-          <MessagesTable messages={messages} error={errorNotes} ticket={ticket} handleReplyEmail={handleReplyEmail} handleQouteNote={handleQouteNote} />
+          <MessagesTable
+            messages={messages}
+            error={errorNotes}
+            ticket={ticket}
+            handleReplyEmail={handleReplyEmail}
+            handleQouteNote={handleQouteNote}
+          />
         </>
       )}
     </AccordionCard>
