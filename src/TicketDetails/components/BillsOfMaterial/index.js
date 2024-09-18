@@ -1,5 +1,5 @@
 import React from "react";
-import { KeyboardArrowDown, OpenInNew, Visibility } from "@mui/icons-material";
+import { KeyboardArrowDown, Visibility } from "@mui/icons-material";
 import AccordionCard from "../../../Common/AccordionCard";
 import {
   IconButton,
@@ -17,7 +17,7 @@ import {
 import HeaderMenuOptions from "components/HeaderMenuOptions";
 import ButtonWithLabel from "Common/ButtonWithLabel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle } from "@fortawesome/pro-light-svg-icons";
+import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
 
 const BillsOfMaterial = (props) => {
   const { appuser_id, lablesVisible, handleIconButton } = props;
@@ -43,9 +43,6 @@ const BillsOfMaterial = (props) => {
             onClick={(event) => handleIconButton(event, "Bills of Material")}
             buttonIcon={<FontAwesomeIcon icon={faPlusCircle} />}
           />
-          <IconButton>
-            <OpenInNew />
-          </IconButton>
         </>
       }
       menuOption={
