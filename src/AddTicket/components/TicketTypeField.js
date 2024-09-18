@@ -50,7 +50,7 @@ const TicketTypeField = props => {
         <Typography variant="subtitle1" className="text-muted">{selected && selected.label ? selected.label : "Select Ticket Type"}</Typography>
       </Grid>
       <Grid item xs={"auto"}>
-        <IconButton style={{ padding: 0 }} onClick={e => setAnchorEl(e.currentTarget)}>
+        <IconButton size="small" onClick={e => setAnchorEl(e.currentTarget)}>
           {anchorEl ?
             <ArrowDropUp className="f-20" />
             : <ArrowDropDown className="f-20" />}

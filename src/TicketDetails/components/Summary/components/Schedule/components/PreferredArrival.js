@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Popover, Button, FormControlLabel, Radio, Divider, Grid, Tooltip, TextField } from "@mui/material";
-import { AccessTime } from "@mui/icons-material";
 import moment from "moment-timezone";
 import ProgressButton from "Common/ProgressButton";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClock } from "@fortawesome/pro-regular-svg-icons";
 
 const PreferredArrival = (props) => {
   const { isSubmitting, ticket, updateTicket } = props;
@@ -66,7 +67,7 @@ const PreferredArrival = (props) => {
   return (
     <>
       <Typography variant="subtitle1" onClick={handleClick} className="pointer">
-        <AccessTime className="text-muted f-20" style={{ marginRight: 5 }} /> Preferred Arrival
+      <FontAwesomeIcon icon={faClock} className="text-muted f-18 mr-1" /> Preferred Arrival
         <Typography variant="subtitle1" className={`primary-on-hover d-inline-block ml-2`}>
           {arrivalTime}
         </Typography>

@@ -3,8 +3,9 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DesktopTimePicker } from "@mui/x-date-pickers/DesktopTimePicker";
 import { Typography, Popover, Button, Divider, TextField } from "@mui/material";
-import { CalendarToday } from "@mui/icons-material";
 import dayjs from "dayjs";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCalendarDay } from "@fortawesome/pro-regular-svg-icons";
 
 const AppointmentDuration = (props) => {
   const { ticket, updateTicket } = props;
@@ -66,7 +67,7 @@ const AppointmentDuration = (props) => {
         className="pointer"
         style={{ display: "flex", alignItems: "center" }}
       >
-        <CalendarToday className="text-muted f-20" style={{ marginRight: 5 }} />
+        <FontAwesomeIcon icon={faCalendarDay} className="text-muted f-18 mr-1" />
         <Typography variant="subtitle1">
           Appointment Duration
           <Typography

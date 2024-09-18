@@ -11,7 +11,8 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { AddCircleOutline } from "@mui/icons-material";
+import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const Attachments = (props) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -169,7 +170,7 @@ const Attachments = (props) => {
                 }
               >
                 <Typography variant="body2" color="textSecondary">
-                  <AddCircleOutline />
+                  <FontAwesomeIcon icon={faPlusCircle}/>
                 </Typography>
               </Box>
             </Grid>

@@ -3,15 +3,18 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { Typography, Popover, Button, Divider } from "@mui/material";
-import { CalendarToday } from "@mui/icons-material";
 import moment from "moment-timezone";
 import dayjs from "dayjs";
 import DialogAlert from "components/DialogAlert";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCalendarDay } from "@fortawesome/pro-regular-svg-icons";
 
 const DueDate = (props) => {
   const { ticket, updateTicket } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [tempDueDate, setTempDueDate] = React.useState(ticket.due_by_date || moment().format("YYYY-MM-DD"));
+  const [tempDueDate, setTempDueDate] = React.useState(
+    ticket.due_by_date || moment().format("YYYY-MM-DD")
+  );
   const [tempDate, setTempDate] = React.useState(ticket.due_by_date);
   const [openPrompt, togglePrompt] = React.useState(false);
 
@@ -19,7 +22,7 @@ const DueDate = (props) => {
     if (ticket.due_by_date && !tempDueDate) {
       setTempDueDate(ticket.due_by_date);
     }
-  }, [ticket.due_by_date, tempDueDate])
+  }, [ticket.due_by_date, tempDueDate]);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -32,26 +35,35 @@ const DueDate = (props) => {
   const onSaveDueDate = () => {
     updateTicket({ ticket_id: ticket.ticket_id, due_by_date: tempDueDate });
     handleClose();
-  }
+  };
 
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
-  const dueDate = !ticket.due_by_date ? "Select a date" : moment(ticket.due_by_date).format("MMM DD, YYYY");
+  const dueDate = !ticket.due_by_date
+    ? "Select a date"
+    : moment(ticket.due_by_date).format("MMM DD, YYYY");
   const handleChange = (newDate) => {
     const isBeforeDate = moment(newDate.$d).isBefore(new Date(), "day");
     if (isBeforeDate) {
-      togglePrompt(true)
-      setTempDate(newDate)
+      togglePrompt(true);
+      setTempDate(newDate);
     } else {
-      setTempDueDate(newDate)
+      setTempDueDate(newDate);
     }
-  }
+  };
   return (
     <>
       <Typography variant="subtitle1" onClick={handleClick} className="pointer">
-        <CalendarToday className="text-muted f-20" style={{ marginRight: 5 }} /> Due Date
-        <Typography variant="subtitle1" className={`primary-on-hover d-inline-block ml-2`}>
+        <FontAwesomeIcon
+          icon={faCalendarDay}
+          className="text-muted f-18 mr-1"
+        />
+        Due Date
+        <Typography
+          variant="subtitle1"
+          className={`primary-on-hover d-inline-block ml-2`}
+        >
           {dueDate}
         </Typography>
       </Typography>
@@ -72,38 +84,52 @@ const DueDate = (props) => {
         </div>
         <Divider />
         <div className="text-right">
-          <Button color="primary" size="large" style={{ padding: "5px" }} onClick={onSaveDueDate}>
+          <Button
+            color="primary"
+            size="large"
+            style={{ padding: "5px" }}
+            onClick={onSaveDueDate}
+          >
             Save
           </Button>
-          <Button className="bg-white text-muted" size="large" style={{ padding: "5px" }} onClick={handleClose}>
+          <Button
+            className="bg-white text-muted"
+            size="large"
+            style={{ padding: "5px" }}
+            onClick={handleClose}
+          >
             Cancel
           </Button>
         </div>
       </Popover>
-      {openPrompt && <DialogAlert
-        open={openPrompt}
-        message={<span>Are you sure you want to set this in the past date?</span>}
-        buttonsList={[
-          {
-            label: "Yes",
-            size: "medium",
-            color: "primary",
-            onClick: () => {
-              setTempDueDate(tempDate)
-              togglePrompt(false)
-            }
-          },
-          {
-            label: "No",
-            size: "medium",
-            color: "default",
-            onClick: () => {
-              setTempDate(null)
-              togglePrompt(false)
-            }
+      {openPrompt && (
+        <DialogAlert
+          open={openPrompt}
+          message={
+            <span>Are you sure you want to set this in the past date?</span>
           }
-        ]}
-      />}
+          buttonsList={[
+            {
+              label: "Yes",
+              size: "medium",
+              color: "primary",
+              onClick: () => {
+                setTempDueDate(tempDate);
+                togglePrompt(false);
+              },
+            },
+            {
+              label: "No",
+              size: "medium",
+              color: "default",
+              onClick: () => {
+                setTempDate(null);
+                togglePrompt(false);
+              },
+            },
+          ]}
+        />
+      )}
     </>
   );
 };

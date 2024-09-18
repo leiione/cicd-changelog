@@ -1,4 +1,5 @@
-import { MessageOutlined } from "@mui/icons-material";
+import { faMessageLines } from "@fortawesome/pro-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Menu, MenuItem } from "@mui/material";
 import ButtonWithLabel from "Common/ButtonWithLabel";
 import { preventEvent } from "Common/helper";
@@ -35,7 +36,7 @@ const AddMessageButton = (props) => {
           buttonLabel="Add Message"
           lablesVisible={lablesVisible}
           onClick={onIconClick}
-          buttonIcon={<MessageOutlined />}
+          buttonIcon={<FontAwesomeIcon icon={faMessageLines} />}
           disabled={error}
         />
       </span>
