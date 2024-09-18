@@ -1,11 +1,13 @@
 import React from "react";
-import { IconButton, MenuItem, Popover } from "@mui/material";
+import { IconButton, MenuItem, Popover, MenuList } from "@mui/material";
 import { MoreVert } from "@mui/icons-material";
 import { preventEvent } from "../Common/helper";
 import CSAT from "Common/CSAT";
+import QueueJobs from "TicketDetails/components/Summary/components/QueueJobs";
 
 const HeaderMenuOptions = (props) => {
-  const { appuser_id, category } = props
+  const { appuser_id, category } = props;
+  console.log("HeaderMenuOptions props", props);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openMenu = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -19,11 +21,10 @@ const HeaderMenuOptions = (props) => {
 
   return (
     <>
-    {/* Using feedback icon directly, as there is currently only one option */}
-      <IconButton color="default" onClick={handleClick} className="d-none"> 
+      {/* Using feedback icon directly, as there is currently only one option */}
+      <IconButton color="default" onClick={handleClick}>
         <MoreVert />
       </IconButton>
-
       <Popover
         open={openMenu}
         anchorEl={anchorEl}
@@ -34,12 +35,23 @@ const HeaderMenuOptions = (props) => {
           horizontal: "left",
         }}
       >
+        {category === "Summary Card" ? 
+          <>
+            <MenuItem onClick={(event) => preventEvent(event)}>Queue Jobs</MenuItem>
+            <MenuItem onClick={(event) => preventEvent(event)}> Delete Ticket</MenuItem>
+          </>           
+        : null }
         <MenuItem color="default" onClick={(event) => preventEvent(event)}>
-          <CSAT appuser_id={appuser_id} category={category} key={category} isSettings={false} handlePopoverClose={() => setAnchorEl(null)} />
+          <CSAT
+            appuser_id={appuser_id}
+            category={category}
+            key={category}
+            isSettings={false}
+            handlePopoverClose={() => setAnchorEl(null)}
+            ticketDrawer={true}
+          />
         </MenuItem>
       </Popover>
-
-      <CSAT appuser_id={appuser_id} category={category} key={category} isSettings={false} handlePopoverClose={() => setAnchorEl(null)} />
     </>
   );
 };
