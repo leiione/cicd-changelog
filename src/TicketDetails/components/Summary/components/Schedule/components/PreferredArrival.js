@@ -67,7 +67,7 @@ const PreferredArrival = (props) => {
   return (
     <>
       <Typography variant="subtitle1" onClick={handleClick} className="pointer">
-      <FontAwesomeIcon icon={faClock} className="text-muted f-18 mr-1" /> Preferred Arrival
+      <FontAwesomeIcon icon={faClock} className=" fa-fw text-muted f-18 mr-2" /> Preferred Arrival
         <Typography variant="subtitle1" className={`primary-on-hover d-inline-block ml-2`}>
           {arrivalTime}
         </Typography>
