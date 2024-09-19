@@ -96,7 +96,6 @@ const AppointmentDuration = (props) => {
               ampm={false} // Use 24-hour format
               views={["hours", "minutes"]} // Only allow selecting hours and minutes
               renderInput={(params) => <TextField {...params} />} // Render the input field normally
-              minTime={dayjs().hour(1).minute(0)} // Min time is 01:00 to avoid 00 hour
               defaultValue={dayjs().hour(1).minute(0)} // Set default time to 01:00
               slots={{
                 actionBar: () => null, // Removes the OK button by setting the action bar to null
