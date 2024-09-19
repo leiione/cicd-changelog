@@ -10,6 +10,7 @@ import { faCalendarDay } from "@fortawesome/pro-regular-svg-icons";
 const AppointmentDuration = (props) => {
   const { ticket, updateTicket } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [error, setError] = React.useState(""); // State to track error messages
 
   // Convert minutes to HH:mm format
   const convertMinutesToTime = (minutes) => {
@@ -37,9 +38,16 @@ const AppointmentDuration = (props) => {
 
   const handleClose = () => {
     setAnchorEl(null);
+    setError(""); // Reset the error when closing the popover
   };
 
   const onSaveDuration = () => {
+    // Check if the selected time is 00:00
+    if (tempMaxDuration.hour() === 0 && tempMaxDuration.minute() === 0) {
+      setError("Appointment Duration cannot be 00:00"); // Set error message if time is 00:00
+      return; // Prevent saving
+    }
+
     // Calculate the total minutes when saving
     const totalMinutes = tempMaxDuration.hour() * 60 + tempMaxDuration.minute();
     updateTicket({ ticket_id: ticket.ticket_id, max_duration: totalMinutes }); // Pass total minutes
@@ -48,6 +56,7 @@ const AppointmentDuration = (props) => {
 
   const handleTimeChange = (newTime) => {
     setMaxDuration(newTime); // Keep it as dayjs object
+    setError(""); // Clear error on valid time selection
   };
 
   const open = Boolean(anchorEl);
@@ -95,13 +104,21 @@ const AppointmentDuration = (props) => {
               onChange={handleTimeChange}
               ampm={false} // Use 24-hour format
               views={["hours", "minutes"]} // Only allow selecting hours and minutes
-              renderInput={(params) => <TextField {...params} />} // Render the input field normally
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  error={Boolean(error)} // Pass error state
+                  helperText={error || params.helperText} // Display error message or default helper text
+                />
+              )}
               defaultValue={dayjs().hour(1).minute(0)} // Set default time to 01:00
-              slots={{
-                actionBar: () => null, // Removes the OK button by setting the action bar to null
-              }}
             />
           </LocalizationProvider>
+          {error && (
+            <Typography color="error" variant="body2" style={{ marginTop: 8 }}>
+              {error}
+            </Typography>
+          )}
         </div>
         <Divider />
         <div className="text-right" style={{ padding: "0px" }}>
