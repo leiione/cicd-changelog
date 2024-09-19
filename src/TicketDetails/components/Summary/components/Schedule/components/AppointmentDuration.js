@@ -19,8 +19,14 @@ const AppointmentDuration = (props) => {
     return dayjs().hour(hours).minute(mins); // Create a dayjs object
   };
 
-  // Initialize tempMaxDuration with 01:00 as default
-  const [tempMaxDuration, setMaxDuration] = React.useState(
+  // Separate state for what is displayed in the field and popover
+  const [displayDuration, setDisplayDuration] = React.useState(
+    ticket.max_duration !== undefined
+      ? convertMinutesToTime(ticket.max_duration)
+      : dayjs().hour(1).minute(0) // Default to 1 hour (01:00)
+  );
+
+  const [tempMaxDuration, setTempMaxDuration] = React.useState(
     ticket.max_duration !== undefined
       ? convertMinutesToTime(ticket.max_duration)
       : dayjs().hour(1).minute(0) // Default to 1 hour (01:00)
@@ -28,7 +34,9 @@ const AppointmentDuration = (props) => {
 
   useEffect(() => {
     if (ticket.max_duration !== undefined) {
-      setMaxDuration(convertMinutesToTime(ticket.max_duration)); // Convert minutes to HH:mm
+      const convertedTime = convertMinutesToTime(ticket.max_duration);
+      setDisplayDuration(convertedTime); // Update both displayed and temp durations
+      setTempMaxDuration(convertedTime);
     }
   }, [ticket.max_duration]);
 
@@ -51,11 +59,13 @@ const AppointmentDuration = (props) => {
     // Calculate the total minutes when saving
     const totalMinutes = tempMaxDuration.hour() * 60 + tempMaxDuration.minute();
     updateTicket({ ticket_id: ticket.ticket_id, max_duration: totalMinutes }); // Pass total minutes
+
+    setDisplayDuration(tempMaxDuration); // Only update the displayed duration when saved
     handleClose();
   };
 
   const handleTimeChange = (newTime) => {
-    setMaxDuration(newTime); // Keep it as dayjs object
+    setTempMaxDuration(newTime); // Keep it as dayjs object
     setError(""); // Clear error on valid time selection
   };
 
@@ -63,10 +73,10 @@ const AppointmentDuration = (props) => {
   const id = open ? "simple-popover" : undefined;
 
   // Ensure durationDisplay shows "01:00" by default
-  const durationDisplay = tempMaxDuration.isValid()
-    ? tempMaxDuration.hour() === 0 && tempMaxDuration.minute() === 0
+  const durationDisplay = displayDuration.isValid()
+    ? displayDuration.hour() === 0 && displayDuration.minute() === 0
       ? "01:00" // Default to "01:00" if both hour and minute are zero
-      : tempMaxDuration.format("HH:mm") // Show "HH:mm" format otherwise
+      : displayDuration.format("HH:mm") // Show "HH:mm" format otherwise
     : "Select a duration";
 
   return (
