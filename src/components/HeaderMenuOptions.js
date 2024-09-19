@@ -1,15 +1,15 @@
 import React from "react";
-import { IconButton, MenuItem, Popover, MenuList } from "@mui/material";
+import { IconButton, MenuItem, Popover } from "@mui/material";
 import { MoreVert } from "@mui/icons-material";
 import { preventEvent } from "../Common/helper";
 import CSAT from "Common/CSAT";
-import QueueJobs from "TicketDetails/components/Summary/components/QueueJobs";
+
 
 const HeaderMenuOptions = (props) => {
-  const { appuser_id, category } = props;
-  console.log("HeaderMenuOptions props", props);
+  const { appuser_id, category, setOpenQueueJobs } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openMenu = Boolean(anchorEl);
+
   const handleClick = (event) => {
     preventEvent(event);
     setAnchorEl(event.currentTarget);
@@ -18,6 +18,11 @@ const HeaderMenuOptions = (props) => {
     preventEvent(event);
     setAnchorEl(null);
   };
+  const handleOpenQueueJobs = (event) => {
+    setAnchorEl(null);
+    event.stopPropagation();
+    setOpenQueueJobs(true);
+  }
 
   return (
     <>
@@ -37,7 +42,7 @@ const HeaderMenuOptions = (props) => {
       >
         {category === "Summary Card" ? 
           <>
-            <MenuItem onClick={(event) => preventEvent(event)}>Queue Jobs</MenuItem>
+            <MenuItem onClick={(event) => handleOpenQueueJobs(event)}>Queue Jobs</MenuItem>
             <MenuItem onClick={(event) => preventEvent(event)}> Delete Ticket</MenuItem>
           </>           
         : null }

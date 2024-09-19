@@ -32,7 +32,7 @@ const ServiceContact = (props) => {
   const summaryCard = useSelector((state) => state.summaryCard);
   const preferences = summaryCard ? summaryCard.subComponent : {};
 
-  const { ticket, updateTicket, isSubmitting } = props;
+  const { ticket, updateTicket, isSubmitting, selectedAddress, setSelectedAddress } = props;
   const { infrastructure = {} } = ticket;
   const [onEditMode, setEditMode] = useState(false);
   const isSubscriber = ticket.category_type === "SUBSCRIBER";
@@ -101,7 +101,7 @@ const ServiceContact = (props) => {
   const contactAddress = ticket.address
     ? ticket.address
     : getFormattedAddress(contact, "main");
-  const [selectedAddress, setSelectedAddress] = React.useState(contactAddress); // for SUBSCRIBER tickets
+   // for SUBSCRIBER tickets
 
   useEffect(() => {
     if (selectedAddress !== contactAddress) {
