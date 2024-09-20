@@ -69,7 +69,7 @@ const AddSMSFields = props => {
           }}
           disabled={isSubmitting}
         />
-        <Typography variant="caption" style={{ display: "block", textAlign: "right", marginTop: "5px" }}>
+        <Typography variant="caption" style={{ display: "block", textAlign: "left", marginTop: "5px" }}>
           {values.message.length}/160
         </Typography>
       </Grid>

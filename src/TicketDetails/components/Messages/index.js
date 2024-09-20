@@ -101,6 +101,15 @@ const Messages = (props) => {
     setReplyMessage({ message: formatMessage, recipient });
   };
 
+  const handleReplySMS = (message, recipient) => {
+    if (addNew) {
+      // add warning dialog
+    }
+    const formatMessage = ``;
+    setAddNew("sms");
+    setReplyMessage({ message: formatMessage, recipient });
+  };
+
   const handleCancel = () => {
     setAddNew(null);
     setQoutedContent(null);
@@ -151,6 +160,7 @@ const Messages = (props) => {
             error={errorNotes}
             ticket={ticket}
             handleReplyEmail={handleReplyEmail}
+            handleReplySMS={handleReplySMS}
             handleQouteNote={handleQouteNote}
           />
         </>
