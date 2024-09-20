@@ -86,7 +86,7 @@ const AppointmentDuration = (props) => {
         className="pointer"
         style={{ display: "flex", alignItems: "center" }}
       >
-        <FontAwesomeIcon icon={faCalendarDay} className=" fa-fw text-muted f-18 mr-2" />
+        <FontAwesomeIcon icon={faCalendarDay} className=" fa-fw text-muted f-16 mr-2" />
         <Typography variant="subtitle1">
           Appointment Duration
           <Typography

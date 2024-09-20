@@ -57,7 +57,7 @@ const DueDate = (props) => {
       <Typography variant="subtitle1" onClick={handleClick} className="pointer">
         <FontAwesomeIcon
           icon={faCalendarDay}
-          className=" fa-fw text-muted f-18 mr-2"
+          className=" fa-fw text-muted f-16 mr-2"
         />
         Due Date
         <Typography
