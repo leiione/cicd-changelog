@@ -6,7 +6,7 @@ import CSAT from "Common/CSAT";
 
 
 const HeaderMenuOptions = (props) => {
-  const { appuser_id, category, setOpenQueueJobs } = props;
+  const { appuser_id, category, setOpenQueueJobs, enableQueueJobs } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openMenu = Boolean(anchorEl);
 
@@ -27,7 +27,7 @@ const HeaderMenuOptions = (props) => {
   return (
     <>
       {/* Using feedback icon directly, as there is currently only one option */}
-      <IconButton color="default" onClick={handleClick}>
+      <IconButton color="default" onClick={handleClick} className={enableQueueJobs ? null : "d-none"}>
         <MoreVert />
       </IconButton>
       <Popover
@@ -40,7 +40,7 @@ const HeaderMenuOptions = (props) => {
           horizontal: "left",
         }}
       >
-        {category === "Summary Card" ? 
+        {enableQueueJobs && category === "Summary Card" ? 
           <>
             <MenuItem onClick={(event) => handleOpenQueueJobs(event)}>Queue Jobs</MenuItem>
             <MenuItem onClick={(event) => preventEvent(event)}> Delete Ticket</MenuItem>

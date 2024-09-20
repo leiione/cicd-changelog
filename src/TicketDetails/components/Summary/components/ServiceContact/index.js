@@ -101,7 +101,6 @@ const ServiceContact = (props) => {
   const contactAddress = ticket.address
     ? ticket.address
     : getFormattedAddress(contact, "main");
-   // for SUBSCRIBER tickets
 
   useEffect(() => {
     if (selectedAddress !== contactAddress) {

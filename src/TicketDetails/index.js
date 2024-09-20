@@ -91,6 +91,7 @@ const TicketDetails = (props) => {
     toggleOffCRMDrawer,
     handleOpenTicket,
     appuser_id,
+    enableQueueJobs,
   } = props;
   const snackbar = useSelector((state) => state.snackbar);
 
@@ -188,6 +189,7 @@ const TicketDetails = (props) => {
             setOpenQueueJobs={setOpenQueueJobs}
             selectedAddress={selectedAddress}
             setSelectedAddress={setSelectedAddress}
+            enableQueueJobs={enableQueueJobs}
           />
 
           {!hideInprogress &&
