@@ -6,7 +6,7 @@ import Activity from "./components/Activity";
 import Summary from "./components/Summary";
 import WorkOrder from "./components/Summary/components/WorkOrder";
 import Tasks from "./components/Tasks";
-// import BillsOfMaterial from "./components/BillsOfMaterial";
+import BillsOfMaterial from "./components/BillsOfMaterial";
 import { GET_TICKET } from "./TicketGraphQL";
 import { useMutation, useQuery } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
@@ -15,7 +15,7 @@ import GlobalSnackbar from "Common/GlobalSnackbar";
 import Messages from "./components/Messages";
 import Attachments from "./components/Attachments";
 import DialogAlert from "components/DialogAlert"; // Import DialogAlert
-
+import BomDrawer from "./components/BillsOfMaterial/components/BomDrawer"; 
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import htmlToPdfmake from "html-to-pdfmake";
@@ -25,6 +25,7 @@ import moment from "moment-timezone";
 import { setInitialUserPreferences } from "config/store";
 import UserPreferences from "components/UserPreferences";
 import QueueJobs from "./components/Summary/components/QueueJobs";
+import CustomFields from "./components/CustomFields";
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -144,8 +145,8 @@ const TicketDetails = (props) => {
 
   const renderChildComponent = () => {
     switch (open1) {
-      case "Notes and Alerts":
-        return "Coming Soon";
+      case "Bills of Material":
+        return <BomDrawer />;
       case "Work Order":
         return (
           <WorkOrder
@@ -194,6 +195,13 @@ const TicketDetails = (props) => {
 
           {!hideInprogress &&
             <>
+             <CustomFields
+                loading={loading}
+                ticket={ticket}
+                appuser_id={appuser_id}
+                lablesVisible={lablesVisible}
+                handleOpenTicket={handleOpenTicket}
+              />
               <Tasks
                 loading={loading}
                 ticket={ticket}
@@ -213,12 +221,12 @@ const TicketDetails = (props) => {
                 lablesVisible={lablesVisible}
                 appuser_id={appuser_id}
               />
-              {/* <BillsOfMaterial
+              <BillsOfMaterial
                 handleIconButton={handleIconButton}
                 customer={ticket}
                 lablesVisible={lablesVisible}
                 appuser_id={appuser_id}
-              /> */}
+              />
               <Activity
                 handleIconButton={handleIconButton}
                 customer={ticket}

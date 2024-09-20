@@ -75,8 +75,7 @@ const CSATForm = props => {
     isSettings,
     dispatch,
     onSubmit,
-    form,
-    ticketDrawer
+    form
   } = props
   const {
     control,
@@ -152,10 +151,9 @@ const CSATForm = props => {
       onClick={handleClick}
       disableRipple
       className={`${classes.experiencePopoverBtn} ${value !== null ? btnColor : ""}`}
-      size="large"
-    >
-      {value === null ? <SentimentSatisfiedAlt /> : TargetIcon}
-      {ticketDrawer && <Typography>&nbsp;Feedback</Typography>}
+      size="large">
+      {value === null ? <SentimentSatisfiedAlt /> : TargetIcon}  
+      <Typography className="font-weight-normal" style={{ paddingLeft: 10 }}>Feedback</Typography>
     </IconButton>
     <Popover
       id="mouse-over-popover"
@@ -258,7 +256,7 @@ const CSATForm = props => {
 }
 
 const CSAT = props => {
-  const { category, isSettings, appuser_id, handlePopoverClose, ticketDrawer = false } = props
+  const { category, isSettings, appuser_id, handlePopoverClose } = props
   const classes = useStyles()
   const dispatch = useDispatch()
   const defaultCsatValues = useMemo(() => ({ score: 0, note: "" }), []);
@@ -340,7 +338,6 @@ const CSAT = props => {
     sayThanks={sayThanks}
     setSayThanks={setSayThanks}
     isSettings={isSettings}
-    ticketDrawer={ticketDrawer}
   />
 }
 

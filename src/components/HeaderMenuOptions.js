@@ -27,7 +27,7 @@ const HeaderMenuOptions = (props) => {
   return (
     <>
       {/* Using feedback icon directly, as there is currently only one option */}
-      <IconButton color="default" onClick={handleClick} className={enableQueueJobs ? null : "d-none"}>
+      <IconButton color="default" onClick={handleClick}>
         <MoreVert />
       </IconButton>
       <Popover
@@ -53,7 +53,6 @@ const HeaderMenuOptions = (props) => {
             key={category}
             isSettings={false}
             handlePopoverClose={() => setAnchorEl(null)}
-            ticketDrawer={true}
           />
         </MenuItem>
       </Popover>

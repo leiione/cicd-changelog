@@ -1,13 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Business,
-  CallOutlined,
   Edit,
   ExpandLess,
   ExpandMore,
-  FmdGoodOutlined,
-  MailOutlined,
-  Person,
 } from "@mui/icons-material";
 import {
   Button,
@@ -26,6 +21,9 @@ import { GET_SITE_CONTACTS } from "TicketDetails/TicketGraphQL";
 import { useQuery } from "@apollo/client";
 import { useDispatch, useSelector } from "react-redux";
 import { setCardPreferences } from "config/store";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBuildings, faEnvelope, faLocationDot, faPhone } from "@fortawesome/pro-regular-svg-icons";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
 
 const ServiceContact = (props) => {
   const dispatch = useDispatch();
@@ -201,10 +199,7 @@ const ServiceContact = (props) => {
             {contact.main_company && (
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  <Business
-                    className="text-muted f-20"
-                    style={{ marginRight: 5 }}
-                  />{" "}
+                  <FontAwesomeIcon  icon={faBuildings}className="fa-fw text-muted f-16 mr-2" />
                   {contact.main_company}
                 </Typography>
               </Grid>
@@ -212,20 +207,14 @@ const ServiceContact = (props) => {
             {contact.first_name && (
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  <Person
-                    className="text-success f-20"
-                    style={{ marginRight: 5 }}
-                  />{" "}
+                  <FontAwesomeIcon  icon={faUser}className="fa-fw text-success f-16 mr-2" />
                   {`${contact.first_name} ${contact.last_name}`}
                 </Typography>
               </Grid>
             )}
             <Grid item xs={12}>
               <Typography variant="subtitle1">
-                <FmdGoodOutlined
-                  className="text-muted f-20"
-                  style={{ marginRight: 5 }}
-                />{" "}
+              <FontAwesomeIcon icon={faLocationDot} className="fa-fw text-muted f-16 mr-2"/>
                 {selectedAddress}
                 {onEditMode && (
                   <ContactAddressDropdown
@@ -246,10 +235,7 @@ const ServiceContact = (props) => {
                 <Grid container spacing={2}>
                   <Grid item xs={"auto"}>
                     <Typography variant="subtitle1">
-                      <CallOutlined
-                        className="text-muted f-20"
-                        style={{ marginRight: 8 }}
-                      />
+                    <FontAwesomeIcon icon={faPhone} className="fa-fw text-muted f-16 mr-2"/>
                       <span>Home &nbsp; {contact.phone[0]}</span>
                     </Typography>
                   </Grid>
@@ -266,10 +252,7 @@ const ServiceContact = (props) => {
             {contact.email && (
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  <MailOutlined
-                    className="text-muted f-20"
-                    style={{ marginRight: 5 }}
-                  />{" "}
+                <FontAwesomeIcon icon={faEnvelope} className="fa-fw text-muted f-16 mr-2"/>
                   {contact.email}
                 </Typography>
               </Grid>

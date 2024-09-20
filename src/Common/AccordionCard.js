@@ -1,5 +1,4 @@
 import React from "react";
-import { ExpandMore } from "@mui/icons-material";
 import {
   Accordion,
   AccordionActions,
@@ -11,6 +10,8 @@ import { useDispatch } from "react-redux";
 import { setCardPreferences } from "config/store";
 import { includes, toLower, trim } from "lodash";
 import { useSelector } from "react-redux";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/pro-regular-svg-icons";
 
 const AccordionCard = (props) => {
   const dispatch = useDispatch()
@@ -29,7 +30,7 @@ const AccordionCard = (props) => {
       onChange={handleChange}
     >
       <AccordionSummary
-        expandIcon={<ExpandMore />}
+        expandIcon={<FontAwesomeIcon icon={faChevronDown} />}
         aria-controls="panel1a-content"
         id="panel1a-header"
       >
