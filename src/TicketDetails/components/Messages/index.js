@@ -15,6 +15,7 @@ import AddEmailForm from "./components/AddEmailForm";
 import AddNoteButton from "./components/AddNoteButton";
 import AddNoteForm from "./components/AddNoteForm";
 import AddSMSForm from "./components/AddSMSForm";
+import h2p from "html2plaintext";
 
 const Messages = (props) => {
   const { appuser_id, ticket, lablesVisible } = props;
@@ -22,6 +23,7 @@ const Messages = (props) => {
   const [addNew, setAddNew] = React.useState(null);
   const [qoutedContent, setQoutedContent] = React.useState(null);
   const [replyMessage, setReplyMessage] = React.useState({});
+  const [replySeeMore, setReplySeeMore] = React.useState(true);
 
   const {
     loading,
@@ -93,10 +95,15 @@ const Messages = (props) => {
     if (addNew) {
       // add warning dialog
     }
-    const formatMessage = `<blockquote style="font-size: 8pt;">${message.replace(
-      /\r|\r\n|\n/g,
-      "<br>"
-    )}</blockquote><p>&nbsp;</p>`;
+    const formatMessage = `
+      <blockquote style="font-size: 8pt;">
+      <p>${recipient}</p>
+      ${message.replace(
+        /\r|\r\n|\n/g,
+        "<br>"
+      )}
+      </blockquote><p>&nbsp;</p>
+    `;
     setAddNew("email");
     setReplyMessage({ message: formatMessage, recipient });
   };
