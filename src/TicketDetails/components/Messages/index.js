@@ -15,7 +15,6 @@ import AddEmailForm from "./components/AddEmailForm";
 import AddNoteButton from "./components/AddNoteButton";
 import AddNoteForm from "./components/AddNoteForm";
 import AddSMSForm from "./components/AddSMSForm";
-import h2p from "html2plaintext";
 
 const Messages = (props) => {
   const { appuser_id, ticket, lablesVisible } = props;
@@ -23,7 +22,6 @@ const Messages = (props) => {
   const [addNew, setAddNew] = React.useState(null);
   const [qoutedContent, setQoutedContent] = React.useState(null);
   const [replyMessage, setReplyMessage] = React.useState({});
-  const [replySeeMore, setReplySeeMore] = React.useState(true);
 
   const {
     loading,
