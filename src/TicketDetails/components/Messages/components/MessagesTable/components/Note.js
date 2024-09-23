@@ -55,7 +55,6 @@ const Note = (props) => {
     setPreviewImage("");
   };
 
-
   return (
     <>
       <ListItem key={message.note_id} alignItems="flex-start">
@@ -110,7 +109,7 @@ const Note = (props) => {
               ) : (
                 <LinesEllipsis
                   text={isHtml ? h2p(message.content) : message.content}
-                  maxLine={5}
+                  maxLine={10}
                   ellipsis=""
                   style={{ whiteSpace: "pre-line", color: "#0009" }}
                 />

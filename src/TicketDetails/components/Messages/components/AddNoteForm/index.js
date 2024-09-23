@@ -244,6 +244,10 @@ const AddNoteFields = (props) => {
   );
 };
 
+const replaceWhitespace = (str) => {
+  return str.replace(/\r|\r\n|\n/g, "<br>");
+};
+
 const AddNoteForm = (props) => {
   const { ticket, handleCancel, qoutedContent } = props;
   const [addTicketNote] = useMutation(ADD_NEW_TICKET_NOTE);
@@ -253,23 +257,23 @@ const AddNoteForm = (props) => {
     if (qoutedContent.from === "email") {
       return `
        <blockquote class="bg-light" style="font-size: 8pt;">
-       <p>${qoutedContent.content.to_email}<br/>
-        ${qoutedContent.content.subject}<br/>
-        ${qoutedContent.content.message}
-        </blockquote><p>&nbsp;</p>
+       <p>${replaceWhitespace(qoutedContent.content.to_email)}<br/>
+        ${replaceWhitespace(qoutedContent.content.subject)}<br/>
+        ${replaceWhitespace(qoutedContent.content.message)}
+        </blockquote><p>&nbsp</p>;
         `;
     } else if (qoutedContent.from === "sms") {
       return `
         <blockquote class="bg-light" style="font-size: 8pt;">
-        <p>${qoutedContent.content.to_email} <br/>
-         ${qoutedContent.content.message}</p>
-        </blockquote><p>&nbsp;</p>
+        <p>${replaceWhitespace(qoutedContent.content.to_email)} <br/>
+         ${replaceWhitespace(qoutedContent.content.message)}</p>
+        </blockquote><p>&nbsp</p>;
         `;
     } else if (qoutedContent.from === "note") {
       return `
-       <p>${qoutedContent.content.appuser_name} wrote: 
        <blockquote class="bg-light" style="font-size: 8pt;">
-        ${qoutedContent.content.content}</p>
+       <p>${replaceWhitespace(qoutedContent.content.appuser_name)} wrote: 
+       ${replaceWhitespace(qoutedContent.content.content)}</p>
        </blockquote><p>&nbsp;</p>
       `;
     }
