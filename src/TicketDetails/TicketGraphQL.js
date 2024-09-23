@@ -323,7 +323,8 @@ export const GET_TICKET_NOTES = gql`
       appuser_id
       isp_id
       content
-      appuser_name
+      appuser_name,
+      attachments
     }
   }
 `;
@@ -357,12 +358,14 @@ export const ADD_NEW_TICKET_NOTE = gql`
     $ticket_id: Int!
     $note: String!
     $flag_internal: Boolean
+    $attachments: [Int]
     
   ) {
     addTicketNote(
       ticket_id: $ticket_id
       note: $note
       flag_internal: $flag_internal
+      attachments: $attachments
     ) {
       note_id
       date_added
@@ -411,3 +414,14 @@ export const UPDATE_NOTE_MUTATION = gql`
   }
 }
 `;
+
+export const UPLOAD_FILE_MUTATION = gql`
+  mutation uploadFile($file: String!, $filename: String!, $ticket_id: Int!) {
+    uploadFile(file: $file, filename: $filename, ticket_id:$ticket_id) {
+      attachment_id
+      filename
+      isp_id
+      file_url
+    }
+  }
+`

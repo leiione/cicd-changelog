@@ -1,17 +1,36 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  LinearProgress,
+  IconButton,
+  Modal,
+  Grid,
+  Button,
+} from "@mui/material";
+
 import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
 import HookCheckbox from "Common/hookFields/HookCheckbox";
-import { ADD_NEW_TICKET_NOTE } from "TicketDetails/TicketGraphQL";
+import {
+  ADD_NEW_TICKET_NOTE,
+  UPLOAD_FILE_MUTATION,
+} from "TicketDetails/TicketGraphQL";
 import { useMutation } from "@apollo/client";
 import { GET_TICKET_NOTES } from "./../../../../TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import CloseIcon from "@mui/icons-material/Close";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { AddCircleOutline } from "@mui/icons-material";
+import Files from "react-files";
+
+// import Files from "react-files";
 
 const AddNoteFields = (props) => {
-  const { form, handleCancel, onSubmit } = props;
+  const { form, handleCancel, onSubmit, ticket } = props;
   const {
     control,
     setValue,
@@ -20,6 +39,93 @@ const AddNoteFields = (props) => {
     handleSubmit,
   } = form;
 
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState({});
+  const [openPreview, setOpenPreview] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+  const [filemapping, setFileMapping] = useState([]);
+  const [uploadFile] = useMutation(UPLOAD_FILE_MUTATION);
+
+  const handleFileChange = (files) => {
+    const newFiles = Array.from(files);
+    const existingFileNames = new Set(selectedFiles.map((file) => file.name));
+
+    const filteredNewFiles = newFiles.filter(
+      (file) => !existingFileNames.has(file.name)
+    );
+
+    const updatedFiles = [...selectedFiles, ...filteredNewFiles].slice(0, 4);
+    setSelectedFiles(updatedFiles);
+    startUpload(filteredNewFiles);
+  };
+
+  const readFileAsBase64 = (inputFile) => {
+    const temporaryFileReader = new FileReader();
+
+    return new Promise((resolve, reject) => {
+      temporaryFileReader.readAsDataURL(inputFile);
+
+      temporaryFileReader.onerror = () => {
+        temporaryFileReader.abort();
+        reject("Problem parsing input file.");
+      };
+
+      temporaryFileReader.onload = () => {
+        resolve(temporaryFileReader.result.split(",").pop());
+      };
+    });
+  };
+
+  const startUpload = async (files) => {
+    files.forEach(async (file) => {
+      const progressKey = file.name;
+      let progress = 0;
+      
+      const fileData = await readFileAsBase64(file);
+
+      const { data } = await uploadFile({
+        variables: {
+          file: fileData,
+          filename: file.name,
+          ticket_id: ticket.ticket_id,
+        },
+      });
+
+      setValue("attachments", [
+        data.uploadFile.attachment_id,
+        ...values.attachments,
+      ]);
+
+      setFileMapping([...filemapping, { name: file.name, id: data.uploadFile.attachment_id }]);
+
+    });
+  };
+
+  const removeFile = (fileName) => {
+    setSelectedFiles((prevFiles) =>
+      prevFiles.filter((file) => file.name !== fileName)
+    );
+    
+    const file_id = filemapping.find((file) => file.name === fileName).id;
+    setValue("attachments", values.attachments.filter((id) => id !== file_id));
+
+    setUploadProgress((prevProgress) => {
+      const updatedProgress = { ...prevProgress };
+      delete updatedProgress[fileName];
+      return updatedProgress;
+    });
+  };
+
+  const handlePreviewOpen = (imageSrc) => {
+    setPreviewImage(imageSrc);
+    setOpenPreview(true);
+  };
+
+  const handlePreviewClose = () => {
+    setOpenPreview(false);
+    setPreviewImage("");
+  };
+
   const values = watch();
 
   const handleMessageChange = (content) => {
@@ -27,7 +133,6 @@ const AddNoteFields = (props) => {
   };
 
   const isFormValid = React.useMemo(() => values.note, [values]);
-
   return (
     <div className="position-relative">
       <div
@@ -36,8 +141,21 @@ const AddNoteFields = (props) => {
           right: "15px",
           zIndex: 99,
           top: 4,
+          display: "flex",
+          alignItems: "center",
         }}
       >
+        <Files
+          className="files-dropzone"
+          onChange={handleFileChange}
+          accepts={["image/*"]}
+          multiple
+          clickable
+        >
+          <IconButton aria-label="attachment">
+            <AttachFileIcon />
+          </IconButton>
+        </Files>
         <HookCheckbox
           control={control}
           name={"flag_internal"}
@@ -49,6 +167,65 @@ const AddNoteFields = (props) => {
         setContent={handleMessageChange}
         disabled={isSubmitting}
       />
+
+      <Box>
+        <Grid container spacing={1} className="upload-image-row">
+          {selectedFiles.map((file, index) => (
+            <Grid item xs={2} sm={2} md={2} key={index}>
+              <Box className="single-img-box">
+                <IconButton
+                  className="close-icon-btn"
+                  size="small"
+                  onClick={() => removeFile(file.name)}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+                <IconButton
+                  className="preview-icon-btn"
+                  size="small"
+                  onClick={() => handlePreviewOpen(URL.createObjectURL(file))}
+                >
+                  <VisibilityIcon fontSize="small" />
+                </IconButton>
+                <img
+                  className="img-preview"
+                  src={URL.createObjectURL(file)}
+                  alt={file.name}
+                  style={{ display: 'block' }}
+
+                />
+              </Box>
+
+              <LinearProgress/>
+              <Typography
+                className="mt-2 d-block text-truncate"
+                variant="caption"
+              >
+                {file.name}
+              </Typography>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Image Preview Modal */}
+        <Modal open={openPreview} onClose={handlePreviewClose}>
+          <Box className="box-modal-preview">
+            <img
+              src={previewImage}
+              alt="Preview"
+              style={{ width: "100%", height: "auto" }}
+            />
+            <Typography variant="body2" className="mt-2">
+              {
+                selectedFiles.find(
+                  (file) => URL.createObjectURL(file) === previewImage
+                )?.name
+              }
+            </Typography>
+          </Box>
+        </Modal>
+      </Box>
+
       <div className="text-right">
         <ProgressButton
           color="primary"
@@ -72,44 +249,46 @@ const AddNoteForm = (props) => {
   const [addTicketNote] = useMutation(ADD_NEW_TICKET_NOTE);
   const dispatch = useDispatch();
 
-
   const foramteQoutedContent = (qoutedContent) => {
     if (qoutedContent.from === "email") {
       return `
-        <div class="non-editable" contenteditable="false">
-         ${qoutedContent.content.to_email} <br/><br/>
-         ${qoutedContent.content.subject} <br/><br/>
-         ${qoutedContent.content.message}
-         </div>
+       <blockquote class="bg-light" style="font-size: 8pt;">
+       <p>${qoutedContent.content.to_email}
+        ${qoutedContent.content.subject}
+        ${qoutedContent.content.message}
+        </blockquote>
         `;
     } else if (qoutedContent.from === "sms") {
       return `
-        <div class="non-editable" contenteditable="false">
-        ${qoutedContent.content.to_email} <br/><br/>
-         ${qoutedContent.content.message}
-        </div>
+        <blockquote class="bg-light" style="font-size: 8pt;">
+        <p>${qoutedContent.content.to_email} 
+         ${qoutedContent.content.message}</p>
+        </blockquote>
         `;
     } else if (qoutedContent.from === "note") {
       return `
-       <div class="non-editable" contenteditable="false">
-       "${qoutedContent.content.appuser_name} wrote:<br/>
-        ${qoutedContent.content.content}"
-      </div>
+       <p>${qoutedContent.content.appuser_name} wrote: 
+       <blockquote class="bg-light" style="font-size: 8pt;">
+        ${qoutedContent.content.content}</p>
+       </blockquote>
       `;
     }
-  }
+  };
 
   const initialValues = React.useMemo(() => {
     return {
       note: qoutedContent ? foramteQoutedContent(qoutedContent) : "",
-      qouted_content_id: qoutedContent ? qoutedContent.from === "note" ? qoutedContent.content.note_id : qoutedContent.content.id: null,
+      qouted_content_id: qoutedContent
+        ? qoutedContent.from === "note"
+          ? qoutedContent.content.note_id
+          : qoutedContent.content.id
+        : null,
       from: qoutedContent ? qoutedContent.from : null,
       flag_internal: false,
       ticket_id: ticket.id,
+      attachments: [],
     };
   }, [ticket, qoutedContent]);
-
-
 
   const form = useForm({
     defaultValues: initialValues,
@@ -118,6 +297,7 @@ const AddNoteForm = (props) => {
     reValidateMode: "onSubmit",
   });
   const onSubmit = async (values) => {
+    console.log(values);
     try {
       const variables = {
         ticket_id: ticket.ticket_id,
@@ -125,6 +305,7 @@ const AddNoteForm = (props) => {
         qouted_content_id: values.qouted_content_id,
         from: values.from,
         flag_internal: values.flag_internal,
+        attachments: values.attachments,
       };
 
       await addTicketNote({

@@ -1,12 +1,14 @@
-import React from "react";
+import React,{useState} from "react";
 import {
   Grid,
-  IconButton,
+  IconButton as MuiIconButton,
   Link,
   ListItem,
   ListItemAvatar,
   ListItemText,
   Typography,
+  Box,
+  Modal,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -21,12 +23,16 @@ import h2p from "html2plaintext";
 import parse from "html-react-parser";
 import PropTypes from "prop-types";
 import DialogAlert from "components/DialogAlert";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const Note = (props) => {
-  const { message, onDeleteNote,handleQouteNote } = props;
-  const [more, setMore] = React.useState(false);
-  const [openDialog, setOpenDialog] = React.useState(false);
-  const [submitting, setSubmitting] = React.useState(false);
+  const { message, onDeleteNote, handleQouteNote } = props;
+  const [more, setMore] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [openPreview, setOpenPreview] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+
   const lineLen = message.content
     ? message.content.split(/\r|\r\n|\n/g).length
     : 1;
@@ -38,6 +44,17 @@ const Note = (props) => {
     setOpenDialog(false);
     setSubmitting(false);
   };
+
+  const handlePreviewOpen = (imageSrc) => {
+    setPreviewImage(imageSrc);
+    setOpenPreview(true);
+  };
+
+  const handlePreviewClose = () => {
+    setOpenPreview(false);
+    setPreviewImage("");
+  };
+
 
   return (
     <>
@@ -59,22 +76,25 @@ const Note = (props) => {
                 </Typography>
               </Grid>
               <Grid item xs="auto">
-                <IconButton size="small">
+                <MuiIconButton size="small">
                   <FontAwesomeIcon icon={faReply} />
-                </IconButton>
+                </MuiIconButton>
               </Grid>
               <Grid item xs="auto">
-                <IconButton size="small">
-                  <FontAwesomeIcon icon={faMessagePlus}  onClick={()=>handleQouteNote("note", message)}/>
-                </IconButton>
+                <MuiIconButton size="small">
+                  <FontAwesomeIcon
+                    icon={faMessagePlus}
+                    onClick={() => handleQouteNote("note", message)}
+                  />
+                </MuiIconButton>
               </Grid>
               <Grid item xs="auto">
-                <IconButton size="small">
+                <MuiIconButton size="small">
                   <FontAwesomeIcon
                     icon={faTrash}
                     onClick={() => setOpenDialog(true)}
                   />
-                </IconButton>
+                </MuiIconButton>
               </Grid>
             </Grid>
           }
@@ -102,6 +122,27 @@ const Note = (props) => {
                   </Link>
                 </div>
               )}
+
+              {message.attachments && message.attachments.length > 0 && (
+                <>
+                  <Typography variant="subtitle1" className="mt-3">Attachments</Typography>
+                  <Grid container spacing={1} className="upload-image-row mt-2">
+                    {message.attachments.map((file, index) => (
+                      <Box key={index} className="single-img-box">
+                        <MuiIconButton
+                          className="preview-icon-btn"
+                          size="small"
+                          onClick={() => handlePreviewOpen(file.file_url)}
+
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </MuiIconButton>
+                        <img className="img-preview" src={file.file_url} />
+                      </Box>
+                    ))}
+                  </Grid>
+                </>
+              )}
             </>
           }
         />
@@ -127,6 +168,16 @@ const Note = (props) => {
           },
         ]}
       />
+        <Modal open={openPreview} onClose={handlePreviewClose}>
+          <Box className="box-modal-preview">
+            <img
+              src={previewImage}
+              alt="Preview"
+              style={{ width: "100%", height: "auto" }}
+            />
+            
+          </Box>
+        </Modal>
     </>
   );
 };
@@ -140,6 +191,7 @@ Note.propTypes = {
     date_added: PropTypes.string,
   }).isRequired,
   onDeleteNote: PropTypes.func.isRequired,
+  handleQouteNote: PropTypes.func.isRequired,
 };
 
 export default Note;
