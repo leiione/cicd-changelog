@@ -253,24 +253,24 @@ const AddNoteForm = (props) => {
     if (qoutedContent.from === "email") {
       return `
        <blockquote class="bg-light" style="font-size: 8pt;">
-       <p>${qoutedContent.content.to_email}
-        ${qoutedContent.content.subject}
+       <p>${qoutedContent.content.to_email}<br/>
+        ${qoutedContent.content.subject}<br/>
         ${qoutedContent.content.message}
-        </blockquote>
+        </blockquote><p>&nbsp;</p>
         `;
     } else if (qoutedContent.from === "sms") {
       return `
         <blockquote class="bg-light" style="font-size: 8pt;">
-        <p>${qoutedContent.content.to_email} 
+        <p>${qoutedContent.content.to_email} <br/>
          ${qoutedContent.content.message}</p>
-        </blockquote>
+        </blockquote><p>&nbsp;</p>
         `;
     } else if (qoutedContent.from === "note") {
       return `
        <p>${qoutedContent.content.appuser_name} wrote: 
        <blockquote class="bg-light" style="font-size: 8pt;">
         ${qoutedContent.content.content}</p>
-       </blockquote>
+       </blockquote><p>&nbsp;</p>
       `;
     }
   };
