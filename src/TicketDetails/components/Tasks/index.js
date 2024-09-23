@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { AddCircleOutline, DragIndicator } from "@mui/icons-material";
+import { DragIndicator } from "@mui/icons-material";
 import AccordionCard from "../../../Common/AccordionCard";
 import ButtonWithLabel from "../../../Common/ButtonWithLabel";
 import HeaderMenuOptions from "../../../components/HeaderMenuOptions";
@@ -23,6 +23,8 @@ import { GET_TICKET, SAVE_TICKET_TASKS } from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { setCardPreferences, showSnackbar } from "config/store";
 import ProgressButton from "Common/ProgressButton";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
 
 const getItemStyle = (isDragging, draggableStyle) => ({
   userSelect: "none",
@@ -203,7 +205,7 @@ const Tasks = (props) => {
             lablesVisible={lablesVisible}
             onClick={addTicketTask}
             disabled={error}
-            buttonIcon={<AddCircleOutline />}
+            buttonIcon={<FontAwesomeIcon icon={faPlusCircle} />}
           />
           <span className="text-muted ml-3">
             {loading ? (

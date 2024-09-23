@@ -11,7 +11,7 @@ import h2p from "html2plaintext";
 import HookTypeAheadSMSField from "Common/hookFields/HookTypeAheadSMSField";
 
 const AddSMSFields = props => {
-  const { form, handleCancel, onSubmit } = props;
+  const { form, handleCancel, onSubmit, recipient  } = props;
   const {
     control,
     setValue,
@@ -21,6 +21,13 @@ const AddSMSFields = props => {
   } = form;
 
   const values = watch();
+
+  React.useEffect(() => {
+    if (recipient) {
+      setValue("to", [{ to: recipient, customOption: true }], { shouldValidate: true });
+    }
+  }, [recipient, setValue]);
+
 
   const handleMessageChange = (event) => {
     const newValue = event.target.value;
@@ -69,7 +76,7 @@ const AddSMSFields = props => {
           }}
           disabled={isSubmitting}
         />
-        <Typography variant="caption" style={{ display: "block", textAlign: "right", marginTop: "5px" }}>
+        <Typography variant="caption" style={{ display: "block", textAlign: "left", marginTop: "5px" }}>
           {values.message.length}/160
         </Typography>
       </Grid>
@@ -93,19 +100,23 @@ const AddSMSFields = props => {
 
 const AddSMSForm = props => {
   const dispatch = useDispatch();
-  const { ticket, handleCancel } = props;
+  const { ticket, handleCancel, recipient  } = props;
   const [sendTicketSMS] = useMutation(ADD_NEW_TICKET_SMS);
 
   const initialValues = React.useMemo(() => {
     let toSMS = [];
-    const contactSMS = ticket.ticket_contact_numbers ? ticket.ticket_contact_numbers.split(",") : [];
-    contactSMS.forEach(SMS => {
-      let cleanedSMS = SMS.replace(/[^\d]/g, ''); // Allow only numbers
-      if (cleanedSMS.length > 10) {
-        cleanedSMS = cleanedSMS.slice(0, 10); // Limit to 10 digits
-      }
-      toSMS.push({ to: cleanedSMS, customOption: true });
-    });
+    if (recipient) {
+      toSMS.push({ to: recipient, customOption: true });
+    } else {
+      const contactSMS = ticket.ticket_contact_numbers ? ticket.ticket_contact_numbers.split(",") : [];
+      contactSMS.forEach(SMS => {
+        let cleanedSMS = SMS.replace(/[^\d]/g, ''); // Allow only numbers
+        if (cleanedSMS.length > 10) {
+          cleanedSMS = cleanedSMS.slice(0, 10); // Limit to 10 digits
+        }
+        toSMS.push({ to: cleanedSMS, customOption: true });
+      });
+    }
 
     return {
       to: toSMS,
@@ -113,7 +124,7 @@ const AddSMSForm = props => {
       message: "",
       flag_internal: false
     };
-  }, [ticket]);
+  }, [ticket, recipient]);
 
   const form = useForm({
     defaultValues: initialValues,
@@ -155,6 +166,7 @@ const AddSMSForm = props => {
       ticket={ticket}
       handleCancel={handleCancel}
       onSubmit={onSubmit}
+      recipient={recipient}
     />
   );
 };

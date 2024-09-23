@@ -39,6 +39,7 @@ const EditorContainer = (props) => {
                         `,
         readonly: false, // Make editor generally editable
         extended_valid_elements: "div[contenteditable|class]",
+        placeholder: "Write Something here..."
 
         
       

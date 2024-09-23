@@ -11,7 +11,7 @@ import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 
 const MessagesTable = (props) => {
-  const { messages, error, ticket, handleQouteNote, handleReplyEmail } = props;
+  const { messages, error, ticket, handleQouteNote, handleReplyEmail, handleReplySMS } = props;
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const dispatch = useDispatch()
@@ -78,7 +78,7 @@ const MessagesTable = (props) => {
   if (error) return <ErrorPage error={error} />;
 
   // sort messages by date
-  let messageList = messages.length > 0 ? messages.sort((a, b) => new Date(b.date_added) - new Date(a.date_added)) : []
+  let messageList = messages.length > 0 ? [...messages].sort((a, b) => new Date(b.date_added) - new Date(a.date_added)) : []
   messageList = messages.length > 0 ? messageList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage):[]
 
   return (
@@ -92,7 +92,7 @@ const MessagesTable = (props) => {
             case 1:
               return <Email message={message} onDeleteMessage={onDeleteMessage} handleQouteNote={handleQouteNote} handleReplyEmail={handleReplyEmail} />
             case 3:
-              return <SMS message={message} handleQouteNote={handleQouteNote} onDeleteMessage={() => onDeleteMessage(message.id, message.ticket_id) } />
+              return <SMS message={message} handleQouteNote={handleQouteNote} onDeleteMessage={() => onDeleteMessage(message.id, message.ticket_id) } handleReplySMS={handleReplySMS} />
             default:
               return null // via FB, etc.
           }

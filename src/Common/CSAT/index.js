@@ -152,7 +152,8 @@ const CSATForm = props => {
       disableRipple
       className={`${classes.experiencePopoverBtn} ${value !== null ? btnColor : ""}`}
       size="large">
-      {value === null ? <SentimentSatisfiedAlt /> : TargetIcon}
+      {value === null ? <SentimentSatisfiedAlt /> : TargetIcon}  
+      <Typography className="font-weight-normal" style={{ paddingLeft: 10 }}>Feedback</Typography>
     </IconButton>
     <Popover
       id="mouse-over-popover"

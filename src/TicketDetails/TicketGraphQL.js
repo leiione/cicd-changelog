@@ -414,7 +414,6 @@ export const UPDATE_NOTE_MUTATION = gql`
   }
 }
 `;
-
 export const UPLOAD_FILE_MUTATION = gql`
   mutation uploadFile($file: String!, $filename: String!, $ticket_id: Int!) {
     uploadFile(file: $file, filename: $filename, ticket_id:$ticket_id) {
@@ -425,3 +424,15 @@ export const UPLOAD_FILE_MUTATION = gql`
     }
   }
 `
+export const GET_QUEUED_JOBS = gql`
+query queuedJobs($custId: Int!, $radiusMile: Int!) {
+  queuedJobs(cust_id: $custId, radius_mile: $radiusMile) {
+    id
+    ticket_id
+    type
+    summary
+    distance
+    installer_skills
+    priority
+  }
+}`;
