@@ -1,6 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Button, Divider, Grid, Typography } from "@mui/material";
+import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
 import HookCheckbox from "Common/hookFields/HookCheckbox";
 import { useMutation } from "@apollo/client";
@@ -11,7 +12,7 @@ import h2p from "html2plaintext";
 import HookTypeAheadSMSField from "Common/hookFields/HookTypeAheadSMSField";
 
 const AddSMSFields = props => {
-  const { form, handleCancel, onSubmit } = props;
+  const { form, handleCancel, onSubmit, recipient } = props;
   const {
     control,
     setValue,
@@ -22,11 +23,14 @@ const AddSMSFields = props => {
 
   const values = watch();
 
-  const handleMessageChange = (event) => {
-    const newValue = event.target.value;
-    if (newValue.length <= 160) {
-      setValue("message", newValue, { shouldValidate: true });
+  React.useEffect(() => {
+    if (recipient) {
+      setValue("to", [{ to: recipient, customOption: true }], { shouldValidate: true });
     }
+  }, [recipient, setValue]);
+
+  const handleMessageChange = (content) => {
+    setValue("message", content, { shouldValidate: true });
   };
 
   const isFormValid = React.useMemo(() => (values.to.length > 0 && values.message && !values.toFreeFieldText), [values]);
@@ -45,33 +49,21 @@ const AddSMSFields = props => {
       </Grid>
       <Divider style={{ width: "100%" }} />
       <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
-        <HookCheckbox
-          control={control}
-          name={"flag_internal"}
-          label={"Mark as Private"}
-          style={{ margin: "10px 0" }}
-        />
+        <div style={{ position: "absolute", right: "38px", zIndex: 99, padding: "23px 3px" }}>
+          <HookCheckbox
+            control={control}
+            name={"flag_internal"}
+            label={"Mark as Private"}
+          />
+        </div>
       </Grid>
       <Grid item xs={12} style={{ marginTop: "10px" }}>
-        <textarea
-          value={values.message}
-          onChange={handleMessageChange}
-          style={{
-            width: "100%",
-            height: "180px",
-            backgroundColor: "#fcefef",
-            fontFamily: "Helvetica, Arial, sans-serif",
-            fontSize: "12px",
-            padding: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            resize: "none"
-          }}
+        <EditorContainer
+          content={values.message}
+          setContent={handleMessageChange}
+          background={"#fcefef"}
           disabled={isSubmitting}
         />
-        <Typography variant="caption" style={{ display: "block", textAlign: "left", marginTop: "5px" }}>
-          {values.message.length}/160
-        </Typography>
       </Grid>
       <Grid item xs={12} style={{ textAlign: "end", marginTop: "-10px" }}>
         <ProgressButton
@@ -93,19 +85,23 @@ const AddSMSFields = props => {
 
 const AddSMSForm = props => {
   const dispatch = useDispatch();
-  const { ticket, handleCancel } = props;
+  const { ticket, handleCancel, recipient } = props;
   const [sendTicketSMS] = useMutation(ADD_NEW_TICKET_SMS);
 
   const initialValues = React.useMemo(() => {
     let toSMS = [];
-    const contactSMS = ticket.ticket_contact_numbers ? ticket.ticket_contact_numbers.split(",") : [];
-    contactSMS.forEach(SMS => {
-      let cleanedSMS = SMS.replace(/[^\d]/g, ''); // Allow only numbers
-      if (cleanedSMS.length > 10) {
-        cleanedSMS = cleanedSMS.slice(0, 10); // Limit to 10 digits
-      }
-      toSMS.push({ to: cleanedSMS, customOption: true });
-    });
+    if (recipient) {
+      toSMS.push({ to: recipient, customOption: true });
+    } else {
+      const contactSMS = ticket.ticket_contact_numbers ? ticket.ticket_contact_numbers.split(",") : [];
+      contactSMS.forEach(SMS => {
+        let cleanedSMS = SMS.replace(/[^\d]/g, ''); // Allow only numbers
+        if (cleanedSMS.length > 10) {
+          cleanedSMS = cleanedSMS.slice(0, 10); // Limit to 10 digits
+        }
+        toSMS.push({ to: cleanedSMS, customOption: true });
+      });
+    }
 
     return {
       to: toSMS,
@@ -113,7 +109,7 @@ const AddSMSForm = props => {
       message: "",
       flag_internal: false
     };
-  }, [ticket]);
+  }, [ticket, recipient]);
 
   const form = useForm({
     defaultValues: initialValues,
@@ -155,6 +151,7 @@ const AddSMSForm = props => {
       ticket={ticket}
       handleCancel={handleCancel}
       onSubmit={onSubmit}
+      recipient={recipient}
     />
   );
 };

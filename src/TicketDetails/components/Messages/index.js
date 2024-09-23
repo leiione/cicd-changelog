@@ -152,7 +152,7 @@ const Messages = (props) => {
             />
           )}
           {addNew === "sms" && (
-            <AddSMSForm ticket={ticket} handleCancel={handleCancel} />
+            <AddSMSForm ticket={ticket} handleCancel={handleCancel} recipient={replyMessage.recipient} />
           )}
           <Filter filter={filter} setFilter={setFilter} />
           <MessagesTable
