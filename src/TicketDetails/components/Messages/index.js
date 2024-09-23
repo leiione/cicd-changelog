@@ -22,6 +22,7 @@ const Messages = (props) => {
   const [addNew, setAddNew] = React.useState(null);
   const [qoutedContent, setQoutedContent] = React.useState(null);
   const [replyMessage, setReplyMessage] = React.useState({});
+  const [replySeeMore, setReplySeeMore] = React.useState(true);
 
   const {
     loading,
@@ -93,11 +94,25 @@ const Messages = (props) => {
     if (addNew) {
       // add warning dialog
     }
-    const formatMessage = `<blockquote style="font-size: 8pt;">${message.replace(
-      /\r|\r\n|\n/g,
-      "<br>"
-    )}</blockquote><p>&nbsp;</p>`;
+    const formatMessage = `
+      <blockquote style="font-size: 8pt;">
+      <p>${recipient}</p>
+      ${message.replace(
+        /\r|\r\n|\n/g,
+        "<br>"
+      )}
+      </blockquote><p>&nbsp;</p>
+    `;
     setAddNew("email");
+    setReplyMessage({ message: formatMessage, recipient });
+  };
+
+  const handleReplySMS = (message, recipient) => {
+    if (addNew) {
+      // add warning dialog
+    }
+    const formatMessage = ``;
+    setAddNew("sms");
     setReplyMessage({ message: formatMessage, recipient });
   };
 
@@ -143,7 +158,7 @@ const Messages = (props) => {
             />
           )}
           {addNew === "sms" && (
-            <AddSMSForm ticket={ticket} handleCancel={handleCancel} />
+            <AddSMSForm ticket={ticket} handleCancel={handleCancel} recipient={replyMessage.recipient} />
           )}
           <Filter filter={filter} setFilter={setFilter} />
           <MessagesTable
@@ -151,6 +166,7 @@ const Messages = (props) => {
             error={errorNotes}
             ticket={ticket}
             handleReplyEmail={handleReplyEmail}
+            handleReplySMS={handleReplySMS}
             handleQouteNote={handleQouteNote}
           />
         </>
