@@ -87,11 +87,12 @@ const SMSPopover = (props) => {
 };
 
 const SMS = (props) => {
-  const { message, onDeleteMessage, handleQouteNote } = props;
+  const { message, onDeleteMessage, handleQouteNote, handleReplySMS } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [more, toggleMore] = React.useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
   const toEmail = message.to_email ? message.to_email.split(",") : [];
+  const replySMS = message.traffic === 'INBOUND' ? [message.from_email] : (message.to_email ? message.to_email.split(",") : [])
 
   // Remove the specific text from the message
   const text = message.message.replace(
@@ -152,11 +153,11 @@ const SMS = (props) => {
                   {moment(message.date).format("MMM DD, YYYY hh:mm")}
                 </Typography>
               </Grid>
-              <Grid item xs="auto">
-                <IconButton size="small">
+              {message.traffic === 'INBOUND' && <Grid item xs="auto">
+                <IconButton size="small" onClick={() => handleReplySMS(isHtml ? h2p(text) : parse(text), replySMS)}>
                   <FontAwesomeIcon icon={faReply} />
                 </IconButton>
-              </Grid>
+              </Grid>}
               <Grid item xs="auto">
                 <IconButton size="small">
                   <FontAwesomeIcon icon={faMessagePlus} onClick={()=>handleQouteNote("sms", message)} />
