@@ -38,6 +38,10 @@ const Summary = (props) => {
     ticketTypes,
     ticketStatuses,
     handleOpenTicket,
+    setOpenQueueJobs,
+    selectedAddress,
+    setSelectedAddress,
+    enableQueueJobs,
   } = props;
 
   const showSignature = true; // this should come from ticket type settings
@@ -112,7 +116,7 @@ const Summary = (props) => {
         )
       }
       menuOption={
-        <HeaderMenuOptions appuser_id={appuser_id} category="Summary Card" />
+        <HeaderMenuOptions appuser_id={appuser_id} category="Summary Card" setOpenQueueJobs={setOpenQueueJobs} enableQueueJobs={enableQueueJobs} />
       }
     >
       {loading ? (
@@ -127,6 +131,8 @@ const Summary = (props) => {
                   ticket={customer}
                   updateTicket={handleUpdate}
                   isSubmitting={isSubmitting}
+                  selectedAddress={selectedAddress}
+                  setSelectedAddress={setSelectedAddress}
                 />
                 <Schedule
                   isSubmitting={isSubmitting}
