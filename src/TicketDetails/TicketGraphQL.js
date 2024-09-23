@@ -411,3 +411,16 @@ export const UPDATE_NOTE_MUTATION = gql`
   }
 }
 `;
+
+export const GET_QUEUED_JOBS = gql`
+query queuedJobs($custId: Int!, $radiusMile: Int!) {
+  queuedJobs(cust_id: $custId, radius_mile: $radiusMile) {
+    id
+    ticket_id
+    type
+    summary
+    distance
+    installer_skills
+    priority
+  }
+}`;

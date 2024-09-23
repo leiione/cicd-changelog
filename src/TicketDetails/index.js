@@ -24,6 +24,7 @@ import { saveUserPreferences } from "components/UserPreferences/savePreferencesU
 import moment from "moment-timezone";
 import { setInitialUserPreferences } from "config/store";
 import UserPreferences from "components/UserPreferences";
+import QueueJobs from "./components/Summary/components/QueueJobs";
 import CustomFields from "./components/CustomFields";
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
@@ -80,6 +81,8 @@ const TicketDetails = (props) => {
   const [dialogOpen, setDialogOpen] = useState(false); // State for DialogAlert
   const [handleSave, setHandleSave] = useState(null); // State to hold handleSave function
   const hideInprogress = false // just mark this false during development
+  const [openQueueJobs, setOpenQueueJobs] = useState(false); // State for QueueJobs drawer
+  const [selectedAddress, setSelectedAddress] = React.useState();
 
   const {
     lablesVisible,
@@ -89,6 +92,7 @@ const TicketDetails = (props) => {
     toggleOffCRMDrawer,
     handleOpenTicket,
     appuser_id,
+    enableQueueJobs,
   } = props;
   const snackbar = useSelector((state) => state.snackbar);
 
@@ -183,6 +187,10 @@ const TicketDetails = (props) => {
             ticketStatuses={ticketStatuses}
             lablesVisible={lablesVisible}
             handleOpenTicket={handleOpenTicket}
+            setOpenQueueJobs={setOpenQueueJobs}
+            selectedAddress={selectedAddress}
+            setSelectedAddress={setSelectedAddress}
+            enableQueueJobs={enableQueueJobs}
           />
 
           {!hideInprogress &&
@@ -263,6 +271,9 @@ const TicketDetails = (props) => {
           ]}
         />
       )}
+      { openQueueJobs &&
+        <QueueJobs openQueueJobs={openQueueJobs} setOpenQueueJobs={setOpenQueueJobs} selectedAddress={selectedAddress} />
+      }
     </div>
   );
 };
