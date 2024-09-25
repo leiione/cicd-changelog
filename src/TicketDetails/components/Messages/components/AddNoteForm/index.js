@@ -80,8 +80,12 @@ const AddNoteFields = (props) => {
     files.forEach(async (file) => {
       const progressKey = file.name;
       let progress = 0;
-      
       const fileData = await readFileAsBase64(file);
+
+      setUploadProgress((prevProgress) => ({
+        ...prevProgress,
+        [progressKey]: true,
+      }));
 
       const { data } = await uploadFile({
         variables: {
@@ -91,13 +95,20 @@ const AddNoteFields = (props) => {
         },
       });
 
+      setUploadProgress((prevProgress) => ({
+        ...prevProgress,
+        [progressKey]: false,
+      }));
+
       setValue("attachments", [
         data.uploadFile.attachment_id,
         ...values.attachments,
       ]);
 
-      setFileMapping([...filemapping, { name: file.name, id: data.uploadFile.attachment_id }]);
-
+      setFileMapping([
+        ...filemapping,
+        { name: file.name, id: data.uploadFile.attachment_id },
+      ]);
     });
   };
 
@@ -105,9 +116,12 @@ const AddNoteFields = (props) => {
     setSelectedFiles((prevFiles) =>
       prevFiles.filter((file) => file.name !== fileName)
     );
-    
+
     const file_id = filemapping.find((file) => file.name === fileName).id;
-    setValue("attachments", values.attachments.filter((id) => id !== file_id));
+    setValue(
+      "attachments",
+      values.attachments.filter((id) => id !== file_id)
+    );
 
     setUploadProgress((prevProgress) => {
       const updatedProgress = { ...prevProgress };
@@ -191,12 +205,12 @@ const AddNoteFields = (props) => {
                   className="img-preview"
                   src={URL.createObjectURL(file)}
                   alt={file.name}
-                  style={{ display: 'block' }}
-
+                  style={{ display: "block" }}
                 />
               </Box>
 
-              <LinearProgress/>
+              {uploadProgress[file.name] && <LinearProgress />}
+
               <Typography
                 className="mt-2 d-block text-truncate"
                 variant="caption"
