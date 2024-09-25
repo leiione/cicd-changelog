@@ -162,10 +162,12 @@ const AddNoteFields = (props) => {
         <Files
           className="files-dropzone"
           onChange={handleFileChange}
-          accepts={["image/*"]}
+          accepts={["image/*", "application/pdf", "application/zip"]}
           multiple
           clickable
-        >
+          maxFileSize={10000000} // 10 MB in bytes
+          maxFiles={4}
+         >
           <IconButton aria-label="attachment">
             <AttachFileIcon />
           </IconButton>
