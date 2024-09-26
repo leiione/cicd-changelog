@@ -39,12 +39,21 @@ const AddNoteFields = (props) => {
     handleSubmit,
   } = form;
 
+  const values = watch();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploadProgress, setUploadProgress] = useState({});
   const [openPreview, setOpenPreview] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [filemapping, setFileMapping] = useState([]);
   const [uploadFile] = useMutation(UPLOAD_FILE_MUTATION);
+  const maxFileSize = 12 * 1024 * 1024; 
+  const dispatch = useDispatch();
+  const acceptedFormats = [
+    "image/*",
+    "application/pdf",
+    "application/zip",
+    "application/x-zip-compressed",
+  ];
 
   const handleFileChange = (files) => {
     const newFiles = Array.from(files);
@@ -79,7 +88,6 @@ const AddNoteFields = (props) => {
   const startUpload = async (files) => {
     files.forEach(async (file) => {
       const progressKey = file.name;
-      let progress = 0;
       const fileData = await readFileAsBase64(file);
 
       setUploadProgress((prevProgress) => ({
@@ -92,6 +100,7 @@ const AddNoteFields = (props) => {
           file: fileData,
           filename: file.name,
           ticket_id: ticket.ticket_id,
+          attachment_type: file.type,
         },
       });
 
@@ -100,9 +109,11 @@ const AddNoteFields = (props) => {
         [progressKey]: false,
       }));
 
+      const values = watch();
+
       setValue("attachments", [
+        ...(values.attachments || []),
         data.uploadFile.attachment_id,
-        ...values.attachments,
       ]);
 
       setFileMapping([
@@ -140,13 +151,26 @@ const AddNoteFields = (props) => {
     setPreviewImage("");
   };
 
-  const values = watch();
-
   const handleMessageChange = (content) => {
     setValue("note", content, { shouldValidate: true });
   };
 
   const isFormValid = React.useMemo(() => values.note, [values]);
+  const isUploading = Object.values(uploadProgress).some(
+    (progress) => progress === true
+  );
+
+  const handleError = (error, file) => {
+
+    dispatch(
+      showSnackbar({
+        message: error.message,
+        severity: "error",
+      })
+    );
+
+  }
+
   return (
     <div className="position-relative">
       <div
@@ -161,13 +185,14 @@ const AddNoteFields = (props) => {
       >
         <Files
           className="files-dropzone"
-          onChange={handleFileChange}
-          accepts={["image/*", "application/pdf", "application/zip"]}
+          onError={handleError}
+         onChange={handleFileChange}
+          accepts={acceptedFormats}
           multiple
           clickable
-          maxFileSize={10000000} // 10 MB in bytes
+          maxFileSize={maxFileSize}
           maxFiles={4}
-         >
+        >
           <IconButton aria-label="attachment">
             <AttachFileIcon />
           </IconButton>
@@ -203,14 +228,19 @@ const AddNoteFields = (props) => {
                 >
                   <VisibilityIcon fontSize="small" />
                 </IconButton>
-                <img
-                  className="img-preview"
-                  src={URL.createObjectURL(file)}
-                  alt={file.name}
-                  style={{ display: "block" }}
-                />
+                {file.type.startsWith("image/") ? (
+                  <img
+                    className="img-preview"
+                    src={URL.createObjectURL(file)}
+                    alt={file.name}
+                    style={{ display: "block" }}
+                  />
+                ) : (
+                  <Typography variant="body2" className="file-name">
+                    {file.name}
+                  </Typography>
+                )}
               </Box>
-
               {uploadProgress[file.name] && <LinearProgress />}
 
               <Typography
@@ -226,18 +256,28 @@ const AddNoteFields = (props) => {
         {/* Image Preview Modal */}
         <Modal open={openPreview} onClose={handlePreviewClose}>
           <Box className="box-modal-preview">
-            <img
-              src={previewImage}
-              alt="Preview"
-              style={{ width: "100%", height: "auto" }}
-            />
-            <Typography variant="body2" className="mt-2">
-              {
-                selectedFiles.find(
-                  (file) => URL.createObjectURL(file) === previewImage
-                )?.name
-              }
-            </Typography>
+            {selectedFiles
+              .find((file) => URL.createObjectURL(file) === previewImage)
+              ?.type.startsWith("image/") ? (
+              <>
+                <img
+                  src={previewImage}
+                  alt="Preview"
+                  style={{ width: "100%", height: "auto" }}
+                />
+                <Typography variant="body2" className="mt-2">
+                  {
+                    selectedFiles.find(
+                      (file) => URL.createObjectURL(file) === previewImage
+                    )?.name
+                  }
+                </Typography>
+              </>
+            ) : (
+              <Typography variant="body2" className="mt-2">
+                Preview not available
+              </Typography>
+            )}
           </Box>
         </Modal>
       </Box>
@@ -248,7 +288,7 @@ const AddNoteFields = (props) => {
           variant="outlined"
           onClick={handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}
-          disabled={!isFormValid || isSubmitting}
+          disabled={!isFormValid || isSubmitting || isUploading}
         >
           Save
         </ProgressButton>

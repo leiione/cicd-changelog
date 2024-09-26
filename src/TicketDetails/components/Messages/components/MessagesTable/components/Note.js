@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import {
   Grid,
   IconButton as MuiIconButton,
@@ -9,6 +9,7 @@ import {
   Typography,
   Box,
   Modal,
+  Button,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -124,19 +125,30 @@ const Note = (props) => {
 
               {message.attachments && message.attachments.length > 0 && (
                 <>
-                  <Typography variant="subtitle1" className="mt-3">Attachments</Typography>
+                  <Typography variant="subtitle1" className="mt-3">
+                    Attachments
+                  </Typography>
                   <Grid container spacing={1} className="upload-image-row mt-2">
                     {message.attachments.map((file, index) => (
                       <Box key={index} className="single-img-box">
                         <MuiIconButton
                           className="preview-icon-btn"
                           size="small"
-                          onClick={() => handlePreviewOpen(file.file_url)}
-
+                          onClick={() => handlePreviewOpen(file)}
                         >
                           <VisibilityIcon fontSize="small" />
                         </MuiIconButton>
-                        <img className="img-preview" src={file.file_url} />
+                        {file.attachment_type.startsWith("image/") ? (
+                          <img
+                            className="img-preview"
+                            src={file.file_url}
+                            alt={file.file_name}
+                          />
+                        ) : (
+                          <Typography variant="body2" className="file-name">
+                            {file.file_name}
+                          </Typography>
+                        )}
                       </Box>
                     ))}
                   </Grid>
@@ -167,16 +179,37 @@ const Note = (props) => {
           },
         ]}
       />
-        <Modal open={openPreview} onClose={handlePreviewClose}>
-          <Box className="box-modal-preview">
+      <Modal open={openPreview} onClose={handlePreviewClose}>
+        <Box className="box-modal-preview">
+          {previewImage && previewImage.attachment_type.startsWith("image/") ? (
             <img
-              src={previewImage}
+              src={previewImage.file_url}
               alt="Preview"
               style={{ width: "100%", height: "auto" }}
             />
-            
-          </Box>
-        </Modal>
+          ) : (
+            <Box>
+              <Typography variant="body2" className="mt-2">
+                Preview not available
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  const link = document.createElement("a");
+                  link.href = previewImage.file_url;
+                  link.download = previewImage.file_name;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+              >
+                Download
+              </Button>
+            </Box>
+          )}
+        </Box>
+      </Modal>
     </>
   );
 };

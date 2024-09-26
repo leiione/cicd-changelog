@@ -415,8 +415,8 @@ export const UPDATE_NOTE_MUTATION = gql`
 }
 `;
 export const UPLOAD_FILE_MUTATION = gql`
-  mutation uploadFile($file: String!, $filename: String!, $ticket_id: Int!) {
-    uploadFile(file: $file, filename: $filename, ticket_id:$ticket_id) {
+  mutation uploadFile($file: String!, $filename: String!, $ticket_id: Int! , $attachment_type: String!) {
+    uploadFile(file: $file, filename: $filename, ticket_id:$ticket_id, attachment_type: $attachment_type) {
       attachment_id
       filename
       isp_id
