@@ -46,6 +46,7 @@ const TaskMenuOptions = (props) => {
   }
 
   const onConvertTask = async () => {
+    console.log("task_id: "+task.task_id);
     setSubmitting(true)
     let input_ticket = {
       ...pick(ticket, [
@@ -59,6 +60,7 @@ const TaskMenuOptions = (props) => {
         "type"
       ]),
       description: task.task,
+      task_id: task.task_id,
       customer_id: ticket.subscriber ? ticket.subscriber.customer_id : 0,
       assignee_ids: ticket.assignees,
       ticket_contact_numbers: ticket.ticket_contact_numbers || '',
@@ -93,7 +95,7 @@ const TaskMenuOptions = (props) => {
       <IconButton color="default" onClick={handleClick}>
         <MoreVert style={!show ? { visibility: "hidden" } : {}} />
       </IconButton>
-      {openMenu &&
+      {openMenu && task.converted_ticket_id == null &&
         <Popover
           open={openMenu}
           anchorEl={anchorEl}

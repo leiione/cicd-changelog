@@ -36,6 +36,7 @@ export const GET_TICKET = gql`
         is_completed
         is_default
         rank
+        converted_ticket_id
       }
       infrastructure {
         id
@@ -283,6 +284,7 @@ export const SAVE_TICKET_TASKS = gql`
       is_completed
       is_default
       rank
+      converted_ticket_id
     }
   }
 `;
