@@ -10,6 +10,7 @@ export const GET_TICKET = gql`
       created_by_time
       last_updated_by
       last_updated_by_time
+      timestamp
       signature_url
       status
       type
