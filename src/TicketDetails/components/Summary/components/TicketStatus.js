@@ -46,41 +46,43 @@ const TicketStatus = (props) => {
     let resolvingTooltipMsgs = []
     let closingTooltipMsgs = []
     const hasUncompletedTask = find(ticket.tasks, task => !task.is_completed && task.is_default)
-    ticket.update_requirements.forEach(req => {
-      if (req.flag_enabled === "Y") {
-        const restrictedUserActions = getUserAction(req.restricted_user_action)
-        const isResolvingTicketRestricted = find(restrictedUserActions, restriction => restriction.label === "resolving")
-        const isClosingTicketRestricted = find(restrictedUserActions, restriction => restriction.label === "closing")
+    if (ticket.update_requirements && ticket.update_requirements.length > 0) {
+      ticket.update_requirements.forEach(req => {
+        if (req.flag_enabled === "Y") {
+          const restrictedUserActions = getUserAction(req.restricted_user_action)
+          const isResolvingTicketRestricted = find(restrictedUserActions, restriction => restriction.label === "resolving")
+          const isClosingTicketRestricted = find(restrictedUserActions, restriction => restriction.label === "closing")
 
-        switch (req.requirement_option) {
-          case "TASKS":
-            if (hasUncompletedTask) {
-              if (isResolvingTicketRestricted && !resolvingTooltipMsgs.includes("- all tasks to be checked")) {
-                resolvingTooltipMsgs.push("- all tasks to be checked")
-              }
+          switch (req.requirement_option) {
+            case "TASKS":
+              if (hasUncompletedTask) {
+                if (isResolvingTicketRestricted && !resolvingTooltipMsgs.includes("- all tasks to be checked")) {
+                  resolvingTooltipMsgs.push("- all tasks to be checked")
+                }
 
-              if (isClosingTicketRestricted && !closingTooltipMsgs.includes("- all tasks to be checked")) {
-                closingTooltipMsgs.push("- all tasks to be checked")
+                if (isClosingTicketRestricted && !closingTooltipMsgs.includes("- all tasks to be checked")) {
+                  closingTooltipMsgs.push("- all tasks to be checked")
+                }
               }
-            }
-            break
-          case "CUSTOM_FIELDS":
-            // TODO
-            break
-          case "ATTACHMENTS":
-            // TODO
-            break
-          case "SIGNATURE":
-            // TODO
-            break
-          case "FOLLOWERS":
-            // TODO
-            break
-          default:
-            break
+              break
+            case "CUSTOM_FIELDS":
+              // TODO
+              break
+            case "ATTACHMENTS":
+              // TODO
+              break
+            case "SIGNATURE":
+              // TODO
+              break
+            case "FOLLOWERS":
+              // TODO
+              break
+            default:
+              break
+          }
         }
-      }
-    })
+      })
+    }
     return { resolvingTooltipMsgs, closingTooltipMsgs }
   }, [ticket.tasks, ticket.update_requirements])
 
