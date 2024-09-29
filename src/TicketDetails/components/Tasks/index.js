@@ -347,10 +347,16 @@ const Tasks = (props) => {
                                     }
                                     style={{ width: "90%" }}
                                   >
-                                    {task.converted_ticket_id !== null && (
-                                      <span>{`Ticket ${task.converted_ticket_id} `}</span>
+                                    {task.converted_ticket_id !== null ? (
+                                      <span
+                                        style={{ color: '#0053F4', cursor: 'pointer' }}
+                                      >
+                                        {`Ticket ${task.converted_ticket_id} `}
+                                        {`${task.task}${" *"}`}
+                                      </span>
+                                    ) : (
+                                      `${task.task}${isTaskRequired ? " *" : ""}`
                                     )}
-                                    {`${task.task}${(isTaskRequired || task.converted_ticket_id !== null) ? " *" : ""}`}
                                   </Typography>
                                 }
                               />
