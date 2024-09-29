@@ -1,12 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
-  Box,
-  Typography,
-  LinearProgress,
   IconButton,
-  Modal,
-  Grid,
   Button,
 } from "@mui/material";
 
@@ -22,10 +17,10 @@ import { GET_TICKET_NOTES } from "./../../../../TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
-import CloseIcon from "@mui/icons-material/Close";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-// import { AddCircleOutline } from "@mui/icons-material";
 import Files from "react-files";
+import FileUploadPreview from "components/FileUploadPreview";
+import { acceptedFormats, maxFileSize } from "Common/constants";
+import { readFileAsBase64 } from "Common/helper";
 
 // import Files from "react-files";
 
@@ -46,15 +41,8 @@ const AddNoteFields = (props) => {
   const [previewImage, setPreviewImage] = useState("");
   const [filemapping, setFileMapping] = useState([]);
   const [uploadFile] = useMutation(UPLOAD_FILE_MUTATION);
-  const maxFileSize = 12 * 1024 * 1024; 
   const dispatch = useDispatch();
-  const acceptedFormats = [
-    "image/*",
-    "application/pdf",
-    "application/zip",
-    "application/x-zip-compressed",
-  ];
-
+  
   const handleFileChange = (files) => {
     const newFiles = Array.from(files);
     const existingFileNames = new Set(selectedFiles.map((file) => file.name));
@@ -63,28 +51,12 @@ const AddNoteFields = (props) => {
       (file) => !existingFileNames.has(file.name)
     );
 
-    const updatedFiles = [...selectedFiles, ...filteredNewFiles].slice(0, 4);
+    const updatedFiles = [...selectedFiles, ...filteredNewFiles];
     setSelectedFiles(updatedFiles);
     startUpload(filteredNewFiles);
   };
 
-  const readFileAsBase64 = (inputFile) => {
-    const temporaryFileReader = new FileReader();
-
-    return new Promise((resolve, reject) => {
-      temporaryFileReader.readAsDataURL(inputFile);
-
-      temporaryFileReader.onerror = () => {
-        temporaryFileReader.abort();
-        reject("Problem parsing input file.");
-      };
-
-      temporaryFileReader.onload = () => {
-        resolve(temporaryFileReader.result.split(",").pop());
-      };
-    });
-  };
-
+  
   const startUpload = async (files) => {
     files.forEach(async (file) => {
       const progressKey = file.name;
@@ -161,15 +133,26 @@ const AddNoteFields = (props) => {
   );
 
   const handleError = (error, file) => {
+    let errorMessage = error.message;
+
+    if (error.code === "file-invalid-type") {
+      errorMessage =
+        "Invalid file format. We support only image files, PDFs, and ZIP files.";
+    }
+    if (error.code === "file-too-large") {
+      errorMessage = "File is too large. Maximum file size is 12MB.";
+    }
+    if (error.code === "too-many-files") {
+      errorMessage = "You can upload a maximum of 4 files at a time.";
+    }
 
     dispatch(
       showSnackbar({
-        message: error.message,
+        message: errorMessage,
         severity: "error",
       })
     );
-
-  }
+  };
 
   return (
     <div className="position-relative">
@@ -186,12 +169,10 @@ const AddNoteFields = (props) => {
         <Files
           className="files-dropzone"
           onError={handleError}
-         onChange={handleFileChange}
+          onChange={handleFileChange}
           accepts={acceptedFormats}
           multiple
           clickable
-          maxFileSize={maxFileSize}
-          maxFiles={4}
         >
           <IconButton aria-label="attachment">
             <AttachFileIcon />
@@ -209,78 +190,15 @@ const AddNoteFields = (props) => {
         disabled={isSubmitting}
       />
 
-      <Box>
-        <Grid container spacing={1} className="upload-image-row">
-          {selectedFiles.map((file, index) => (
-            <Grid item xs={2} sm={2} md={2} key={index}>
-              <Box className="single-img-box">
-                <IconButton
-                  className="close-icon-btn"
-                  size="small"
-                  onClick={() => removeFile(file.name)}
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  className="preview-icon-btn"
-                  size="small"
-                  onClick={() => handlePreviewOpen(URL.createObjectURL(file))}
-                >
-                  <VisibilityIcon fontSize="small" />
-                </IconButton>
-                {file.type.startsWith("image/") ? (
-                  <img
-                    className="img-preview"
-                    src={URL.createObjectURL(file)}
-                    alt={file.name}
-                    style={{ display: "block" }}
-                  />
-                ) : (
-                  <Typography variant="body2" className="file-name">
-                    {file.name}
-                  </Typography>
-                )}
-              </Box>
-              {uploadProgress[file.name] && <LinearProgress />}
-
-              <Typography
-                className="mt-2 d-block text-truncate"
-                variant="caption"
-              >
-                {file.name}
-              </Typography>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* Image Preview Modal */}
-        <Modal open={openPreview} onClose={handlePreviewClose}>
-          <Box className="box-modal-preview">
-            {selectedFiles
-              .find((file) => URL.createObjectURL(file) === previewImage)
-              ?.type.startsWith("image/") ? (
-              <>
-                <img
-                  src={previewImage}
-                  alt="Preview"
-                  style={{ width: "100%", height: "auto" }}
-                />
-                <Typography variant="body2" className="mt-2">
-                  {
-                    selectedFiles.find(
-                      (file) => URL.createObjectURL(file) === previewImage
-                    )?.name
-                  }
-                </Typography>
-              </>
-            ) : (
-              <Typography variant="body2" className="mt-2">
-                Preview not available
-              </Typography>
-            )}
-          </Box>
-        </Modal>
-      </Box>
+      <FileUploadPreview
+        selectedFiles={selectedFiles}
+        uploadProgress={uploadProgress}
+        removeFile={removeFile}
+        openPreview={openPreview}
+        handlePreviewOpen={handlePreviewOpen}
+        handlePreviewClose={handlePreviewClose}
+        previewImage={previewImage}
+      />
 
       <div className="text-right">
         <ProgressButton

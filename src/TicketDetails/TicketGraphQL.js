@@ -439,3 +439,40 @@ query queuedJobs($custId: Int!, $radiusMile: Int!) {
     priority
   }
 }`;
+
+export const ADD_TICKET_ATTACHMENT = gql`
+  mutation addTicketAttachment($input_attachment: TicketAttachmentInput) {
+    addTicketAttachment(input_attachment: $input_attachment) {
+      id
+      attachment_label
+      filename
+      attachment_type
+      file_url
+      ticket_id
+      is_additional_attachment
+      flag_attachments_required
+    }
+  }
+`
+
+export const GET_TICKET_ATTACHMENTS = gql`
+  query getTicketAttachments($ticket_id: Int!) {
+    ticketAttachments(ticket_id: $ticket_id) {
+      id
+      attachment_label
+      filename
+      attachment_type
+      file_url
+      ticket_id
+      is_additional_attachment
+      flag_attachments_required
+    }
+  }
+`
+
+export const DELETE_TICKET_ATTACHMENT = gql`
+  mutation deleteTicketAttachment($id: Float!) {
+    deleteTicketAttachment(id: $id)
+  }
+`;
+
