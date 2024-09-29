@@ -217,7 +217,7 @@ const TicketDetails = (props) => {
               />
               <Attachments
                 handleIconButton={handleIconButton}
-                customer={ticket}
+                ticket={ticket}
                 lablesVisible={lablesVisible}
                 appuser_id={appuser_id}
               />

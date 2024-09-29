@@ -19,6 +19,8 @@ import { showSnackbar } from "config/store";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import Files from "react-files";
 import FileUploadPreview from "components/FileUploadPreview";
+import { acceptedFormats, maxFileSize } from "Common/constants";
+import { readFileAsBase64 } from "Common/helper";
 
 // import Files from "react-files";
 
@@ -39,15 +41,8 @@ const AddNoteFields = (props) => {
   const [previewImage, setPreviewImage] = useState("");
   const [filemapping, setFileMapping] = useState([]);
   const [uploadFile] = useMutation(UPLOAD_FILE_MUTATION);
-  const maxFileSize = 12 * 1024 * 1024;
   const dispatch = useDispatch();
-  const acceptedFormats = [
-    "image/*",
-    "application/pdf",
-    "application/zip",
-    "application/x-zip-compressed",
-  ];
-
+  
   const handleFileChange = (files) => {
     const newFiles = Array.from(files);
     const existingFileNames = new Set(selectedFiles.map((file) => file.name));
@@ -61,23 +56,7 @@ const AddNoteFields = (props) => {
     startUpload(filteredNewFiles);
   };
 
-  const readFileAsBase64 = (inputFile) => {
-    const temporaryFileReader = new FileReader();
-
-    return new Promise((resolve, reject) => {
-      temporaryFileReader.readAsDataURL(inputFile);
-
-      temporaryFileReader.onerror = () => {
-        temporaryFileReader.abort();
-        reject("Problem parsing input file.");
-      };
-
-      temporaryFileReader.onload = () => {
-        resolve(temporaryFileReader.result.split(",").pop());
-      };
-    });
-  };
-
+  
   const startUpload = async (files) => {
     files.forEach(async (file) => {
       const progressKey = file.name;

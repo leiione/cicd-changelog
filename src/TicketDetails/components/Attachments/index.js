@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AccordionCard from "../../../Common/AccordionCard";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
 import {
@@ -13,23 +13,97 @@ import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Files from "react-files";
+import { acceptedFormats } from "Common/constants";
+import { useDispatch } from "react-redux";
+import { showSnackbar } from "config/store";
+import {
+  ADD_TICKET_ATTACHMENT,
+  DELETE_TICKET_ATTACHMENT,
+  GET_TICKET_ATTACHMENTS,
+} from "TicketDetails/TicketGraphQL";
+import { useMutation, useQuery } from "@apollo/client";
+import { readFileAsBase64 } from "Common/helper";
+import GetAppIcon from "@mui/icons-material/GetApp";
+import DialogAlert from "components/DialogAlert";
+import { set } from "lodash";
 
 const Attachments = (props) => {
+  const { ticket } = props;
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploadProgress, setUploadProgress] = useState({});
   const [openPreview, setOpenPreview] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
+  const dispatch = useDispatch();
+  const [addTicketAttachment] = useMutation(ADD_TICKET_ATTACHMENT);
+  const [deleteAttachment] = useMutation(DELETE_TICKET_ATTACHMENT);
+  const [fileToUpdate, setFileToUpdate] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [deleteAttachmentID, setDeleteAttachmentID] = useState("");
 
-  const handleFileChange = (event) => {
-    const newFiles = Array.from(event.target.files);
-    const updatedFiles = [...selectedFiles, ...newFiles].slice(0, 4); 
+  const { loading, error, data } = useQuery(GET_TICKET_ATTACHMENTS, {
+    variables: { ticket_id: ticket.ticket_id },
+    fetchPolicy: "network-only",
+  });
+
+  
+
+  useEffect(() => {
+    if (data) {
+      setSelectedFiles(data.ticketAttachments);
+    }
+  }, [data]);
+
+  const handleFileChange = (files) => {
+    const newFiles = Array.from(files);
+    const existingFileNames = new Set(selectedFiles.map((file) => file.name));
+
+    const filteredNewFiles = newFiles.filter(
+      (file) => !existingFileNames.has(file.name)
+    );
+
+    const updatedFiles = [...selectedFiles, ...filteredNewFiles];
     setSelectedFiles(updatedFiles);
-    startUpload(newFiles); 
+    startUpload(filteredNewFiles);
   };
 
   const handleDragOver = (event) => {
     event.preventDefault();
   };
+
+  useEffect(() => {
+    if (fileToUpdate) {
+      const { file, data } = fileToUpdate;
+      let fileIndex = -1;
+
+      console.log("Selected files:", selectedFiles);
+      console.log("Current file name:", file.name);
+
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const item = selectedFiles[i];
+        console.log(`Comparing ${item.name} with ${file.name}`);
+        if (item.name === file.name) {
+          fileIndex = i;
+          break;
+        }
+      }
+
+      console.log("Found index:", fileIndex);
+
+      if (fileIndex !== -1) {
+        const updatedSelectedFiles = [...selectedFiles];
+        updatedSelectedFiles[fileIndex] = {
+          ...data.addTicketAttachment,
+          lodingStatus: true,
+        };
+        setSelectedFiles(updatedSelectedFiles);
+      }
+
+      // Reset fileToUpdate after processing
+      setFileToUpdate(null);
+    }
+  }, [fileToUpdate, selectedFiles]);
 
   const handleDrop = (event) => {
     event.preventDefault();
@@ -39,34 +113,60 @@ const Attachments = (props) => {
     startUpload(files);
   };
 
-  const startUpload = (files) => {
-    files.forEach((file) => {
+  const startUpload = async (files) => {
+    files.forEach(async (file) => {
       const progressKey = file.name;
-      let progress = 0;
+      const fileData = await readFileAsBase64(file);
+      setUploadProgress((prevProgress) => ({
+        ...prevProgress,
+        [progressKey]: true,
+      }));
 
-      const interval = setInterval(() => {
-        progress += 10;
+      const input_attachment = {
+        filename: file.name,
+        attachment_label: file.name,
+        attachment_type: file.type,
+        file: fileData,
+        ticket_id: ticket.ticket_id,
+        is_additional_attachment: true,
+        flag_attachments_required: false,
+      };
+
+      try {
+        const { data } = await addTicketAttachment({
+          variables: { input_attachment },
+        });
+
         setUploadProgress((prevProgress) => ({
           ...prevProgress,
-          [progressKey]: Math.min(progress, 100),
+          [progressKey]: false,
         }));
 
-        if (progress >= 100) {
-          clearInterval(interval);
-        }
-      }, 200); // Simulated upload time
+        setFileToUpdate({ file, data });
+      } catch {
+        dispatch(
+          showSnackbar({
+            message: "Failed to upload file",
+            severity: "error",
+          })
+        );
+      }
     });
   };
 
-  const removeFile = (fileName) => {
-    setSelectedFiles((prevFiles) =>
-      prevFiles.filter((file) => file.name !== fileName)
-    );
-    setUploadProgress((prevProgress) => {
-      const updatedProgress = { ...prevProgress };
-      delete updatedProgress[fileName];
-      return updatedProgress;
-    });
+  const removeFile = (id) => {
+    setOpenDialog(true);
+    setDeleteAttachmentID(id);
+    
+    
+    // setSelectedFiles((prevFiles) =>
+    //   prevFiles.filter((file) => file.name !== fileName)
+    // );
+    // setUploadProgress((prevProgress) => {
+    //   const updatedProgress = { ...prevProgress };
+    //   delete updatedProgress[fileName];
+    //   return updatedProgress;
+    // });
   };
 
   const handlePreviewOpen = (imageSrc) => {
@@ -79,119 +179,245 @@ const Attachments = (props) => {
     setPreviewImage("");
   };
 
+  const handleOnDelete = async()=>{
+   setSubmitting(true);
+    console.log("deleteAttachment", deleteAttachmentID);
+
+    await deleteAttachment({
+      variables: { id: deleteAttachmentID },
+    })
+
+    setSelectedFiles((prevFiles) =>
+      prevFiles.filter((file) => file.id !== deleteAttachmentID )
+    );
+
+    setSubmitting(false);
+    setOpenDialog(false);
+    setDeleteAttachmentID("");
+    dispatch(
+      showSnackbar({
+        message: "Attachment deleted successfully",
+        severity: "success",
+      })
+    );
+
+  }
+
+  const handleError = (error) => {
+    let errorMessage = error.message;
+
+    if (error.code === "file-invalid-type") {
+      errorMessage =
+        "Invalid file format. We support only image files, PDFs, and ZIP files.";
+    }
+    if (error.code === "file-too-large") {
+      errorMessage = "File is too large. Maximum file size is 12MB.";
+    }
+    if (error.code === "too-many-files") {
+      errorMessage = "You can upload a maximum of 4 files at a time.";
+    }
+
+    dispatch(
+      showSnackbar({
+        message: errorMessage,
+        severity: "error",
+      })
+    );
+  };
+
   const { appuser_id } = props;
 
   return (
-    <AccordionCard
-      label="Attachments"
-      iconButtons={<></>}
-      menuOption={
-        <>
-          <HeaderMenuOptions
-            appuser_id={appuser_id}
-            category="Attachments Card"
-          />
-        </>
-      }
-    >
-      <Box>
-        <Box
-          className="upload-image-placeholder"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        >
-          <input
-            accept="image/*"
-            id="upload-file-input"
-            className="upload-file-input"
-            type="file"
-            multiple
+    <>
+      <AccordionCard
+        label="Attachments"
+        iconButtons={<></>}
+        menuOption={
+          <>
+            <HeaderMenuOptions
+              appuser_id={appuser_id}
+              category="Attachments Card"
+            />
+          </>
+        }
+      >
+        <Box>
+          <Files
+            className="files-dropzone"
+            onError={handleError}
             onChange={handleFileChange}
-          />
-          <label htmlFor="upload-file-input" className="upload-file-input">
-            <Typography variant="body2" className="mt-2">
-              Drag and drop files or
-              <span className="text-primary"> Browse</span>
-            </Typography>
-            <Typography variant="text-muted mb-2 mt-2">
-              Supported formats: JPEG, PNG, GIF, PDF, ZIP
-            </Typography>
-          </label>
-        </Box>
-        <Grid container spacing={1} className="upload-image-row">
-          {selectedFiles.map((file, index) => (
-            <Grid item xs={2} sm={2} md={2} key={index}>
-              <Box className="single-img-box">
-                <IconButton
-                  className="close-icon-btn"
-                  size="small"
-                  onClick={() => removeFile(file.name)}
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  className="preview-icon-btn"
-                  size="small"
-                  onClick={() => handlePreviewOpen(URL.createObjectURL(file))}
-                >
-                  <VisibilityIcon fontSize="small" />
-                </IconButton>
-                <img
-                  className="img-preview"
-                  src={URL.createObjectURL(file)}
-                  alt={file.name}
-                />
-              </Box>
-
-              <LinearProgress
-                variant="determinate"
-                value={uploadProgress[file.name] || 0}
-                className={`mt-2 linear-progress ${
-                  uploadProgress[file.name] === 100
-                    ? "progress-success"
-                    : "progress-bar"
-                }`}
-              />
-              <Typography
-                className="mt-2 d-block text-truncate"
-                variant="caption"
-              >
-                {file.name}
-              </Typography>
-            </Grid>
-          ))}
-
-          {selectedFiles.length > 0 && selectedFiles.length < 4 && (
-            <Grid item xs={2} sm={2} md={2}>
-              <Box
-                className="empty-single-img-box"
-                onClick={() =>
-                  document.getElementById("upload-file-input").click()
-                }
-              >
-                <Typography variant="body2" color="textSecondary">
-                  <FontAwesomeIcon icon={faPlusCircle}/>
+            accepts={acceptedFormats}
+            multiple
+            clickable
+          >
+            <Box
+              className="upload-image-placeholder"
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
+              <label htmlFor="upload-file-input" className="upload-file-input">
+                <Typography variant="body2" className="mt-2">
+                  Drag and drop files or
+                  <span className="text-primary"> Browse</span>
                 </Typography>
-              </Box>
-            </Grid>
-          )}
-        </Grid>
+                <Typography variant="text-muted mb-2 mt-2">
+                  Supported formats: JPEG, PNG, GIF, PDF, ZIP
+                </Typography>
+              </label>
+            </Box>
+          </Files>
+          <Grid container spacing={1} className="upload-image-row">
+            {selectedFiles.map((file, index) => (
+              <Grid item xs={2} sm={2} md={2} key={index}>
+                <Box className="single-img-box">
+                  {file.file_url && (
+                    <IconButton
+                      className="close-icon-btn"
+                      size="small"
+                      onClick={() => removeFile(file.id)}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  )}
 
-        {/* Image Preview Modal */}
-        <Modal open={openPreview} onClose={handlePreviewClose}>
-          <Box className="box-modal-preview">
-            <img src={previewImage} alt="Preview" />
-            <Typography variant="body2" className="mt-2">
-              {
-                selectedFiles.find(
-                  (file) => URL.createObjectURL(file) === previewImage
-                )?.name
-              }
-            </Typography>
-          </Box>
-        </Modal>
-      </Box>
-    </AccordionCard>
+                  <IconButton
+                    className="preview-icon-btn"
+                    size="small"
+                    onClick={() => handlePreviewOpen(file)}
+                  >
+                    <VisibilityIcon fontSize="small" />
+                  </IconButton>
+                  {file.type?.startsWith("image/") ||
+                  file.attachment_type?.startsWith("image/") ? (
+                    <img
+                      className="img-preview"
+                      src={
+                        file.file_url
+                          ? file.file_url
+                          : URL.createObjectURL(file)
+                      }
+                      alt={file.filename ? file.filename : file.name}
+                    />
+                  ) : (
+                    <div
+                      className="empty-box"
+                      style={{
+                        width: "100px",
+                        height: "100px",
+                        border: "1px solid #ccc",
+                      }}
+                    ></div>
+                  )}
+                </Box>
+
+                {(!file.file_url || (file && file.lodingStatus)) &&
+                  (uploadProgress[file.name] ? (
+                    <LinearProgress className="mt-2" />
+                  ) : (
+                    <LinearProgress
+                      variant="determinate"
+                      value={100}
+                      className={`mt-2 linear-progress progress-success`}
+                    />
+                  ))}
+
+                <Typography
+                  className="mt-2 d-block text-truncate"
+                  variant="caption"
+                >
+                  {file.filename ? file.filename : file.name}
+                </Typography>
+              </Grid>
+            ))}
+
+            {selectedFiles.length > 0 && selectedFiles.length < 4 && (
+              <Grid item xs={2} sm={2} md={2}>
+                <Files
+                  className="files-dropzone"
+                  onError={handleError}
+                  onChange={handleFileChange}
+                  accepts={acceptedFormats}
+                  clickable
+                >
+                  <Box className="empty-single-img-box">
+                    <Typography variant="body2" color="textSecondary">
+                      <FontAwesomeIcon icon={faPlusCircle} />
+                    </Typography>
+                  </Box>
+                </Files>
+              </Grid>
+            )}
+          </Grid>
+
+          {/* Image Preview Modal */}
+          <Modal open={openPreview} onClose={handlePreviewClose}>
+            <Box className="box-modal-preview">
+              <Typography
+                variant="body2"
+                className="mt-2"
+                display="flex"
+                alignItems="center"
+              >
+                {previewImage.filename || previewImage.name}
+                {previewImage.file_url && (
+                  <IconButton
+                    component="a"
+                    href={previewImage.file_url}
+                    download={previewImage.filename || previewImage.name}
+                    aria-label="download"
+                    size="small"
+                    style={{ marginLeft: "8px" }}
+                  >
+                    <GetAppIcon />
+                  </IconButton>
+                )}
+              </Typography>
+
+              {previewImage ? (
+                previewImage.type?.startsWith("image/") ||
+                previewImage.attachment_type?.startsWith("image/") ? (
+                  <>
+                    <img
+                      src={
+                        previewImage.file_url ||
+                        URL.createObjectURL(previewImage)
+                      }
+                      alt="Preview"
+                    />
+                  </>
+                ) : (
+                  <Typography variant="body2" className="mt-2">
+                    Preview not available
+                  </Typography>
+                )
+              ) : null}
+            </Box>
+          </Modal>
+        </Box>
+      </AccordionCard>
+
+      <DialogAlert
+        open={openDialog}
+        message={<span>Are you sure you want to delete this attachment?</span>}
+        buttonsList={[
+          {
+            label: "Yes",
+            size: "medium",
+            color: "primary",
+            onClick: handleOnDelete,
+            isProgress: true,
+            isSubmitting: submitting,
+          },
+          {
+            label: "No",
+            size: "medium",
+            color: "default",
+            onClick: () => setOpenDialog(false),
+            disabled: submitting,
+          },
+        ]}
+      />
+    </>
   );
 };
 

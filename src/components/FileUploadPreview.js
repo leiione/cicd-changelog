@@ -71,9 +71,6 @@ const FileUploadPreview = ({
         ))}
       </Grid>
 
-
-      {console.log(previewImage)}
-
             {/* Image Preview Modal */}
       <Modal open={openPreview} onClose={handlePreviewClose}>
         <Box className="box-modal-preview">
