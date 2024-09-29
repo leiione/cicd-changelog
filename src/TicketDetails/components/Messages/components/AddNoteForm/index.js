@@ -51,7 +51,7 @@ const AddNoteFields = (props) => {
       (file) => !existingFileNames.has(file.name)
     );
 
-    const updatedFiles = [...selectedFiles, ...filteredNewFiles].slice(0, 4);
+    const updatedFiles = [...selectedFiles, ...filteredNewFiles];
     setSelectedFiles(updatedFiles);
     startUpload(filteredNewFiles);
   };
@@ -173,8 +173,6 @@ const AddNoteFields = (props) => {
           accepts={acceptedFormats}
           multiple
           clickable
-          maxFileSize={maxFileSize}
-          maxFiles={4}
         >
           <IconButton aria-label="attachment">
             <AttachFileIcon />
