@@ -22,7 +22,7 @@ const Messages = (props) => {
   const [addNew, setAddNew] = React.useState(null);
   const [qoutedContent, setQoutedContent] = React.useState(null);
   const [replyMessage, setReplyMessage] = React.useState({});
-  const [replySeeMore, setReplySeeMore] = React.useState(true);
+  // const [replySeeMore, setReplySeeMore] = React.useState(true);
 
   const {
     loading,

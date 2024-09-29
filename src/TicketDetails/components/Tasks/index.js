@@ -251,10 +251,10 @@ const Tasks = (props) => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            style={getItemStyle(
-                              snapshot.isDragging,
-                              provided.draggableProps.style
-                            )}
+                            style={{
+                              ...getItemStyle(snapshot.isDragging, provided.draggableProps.style),
+                              backgroundColor: task.converted_ticket_id !== null ? '#e7f2fe' : 'inherit',
+                            }}
                             onMouseOver={() => setHover(index)}
                             onMouseLeave={() => setHover(-1)}
                             secondaryAction={
@@ -269,7 +269,7 @@ const Tasks = (props) => {
                                 <TaskMenuOptions
                                   ticket={ticket}
                                   show={isHovered === index}
-                                  disabled={onEditMode.index === index}
+                                  disabled={onEditMode.index === index || task.converted_ticket_id !== null}
                                   task={task}
                                   ticketTasks={ticketTasks}
                                   setTicketTasks={setTicketTasks}
@@ -283,7 +283,7 @@ const Tasks = (props) => {
                                     checked={task.is_completed}
                                     onChange={() => onCompleteTask(index)}
                                     inputProps={{ "aria-label": "controlled" }}
-                                    disabled={onEditMode.index === index}
+                                    disabled={onEditMode.index === index || task.converted_ticket_id !== null}
                                     size="small"
                                   />
                                 </ListItemIcon>
@@ -347,7 +347,10 @@ const Tasks = (props) => {
                                     }
                                     style={{ width: "90%" }}
                                   >
-                                    {`${task.task}${isTaskRequired ? " *" : ""}`}
+                                    {task.converted_ticket_id !== null && (
+                                      <span>{`Ticket ${task.converted_ticket_id} `}</span>
+                                    )}
+                                    {`${task.task}${(isTaskRequired || task.converted_ticket_id !== null) ? " *" : ""}`}
                                   </Typography>
                                 }
                               />

@@ -10,6 +10,7 @@ export const GET_TICKET = gql`
       created_by_time
       last_updated_by
       last_updated_by_time
+      timestamp
       signature_url
       status
       type
@@ -36,6 +37,7 @@ export const GET_TICKET = gql`
         is_completed
         is_default
         rank
+        converted_ticket_id
       }
       infrastructure {
         id
@@ -283,6 +285,7 @@ export const SAVE_TICKET_TASKS = gql`
       is_completed
       is_default
       rank
+      converted_ticket_id
     }
   }
 `;
