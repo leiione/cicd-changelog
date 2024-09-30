@@ -13,7 +13,7 @@ import {
   UPLOAD_FILE_MUTATION,
 } from "TicketDetails/TicketGraphQL";
 import { useMutation } from "@apollo/client";
-import { GET_TICKET_NOTES } from "./../../../../TicketGraphQL";
+import { GET_TICKET_NOTES, GET_TICKET } from "./../../../../TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
@@ -294,6 +294,7 @@ const AddNoteForm = (props) => {
             query: GET_TICKET_NOTES,
             variables: { ticket_id: ticket.ticket_id },
           },
+          { query: GET_TICKET, variables: { id: ticket.ticket_id } },
         ],
         update: (cache, { data }) => {
           dispatch(
