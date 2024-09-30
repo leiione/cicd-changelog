@@ -73,7 +73,7 @@ const TaskMenuOptions = (props) => {
       await convertTaskToTicket({
         variables: { input_ticket },
         update: (cache, { data }) => {
-          handleOpenTicket({ ...data.convertTaskToTicket })
+          handleOpenTicket({ ...data.convertTaskToTicket }, "microservice");
         },
       });
       dispatch(showSnackbar({ message: "The task was converted to a ticket successfully", severity: "success" }))
@@ -106,7 +106,7 @@ const TaskMenuOptions = (props) => {
             horizontal: "left",
           }}
         >
-          <MenuItem onClick={() => onOpenAlert("convert")} disabled={disabled}> Convert to ticket</MenuItem>
+          <MenuItem onClick={() => handleOpenTicket(task, "microservice")} disabled={disabled}> Convert to ticket</MenuItem>
           {!task.is_default &&
             <>
               <MenuItem onClick={handleEdit}> Edit</MenuItem>
