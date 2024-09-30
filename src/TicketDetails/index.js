@@ -6,7 +6,7 @@ import Activity from "./components/Activity";
 import Summary from "./components/Summary";
 import WorkOrder from "./components/Summary/components/WorkOrder";
 import Tasks from "./components/Tasks";
-import BillsOfMaterial from "./components/BillsOfMaterial";
+// import BillsOfMaterial from "./components/BillsOfMaterial";
 import { GET_TICKET } from "./TicketGraphQL";
 import { useMutation, useQuery } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
@@ -221,12 +221,12 @@ const TicketDetails = (props) => {
                 lablesVisible={lablesVisible}
                 appuser_id={appuser_id}
               />
-              <BillsOfMaterial
+              {/* <BillsOfMaterial
                 handleIconButton={handleIconButton}
                 customer={ticket}
                 lablesVisible={lablesVisible}
                 appuser_id={appuser_id}
-              />
+              /> */}
               <Activity
                 handleIconButton={handleIconButton}
                 customer={ticket}
