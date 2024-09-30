@@ -8,6 +8,7 @@ import {
   IconButton,
   Modal,
   Grid,
+  Chip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -26,7 +27,6 @@ import { useMutation, useQuery } from "@apollo/client";
 import { readFileAsBase64 } from "Common/helper";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import DialogAlert from "components/DialogAlert";
-import { set } from "lodash";
 
 const Attachments = (props) => {
   const { ticket } = props;
@@ -41,23 +41,29 @@ const Attachments = (props) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [deleteAttachmentID, setDeleteAttachmentID] = useState("");
+  const [attachmentCount, setAttachmentCount] = useState(0);
 
-  const { loading, error, data } = useQuery(GET_TICKET_ATTACHMENTS, {
+  const { data } = useQuery(GET_TICKET_ATTACHMENTS, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: "network-only",
   });
 
-  
-
   useEffect(() => {
     if (data) {
       setSelectedFiles(data.ticketAttachments);
+      setAttachmentCount(data.ticketAttachments.length);
     }
   }, [data]);
 
+  useEffect(() => {
+    setAttachmentCount(selectedFiles.length);
+  }, [selectedFiles]);
+
   const handleFileChange = (files) => {
     const newFiles = Array.from(files);
-    const existingFileNames = new Set(selectedFiles.map((file) => file.name));
+    const existingFileNames = new Set(
+      selectedFiles.map((file) => (file.name ? file.name : file.filename))
+    );
 
     const filteredNewFiles = newFiles.filter(
       (file) => !existingFileNames.has(file.name)
@@ -70,6 +76,8 @@ const Attachments = (props) => {
 
   const handleDragOver = (event) => {
     event.preventDefault();
+    const files = Array.from(event.dataTransfer.files);
+    handleFileChange(files);
   };
 
   useEffect(() => {
@@ -107,10 +115,8 @@ const Attachments = (props) => {
 
   const handleDrop = (event) => {
     event.preventDefault();
-    const files = Array.from(event.dataTransfer.files).slice(0, 4);
-    const updatedFiles = [...selectedFiles, ...files].slice(0, 4);
-    setSelectedFiles(updatedFiles);
-    startUpload(files);
+    const files = Array.from(event.dataTransfer.files);
+    handleFileChange(files);
   };
 
   const startUpload = async (files) => {
@@ -157,16 +163,6 @@ const Attachments = (props) => {
   const removeFile = (id) => {
     setOpenDialog(true);
     setDeleteAttachmentID(id);
-    
-    
-    // setSelectedFiles((prevFiles) =>
-    //   prevFiles.filter((file) => file.name !== fileName)
-    // );
-    // setUploadProgress((prevProgress) => {
-    //   const updatedProgress = { ...prevProgress };
-    //   delete updatedProgress[fileName];
-    //   return updatedProgress;
-    // });
   };
 
   const handlePreviewOpen = (imageSrc) => {
@@ -179,16 +175,14 @@ const Attachments = (props) => {
     setPreviewImage("");
   };
 
-  const handleOnDelete = async()=>{
-   setSubmitting(true);
-    console.log("deleteAttachment", deleteAttachmentID);
-
+  const handleOnDelete = async () => {
+    setSubmitting(true);
     await deleteAttachment({
       variables: { id: deleteAttachmentID },
-    })
+    });
 
     setSelectedFiles((prevFiles) =>
-      prevFiles.filter((file) => file.id !== deleteAttachmentID )
+      prevFiles.filter((file) => file.id !== deleteAttachmentID)
     );
 
     setSubmitting(false);
@@ -200,8 +194,7 @@ const Attachments = (props) => {
         severity: "success",
       })
     );
-
-  }
+  };
 
   const handleError = (error) => {
     let errorMessage = error.message;
@@ -230,7 +223,17 @@ const Attachments = (props) => {
   return (
     <>
       <AccordionCard
-        label="Attachments"
+        label={
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <span>Attachments</span>
+            <Chip
+              label={attachmentCount || 0}
+              sx={{ height: 20, width: 20 }}
+              classes={{ label: "p-0" }}
+              className="bg-light text-white ml-3"
+            />
+          </div>
+        }
         iconButtons={<></>}
         menuOption={
           <>
@@ -249,12 +252,10 @@ const Attachments = (props) => {
             accepts={acceptedFormats}
             multiple
             clickable
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
           >
-            <Box
-              className="upload-image-placeholder"
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-            >
+            <Box className="upload-image-placeholder">
               <label htmlFor="upload-file-input" className="upload-file-input">
                 <Typography variant="body2" className="mt-2">
                   Drag and drop files or

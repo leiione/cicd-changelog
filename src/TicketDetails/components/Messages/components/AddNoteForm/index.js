@@ -173,6 +173,7 @@ const AddNoteFields = (props) => {
           accepts={acceptedFormats}
           multiple
           clickable
+          maxFileSize={maxFileSize}
         >
           <IconButton aria-label="attachment">
             <AttachFileIcon />
