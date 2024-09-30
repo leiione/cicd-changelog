@@ -5,7 +5,7 @@ import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
 import HookCheckbox from "Common/hookFields/HookCheckbox";
 import { useMutation } from "@apollo/client";
-import { ADD_NEW_TICKET_EMAIL, GET_TICKET_MESSAGES } from "TicketDetails/TicketGraphQL";
+import { ADD_NEW_TICKET_EMAIL, GET_TICKET_MESSAGES, GET_TICKET } from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 import HookTypeAheadEmailField from "Common/hookFields/HookTypeAheadEmailField";
@@ -169,7 +169,10 @@ const AddEmailForm = props => {
       }
       await sendTicketEmail({
         variables,
-        refetchQueries: [{ query: GET_TICKET_MESSAGES, variables: { ticket_id: ticket.ticket_id } }],
+        refetchQueries: [
+          { query: GET_TICKET_MESSAGES, variables: { ticket_id: ticket.ticket_id } },
+          { query: GET_TICKET, variables: { id: ticket.ticket_id } },
+        ],
         update: (cache, { data }) => {
           if (data.sendTicketEmail && data.sendTicketEmail.status === "failed") {
             dispatch(showSnackbar({ message: "Email failed to send.", severity: "error" }))

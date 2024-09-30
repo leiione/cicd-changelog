@@ -4,7 +4,7 @@ import { Button, Divider, Grid, Typography } from "@mui/material";
 import ProgressButton from "Common/ProgressButton";
 import HookCheckbox from "Common/hookFields/HookCheckbox";
 import { useMutation } from "@apollo/client";
-import { ADD_NEW_TICKET_SMS, GET_TICKET_MESSAGES } from "TicketDetails/TicketGraphQL";
+import { ADD_NEW_TICKET_SMS, GET_TICKET_MESSAGES, GET_TICKET } from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 import h2p from "html2plaintext";
@@ -144,7 +144,10 @@ const AddSMSForm = props => {
       };
       await sendTicketSMS({
         variables,
-        refetchQueries: [{ query: GET_TICKET_MESSAGES, variables: { ticket_id: ticket.ticket_id } }],
+        refetchQueries: [
+          { query: GET_TICKET_MESSAGES, variables: { ticket_id: ticket.ticket_id } },
+          { query: GET_TICKET, variables: { id: ticket.ticket_id } },
+        ],
         update: (cache, { data }) => {
           if (data.sendTicketSMS && data.sendTicketSMS.status === "failed") {
             dispatch(showSnackbar({ message: "SMS failed to send.", severity: "error" }));
