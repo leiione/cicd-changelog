@@ -62,7 +62,7 @@ const Attachments = (props) => {
   const handleFileChange = (files) => {
     const newFiles = Array.from(files);
     const existingFileNames = new Set(
-      selectedFiles.map((file) => (file.name ? file.name : file.filename))
+      selectedFiles.map((file) => (file.name))
     );
 
     const filteredNewFiles = newFiles.filter(
