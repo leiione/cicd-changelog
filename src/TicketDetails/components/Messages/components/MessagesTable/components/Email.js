@@ -84,7 +84,7 @@ const EmailPopover = (props) => {
             </Typography>
           </Grid>
           <Grid item xs={9}>
-            <Typography variant="subtitle1">{ }</Typography>
+            <Typography variant="subtitle1">{message.bcc}</Typography>
           </Grid>
           <Grid item xs={3} style={{ textAlign: "end" }}>
             <Typography variant="subtitle1" style={{ paddingRight: 5 }}>

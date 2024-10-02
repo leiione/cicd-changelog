@@ -316,6 +316,7 @@ export const GET_TICKET_MESSAGES = gql`
       subject
       traffic
       cc
+      bcc
     }
   }
 `;
