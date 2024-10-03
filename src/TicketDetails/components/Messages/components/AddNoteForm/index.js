@@ -7,7 +7,6 @@ import {
 
 import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
-import HookCheckbox from "Common/hookFields/HookCheckbox";
 import {
   ADD_NEW_TICKET_NOTE,
   UPLOAD_FILE_MUTATION,
@@ -27,7 +26,6 @@ import { readFileAsBase64 } from "Common/helper";
 const AddNoteFields = (props) => {
   const { form, handleCancel, onSubmit, ticket } = props;
   const {
-    control,
     setValue,
     watch,
     formState: { isSubmitting },
@@ -179,11 +177,11 @@ const AddNoteFields = (props) => {
             <AttachFileIcon />
           </IconButton>
         </Files>
-        <HookCheckbox
+        {/* <HookCheckbox
           control={control}
           name={"flag_internal"}
           label={"Mark as Private"}
-        />
+        /> */}
       </div>
       <EditorContainer
         content={values.note}
@@ -283,7 +281,7 @@ const AddNoteForm = (props) => {
         note: values.note,
         qouted_content_id: values.qouted_content_id,
         from: values.from,
-        flag_internal: values.flag_internal,
+        flag_internal: false,
         attachments: values.attachments,
       };
 
