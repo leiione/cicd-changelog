@@ -93,7 +93,7 @@ const AddTicket = (props) => {
   const dispatch = useDispatch()
   const { ticket, handleOpenTicket } = props;
 
-  console.log("From microfrontend" ,ticket)
+  // console.log("From microfrontend" ,ticket)
 
 
   let initialValues = {
@@ -109,7 +109,7 @@ const AddTicket = (props) => {
     ticket_contact_name: '',
     ticket_contact_numbers: '',
     task_id: ticket && ticket.task_id !== undefined ? ticket.task_id : 0, 
-    task: ticket && ticket.task !== undefined ? ticket.task : '', 
+    description: ticket && ticket.task !== undefined ? ticket.task : null, 
   }
 
   if (ticket && ticket.initSelectedCustId > 0) {
