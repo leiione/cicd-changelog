@@ -46,43 +46,48 @@ const TaskMenuOptions = (props) => {
   }
 
   const onConvertTask = async () => {
-    console.log("task_id: "+task.task_id);
-    setSubmitting(true)
-    let input_ticket = {
-      ...pick(ticket, [
-        "category_type",
-        "priority",
-        "ticket_type_id",
-        "equipment_id",
-        "location_id",
-        "assigned_name",
-        "address",
-        "type"
-      ]),
-      description: task.task,
-      task_id: task.task_id,
-      customer_id: ticket.subscriber ? ticket.subscriber.customer_id : 0,
-      assignee_ids: ticket.assignees,
-      ticket_contact_numbers: ticket.ticket_contact_numbers || '',
-      ticket_contact_name: ticket.ticket_contact_name || '',
-      ticket_contact_emails: ticket.ticket_contact_email || '',
-      ticket_id: ticket.ticket_id,
-    }
-    input_ticket.followers = !isEmpty(ticket.followers) ? ticket.followers.split(",") : []
-    try {
-      await convertTaskToTicket({
-        variables: { input_ticket },
-        update: (cache, { data }) => {
-          handleOpenTicket({ ...data.convertTaskToTicket }, "microservice");
-        },
-      });
-      dispatch(showSnackbar({ message: "The task was converted to a ticket successfully", severity: "success" }))
-      setSubmitting(false)
-    } catch (error) {
-      const msg = error.message.replace("GraphQL error: ", "")
-      dispatch(showSnackbar({ message: msg, severity: "error" }))
-      setSubmitting(false)
-    }
+
+    handleOpenTicket({task}, "microservice");
+
+
+
+    // console.log("task_id: "+task.task_id);
+    // setSubmitting(true)
+    // let input_ticket = {
+    //   ...pick(ticket, [
+    //     "category_type",
+    //     "priority",
+    //     "ticket_type_id",
+    //     "equipment_id",
+    //     "location_id",
+    //     "assigned_name",
+    //     "address",
+    //     "type"
+    //   ]),
+    //   description: task.task,
+    //   task_id: task.task_id,
+    //   customer_id: ticket.subscriber ? ticket.subscriber.customer_id : 0,
+    //   assignee_ids: ticket.assignees,
+    //   ticket_contact_numbers: ticket.ticket_contact_numbers || '',
+    //   ticket_contact_name: ticket.ticket_contact_name || '',
+    //   ticket_contact_emails: ticket.ticket_contact_email || '',
+    //   ticket_id: ticket.ticket_id,
+    // }
+    // input_ticket.followers = !isEmpty(ticket.followers) ? ticket.followers.split(",") : []
+    // try {
+    //   await convertTaskToTicket({
+    //     variables: { input_ticket },
+    //     update: (cache, { data }) => {
+    //       handleOpenTicket({ ...data.convertTaskToTicket }, "microservice");
+    //     },
+    //   });
+    //   dispatch(showSnackbar({ message: "The task was converted to a ticket successfully", severity: "success" }))
+    //   setSubmitting(false)
+    // } catch (error) {
+    //   const msg = error.message.replace("GraphQL error: ", "")
+    //   dispatch(showSnackbar({ message: msg, severity: "error" }))
+    //   setSubmitting(false)
+    // }
   }
 
   const handleEdit = () => {
