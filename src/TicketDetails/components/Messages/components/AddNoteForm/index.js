@@ -208,12 +208,10 @@ const AddNoteFields = (props) => {
           onClick={handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}
           disabled={!isFormValid || isSubmitting || isUploading}
-        >
-          Save
+        > 
+        Save
         </ProgressButton>
-        <Button color="default" variant="outlined" onClick={handleCancel}>
-          Cancel
-        </Button>
+        <Button color="default" variant="outlined" onClick={handleCancel}>Cancel </Button>
       </div>
     </div>
   );
@@ -231,26 +229,28 @@ const AddNoteForm = (props) => {
   const foramteQoutedContent = (qoutedContent) => {
     if (qoutedContent.from === "email") {
       return `
-       <blockquote class="bg-light" style="font-size: 8pt;">
-       <p>${replaceWhitespace(qoutedContent.content.to_email)}<br/>
-        ${replaceWhitespace(qoutedContent.content.subject)}<br/>
-        ${replaceWhitespace(qoutedContent.content.message)}
-        </blockquote><p>&nbsp</p>;
+      <blockquote class="quote-text">
+       <div class="eamil-body"> 
+          ${replaceWhitespace(qoutedContent.content.to_email)}
+          ${replaceWhitespace(qoutedContent.content.subject)}
+          ${replaceWhitespace(qoutedContent.content.message)}
+       <div/>
+      </blockquote>
         `;
     } else if (qoutedContent.from === "sms") {
       return `
-        <blockquote class="bg-light" style="font-size: 8pt;">
-        <p>${replaceWhitespace(qoutedContent.content.to_email)} <br/>
-         ${replaceWhitespace(qoutedContent.content.message)}</p>
+        <blockquote class="quote-text">
+        ${replaceWhitespace(qoutedContent.content.to_email)} <br/>
+         ${replaceWhitespace(qoutedContent.content.message)}
         </blockquote><p>&nbsp</p>;
         `;
     } else if (qoutedContent.from === "note") {
       return `
-       <blockquote class="bg-light" style="font-size: 8pt;">
-       <p>${replaceWhitespace(qoutedContent.content.appuser_name)} wrote: 
-       ${replaceWhitespace(qoutedContent.content.content)}</p>
+       <blockquote class="quote-text">
+       ${replaceWhitespace(qoutedContent.content.appuser_name)} wrote: 
+       ${replaceWhitespace(qoutedContent.content.content)}
        </blockquote><p>&nbsp;</p>
-      `;
+      `
     }
   };
 

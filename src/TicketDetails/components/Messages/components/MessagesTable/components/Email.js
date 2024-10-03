@@ -126,7 +126,7 @@ const Email = (props) => {
 
   return (
     <>
-      <ListItem key={message.id} alignItems="flex-start">
+      <ListItem className="border-bottom border-lighter" key={message.id} alignItems="flex-start">
         <ListItemAvatar
           sx={{ width: 24, height: 24, minWidth: 24 }}
           onMouseOver={(e) => setAnchorEl(e.currentTarget)}
@@ -143,8 +143,9 @@ const Email = (props) => {
           )}
         </ListItemAvatar>
         <ListItemText
+        
           primary={
-            <Grid container spacing={1} className="align-items-center mb-1">
+            <Grid container spacing={1} className="align-items-center mb-1" >
               <Grid item xs>
                 <Typography
                   variant="body2"

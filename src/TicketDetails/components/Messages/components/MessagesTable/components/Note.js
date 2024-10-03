@@ -58,7 +58,7 @@ const Note = (props) => {
 
   return (
     <>
-      <ListItem key={message.note_id} alignItems="flex-start">
+      <ListItem key={message.note_id} alignItems="flex-start" className="border-bottom border-lighter">
         <ListItemAvatar sx={{ width: 24, height: 24, minWidth: 24 }}>
           <FontAwesomeIcon icon={faNote} />
         </ListItemAvatar>

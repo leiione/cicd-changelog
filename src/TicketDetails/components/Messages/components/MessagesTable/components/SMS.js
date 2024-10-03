@@ -92,7 +92,12 @@ const SMS = (props) => {
   const [more, toggleMore] = React.useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
   const toEmail = message.to_email ? message.to_email.split(",") : [];
-  const replySMS = message.traffic === 'INBOUND' ? [message.from_email] : (message.to_email ? message.to_email.split(",") : [])
+  const replySMS =
+    message.traffic === "INBOUND"
+      ? [message.from_email]
+      : message.to_email
+      ? message.to_email.split(",")
+      : [];
 
   // Remove the specific text from the message
   const text = message.message.replace(
@@ -120,7 +125,11 @@ const SMS = (props) => {
 
   return (
     <>
-      <ListItem key={message.id} alignItems="flex-start">
+      <ListItem
+        key={message.id}
+        alignItems="flex-start"
+        className="border-bottom border-lighter"
+      >
         <ListItemAvatar
           sx={{ width: 24, height: 24, minWidth: 24 }}
           onMouseOver={(e) => setAnchorEl(e.currentTarget)}
@@ -153,14 +162,24 @@ const SMS = (props) => {
                   {moment(message.date).format("MMM DD, YYYY hh:mm")}
                 </Typography>
               </Grid>
-              {message.traffic === 'INBOUND' && <Grid item xs="auto">
-                <IconButton size="small" onClick={() => handleReplySMS(isHtml ? h2p(text) : parse(text), replySMS)}>
-                  <FontAwesomeIcon icon={faReply} />
-                </IconButton>
-              </Grid>}
+              {message.traffic === "INBOUND" && (
+                <Grid item xs="auto">
+                  <IconButton
+                    size="small"
+                    onClick={() =>
+                      handleReplySMS(isHtml ? h2p(text) : parse(text), replySMS)
+                    }
+                  >
+                    <FontAwesomeIcon icon={faReply} />
+                  </IconButton>
+                </Grid>
+              )}
               <Grid item xs="auto">
                 <IconButton size="small">
-                  <FontAwesomeIcon icon={faMessagePlus} onClick={()=>handleQouteNote("sms", message)} />
+                  <FontAwesomeIcon
+                    icon={faMessagePlus}
+                    onClick={() => handleQouteNote("sms", message)}
+                  />
                 </IconButton>
               </Grid>
               <Grid item xs="auto">

@@ -12,8 +12,9 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
+import { faFilePdf } from "@fortawesome/pro-duotone-svg-icons";
 import Files from "react-files";
 import { acceptedFormats } from "Common/constants";
 import { useDispatch } from "react-redux";
@@ -61,9 +62,7 @@ const Attachments = (props) => {
 
   const handleFileChange = (files) => {
     const newFiles = Array.from(files);
-    const existingFileNames = new Set(
-      selectedFiles.map((file) => (file.name))
-    );
+    const existingFileNames = new Set(selectedFiles.map((file) => file.name));
 
     const filteredNewFiles = newFiles.filter(
       (file) => !existingFileNames.has(file.name)
@@ -300,14 +299,12 @@ const Attachments = (props) => {
                       alt={file.filename ? file.filename : file.name}
                     />
                   ) : (
-                    <div
-                      className="empty-box"
-                      style={{
-                        width: "100px",
-                        height: "100px",
-                        border: "1px solid #ccc",
-                      }}
-                    ></div>
+                    <div className="display-pdf-box">
+                      <FontAwesomeIcon
+                        icon={faFilePdf}
+                        size="2xl"
+                      />
+                    </div>
                   )}
                 </Box>
 
@@ -342,7 +339,7 @@ const Attachments = (props) => {
                 >
                   <Box className="empty-single-img-box">
                     <Typography variant="body2" color="textSecondary">
-                      <FontAwesomeIcon icon={faPlusCircle} />
+                      <FontAwesomeIcon icon={faPlusCircle} size="lg" />
                     </Typography>
                   </Box>
                 </Files>
