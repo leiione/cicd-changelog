@@ -10,7 +10,7 @@ import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 import HookTypeAheadEmailField from "Common/hookFields/HookTypeAheadEmailField";
 
-const defaultMoreFields = ["Cc"]
+const defaultMoreFields = ["Cc", "Bcc"]
 
 const AddEmailFields = props => {
   const { form, handleCancel, onSubmit } = props
