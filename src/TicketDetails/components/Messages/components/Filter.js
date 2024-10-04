@@ -8,26 +8,36 @@ const Filter = ({ setFilter }) => {
   const handleFilter = (event, newFilters) => {
     console.log("New Filters Selected:", newFilters);
 
+    // If only "All" is selected, select "all", "notes", and "message"
     if (newFilters.includes("all") && newFilters.length === 1) {
-      // If only "All" is selected, select "all", "notes", and "message"
       const updatedFilters = ["all", "notes", "message"];
       setFilters(updatedFilters);
       setFilter(updatedFilters);
-    } else if (newFilters.includes("all") && newFilters.length > 1) {
-      // If "All" is selected along with other filters, remove "All" and keep only the specific filters
+    }
+    // If "All" is selected along with other filters, remove "All" and keep only the specific filters
+    else if (newFilters.includes("all") && newFilters.length > 1) {
       const updatedFilters = newFilters.filter((filter) => filter !== "all");
       setFilters(updatedFilters);
       setFilter(updatedFilters);
-    } else if (newFilters.length === 1 && (newFilters.includes("notes") || newFilters.includes("message"))) {
-      // If either "notes" or "message" is the only one selected, deselect "all"
+    }
+    // If both "Notes" and "Messages" are selected, automatically select "All"
+    else if (newFilters.includes("notes") && newFilters.includes("message")) {
+      const updatedFilters = ["all", "notes", "message"];
+      setFilters(updatedFilters);
+      setFilter(updatedFilters);
+    }
+    // If only "notes" or "message" is selected, deselect "All"
+    else if (newFilters.length === 1 && (newFilters.includes("notes") || newFilters.includes("message"))) {
       setFilters(newFilters);
       setFilter(newFilters);
-    } else if (newFilters.length === 0) {
-      // If no filters are selected, default to showing nothing
+    }
+    // If no filters are selected, default to showing nothing
+    else if (newFilters.length === 0) {
       setFilters([]);
       setFilter([]);
-    } else {
-      // Normal selection behavior, update with the current filters
+    }
+    // Normal selection behavior, update with the current filters
+    else {
       setFilters(newFilters);
       setFilter(newFilters);
     }
