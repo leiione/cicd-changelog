@@ -6,7 +6,7 @@ const Filter = ({ setFilter }) => {
   const [filters, setFilters] = useState(["all", "notes", "message"]);
 
   const handleFilter = (event, newFilters) => {
-    console.log("New Filters Selected:", newFilters);
+    // console.log("New Filters Selected:", newFilters);
 
     // If only "All" is selected, select "all", "notes", and "message"
     if (newFilters.includes("all") && newFilters.length === 1) {
