@@ -357,7 +357,7 @@ const Tasks = (props) => {
                                   >
                                     {task.converted_ticket_id !== null ? (
                                       <span
-                                      // onClick={() => onTaskClick(task)}
+                                      onClick={() => onTaskClick(task)}
                                         style={{ color: '#0053F4', cursor: 'pointer' }}
                                       >
                                         {`Ticket ${task.converted_ticket_id} `}
