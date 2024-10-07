@@ -195,6 +195,14 @@ const Tasks = (props) => {
     setOnEditMode({ index: -1, value: '' })
   }
 
+  const onTaskClick = (ticket) => {
+    const updatedTicket = {
+      ...ticket,
+      ticket_id: ticket.converted_ticket_id,
+    };
+    handleOpenTicket(updatedTicket);
+  };
+
   return (
     <AccordionCard
       label="Tasks"
@@ -251,6 +259,7 @@ const Tasks = (props) => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
+                            onClick={() => onTaskClick(task)}
                             style={{
                               ...getItemStyle(snapshot.isDragging, provided.draggableProps.style),
                               backgroundColor: task.converted_ticket_id !== null ? '#e7f2fe' : 'inherit',

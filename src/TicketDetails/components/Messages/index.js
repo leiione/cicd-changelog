@@ -18,12 +18,12 @@ import AddSMSForm from "./components/AddSMSForm";
 
 const Messages = (props) => {
   const { appuser_id, ticket, lablesVisible } = props;
-  const [filter, setFilter] = React.useState("all");
+  const [filter, setFilter] = React.useState(["all"]); // Default to "all"
   const [addNew, setAddNew] = React.useState(null);
   const [qoutedContent, setQoutedContent] = React.useState(null);
   const [replyMessage, setReplyMessage] = React.useState({});
-  // const [replySeeMore, setReplySeeMore] = React.useState(true);
 
+  // Fetch ticket messages
   const {
     loading,
     error: messageError,
@@ -32,13 +32,15 @@ const Messages = (props) => {
   } = useQuery(GET_TICKET_MESSAGES, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: "cache-and-network",
-    skip: !ticket.ticket_id || filter === "notes",
+    skip:
+      !ticket.ticket_id || (filter.length === 1 && filter.includes("notes")),
   });
   const cacheExists = checkIfCacheExists(client, {
     query: GET_TICKET_MESSAGES,
     variables: { ticket_id: ticket.ticket_id },
   });
 
+  // Fetch ticket notes
   const {
     loading: loadingNotes,
     error: errorNotes,
@@ -54,7 +56,28 @@ const Messages = (props) => {
     variables: { ticket_id: ticket.ticket_id },
   });
 
+  // Initialize messages array
   let messages = [];
+
+  // Handle merging of data based on selected filters
+  if (
+    filter.includes("all") &&
+    data &&
+    data.ticketMessages &&
+    dataNotes &&
+    dataNotes.ticketNotes
+  ) {
+    messages = [...data.ticketMessages, ...dataNotes.ticketNotes];
+  } else {
+    // Combine notes and messages based on filter selection
+    if (filter.includes("notes") && dataNotes && dataNotes.ticketNotes) {
+      messages = [...dataNotes.ticketNotes]; // Start with notes
+    }
+
+    if (filter.includes("message") && data && data.ticketMessages) {
+      messages = [...messages, ...data.ticketMessages]; // Append messages to the existing notes
+    }
+  }
 
   const handleQouteNote = (from, content) => {
     setQoutedContent({
@@ -64,32 +87,6 @@ const Messages = (props) => {
     setAddNew("note");
   };
 
-  if (
-    filter === "notes" &&
-    (!loadingNotes || cacheExistsNotes) &&
-    dataNotes &&
-    dataNotes.ticketNotes
-  ) {
-    messages = dataNotes.ticketNotes;
-  } else if (
-    filter === "message" &&
-    (!loading || cacheExists) &&
-    data &&
-    data.ticketMessages
-  ) {
-    messages = data.ticketMessages;
-  } else if (
-    filter === "all" &&
-    (!loading || cacheExists) &&
-    data &&
-    data.ticketMessages &&
-    (!loadingNotes || cacheExistsNotes) &&
-    dataNotes &&
-    dataNotes.ticketNotes
-  ) {
-    messages = [...data.ticketMessages, ...dataNotes.ticketNotes];
-  }
-
   const handleReplyEmail = (message, recipient) => {
     if (addNew) {
       // add warning dialog
@@ -97,11 +94,8 @@ const Messages = (props) => {
     const formatMessage = `
       <div class="quote-text">
       <p>${recipient}</p>
-      ${message.replace(
-        /\r|\r\n|\n/g,
-        "<br>"
-      )}
-      </div><p>&nbsp;</p>
+      ${message.replace(/\r|\r\n|\n/g, "<br>")}
+      </blockquote><p>&nbsp;</p>
     `;
     setAddNew("email");
     setReplyMessage({ message: formatMessage, recipient });
@@ -149,21 +143,31 @@ const Messages = (props) => {
               ticket={ticket}
               handleCancel={handleCancel}
               replyMessage={replyMessage}
-              
             />
           )}
-         {addNew === "note" && (
+          {addNew === "note" && (
+            <AddEmailForm
+              className="primary-hover"
+              ticket={ticket}
+              handleCancel={handleCancel}
+              replyMessage={replyMessage}
+            />
+          )}
+          {addNew === "note" && (
             <AddNoteForm
-            className="primary-hover"
-            ticket={ticket}
+              ticket={ticket}
               handleCancel={handleCancel}
               qoutedContent={qoutedContent}
             />
           )}
           {addNew === "sms" && (
-            <AddSMSForm ticket={ticket} handleCancel={handleCancel} recipient={replyMessage.recipient} />
+            <AddSMSForm
+              ticket={ticket}
+              handleCancel={handleCancel}
+              recipient={replyMessage.recipient}
+            />
           )}
-          <Filter filter={filter} setFilter={setFilter} />
+          <Filter setFilter={setFilter} />
           <MessagesTable
             messages={messages}
             error={errorNotes}
@@ -177,4 +181,5 @@ const Messages = (props) => {
     </AccordionCard>
   );
 };
+
 export default React.memo(Messages);

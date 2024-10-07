@@ -4,7 +4,6 @@ import { IconButton, Button, Tooltip, Grid } from "@mui/material";
 
 import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
-import HookCheckbox from "Common/hookFields/HookCheckbox";
 import {
   ADD_NEW_TICKET_NOTE,
   UPLOAD_FILE_MUTATION,
@@ -24,7 +23,6 @@ import { readFileAsBase64 } from "Common/helper";
 const AddNoteFields = (props) => {
   const { form, handleCancel, onSubmit, ticket } = props;
   const {
-    control,
     setValue,
     watch,
     formState: { isSubmitting },
@@ -177,11 +175,11 @@ const AddNoteFields = (props) => {
             </IconButton>
           </Files>
         </Tooltip>
-        <HookCheckbox
+        {/* <HookCheckbox
           control={control}
           name={"flag_internal"}
           label={"Mark as Private"}
-        />
+        />  */}
       </div>
 
       <Grid container spacing={1}>
@@ -297,7 +295,7 @@ const AddNoteForm = (props) => {
         note: values.note,
         qouted_content_id: values.qouted_content_id,
         from: values.from,
-        flag_internal: values.flag_internal,
+        flag_internal: false,
         attachments: values.attachments,
       };
 

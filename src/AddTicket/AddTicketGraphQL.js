@@ -7,6 +7,7 @@ export const ADD_TICKET = gql`
       priority
       status
       description
+      task_id
     }
   }
 `

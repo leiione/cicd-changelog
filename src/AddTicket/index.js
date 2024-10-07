@@ -92,6 +92,10 @@ const AddTicket = (props) => {
   const [addTicket] = useMutation(ADD_TICKET);
   const dispatch = useDispatch()
   const { ticket, handleOpenTicket } = props;
+
+  // console.log("From microfrontend" ,ticket)
+
+
   let initialValues = {
     category_type: "",
     priority: "Normal",
@@ -104,6 +108,8 @@ const AddTicket = (props) => {
     ticket_contact_emails: '',
     ticket_contact_name: '',
     ticket_contact_numbers: '',
+    task_id: ticket && ticket.task_id !== undefined ? ticket.task_id : 0, 
+    description: ticket && ticket.task !== undefined ? ticket.task : null, 
   }
 
   if (ticket && ticket.initSelectedCustId > 0) {

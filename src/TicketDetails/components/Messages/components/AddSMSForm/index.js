@@ -2,7 +2,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { Button, Divider, Grid, Typography } from "@mui/material";
 import ProgressButton from "Common/ProgressButton";
-import HookCheckbox from "Common/hookFields/HookCheckbox";
 import { useMutation } from "@apollo/client";
 import {
   ADD_NEW_TICKET_SMS,
@@ -61,16 +60,15 @@ const AddSMSFields = (props) => {
         />
       </Grid>
       <Divider style={{ width: "100%" }} />
-
-      <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
+      {/* <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
         <HookCheckbox
           control={control}
           name={"flag_internal"}
           label={"Mark as Private"}
           style={{ margin: "10px 0" }}
         />
-      </Grid>
-      <Grid item xs={12} className="mt2">
+      </Grid> */}
+      <Grid item xs={12} style={{ marginTop: "10px" }}>
         <textarea
           value={values.message}
           onChange={handleMessageChange}
@@ -165,7 +163,7 @@ const AddSMSForm = (props) => {
         message: h2p(values.message),
         customer_id: ticket.customer_id || 0,
         subject: values.subject,
-        flag_internal: values.flag_internal,
+        flag_internal: false
       };
       await sendTicketSMS({
         variables,

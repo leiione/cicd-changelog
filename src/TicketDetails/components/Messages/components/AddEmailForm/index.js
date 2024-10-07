@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { Button, Divider, Grid, Typography } from "@mui/material";
 import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
-import HookCheckbox from "Common/hookFields/HookCheckbox";
 import { useMutation } from "@apollo/client";
 import {
   ADD_NEW_TICKET_EMAIL,
@@ -100,23 +99,16 @@ const AddEmailFields = (props) => {
       </Grid> 
       <Divider style={{ width: "100%", marginLeft: "10px" }} /> 
       */}
-      <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
-        <div
-          style={{
-            position: "absolute",
-            right: "38px",
-            zIndex: 99,
-            padding: "23px 3px",
-          }}
-        >
+      {/* <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
+        <div style={{ position: "absolute", right: "38px", zIndex: 99, padding: "23px 3px" }}>
           <HookCheckbox
             control={control}
             name={"flag_internal"}
             label={"Mark as Private"}
           />
         </div>
-      </Grid>
-      <Grid item xs={12} className="mt-2">
+      </Grid> */}
+      <Grid item xs={12} style={{ marginTop: "10px" }}>
         <EditorContainer
           content={values.message}
           setContent={handleMessageChange}
