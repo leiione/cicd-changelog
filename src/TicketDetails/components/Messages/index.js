@@ -95,13 +95,13 @@ const Messages = (props) => {
       // add warning dialog
     }
     const formatMessage = `
-      <blockquote class="quote-text">
+      <div class="quote-text">
       <p>${recipient}</p>
       ${message.replace(
         /\r|\r\n|\n/g,
         "<br>"
       )}
-      </blockquote><p>&nbsp;</p>
+      </div><p>&nbsp;</p>
     `;
     setAddNew("email");
     setReplyMessage({ message: formatMessage, recipient });
@@ -145,14 +145,17 @@ const Messages = (props) => {
         <>
           {addNew === "email" && (
             <AddEmailForm
+              className="primary-hover"
               ticket={ticket}
               handleCancel={handleCancel}
               replyMessage={replyMessage}
+              
             />
           )}
-          {addNew === "note" && (
+         {addNew === "note" && (
             <AddNoteForm
-              ticket={ticket}
+            className="primary-hover"
+            ticket={ticket}
               handleCancel={handleCancel}
               qoutedContent={qoutedContent}
             />

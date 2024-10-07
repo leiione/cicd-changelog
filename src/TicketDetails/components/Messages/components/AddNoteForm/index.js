@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  IconButton,
-  Button,
-} from "@mui/material";
+import { IconButton, Button, Tooltip, Grid } from "@mui/material";
 
 import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
@@ -42,7 +39,7 @@ const AddNoteFields = (props) => {
   const [filemapping, setFileMapping] = useState([]);
   const [uploadFile] = useMutation(UPLOAD_FILE_MUTATION);
   const dispatch = useDispatch();
-  
+
   const handleFileChange = (files) => {
     const newFiles = Array.from(files);
     const existingFileNames = new Set(selectedFiles.map((file) => file.name));
@@ -56,7 +53,6 @@ const AddNoteFields = (props) => {
     startUpload(filteredNewFiles);
   };
 
-  
   const startUpload = async (files) => {
     files.forEach(async (file) => {
       const progressKey = file.name;
@@ -161,58 +157,64 @@ const AddNoteFields = (props) => {
           position: "absolute",
           right: "15px",
           zIndex: 99,
-          top: 4,
+          top: 11,
           display: "flex",
           alignItems: "center",
         }}
       >
-        <Files
-          className="files-dropzone"
-          onError={handleError}
-          onChange={handleFileChange}
-          accepts={acceptedFormats}
-          multiple
-          clickable
-          maxFileSize={maxFileSize}
-        >
-          <IconButton aria-label="attachment">
-            <AttachFileIcon />
-          </IconButton>
-        </Files>
+        <Tooltip title="Attach File">
+          <Files
+            className="files-dropzone"
+            onError={handleError}
+            onChange={handleFileChange}
+            accepts={acceptedFormats}
+            multiple
+            clickable
+            maxFileSize={maxFileSize}
+          >
+            <IconButton aria-label="attachment" className="primary-hover">
+              <AttachFileIcon className="primary-hover" />
+            </IconButton>
+          </Files>
+        </Tooltip>
         <HookCheckbox
           control={control}
           name={"flag_internal"}
           label={"Mark as Private"}
         />
       </div>
-      <EditorContainer
-        content={values.note}
-        setContent={handleMessageChange}
-        disabled={isSubmitting}
-      />
 
-      <FileUploadPreview
-        selectedFiles={selectedFiles}
-        uploadProgress={uploadProgress}
-        removeFile={removeFile}
-        openPreview={openPreview}
-        handlePreviewOpen={handlePreviewOpen}
-        handlePreviewClose={handlePreviewClose}
-        previewImage={previewImage}
-      />
-
-      <div className="text-right">
-        <ProgressButton
-          color="primary"
-          variant="outlined"
-          onClick={handleSubmit(onSubmit)}
-          isSubmitting={isSubmitting}
-          disabled={!isFormValid || isSubmitting || isUploading}
-        > 
-        Save
-        </ProgressButton>
-        <Button color="default" variant="outlined" onClick={handleCancel}>Cancel </Button>
-      </div>
+      <Grid container spacing={1}>
+        <Grid item xs={12}>
+          <EditorContainer
+            content={values.note}
+            setContent={handleMessageChange}
+            disabled={isSubmitting}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FileUploadPreview
+            selectedFiles={selectedFiles}
+            uploadProgress={uploadProgress}
+            removeFile={removeFile}
+            openPreview={openPreview}
+            handlePreviewOpen={handlePreviewOpen}
+            handlePreviewClose={handlePreviewClose}
+            previewImage={previewImage}
+          />
+        </Grid>
+        <Grid item xs={12} textAlign={"right"}>
+          <ProgressButton
+            color="primary"
+            variant="outlined"
+            onClick={handleSubmit(onSubmit)}
+            isSubmitting={isSubmitting}
+            disabled={!isFormValid || isSubmitting || isUploading}
+          > Save
+          </ProgressButton>
+          <Button color="default" variant="outlined" onClick={handleCancel}>Cancel</Button>
+        </Grid>
+      </Grid>
     </div>
   );
 };
@@ -229,28 +231,40 @@ const AddNoteForm = (props) => {
   const foramteQoutedContent = (qoutedContent) => {
     if (qoutedContent.from === "email") {
       return `
-      <blockquote class="quote-text">
-       <div class="eamil-body"> 
-          ${replaceWhitespace(qoutedContent.content.to_email)}
-          ${replaceWhitespace(qoutedContent.content.subject)}
-          ${replaceWhitespace(qoutedContent.content.message)}
-       <div/>
-      </blockquote>
+      <div class="quote-text">
+          <div class="email-content"> ${replaceWhitespace(
+            qoutedContent.content.to_email
+          )}</div>
+          <div class="email-subject"> ${replaceWhitespace(
+            qoutedContent.content.subject
+          )}</div>
+          <div class="email-body">${replaceWhitespace(
+            qoutedContent.content.message
+          )}</div>
+      </div><p>&nbsp</p>
         `;
     } else if (qoutedContent.from === "sms") {
       return `
-        <blockquote class="quote-text">
-        ${replaceWhitespace(qoutedContent.content.to_email)} <br/>
-         ${replaceWhitespace(qoutedContent.content.message)}
-        </blockquote><p>&nbsp</p>;
+        <div class="quote-text">
+        <div class="email-content">${replaceWhitespace(
+          qoutedContent.content.to_email
+        )} </div>
+        <div class="email-body"> ${replaceWhitespace(
+          qoutedContent.content.message
+        )}</div>
+        </div><p>&nbsp</p>;
         `;
     } else if (qoutedContent.from === "note") {
       return `
-       <blockquote class="quote-text">
-       ${replaceWhitespace(qoutedContent.content.appuser_name)} wrote: 
-       ${replaceWhitespace(qoutedContent.content.content)}
-       </blockquote><p>&nbsp;</p>
-      `
+       <div class="quote-text">
+      <div class="email-content"> ${replaceWhitespace(
+        qoutedContent.content.appuser_name
+      )} wrote: </div>
+      <div class="email-body"> ${replaceWhitespace(
+        qoutedContent.content.content
+      )} </div>
+       </div><p>&nbsp;</p>
+      `;
     }
   };
 

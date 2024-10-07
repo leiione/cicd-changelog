@@ -5,38 +5,50 @@ import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
 import HookCheckbox from "Common/hookFields/HookCheckbox";
 import { useMutation } from "@apollo/client";
-import { ADD_NEW_TICKET_EMAIL, GET_TICKET_MESSAGES, GET_TICKET } from "TicketDetails/TicketGraphQL";
+import {
+  ADD_NEW_TICKET_EMAIL,
+  GET_TICKET_MESSAGES,
+  GET_TICKET,
+} from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 import HookTypeAheadEmailField from "Common/hookFields/HookTypeAheadEmailField";
 
-const defaultMoreFields = ["Cc", "Bcc"]
+const defaultMoreFields = ["Cc", "Bcc"];
 
-const AddEmailFields = props => {
-  const { form, handleCancel, onSubmit } = props
+const AddEmailFields = (props) => {
+  const { form, handleCancel, onSubmit } = props;
   const {
     control,
     setValue,
     watch,
     formState: { isSubmitting },
-    handleSubmit
-  } = form
-  const [moreFields, setMoreFields] = React.useState([])
+    handleSubmit,
+  } = form;
+  const [moreFields, setMoreFields] = React.useState([]);
 
-  const values = watch()
+  const values = watch();
 
   const handleMessageChange = (content) => {
-    setValue("message", content, { shouldValidate: true })
-  }
+    setValue("message", content, { shouldValidate: true });
+  };
 
-  const isFormValid = React.useMemo(() => (
-    values.to.length > 0 && values.message && !values.toFreeFieldText && !values.ccFreeFieldText && !values.bccFreeFieldText
-  ), [values])
+  const isFormValid = React.useMemo(
+    () =>
+      values.to.length > 0 &&
+      values.message &&
+      !values.toFreeFieldText &&
+      !values.ccFreeFieldText &&
+      !values.bccFreeFieldText,
+    [values]
+  );
 
   return (
     <Grid container spacing={0} style={{ padding: "0px 10px 10px" }}>
       <Grid item xs={9} style={{ display: "inline-flex" }}>
-        <Typography variant="subtitle1" style={{ margin: "7px 10px 0px 0px" }}>To: </Typography>
+        <Typography variant="subtitle1" style={{ margin: "7px 10px 0px 0px" }}>
+          To:{" "}
+        </Typography>
         <HookTypeAheadEmailField
           control={control}
           name="to"
@@ -58,9 +70,9 @@ const AddEmailFields = props => {
                 >
                   {item}
                 </Typography>
-              )
+              );
             }
-            return null
+            return null;
           })}
         </div>
       </Grid>
@@ -68,7 +80,10 @@ const AddEmailFields = props => {
         <>
           <Divider style={{ width: "100%" }} />
           <Grid item xs={12} key={index} style={{ display: "inline-flex" }}>
-            <Typography variant="subtitle1" style={{ margin: "7px 10px 0px 0px" }}>{`${item}: `}</Typography>
+            <Typography
+              variant="subtitle1"
+              style={{ margin: "7px 10px 0px 0px" }}
+            >{`${item}: `}</Typography>
             <HookTypeAheadEmailField
               control={control}
               name={item.toLowerCase()}
@@ -86,7 +101,14 @@ const AddEmailFields = props => {
       <Divider style={{ width: "100%", marginLeft: "10px" }} /> 
       */}
       <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
-        <div style={{ position: "absolute", right: "38px", zIndex: 99, padding: "23px 3px" }}>
+        <div
+          style={{
+            position: "absolute",
+            right: "38px",
+            zIndex: 99,
+            padding: "23px 3px",
+          }}
+        >
           <HookCheckbox
             control={control}
             name={"flag_internal"}
@@ -94,7 +116,7 @@ const AddEmailFields = props => {
           />
         </div>
       </Grid>
-      <Grid item xs={12} style={{ marginTop: "10px" }}>
+      <Grid item xs={12} className="mt-2">
         <EditorContainer
           content={values.message}
           setContent={handleMessageChange}
@@ -102,40 +124,42 @@ const AddEmailFields = props => {
           disabled={isSubmitting}
         />
       </Grid>
-      <Grid item xs={12} style={{ textAlign: "end", marginTop: "-10px" }}>
+      <Grid item xs={12} textAlign={"right"}>
         <ProgressButton
           color="primary"
-          size="medium"
+          variant="outlined"
           onClick={handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}
           disabled={!isFormValid || isSubmitting}
         >
           Send
         </ProgressButton>
-        <Button color="default" size="medium" style={{ padding: "5px" }} onClick={handleCancel}>
+        <Button color="primary" variant="outlined" onClick={handleCancel}>
           Cancel
         </Button>
       </Grid>
     </Grid>
-  )
-}
+  );
+};
 
-const AddEmailForm = props => {
-  const dispatch = useDispatch()
-  const { ticket, handleCancel, replyMessage } = props
-  const [sendTicketEmail] = useMutation(ADD_NEW_TICKET_EMAIL)
+const AddEmailForm = (props) => {
+  const dispatch = useDispatch();
+  const { ticket, handleCancel, replyMessage } = props;
+  const [sendTicketEmail] = useMutation(ADD_NEW_TICKET_EMAIL);
 
   const initialValues = React.useMemo(() => {
-    const toEmail = []
+    const toEmail = [];
     if (replyMessage.recipient && replyMessage.recipient.length > 0) {
-      replyMessage.recipient.forEach(email => {
-        toEmail.push({ to: email, customOption: true })
-      })
+      replyMessage.recipient.forEach((email) => {
+        toEmail.push({ to: email, customOption: true });
+      });
     } else {
-      const contactEmail = ticket.ticket_contact_email ? ticket.ticket_contact_email.split(",") : []
-      contactEmail.forEach(email => {
-        toEmail.push({ to: email, customOption: true })
-      })
+      const contactEmail = ticket.ticket_contact_email
+        ? ticket.ticket_contact_email.split(",")
+        : [];
+      contactEmail.forEach((email) => {
+        toEmail.push({ to: email, customOption: true });
+      });
     }
 
     return {
@@ -144,49 +168,74 @@ const AddEmailForm = props => {
       bcc: [],
       subject: `[Ticket#${ticket.ticket_id}] ${ticket.description}`,
       message: replyMessage ? replyMessage.message : "",
-      flag_internal: false
-    }
-  }, [ticket, replyMessage])
+      flag_internal: false,
+    };
+  }, [ticket, replyMessage]);
 
   const form = useForm({
     defaultValues: initialValues,
     // resolver: yupResolver(validationSchemaSubLocation),
     mode: "onChange",
-    reValidateMode: "onSubmit"
+    reValidateMode: "onSubmit",
   });
 
-  const onSubmit = async values => {
+  const onSubmit = async (values) => {
     try {
       const variables = {
         ticket_id: ticket.ticket_id,
-        to: (values.to.map(item => item.to).join(",")).replace(/ /g, ''),
-        cc: (values.cc.map(item => item.cc).join(",")).replace(/ /g, ''),
-        bcc: (values.bcc.map(item => item.bcc).join(",")).replace(/ /g, ''),
+        to: values.to
+          .map((item) => item.to)
+          .join(",")
+          .replace(/ /g, ""),
+        cc: values.cc
+          .map((item) => item.cc)
+          .join(",")
+          .replace(/ /g, ""),
+        bcc: values.bcc
+          .map((item) => item.bcc)
+          .join(",")
+          .replace(/ /g, ""),
         message: values.message,
         customer_id: ticket.customer_id || 0,
         subject: values.subject,
-        flag_internal: values.flag_internal
-      }
+        flag_internal: values.flag_internal,
+      };
       await sendTicketEmail({
         variables,
         refetchQueries: [
-          { query: GET_TICKET_MESSAGES, variables: { ticket_id: ticket.ticket_id } },
+          {
+            query: GET_TICKET_MESSAGES,
+            variables: { ticket_id: ticket.ticket_id },
+          },
           { query: GET_TICKET, variables: { id: ticket.ticket_id } },
         ],
         update: (cache, { data }) => {
-          if (data.sendTicketEmail && data.sendTicketEmail.status === "failed") {
-            dispatch(showSnackbar({ message: "Email failed to send.", severity: "error" }))
+          if (
+            data.sendTicketEmail &&
+            data.sendTicketEmail.status === "failed"
+          ) {
+            dispatch(
+              showSnackbar({
+                message: "Email failed to send.",
+                severity: "error",
+              })
+            );
           } else {
-            dispatch(showSnackbar({ message: "Email was sent successdully.", severity: "success" }))
+            dispatch(
+              showSnackbar({
+                message: "Email was sent successdully.",
+                severity: "success",
+              })
+            );
           }
-        }
+        },
       });
-      handleCancel()
+      handleCancel();
     } catch (error) {
-      const msg = error.message.replace("GraphQL error: ", "")
-      dispatch(showSnackbar({ message: msg, severity: "error" }))
+      const msg = error.message.replace("GraphQL error: ", "");
+      dispatch(showSnackbar({ message: msg, severity: "error" }));
     }
-  }
+  };
 
   return (
     <AddEmailFields
@@ -195,7 +244,7 @@ const AddEmailForm = props => {
       handleCancel={handleCancel}
       onSubmit={onSubmit}
     />
-  )
-}
+  );
+};
 
 export default React.memo(AddEmailForm);

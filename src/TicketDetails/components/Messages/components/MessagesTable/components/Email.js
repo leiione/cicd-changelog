@@ -14,7 +14,7 @@ import {
   faMessagePlus,
   faTrash,
   faReply,
-} from "@fortawesome/pro-light-svg-icons";
+} from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
 import moment from "moment-timezone";
 import { EmailOutlined } from "@mui/icons-material";
 import LinesEllipsis from "react-lines-ellipsis";
@@ -161,18 +161,18 @@ const Email = (props) => {
                 </Typography>
               </Grid>
               {message.traffic === 'INBOUND' && <Grid item xs="auto">
-                <IconButton size="small" onClick={() => handleReplyEmail(isHtml ? h2p(text) : parse(text), replyEmail)}>
-                  <FontAwesomeIcon icon={faReply} />
+                <IconButton className="primary-hover" size="small" onClick={() => handleReplyEmail(isHtml ? h2p(text) : parse(text), replyEmail)}>
+                  <FontAwesomeIcon icon={faReply} className="primary-hover" />
                 </IconButton>
               </Grid>}
               <Grid item xs="auto">
-                <IconButton size="small">
-                  <FontAwesomeIcon icon={faMessagePlus} onClick={() => handleQouteNote("email", message)} />
+                <IconButton size="small" className="primary-hover">
+                  <FontAwesomeIcon className="primary-hover" icon={faMessagePlus} onClick={() => handleQouteNote("email", message)} />
                 </IconButton>
               </Grid>
               <Grid item xs="auto">
-                <IconButton size="small" onClick={() => setOpenDialog(true)}>
-                  <FontAwesomeIcon icon={faTrash} />
+                <IconButton size="small" className="primary-hover" onClick={() => setOpenDialog(true)}>
+                  <FontAwesomeIcon className="primary-hover" icon={faTrash} />
                 </IconButton>
               </Grid>
             </Grid>
