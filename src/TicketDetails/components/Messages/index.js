@@ -146,14 +146,6 @@ const Messages = (props) => {
             />
           )}
           {addNew === "note" && (
-            <AddEmailForm
-              className="primary-hover"
-              ticket={ticket}
-              handleCancel={handleCancel}
-              replyMessage={replyMessage}
-            />
-          )}
-          {addNew === "note" && (
             <AddNoteForm
               ticket={ticket}
               handleCancel={handleCancel}
