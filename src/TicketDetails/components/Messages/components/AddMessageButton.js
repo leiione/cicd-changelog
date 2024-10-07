@@ -36,7 +36,7 @@ const AddMessageButton = (props) => {
           buttonLabel="Add Message"
           lablesVisible={lablesVisible}
           onClick={onIconClick}
-          buttonIcon={<FontAwesomeIcon icon={faMessageLines} />}
+          buttonIcon={<FontAwesomeIcon className="primary-hover" icon={faMessageLines} size="lg" />}
           disabled={error}
         />
       </span>

@@ -3,7 +3,10 @@ import AccordionCard from "../../../Common/AccordionCard";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
 import Filter from "./components/Filter";
 import MessagesTable from "./components/MessagesTable";
-import { GET_TICKET_MESSAGES, GET_TICKET_NOTES } from "TicketDetails/TicketGraphQL";
+import {
+  GET_TICKET_MESSAGES,
+  GET_TICKET_NOTES,
+} from "TicketDetails/TicketGraphQL";
 import { useQuery } from "@apollo/client";
 import Loader from "components/Loader";
 import { checkIfCacheExists } from "config/apollo";
@@ -29,7 +32,8 @@ const Messages = (props) => {
   } = useQuery(GET_TICKET_MESSAGES, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: "cache-and-network",
-    skip: !ticket.ticket_id || (filter.length === 1 && filter.includes("notes")),
+    skip:
+      !ticket.ticket_id || (filter.length === 1 && filter.includes("notes")),
   });
   const cacheExists = checkIfCacheExists(client, {
     query: GET_TICKET_MESSAGES,
@@ -56,7 +60,13 @@ const Messages = (props) => {
   let messages = [];
 
   // Handle merging of data based on selected filters
-  if (filter.includes("all") && data && data.ticketMessages && dataNotes && dataNotes.ticketNotes) {
+  if (
+    filter.includes("all") &&
+    data &&
+    data.ticketMessages &&
+    dataNotes &&
+    dataNotes.ticketNotes
+  ) {
     messages = [...data.ticketMessages, ...dataNotes.ticketNotes];
   } else {
     // Combine notes and messages based on filter selection
@@ -82,7 +92,7 @@ const Messages = (props) => {
       // add warning dialog
     }
     const formatMessage = `
-      <blockquote class="quote-text">
+      <div class="quote-text">
       <p>${recipient}</p>
       ${message.replace(/\r|\r\n|\n/g, "<br>")}
       </blockquote><p>&nbsp;</p>
@@ -112,7 +122,11 @@ const Messages = (props) => {
       iconButtons={
         <>
           <AddNoteButton setAddNew={setAddNew} lablesVisible={lablesVisible} />
-          <AddMessageButton setAddNew={setAddNew} lablesVisible={lablesVisible} error={messageError} />
+          <AddMessageButton
+            setAddNew={setAddNew}
+            lablesVisible={lablesVisible}
+            error={messageError}
+          />
         </>
       }
       menuOption={
@@ -124,13 +138,26 @@ const Messages = (props) => {
       ) : (
         <>
           {addNew === "email" && (
-            <AddEmailForm ticket={ticket} handleCancel={handleCancel} replyMessage={replyMessage} />
+            <AddEmailForm
+              className="primary-hover"
+              ticket={ticket}
+              handleCancel={handleCancel}
+              replyMessage={replyMessage}
+            />
           )}
           {addNew === "note" && (
-            <AddNoteForm ticket={ticket} handleCancel={handleCancel} qoutedContent={qoutedContent} />
+            <AddNoteForm
+              ticket={ticket}
+              handleCancel={handleCancel}
+              qoutedContent={qoutedContent}
+            />
           )}
           {addNew === "sms" && (
-            <AddSMSForm ticket={ticket} handleCancel={handleCancel} recipient={replyMessage.recipient} />
+            <AddSMSForm
+              ticket={ticket}
+              handleCancel={handleCancel}
+              recipient={replyMessage.recipient}
+            />
           )}
           <Filter setFilter={setFilter} />
           <MessagesTable

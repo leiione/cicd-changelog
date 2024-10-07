@@ -3,30 +3,35 @@ import { useForm } from "react-hook-form";
 import { Button, Divider, Grid, Typography } from "@mui/material";
 import ProgressButton from "Common/ProgressButton";
 import { useMutation } from "@apollo/client";
-import { ADD_NEW_TICKET_SMS, GET_TICKET_MESSAGES, GET_TICKET } from "TicketDetails/TicketGraphQL";
+import {
+  ADD_NEW_TICKET_SMS,
+  GET_TICKET_MESSAGES,
+  GET_TICKET,
+} from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 import h2p from "html2plaintext";
 import HookTypeAheadSMSField from "Common/hookFields/HookTypeAheadSMSField";
 
-const AddSMSFields = props => {
-  const { form, handleCancel, onSubmit, recipient  } = props;
+const AddSMSFields = (props) => {
+  const { form, handleCancel, onSubmit, recipient } = props;
   const {
     control,
     setValue,
     watch,
     formState: { isSubmitting },
-    handleSubmit
+    handleSubmit,
   } = form;
 
   const values = watch();
 
   React.useEffect(() => {
     if (recipient) {
-      setValue("to", [{ to: recipient, customOption: true }], { shouldValidate: true });
+      setValue("to", [{ to: recipient, customOption: true }], {
+        shouldValidate: true,
+      });
     }
   }, [recipient, setValue]);
-
 
   const handleMessageChange = (event) => {
     const newValue = event.target.value;
@@ -35,12 +40,17 @@ const AddSMSFields = props => {
     }
   };
 
-  const isFormValid = React.useMemo(() => (values.to.length > 0 && values.message && !values.toFreeFieldText), [values]);
+  const isFormValid = React.useMemo(
+    () => values.to.length > 0 && values.message && !values.toFreeFieldText,
+    [values]
+  );
 
   return (
     <Grid container spacing={0} style={{ padding: "0px 10px 10px" }}>
       <Grid item xs={9} style={{ display: "inline-flex" }}>
-        <Typography variant="subtitle1" style={{ margin: "7px 10px 0px 0px" }}>To: </Typography>
+        <Typography variant="subtitle1" style={{ margin: "7px 10px 0px 0px" }}>
+          To:
+        </Typography>
         <HookTypeAheadSMSField
           control={control}
           name="to"
@@ -62,34 +72,43 @@ const AddSMSFields = props => {
         <textarea
           value={values.message}
           onChange={handleMessageChange}
+          placeholder="Add Text Here...."
           style={{
             width: "100%",
-            height: "180px",
+            height: "160px",
             backgroundColor: "#fcefef",
-            fontFamily: "Helvetica, Arial, sans-serif",
             fontSize: "12px",
             padding: "10px",
             border: "1px solid #ccc",
             borderRadius: "4px",
-            resize: "none"
+            resize: "none",
           }}
           disabled={isSubmitting}
         />
-        <Typography variant="caption" style={{ display: "block", textAlign: "left", marginTop: "5px" }}>
+      </Grid>
+      <Grid item xs={6} alignItems={"left"}>
+        <Typography
+          variant="caption"
+          style={{ display: "block", textAlign: "left", marginTop: "5px" }}
+        >
           {values.message.length}/160
         </Typography>
       </Grid>
-      <Grid item xs={12} style={{ textAlign: "end", marginTop: "-10px" }}>
+      <Grid item xs={6} textAlign={"right"}>
         <ProgressButton
           color="primary"
-          size="medium"
+            variant="outlined"
           onClick={handleSubmit(onSubmit)}
           isSubmitting={isSubmitting}
           disabled={!isFormValid || isSubmitting}
         >
           Send
         </ProgressButton>
-        <Button color="default" size="medium" style={{ padding: "5px" }} onClick={handleCancel}>
+        <Button
+          color="default" 
+          variant="outlined"
+          onClick={handleCancel}
+        >
           Cancel
         </Button>
       </Grid>
@@ -97,9 +116,9 @@ const AddSMSFields = props => {
   );
 };
 
-const AddSMSForm = props => {
+const AddSMSForm = (props) => {
   const dispatch = useDispatch();
-  const { ticket, handleCancel, recipient  } = props;
+  const { ticket, handleCancel, recipient } = props;
   const [sendTicketSMS] = useMutation(ADD_NEW_TICKET_SMS);
 
   const initialValues = React.useMemo(() => {
@@ -107,9 +126,11 @@ const AddSMSForm = props => {
     if (recipient) {
       toSMS.push({ to: recipient, customOption: true });
     } else {
-      const contactSMS = ticket.ticket_contact_numbers ? ticket.ticket_contact_numbers.split(",") : [];
-      contactSMS.forEach(SMS => {
-        let cleanedSMS = SMS.replace(/[^\d]/g, ''); // Allow only numbers
+      const contactSMS = ticket.ticket_contact_numbers
+        ? ticket.ticket_contact_numbers.split(",")
+        : [];
+      contactSMS.forEach((SMS) => {
+        let cleanedSMS = SMS.replace(/[^\d]/g, ""); // Allow only numbers
         if (cleanedSMS.length > 10) {
           cleanedSMS = cleanedSMS.slice(0, 10); // Limit to 10 digits
         }
@@ -121,21 +142,24 @@ const AddSMSForm = props => {
       to: toSMS,
       subject: `[Ticket#${ticket.ticket_id}] ${ticket.description}`,
       message: "",
-      flag_internal: false
+      flag_internal: false,
     };
   }, [ticket, recipient]);
 
   const form = useForm({
     defaultValues: initialValues,
     mode: "onChange",
-    reValidateMode: "onSubmit"
+    reValidateMode: "onSubmit",
   });
 
-  const onSubmit = async values => {
+  const onSubmit = async (values) => {
     try {
       const variables = {
         ticket_id: ticket.ticket_id,
-        to: (values.to.map(item => item.to).join(",")).replace(/ /g,''),
+        to: values.to
+          .map((item) => item.to)
+          .join(",")
+          .replace(/ /g, ""),
         message: h2p(values.message),
         customer_id: ticket.customer_id || 0,
         subject: values.subject,
@@ -144,16 +168,29 @@ const AddSMSForm = props => {
       await sendTicketSMS({
         variables,
         refetchQueries: [
-          { query: GET_TICKET_MESSAGES, variables: { ticket_id: ticket.ticket_id } },
+          {
+            query: GET_TICKET_MESSAGES,
+            variables: { ticket_id: ticket.ticket_id },
+          },
           { query: GET_TICKET, variables: { id: ticket.ticket_id } },
         ],
         update: (cache, { data }) => {
           if (data.sendTicketSMS && data.sendTicketSMS.status === "failed") {
-            dispatch(showSnackbar({ message: "SMS failed to send.", severity: "error" }));
+            dispatch(
+              showSnackbar({
+                message: "SMS failed to send.",
+                severity: "error",
+              })
+            );
           } else {
-            dispatch(showSnackbar({ message: "SMS was sent successfully.", severity: "success" }));
+            dispatch(
+              showSnackbar({
+                message: "SMS was sent successfully.",
+                severity: "success",
+              })
+            );
           }
-        }
+        },
       });
       handleCancel();
     } catch (error) {

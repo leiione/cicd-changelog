@@ -9,6 +9,7 @@ import {
   Modal,
   Grid,
   Chip,
+  Tooltip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -244,6 +245,7 @@ const Attachments = (props) => {
         }
       >
         <Box>
+          <Tooltip title="Attach File">
           <Files
             className="files-dropzone"
             onError={handleError}
@@ -254,6 +256,7 @@ const Attachments = (props) => {
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
+           
             <Box className="upload-image-placeholder">
               <label htmlFor="upload-file-input" className="upload-file-input">
                 <Typography variant="body2" className="mt-2">
@@ -266,6 +269,7 @@ const Attachments = (props) => {
               </label>
             </Box>
           </Files>
+          </Tooltip>
           <Grid container spacing={1} className="upload-image-row">
             {selectedFiles.map((file, index) => (
               <Grid item xs={2} sm={2} md={2} key={index}>
@@ -330,6 +334,7 @@ const Attachments = (props) => {
 
             {selectedFiles.length > 0 && selectedFiles.length < 4 && (
               <Grid item xs={2} sm={2} md={2}>
+                <Tooltip title="Attache File">
                 <Files
                   className="files-dropzone"
                   onError={handleError}
@@ -343,6 +348,7 @@ const Attachments = (props) => {
                     </Typography>
                   </Box>
                 </Files>
+                </Tooltip>
               </Grid>
             )}
           </Grid>

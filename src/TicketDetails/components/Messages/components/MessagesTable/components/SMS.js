@@ -14,11 +14,11 @@ import {
   faMessagePlus,
   faTrash,
   faReply,
-} from "@fortawesome/pro-light-svg-icons";
+  faMessageSms
+} from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
 import h2p from "html2plaintext";
 import parse from "html-react-parser";
 import moment from "moment-timezone";
-import { SmsOutlined } from "@mui/icons-material";
 import LinesEllipsis from "react-lines-ellipsis";
 import DialogAlert from "components/DialogAlert";
 
@@ -135,7 +135,7 @@ const SMS = (props) => {
           onMouseOver={(e) => setAnchorEl(e.currentTarget)}
           onMouseLeave={() => setAnchorEl(null)}
         >
-          <SmsOutlined className="text-danger" />
+          <FontAwesomeIcon className="text-danger" icon={faMessageSms} />
           {anchorEl && (
             <SMSPopover
               anchorEl={anchorEl}
@@ -170,13 +170,14 @@ const SMS = (props) => {
                       handleReplySMS(isHtml ? h2p(text) : parse(text), replySMS)
                     }
                   >
-                    <FontAwesomeIcon icon={faReply} />
+                    <FontAwesomeIcon className="primary-hover" icon={faReply} />
                   </IconButton>
                 </Grid>
               )}
               <Grid item xs="auto">
                 <IconButton size="small">
                   <FontAwesomeIcon
+                  className="primary-hover"
                     icon={faMessagePlus}
                     onClick={() => handleQouteNote("sms", message)}
                   />
@@ -184,7 +185,7 @@ const SMS = (props) => {
               </Grid>
               <Grid item xs="auto">
                 <IconButton size="small" onClick={handleDeleteClick}>
-                  <FontAwesomeIcon icon={faTrash} />
+                  <FontAwesomeIcon className="primary-hover" icon={faTrash} />
                 </IconButton>
               </Grid>
             </Grid>

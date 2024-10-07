@@ -35,8 +35,9 @@ const EditorContainer = (props) => {
         setup: handleEditorSetup,
         content_css: "default",
         content_style: `body { font-family:Helvetica,Arial,sans-serif; font-size:12px; background-color: ${background}; }
-                        .non-editable { background-color: #f0f0f0; padding: 5px; border: 1px solid #ddd; color: gray; }
+                        .quote-text { background-color: #f7f7f7; border: 1px solid #ccc; margin : 0 !important; padding :1rem; font-size: 12px;}
                         `,
+                        
         readonly: false, // Make editor generally editable
         extended_valid_elements: "div[contenteditable|class]",
         placeholder: "Write Something here..."

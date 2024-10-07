@@ -17,7 +17,8 @@ import {
   faNote,
   faTrash,
   faReply,
-} from "@fortawesome/pro-light-svg-icons";
+} from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
+
 import moment from "moment-timezone";
 import LinesEllipsis from "react-lines-ellipsis";
 import h2p from "html2plaintext";
@@ -77,12 +78,13 @@ const Note = (props) => {
               </Grid>
               <Grid item xs="auto">
                 <MuiIconButton size="small">
-                  <FontAwesomeIcon icon={faReply} />
+                  <FontAwesomeIcon className="primary-hover" icon={faReply} />
                 </MuiIconButton>
               </Grid>
               <Grid item xs="auto">
                 <MuiIconButton size="small">
                   <FontAwesomeIcon
+                  className="primary-hover"
                     icon={faMessagePlus}
                     onClick={() => handleQouteNote("note", message)}
                   />
@@ -91,6 +93,7 @@ const Note = (props) => {
               <Grid item xs="auto">
                 <MuiIconButton size="small">
                   <FontAwesomeIcon
+                  className="primary-hover"
                     icon={faTrash}
                     onClick={() => setOpenDialog(true)}
                   />
