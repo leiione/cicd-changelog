@@ -13,6 +13,7 @@ export const GET_TICKET = gql`
       timestamp
       signature_url
       status
+      payment_status
       type
       ticket_type_id
       assigned_name

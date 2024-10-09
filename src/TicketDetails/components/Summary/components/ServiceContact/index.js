@@ -4,6 +4,7 @@ import {
   ExpandLess,
   ExpandMore,
 } from "@mui/icons-material";
+import { Person as PersonIcon, PersonOutline as PersonOutlineIcon } from "@mui/icons-material"
 import {
   Button,
   Collapse,
@@ -23,7 +24,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { setCardPreferences } from "config/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBuildings, faEnvelope, faLocationDot, faPhone } from "@fortawesome/pro-regular-svg-icons";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { faUser as faUserOutline } from '@fortawesome/free-regular-svg-icons'; // Import the outline icon
+
 
 const ServiceContact = (props) => {
   const dispatch = useDispatch();
@@ -151,6 +154,34 @@ const ServiceContact = (props) => {
     }, 500); // so value wont change
   };
 
+  const getPaymentStatusIconClass = (payment_status) => {
+    const iconStyle = { fontSize: '2rem' }; 
+    switch (payment_status) {
+      case 1:
+        return "text-success"
+      case 2:
+        return "text-warning"
+      case 4:
+        return "text-danger"
+      case 8:
+        return "text-danger"
+      case 9:
+        return "text-primary"
+      case 10:
+      case 20:
+      return "text-muted"
+      default:
+        return "text-light"
+    }
+  }
+
+  const getPaymentStatusIcon = (payment_status) => {
+    if (payment_status === 8) {
+        return faUserOutline; // Return the outline icon for payment_status 8
+    }
+    return faUser; // Return the default solid icon for other statuses
+};
+
   return (
     <Grid container spacing={0} alignItems="center">
       <Grid item xs="auto">
@@ -207,7 +238,12 @@ const ServiceContact = (props) => {
             {contact.first_name && (
               <Grid item xs={12}>
                 <Typography variant="subtitle1">
-                  <FontAwesomeIcon  icon={faUser}className="fa-fw text-success f-16 mr-2" />
+                <FontAwesomeIcon
+                    icon={getPaymentStatusIcon(ticket.payment_status)}
+                    className={`fa-fw f-16 mr-2 ${getPaymentStatusIconClass(ticket.payment_status)}`}
+                    style={{ fontSize: '2rem' }} // Increase icon size
+                />
+                  {/* {getStatusIcon(ticket.payment_status)} */}
                   {`${contact.first_name} ${contact.last_name}`}
                 </Typography>
               </Grid>
