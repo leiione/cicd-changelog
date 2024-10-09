@@ -201,7 +201,9 @@ const AddNoteFields = (props) => {
             previewImage={previewImage}
           />
         </Grid>
-        <Grid item xs={12} textAlign={"right"}>
+       
+      </Grid>
+      <div className="text-right">
           <ProgressButton
             color="primary"
             variant="outlined"
@@ -211,8 +213,7 @@ const AddNoteFields = (props) => {
           > Save
           </ProgressButton>
           <Button color="default" variant="outlined" onClick={handleCancel}>Cancel</Button>
-        </Grid>
-      </Grid>
+        </div>
     </div>
   );
 };

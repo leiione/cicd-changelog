@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faNoteMedical } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
+import { faNote } from "@fortawesome/pro-regular-svg-icons";
 import ButtonWithLabel from "Common/ButtonWithLabel";
 import { preventEvent } from "Common/helper";
 import { setCardPreferences } from "config/store";
@@ -26,7 +26,7 @@ const AddNoteButton = (props) => {
           buttonLabel="Add Note"
           lablesVisible={lablesVisible}
           onClick={(event) => handleAdd(event, "note")}
-          buttonIcon={<FontAwesomeIcon className="primary-hover" icon={faNoteMedical} size="lg" />}
+          buttonIcon={<FontAwesomeIcon className="primary-hover" icon={faNote} size="lg" />}
         />
     </>
   );

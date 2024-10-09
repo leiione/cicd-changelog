@@ -46,11 +46,13 @@ const AddSMSFields = (props) => {
   );
 
   return (
-    <Grid container spacing={0} style={{ padding: "0px 10px 10px" }}>
-      <Grid item xs={9} style={{ display: "inline-flex" }}>
-        <Typography variant="subtitle1" style={{ margin: "7px 10px 0px 0px" }}>
+    <Grid container spacing={1} alignItems={"center"} >
+      <Grid item xs={"auto"} >
+        <Typography variant="subtitle1">
           To:
         </Typography>
+        </Grid>
+        <Grid item xs={9}>
         <HookTypeAheadSMSField
           control={control}
           name="to"
@@ -59,7 +61,9 @@ const AddSMSFields = (props) => {
           errorFieldFreeText="toFreeFieldText"
         />
       </Grid>
-      <Divider style={{ width: "100%" }} />
+      <Grid item xs={12}>
+      <Divider />
+      </Grid>
       {/* <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
         <HookCheckbox
           control={control}
@@ -68,33 +72,26 @@ const AddSMSFields = (props) => {
           style={{ margin: "10px 0" }}
         />
       </Grid> */}
-      <Grid item xs={12} style={{ marginTop: "10px" }}>
+      <Grid item xs={12}>
         <textarea
+
           value={values.message}
           onChange={handleMessageChange}
           placeholder="Add Text Here...."
+          className="bg-lightest p-2 border rounded w-100 mt-2"
           style={{
-            width: "100%",
             height: "160px",
-            backgroundColor: "#fcefef",
-            fontSize: "12px",
-            padding: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
             resize: "none",
           }}
           disabled={isSubmitting}
         />
       </Grid>
-      <Grid item xs={6} alignItems={"left"}>
-        <Typography
-          variant="caption"
-          style={{ display: "block", textAlign: "left", marginTop: "5px" }}
-        >
+      <Grid item xs className="mb-3">
+        <Typography variant="caption" >
           {values.message.length}/160
         </Typography>
       </Grid>
-      <Grid item xs={6} textAlign={"right"}>
+      <Grid item xs={"auto"}>
         <ProgressButton
           color="primary"
             variant="outlined"
