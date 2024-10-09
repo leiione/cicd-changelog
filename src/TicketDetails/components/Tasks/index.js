@@ -259,7 +259,6 @@ const Tasks = (props) => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            onClick={() => onTaskClick(task)}
                             style={{
                               ...getItemStyle(snapshot.isDragging, provided.draggableProps.style),
                               backgroundColor: task.converted_ticket_id !== null ? '#e7f2fe' : 'inherit',
@@ -358,6 +357,7 @@ const Tasks = (props) => {
                                   >
                                     {task.converted_ticket_id !== null ? (
                                       <span
+                                      onClick={() => onTaskClick(task)}
                                         style={{ color: '#0053F4', cursor: 'pointer' }}
                                       >
                                         {`Ticket ${task.converted_ticket_id} `}

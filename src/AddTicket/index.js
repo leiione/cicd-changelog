@@ -95,7 +95,6 @@ const AddTicket = (props) => {
 
   // console.log("From microfrontend" ,ticket)
 
-
   let initialValues = {
     category_type: "",
     priority: "Normal",
