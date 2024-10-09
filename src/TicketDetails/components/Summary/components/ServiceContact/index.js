@@ -4,7 +4,7 @@ import {
   ExpandLess,
   ExpandMore,
 } from "@mui/icons-material";
-import { Person as PersonIcon, PersonOutline as PersonOutlineIcon } from "@mui/icons-material"
+// import { Person as PersonIcon, PersonOutline as PersonOutlineIcon } from "@mui/icons-material"
 import {
   Button,
   Collapse,
@@ -155,7 +155,6 @@ const ServiceContact = (props) => {
   };
 
   const getPaymentStatusIconClass = (payment_status) => {
-    const iconStyle = { fontSize: '2rem' }; 
     switch (payment_status) {
       case 1:
         return "text-success"
