@@ -318,6 +318,11 @@ export const GET_TICKET_MESSAGES = gql`
       traffic
       cc
       bcc
+      attachments {
+        id
+        filename
+        file_url
+      }
     }
   }
 `;

@@ -7,3 +7,6 @@ export const acceptedFormats = [
     "application/x-zip-compressed",
   ];
 export const maxFileSize = 12 * 1024 * 1024;
+
+
+export const IMAGE_EXTENSION_LIST = ["jpg", "bmp", "gif", "jpg", "jpeg", "png"]
