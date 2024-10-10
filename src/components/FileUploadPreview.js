@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Grid,
@@ -12,13 +12,21 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const FileUploadPreview = ({
   selectedFiles,
-  uploadProgress,
+  uploadProgress = {},
   removeFile,
-  openPreview,
-  handlePreviewOpen,
-  handlePreviewClose,
-  previewImage,
 }) => {
+  const [previewImage, setPreviewImage] = useState("");
+  const [openPreview, setOpenPreview] = useState(false);
+
+  const handlePreviewOpen = (imageSrc) => {
+    setPreviewImage(imageSrc);
+    setOpenPreview(true);
+  };
+
+  const handlePreviewClose = () => {
+    setOpenPreview(false);
+    setPreviewImage("");
+  };
   return (
     <Box>
       <Grid container spacing={1} className="upload-image-row">

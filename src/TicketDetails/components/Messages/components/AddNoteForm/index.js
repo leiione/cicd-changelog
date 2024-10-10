@@ -32,8 +32,6 @@ const AddNoteFields = (props) => {
   const values = watch();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploadProgress, setUploadProgress] = useState({});
-  const [openPreview, setOpenPreview] = useState(false);
-  const [previewImage, setPreviewImage] = useState("");
   const [filemapping, setFileMapping] = useState([]);
   const [uploadFile] = useMutation(UPLOAD_FILE_MUTATION);
   const dispatch = useDispatch();
@@ -105,16 +103,6 @@ const AddNoteFields = (props) => {
       delete updatedProgress[fileName];
       return updatedProgress;
     });
-  };
-
-  const handlePreviewOpen = (imageSrc) => {
-    setPreviewImage(imageSrc);
-    setOpenPreview(true);
-  };
-
-  const handlePreviewClose = () => {
-    setOpenPreview(false);
-    setPreviewImage("");
   };
 
   const handleMessageChange = (content) => {
@@ -195,10 +183,6 @@ const AddNoteFields = (props) => {
             selectedFiles={selectedFiles}
             uploadProgress={uploadProgress}
             removeFile={removeFile}
-            openPreview={openPreview}
-            handlePreviewOpen={handlePreviewOpen}
-            handlePreviewClose={handlePreviewClose}
-            previewImage={previewImage}
           />
         </Grid>
        
