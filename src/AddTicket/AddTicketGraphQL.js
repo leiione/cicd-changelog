@@ -8,6 +8,7 @@ export const ADD_TICKET = gql`
       status
       description
       task_id
+      type
     }
   }
 `

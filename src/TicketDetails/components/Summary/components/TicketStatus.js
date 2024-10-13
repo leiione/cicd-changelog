@@ -80,8 +80,7 @@ const TicketStatus = (props) => {
                 }
               }
               break
-              break
-            case "SIGNATURE":
+              case "SIGNATURE":
               // TODO
               break
             case "FOLLOWERS":

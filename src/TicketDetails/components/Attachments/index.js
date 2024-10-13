@@ -67,7 +67,7 @@ const Attachments = (props) => {
     setDefaultAttacmentCount(
       selectedFiles.filter((file) => file.default_attachment === "Y").length
     );
-  }, [selectedFiles]);
+  }, [selectedFiles,setDefaultAttacmentCount]);
 
   const handleFileChange = (files) => {
     const newFiles = Array.from(files);
@@ -268,7 +268,7 @@ const Attachments = (props) => {
       const updatedFiles = prevFiles.filter(file => file.id !== deleteAttachmentID);
   
       // Check if the label is present in any object in defaultAttachment
-      const defaultAttachmentObject = defaultAttachment.find(attachment => attachment.attachment_label == fileToDelete?.attachment_label);
+      const defaultAttachmentObject = defaultAttachment.find(attachment => attachment.attachment_label === fileToDelete?.attachment_label);
   
     
       // If the default attachment object is found, push it back into selected files
