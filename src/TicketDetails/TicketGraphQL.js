@@ -66,6 +66,8 @@ export const GET_TICKET = gql`
       }
       linked_count
       update_requirements
+      attachments
+      
     }
     ticketTypes {
       ticket_type_id
@@ -75,6 +77,7 @@ export const GET_TICKET = gql`
       id
       name
     }
+     
   }
 `;
 
@@ -460,16 +463,7 @@ export const ADD_TICKET_ATTACHMENT = gql`
 
 export const GET_TICKET_ATTACHMENTS = gql`
   query getTicketAttachments($ticket_id: Int!) {
-    ticketAttachments(ticket_id: $ticket_id) {
-      id
-      attachment_label
-      filename
-      attachment_type
-      file_url
-      ticket_id
-      is_additional_attachment
-      flag_attachments_required
-    }
+    ticketAttachments(ticket_id: $ticket_id)
   }
 `
 

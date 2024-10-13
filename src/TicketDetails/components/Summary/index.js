@@ -15,6 +15,7 @@ import ServiceContact from "./components/ServiceContact";
 import LinkedTickets from "./components/LinkedTickets";
 import {
   GET_TICKET,
+  GET_TICKET_ATTACHMENTS,
   UPDATE_TICKET_MUTATION,
 } from "TicketDetails/TicketGraphQL";
 import { useMutation } from "@apollo/client";
@@ -42,6 +43,7 @@ const Summary = (props) => {
     selectedAddress,
     setSelectedAddress,
     enableQueueJobs,
+    defaultAttacmentCount
   } = props;
 
   const showSignature = true; // this should come from ticket type settings
@@ -74,7 +76,10 @@ const Summary = (props) => {
           input_ticket: input_ticket,
         },
         refetchQueries: [
-          { query: GET_TICKET, variables: { id: customer.ticket_id } },
+          { query: GET_TICKET, variables: { id: customer.ticket_id }
+          },
+          { query: GET_TICKET_ATTACHMENTS, variables: { ticket_id: customer.ticket_id }
+          },
         ],
       });
       dispatch(
@@ -110,6 +115,7 @@ const Summary = (props) => {
             <TicketStatus
               ticket={customer}
               ticketStatuses={ticketStatuses}
+              defaultAttacmentCount={defaultAttacmentCount}
               handleUpdate={handleUpdate}
             />
           </>

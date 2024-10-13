@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 const TicketStatus = (props) => {
   const classes = useStyles();
-  const { ticket, ticketStatuses, handleUpdate } = props;
+  const { ticket, ticketStatuses, handleUpdate,defaultAttacmentCount } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [status, setStatus] = React.useState();
 
@@ -46,7 +46,8 @@ const TicketStatus = (props) => {
     let resolvingTooltipMsgs = []
     let closingTooltipMsgs = []
     const hasUncompletedTask = find(ticket.tasks, task => !task.is_completed && task.is_default)
-    if (ticket.update_requirements && ticket.update_requirements.length > 0) {
+    const hasUncompletedAttachments = defaultAttacmentCount > 0 
+     if (ticket.update_requirements && ticket.update_requirements.length > 0) {
       ticket.update_requirements.forEach(req => {
         if (req.flag_enabled === "Y") {
           const restrictedUserActions = getUserAction(req.restricted_user_action)
@@ -69,7 +70,16 @@ const TicketStatus = (props) => {
               // TODO
               break
             case "ATTACHMENTS":
-              // TODO
+              if (hasUncompletedAttachments) {
+                if (isResolvingTicketRestricted && !resolvingTooltipMsgs.includes("- all attachments")) {
+                  resolvingTooltipMsgs.push("- all attachments")
+                }
+
+                if (isClosingTicketRestricted && !closingTooltipMsgs.includes("- all attachments")) {
+                  closingTooltipMsgs.push("- all attachments")
+                }
+              }
+              break
               break
             case "SIGNATURE":
               // TODO
@@ -84,7 +94,7 @@ const TicketStatus = (props) => {
       })
     }
     return { resolvingTooltipMsgs, closingTooltipMsgs }
-  }, [ticket.tasks, ticket.update_requirements])
+  }, [ticket.tasks, ticket.update_requirements,defaultAttacmentCount])
 
   const resolvingClosingMessage = action => {
     if (['Resolved', 'Close'].includes(action)) {

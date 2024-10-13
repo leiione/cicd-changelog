@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import PropTypes from 'prop-types';
 import AccordionCard from "../../../Common/AccordionCard";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
 import {
@@ -15,7 +16,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
-import { faFilePdf } from "@fortawesome/pro-duotone-svg-icons";
+import { faFilePdf,faFileZip } from "@fortawesome/pro-duotone-svg-icons";
 import Files from "react-files";
 import { acceptedFormats } from "Common/constants";
 import { useDispatch } from "react-redux";
@@ -31,8 +32,9 @@ import GetAppIcon from "@mui/icons-material/GetApp";
 import DialogAlert from "components/DialogAlert";
 
 const Attachments = (props) => {
-  const { ticket } = props;
+  const { ticket, setDefaultAttacmentCount } = props;
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [defaultAttachment, setDefaultAttachment] = useState([]);
   const [uploadProgress, setUploadProgress] = useState({});
   const [openPreview, setOpenPreview] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
@@ -54,11 +56,17 @@ const Attachments = (props) => {
     if (data) {
       setSelectedFiles(data.ticketAttachments);
       setAttachmentCount(data.ticketAttachments.length);
-    }
+      setDefaultAttachment(data.ticketAttachments.filter((file) => file.attachment_label && file.attachment_label.trim() !== '')) }
+
   }, [data]);
 
   useEffect(() => {
-    setAttachmentCount(selectedFiles.length);
+    setAttachmentCount(selectedFiles.filter((file) => file.file_url).length
+  );
+
+    setDefaultAttacmentCount(
+      selectedFiles.filter((file) => file.default_attachment === "Y").length
+    );
   }, [selectedFiles]);
 
   const handleFileChange = (files) => {
@@ -74,6 +82,39 @@ const Attachments = (props) => {
     startUpload(filteredNewFiles);
   };
 
+  const handelDefaultFileChange = (files, attachment_label) => {
+    if (files.length > 0) {
+      const newFile = files[0]; // Assuming only one file is uploaded at a time
+      const updatedFiles = selectedFiles.map((file) => {
+        if (file.attachment_label === attachment_label) {
+          return {
+            id: newFile.id ?? file.id,
+            preview: newFile.preview ?? file.preview,
+            sizeReadable: newFile.sizeReadable ?? file.sizeReadable,
+            lastModified: newFile.lastModified ?? file.lastModified,
+            lastModifiedDate: newFile.lastModifiedDate ?? file.lastModifiedDate,
+            name: newFile.name ?? file.name,
+            size: newFile.size ?? file.size,
+            type: newFile.type ?? file.type,
+            webkitRelativePath:
+              newFile.webkitRelativePath ?? file.webkitRelativePath,
+            attachment_label: attachment_label,
+          };
+        }
+        return file;
+      });
+
+      setSelectedFiles(updatedFiles);
+      startUploadSingleFile(newFile, attachment_label);
+    }
+  };
+
+  const defaultfiles = selectedFiles.filter((file) => file.id === 0);
+  const nonDefaultFiles = selectedFiles.filter(
+    (file) =>
+      file.default_attachment === undefined || file.default_attachment === "N"
+  );
+
   const handleDragOver = (event) => {
     event.preventDefault();
     const files = Array.from(event.dataTransfer.files);
@@ -85,19 +126,13 @@ const Attachments = (props) => {
       const { file, data } = fileToUpdate;
       let fileIndex = -1;
 
-      console.log("Selected files:", selectedFiles);
-      console.log("Current file name:", file.name);
-
       for (let i = 0; i < selectedFiles.length; i++) {
         const item = selectedFiles[i];
-        console.log(`Comparing ${item.name} with ${file.name}`);
         if (item.name === file.name) {
           fileIndex = i;
           break;
         }
       }
-
-      console.log("Found index:", fileIndex);
 
       if (fileIndex !== -1) {
         const updatedSelectedFiles = [...selectedFiles];
@@ -119,6 +154,45 @@ const Attachments = (props) => {
     handleFileChange(files);
   };
 
+  const startUploadSingleFile = async (file, attachment_label) => {
+    const progressKey = file.name;
+    const fileData = await readFileAsBase64(file);
+    setUploadProgress((prevProgress) => ({
+      ...prevProgress,
+      [progressKey]: true,
+    }));
+
+    const input_attachment = {
+      filename: file.name,
+      attachment_label: attachment_label ?? "",
+      attachment_type: file.type,
+      file: fileData,
+      ticket_id: ticket.ticket_id,
+      is_additional_attachment: false,
+      flag_attachments_required: true,
+    };
+
+    try {
+      const { data } = await addTicketAttachment({
+        variables: { input_attachment },
+      });
+
+      setUploadProgress((prevProgress) => ({
+        ...prevProgress,
+        [progressKey]: false,
+      }));
+
+      setFileToUpdate({ file, data });
+    } catch {
+      dispatch(
+        showSnackbar({
+          message: "Failed to upload file",
+          severity: "error",
+        })
+      );
+    }
+  };
+
   const startUpload = async (files) => {
     files.forEach(async (file) => {
       const progressKey = file.name;
@@ -130,7 +204,7 @@ const Attachments = (props) => {
 
       const input_attachment = {
         filename: file.name,
-        attachment_label: file.name,
+        attachment_label: file.attachment_label ?? "",
         attachment_type: file.type,
         file: fileData,
         ticket_id: ticket.ticket_id,
@@ -163,6 +237,11 @@ const Attachments = (props) => {
   const removeFile = (id) => {
     setOpenDialog(true);
     setDeleteAttachmentID(id);
+
+
+
+
+
   };
 
   const handlePreviewOpen = (imageSrc) => {
@@ -181,9 +260,26 @@ const Attachments = (props) => {
       variables: { id: deleteAttachmentID },
     });
 
-    setSelectedFiles((prevFiles) =>
-      prevFiles.filter((file) => file.id !== deleteAttachmentID)
-    );
+    setSelectedFiles((prevFiles) => {
+      // Find the file to be deleted
+      const fileToDelete = prevFiles.find(file => file.id === deleteAttachmentID);
+  
+      // Filter out the file with the deleteAttachmentID
+      const updatedFiles = prevFiles.filter(file => file.id !== deleteAttachmentID);
+  
+      // Check if the label is present in any object in defaultAttachment
+      const defaultAttachmentObject = defaultAttachment.find(attachment => attachment.attachment_label == fileToDelete?.attachment_label);
+  
+    
+      // If the default attachment object is found, push it back into selected files
+      if (defaultAttachmentObject) {
+          updatedFiles.push({...defaultAttachmentObject,id:0, default_attachment: "Y"});
+      }
+  
+      return updatedFiles;
+  });
+   
+
 
     setSubmitting(false);
     setOpenDialog(false);
@@ -220,6 +316,20 @@ const Attachments = (props) => {
 
   const { appuser_id } = props;
 
+  function getAcceptedFormats(attachmentType) {
+    let formats = [];
+
+    if (attachmentType.includes("image")) {
+      formats = ["image/jpeg", "image/png", "image/gif"];
+    } else if (attachmentType.includes("pdf")) {
+      formats = ["application/pdf"];
+    } else if (attachmentType.includes("zip")) {
+      formats = ["application/zip", "application/x-zip-compressed"];
+    }
+
+    return formats;
+  }
+
   return (
     <>
       <AccordionCard
@@ -246,35 +356,80 @@ const Attachments = (props) => {
       >
         <Box>
           <Tooltip title="Attach File">
-          <Files
-            className="files-dropzone"
-            onError={handleError}
-            onChange={handleFileChange}
-            accepts={acceptedFormats}
-            multiple
-            clickable
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-          >
-           
-            <Box className="upload-image-placeholder">
-              <label htmlFor="upload-file-input" className="upload-file-input">
-                <Typography variant="body2" className="mt-2">
-                  Drag and drop files or
-                  <span className="text-primary"> Browse</span>
-                </Typography>
-                <Typography variant="text-muted mb-2 mt-2">
-                  Supported formats: JPEG, PNG, GIF, PDF, ZIP
-                </Typography>
-              </label>
-            </Box>
-          </Files>
+            <Files
+              className="files-dropzone"
+              onError={handleError}
+              onChange={handleFileChange}
+              accepts={acceptedFormats}
+              multiple
+              clickable
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
+              <Box className="upload-image-placeholder">
+                <label
+                  htmlFor="upload-file-input"
+                  className="upload-file-input"
+                >
+                  <Typography variant="body2" className="mt-2">
+                    Drag and drop files or
+                    <span className="text-primary"> Browse</span>
+                  </Typography>
+                  <Typography variant="text-muted mb-2 mt-2">
+                    Supported formats: JPEG, PNG, GIF, PDF, ZIP
+                  </Typography>
+                </label>
+              </Box>
+            </Files>
           </Tooltip>
           <Grid container spacing={1} className="upload-image-row">
-            {selectedFiles.map((file, index) => (
+            {defaultfiles.map((file, index) => (
               <Grid item xs={2} sm={2} md={2} key={index}>
+                <Typography
+                  className="mt-2 d-block text-truncate"
+                  variant="caption"
+                >
+                  {file.attachment_label && (
+                    <span>{file.attachment_label}</span>
+                  )}
+                </Typography>
+                <Tooltip title="Attache File">
+                  <Files
+                    className="files-dropzone"
+                    onError={handleError}
+                    onChange={(uploadedFile) =>
+                      handelDefaultFileChange(
+                        uploadedFile,
+                        file.attachment_label
+                      )
+                    } // Pass file and atta_label
+                    accepts={getAcceptedFormats(file.attachment_type)} // Make it
+                    clickable
+                    multiple={false} // Disable multi-select
+                  >
+                    <Box className="empty-single-img-box">
+                      <Typography variant="body2" color="textSecondary">
+                        <FontAwesomeIcon icon={faPlusCircle} size="lg" />
+                      </Typography>
+                    </Box>
+                  </Files>
+                </Tooltip>
+              </Grid>
+            ))}
+
+            {nonDefaultFiles.map((file, index) => (
+              <Grid item xs={2} sm={2} md={2} key={index}>
+                <Typography
+                  className="mt-2 d-block text-truncate"
+                  variant="caption"
+                >
+                  {file.attachment_label && (
+                    <span>{file.attachment_label}</span>
+                  )}
+                </Typography>
+
                 <Box className="single-img-box">
-                  {file.file_url && (
+                  {file.file_url  && (
                     <IconButton
                       className="close-icon-btn"
                       size="small"
@@ -283,7 +438,6 @@ const Attachments = (props) => {
                       <CloseIcon fontSize="small" />
                     </IconButton>
                   )}
-
                   <IconButton
                     className="preview-icon-btn"
                     size="small"
@@ -291,28 +445,31 @@ const Attachments = (props) => {
                   >
                     <VisibilityIcon fontSize="small" />
                   </IconButton>
-                  {file.type?.startsWith("image/") ||
-                  file.attachment_type?.startsWith("image/") ? (
+                  {(file.type?.startsWith("image/") ||
+                    file.attachment_type?.startsWith("image/")) && (
                     <img
                       className="img-preview"
-                      src={
-                        file.file_url
-                          ? file.file_url
-                          : URL.createObjectURL(file)
-                      }
-                      alt={file.filename ? file.filename : file.name}
+                      src={file.file_url || file.preview?.url}
+                      alt={file.filename || file.name}
                     />
-                  ) : (
+                  )}
+
+                  {(file.type?.includes("pdf") ||
+                    file.attachment_type?.includes("pdf")) && (
                     <div className="display-pdf-box">
-                      <FontAwesomeIcon
-                        icon={faFilePdf}
-                        size="2xl"
-                      />
+                      <FontAwesomeIcon icon={faFilePdf} size="2xl" />
+                    </div>
+                  )}
+
+                  {(file.type?.includes("zip") ||
+                    file.attachment_type?.includes("zip")) && (
+                    <div className="display-pdf-box">
+                      <FontAwesomeIcon icon={faFileZip} size="2xl" />
                     </div>
                   )}
                 </Box>
 
-                {(!file.file_url || (file && file.lodingStatus)) &&
+                {(!file.file_url || file?.lodingStatus) &&
                   (uploadProgress[file.name] ? (
                     <LinearProgress className="mt-2" />
                   ) : (
@@ -331,23 +488,22 @@ const Attachments = (props) => {
                 </Typography>
               </Grid>
             ))}
-
             {selectedFiles.length > 0 && selectedFiles.length < 4 && (
-              <Grid item xs={2} sm={2} md={2}>
+              <Grid item xs={2} sm={2} md={2} className="mt-4">
                 <Tooltip title="Attache File">
-                <Files
-                  className="files-dropzone"
-                  onError={handleError}
-                  onChange={handleFileChange}
-                  accepts={acceptedFormats}
-                  clickable
-                >
-                  <Box className="empty-single-img-box">
-                    <Typography variant="body2" color="textSecondary">
-                      <FontAwesomeIcon icon={faPlusCircle} size="lg" />
-                    </Typography>
-                  </Box>
-                </Files>
+                  <Files
+                    className="files-dropzone"
+                    onError={handleError}
+                    onChange={handleFileChange}
+                    accepts={acceptedFormats}
+                    clickable
+                  >
+                    <Box className="empty-single-img-box">
+                      <Typography variant="body2" color="textSecondary">
+                        <FontAwesomeIcon icon={faPlusCircle} size="lg" />
+                      </Typography>
+                    </Box>
+                  </Files>
                 </Tooltip>
               </Grid>
             )}
@@ -377,24 +533,20 @@ const Attachments = (props) => {
                 )}
               </Typography>
 
-              {previewImage ? (
-                previewImage.type?.startsWith("image/") ||
+              {previewImage &&
+                (previewImage.type?.startsWith("image/") ||
                 previewImage.attachment_type?.startsWith("image/") ? (
-                  <>
-                    <img
-                      src={
-                        previewImage.file_url ||
-                        URL.createObjectURL(previewImage)
-                      }
-                      alt="Preview"
-                    />
-                  </>
+                  <img
+                    src={
+                      previewImage.file_url || URL.createObjectURL(previewImage)
+                    }
+                    alt="Preview"
+                  />
                 ) : (
                   <Typography variant="body2" className="mt-2">
                     Preview not available
                   </Typography>
-                )
-              ) : null}
+                ))}
             </Box>
           </Modal>
         </Box>
@@ -423,6 +575,13 @@ const Attachments = (props) => {
       />
     </>
   );
+};
+Attachments.propTypes = {
+  ticket: PropTypes.shape({
+    ticket_id: PropTypes.string.isRequired,
+  }).isRequired,
+  setDefaultAttacmentCount: PropTypes.func.isRequired,
+  appuser_id: PropTypes.string.isRequired,
 };
 
 export default Attachments;

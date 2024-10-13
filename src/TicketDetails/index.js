@@ -83,7 +83,7 @@ const TicketDetails = (props) => {
   const hideInprogress = false // just mark this false during development
   const [openQueueJobs, setOpenQueueJobs] = useState(false); // State for QueueJobs drawer
   const [selectedAddress, setSelectedAddress] = React.useState();
-
+  const [defaultAttacmentCount, setDefaultAttacmentCount] = React.useState(0);
   const {
     lablesVisible,
     ticket: ticketData,
@@ -185,6 +185,7 @@ const TicketDetails = (props) => {
             customer={ticket}
             ticketTypes={ticketTypes}
             ticketStatuses={ticketStatuses}
+            defaultAttacmentCount={defaultAttacmentCount}
             lablesVisible={lablesVisible}
             handleOpenTicket={handleOpenTicket}
             setOpenQueueJobs={setOpenQueueJobs}
@@ -220,6 +221,7 @@ const TicketDetails = (props) => {
                 ticket={ticket}
                 lablesVisible={lablesVisible}
                 appuser_id={appuser_id}
+                setDefaultAttacmentCount={setDefaultAttacmentCount}
               />
               {/* <BillsOfMaterial
                 handleIconButton={handleIconButton}
