@@ -1,11 +1,14 @@
 import React from "react";
 import {
+  Box,
+  Button,
   Grid,
   IconButton,
   Link,
   ListItem,
   ListItemAvatar,
   ListItemText,
+  Modal,
   Popover,
   Typography,
 } from "@mui/material";
@@ -16,11 +19,14 @@ import {
   faReply,
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
 import moment from "moment-timezone";
-import { EmailOutlined } from "@mui/icons-material";
+import { EmailOutlined, Visibility } from "@mui/icons-material";
 import LinesEllipsis from "react-lines-ellipsis";
 import h2p from "html2plaintext";
 import parse from "html-react-parser";
 import DialogAlert from "components/DialogAlert";
+import { getExtensionFromFilename } from "Common/helper";
+import { IMAGE_EXTENSION_LIST } from "Common/constants";
+import { includes } from "lodash";
 
 const EmailPopover = (props) => {
   const { anchorEl, message, handleClose, toEmail } = props;
@@ -108,6 +114,7 @@ const Email = (props) => {
   const [more, toggleMore] = React.useState(false);
   const [openDialog, setOpenDialog] = React.useState(false);
   const [isSubmitting, setSubmitting] = React.useState(false);
+  const [previewAttachment, setPreviewAttachment] = React.useState(null);
   const toEmail = message.to_email ? message.to_email.split(",") : [];
   const replyEmail = message.traffic === 'INBOUND' ? [message.from_email] : (message.to_email ? message.to_email.split(",") : [])
   const text = message.message;
@@ -143,7 +150,7 @@ const Email = (props) => {
           )}
         </ListItemAvatar>
         <ListItemText
-        
+
           primary={
             <Grid container spacing={1} className="align-items-center mb-1" >
               <Grid item xs>
@@ -201,6 +208,40 @@ const Email = (props) => {
                   </Link>
                 </div>
               )}
+              {message.attachments && message.attachments.length > 0 && (
+                <>
+                  <Typography variant="subtitle1" className="mt-3">
+                    Attachments
+                  </Typography>
+                  <Grid container spacing={1} className="upload-image-row mt-2">
+                    {message.attachments.map((file, index) => {
+                      const type = getExtensionFromFilename(file.filename)
+                      return (
+                        <Box key={index} className="single-img-box">
+                          <IconButton
+                            className="preview-icon-btn"
+                            size="small"
+                            onClick={() => setPreviewAttachment(file)}
+                          >
+                            <Visibility fontSize="small" />
+                          </IconButton>
+                          {includes(IMAGE_EXTENSION_LIST, type) ? (
+                            <img
+                              className="img-preview"
+                              src={file.file_url}
+                              alt={file.filename}
+                            />
+                          ) : (
+                            <Typography variant="body2" className="file-name">
+                              {file.filename}
+                            </Typography>
+                          )}
+                        </Box>
+                      )
+                    })}
+                  </Grid>
+                </>
+              )}
             </>
           }
         />
@@ -226,6 +267,39 @@ const Email = (props) => {
           },
         ]}
       />
+      {Boolean(previewAttachment) &&
+        <Modal open={Boolean(previewAttachment)} onClose={() => setPreviewAttachment(null)}>
+          <Box className="box-modal-preview">
+            {previewAttachment && previewAttachment.attachment_type.startsWith("image/") ? (
+              <img
+                src={previewAttachment.file_url}
+                alt="Preview"
+                style={{ width: "100%", height: "auto" }}
+              />
+            ) : (
+              <Box>
+                <Typography variant="body2" className="mt-2">
+                  Preview not available
+                </Typography>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    const link = document.createElement("a");
+                    link.href = previewAttachment.file_url;
+                    link.download = previewAttachment.filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                >
+                  Download
+                </Button>
+              </Box>
+            )}
+          </Box>
+        </Modal>
+      }
     </>
   );
 };

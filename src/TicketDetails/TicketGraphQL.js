@@ -321,6 +321,11 @@ export const GET_TICKET_MESSAGES = gql`
       traffic
       cc
       bcc
+      attachments {
+        id
+        filename
+        file_url
+      }
     }
   }
 `;
@@ -348,6 +353,7 @@ export const ADD_NEW_TICKET_EMAIL = gql`
     $subject: String!
     $flag_internal: Boolean
     $customer_id: Int
+    $attachments: [AttachmentInput]
   ) {
     sendTicketEmail(
       ticket_id: $ticket_id
@@ -358,6 +364,7 @@ export const ADD_NEW_TICKET_EMAIL = gql`
       subject: $subject
       flag_internal: $flag_internal
       customer_id: $customer_id
+      attachments: $attachments
     )
   }
 `

@@ -23,3 +23,14 @@ export const readFileAsBase64 = (inputFile) => {
     };
   });
 };
+
+export const getExtensionFromFilename = filename => {
+  try {
+    return filename
+      .split(".")
+      .pop()
+      .toLowerCase()
+  } catch (e) {
+    return ""
+  }
+}

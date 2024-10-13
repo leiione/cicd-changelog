@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Button, Divider, Grid, Typography } from "@mui/material";
+import { Button, Divider, Grid, IconButton, Tooltip, Typography } from "@mui/material";
 import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
 import { useMutation } from "@apollo/client";
@@ -12,10 +12,16 @@ import {
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 import HookTypeAheadEmailField from "Common/hookFields/HookTypeAheadEmailField";
+import FileUploadPreview from "components/FileUploadPreview";
+import { readFileAsBase64 } from "Common/helper";
+import Files from "react-files";
+import { acceptedFormats, maxFileSize } from "Common/constants";
+import { AttachFile } from "@mui/icons-material";
 
 const defaultMoreFields = ["Cc", "Bcc"];
 
 const AddEmailFields = (props) => {
+  const dispatch = useDispatch();
   const { form, handleCancel, onSubmit } = props;
   const {
     control,
@@ -25,8 +31,62 @@ const AddEmailFields = (props) => {
     handleSubmit,
   } = form;
   const [moreFields, setMoreFields] = React.useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const values = watch();
+
+  const attachFiles = async (files) => {
+    files.forEach(async (file) => {
+      const fileData = await readFileAsBase64(file);
+      setValue("attachments", [
+        ...(values.attachments || []),
+        { file: fileData, filename: file.name },
+      ]);
+    });
+  };
+
+
+  const handleFileChange = (files) => {
+    const newFiles = Array.from(files);
+    const existingFileNames = new Set(selectedFiles.map((file) => file.name));
+
+    const filteredNewFiles = newFiles.filter(
+      (file) => !existingFileNames.has(file.name)
+    );
+
+    const updatedFiles = [...selectedFiles, ...filteredNewFiles];
+    setSelectedFiles(updatedFiles);
+    attachFiles(filteredNewFiles)
+  };
+
+  const removeFile = (fileName) => {
+    setSelectedFiles((prevFiles) =>
+      prevFiles.filter((file) => file.name !== fileName)
+    );
+  };
+
+  const handleError = (error, file) => {
+    let errorMessage = error.message;
+
+    if (error.code === "file-invalid-type") {
+      errorMessage =
+        "Invalid file format. We support only image files, PDFs, and ZIP files.";
+    }
+    if (error.code === "file-too-large") {
+      errorMessage = "File is too large. Maximum file size is 12MB.";
+    }
+    if (error.code === "too-many-files") {
+      errorMessage = "You can upload a maximum of 4 files at a time.";
+    }
+
+    dispatch(
+      showSnackbar({
+        message: errorMessage,
+        severity: "error",
+      })
+    );
+  };
+
 
   const handleMessageChange = (content) => {
     setValue("message", content, { shouldValidate: true });
@@ -94,26 +154,37 @@ const AddEmailFields = (props) => {
         </>
       ))}
       <Divider style={{ width: "100%" }} />
-      {/* <Grid item xs={12}>
-        <Typography variant="subtitle1">{`Subject: ${values.subject}`}</Typography>
-      </Grid> 
-      <Divider style={{ width: "100%", marginLeft: "10px" }} /> 
-      */}
-      {/* <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
-        <div style={{ position: "absolute", right: "38px", zIndex: 99, padding: "23px 3px" }}>
-          <HookCheckbox
-            control={control}
-            name={"flag_internal"}
-            label={"Mark as Private"}
-          />
+      <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
+        <div style={{ position: "absolute", right: "24px", zIndex: 99, padding: "17px 3px" }}>
+          <Tooltip title="Attach File">
+            <Files
+              className="files-dropzone"
+              onError={handleError}
+              onChange={handleFileChange}
+              accepts={acceptedFormats}
+              multiple
+              clickable
+              maxFileSize={maxFileSize}
+            >
+              <IconButton aria-label="attachment" className="primary-hover">
+                <AttachFile className="primary-hover" />
+              </IconButton>
+            </Files>
+          </Tooltip>
         </div>
-      </Grid> */}
+      </Grid>
       <Grid item xs={12} className="mt-1">
         <EditorContainer
           content={values.message}
           setContent={handleMessageChange}
           background={"#fcefef"}
           disabled={isSubmitting}
+        />
+      </Grid>
+      <Grid item xs={12} style={{ padding: '5px 0px' }}>
+        <FileUploadPreview
+          selectedFiles={selectedFiles}
+          removeFile={removeFile}
         />
       </Grid>
       <Grid item xs={12} textAlign={"right"}>
@@ -161,6 +232,7 @@ const AddEmailForm = (props) => {
       subject: `[Ticket#${ticket.ticket_id}] ${ticket.description}`,
       message: replyMessage ? replyMessage.message : "",
       flag_internal: false,
+      attachments: [],
     };
   }, [ticket, replyMessage]);
 
@@ -191,6 +263,7 @@ const AddEmailForm = (props) => {
         customer_id: ticket.customer_id || 0,
         subject: values.subject,
         flag_internal: values.flag_internal,
+        attachments: values.attachments,
       };
       await sendTicketEmail({
         variables,
