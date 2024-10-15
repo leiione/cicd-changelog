@@ -42,58 +42,52 @@ const EmailPopover = (props) => {
         horizontal: "left",
       }}
       slotProps={{
-        paper: { style: { maxWidth: "210px" } },
+        paper: { style: { minWidth: "210px",width:"auto" } },
       }}
       sx={{ pointerEvents: "none" }}
-      disableRestoreFocus
     >
-      <Grid item xs={12}>
-        <Grid container spacing={0} style={{ padding: 5 }}>
-          <Grid item xs={3} style={{ textAlign: "end" }}>
-            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>
+        <Grid container spacing={1}>
+          <Grid item xs={3}>
+            <Typography variant="subtitle1" className="text-right">
               From:
             </Typography>
           </Grid>
           <Grid item xs={9}>
             <Typography variant="subtitle1">{message.from_email}</Typography>
           </Grid>
-          <Grid item xs={3} style={{ textAlign: "end" }}>
-            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>
+          <Grid item xs={3}  className="text-right">
+            <Typography variant="subtitle1">
               To:
             </Typography>
           </Grid>
           <Grid item xs={9}>
-            <Grid container spacing={0}>
               {toEmail.map((email, index) => (
-                <Grid item xs={12} key={index}>
-                  <Typography
+                  <Typography key={index}
                     variant="subtitle1"
                     style={{ wordWrap: "break-word" }}
                   >
                     {email}
                   </Typography>
-                </Grid>
               ))}
-            </Grid>
           </Grid>
-          <Grid item xs={3} style={{ textAlign: "end" }}>
-            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>
+          <Grid item xs={3}   className="text-right">
+            <Typography variant="subtitle1">
               Cc:
             </Typography>
           </Grid>
           <Grid item xs={9}>
             <Typography variant="subtitle1">{message.cc}</Typography>
           </Grid>
-          <Grid item xs={3} style={{ textAlign: "end" }}>
-            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>
+          <Grid item xs={3}   className="text-right">
+            <Typography variant="subtitle1">
               Bcc:
             </Typography>
           </Grid>
           <Grid item xs={9}>
             <Typography variant="subtitle1">{message.bcc}</Typography>
           </Grid>
-          <Grid item xs={3} style={{ textAlign: "end" }}>
-            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>
+          <Grid item xs={3}   className="text-right">
+            <Typography variant="subtitle1">
               Subject:
             </Typography>
           </Grid>
@@ -103,7 +97,6 @@ const EmailPopover = (props) => {
             </Typography>
           </Grid>
         </Grid>
-      </Grid>
     </Popover>
   );
 };
@@ -136,8 +129,8 @@ const Email = (props) => {
       <ListItem className="border-bottom border-lighter" key={message.id} alignItems="flex-start">
         <ListItemAvatar
           sx={{ width: 24, height: 24, minWidth: 24 }}
-          onMouseOver={(e) => setAnchorEl(e.currentTarget)}
-          onMouseLeave={() => setAnchorEl(null)}
+          onClick={(e) => setAnchorEl(e.currentTarget)}
+          onClose={() => setAnchorEl(null)}
         >
           <EmailOutlined className="text-danger" />
           {anchorEl && (
