@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import AccordionCard from "../../../Common/AccordionCard";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
 import {
@@ -16,7 +16,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
-import { faFilePdf,faFileZip } from "@fortawesome/pro-duotone-svg-icons";
+import { faFilePdf, faFileZip } from "@fortawesome/pro-duotone-svg-icons";
 import Files from "react-files";
 import { acceptedFormats } from "Common/constants";
 import { useDispatch } from "react-redux";
@@ -46,6 +46,7 @@ const Attachments = (props) => {
   const [submitting, setSubmitting] = useState(false);
   const [deleteAttachmentID, setDeleteAttachmentID] = useState("");
   const [attachmentCount, setAttachmentCount] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const { data } = useQuery(GET_TICKET_ATTACHMENTS, {
     variables: { ticket_id: ticket.ticket_id },
@@ -56,18 +57,21 @@ const Attachments = (props) => {
     if (data) {
       setSelectedFiles(data.ticketAttachments);
       setAttachmentCount(data.ticketAttachments.length);
-      setDefaultAttachment(data.ticketAttachments.filter((file) => file.attachment_label && file.attachment_label.trim() !== '')) }
-
+      setDefaultAttachment(
+        data.ticketAttachments.filter(
+          (file) => file.attachment_label && file.attachment_label.trim() !== ""
+        )
+      );
+    }
   }, [data]);
 
   useEffect(() => {
-    setAttachmentCount(selectedFiles.filter((file) => file.file_url).length
-  );
+    setAttachmentCount(selectedFiles.filter((file) => file.file_url).length);
 
     setDefaultAttacmentCount(
       selectedFiles.filter((file) => file.default_attachment === "Y").length
     );
-  }, [selectedFiles,setDefaultAttacmentCount]);
+  }, [selectedFiles, setDefaultAttacmentCount]);
 
   const handleFileChange = (files) => {
     const newFiles = Array.from(files);
@@ -119,6 +123,7 @@ const Attachments = (props) => {
     event.preventDefault();
     const files = Array.from(event.dataTransfer.files);
     handleFileChange(files);
+    setIsDragging(true);
   };
 
   useEffect(() => {
@@ -152,6 +157,11 @@ const Attachments = (props) => {
     event.preventDefault();
     const files = Array.from(event.dataTransfer.files);
     handleFileChange(files);
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(true);
   };
 
   const startUploadSingleFile = async (file, attachment_label) => {
@@ -237,11 +247,6 @@ const Attachments = (props) => {
   const removeFile = (id) => {
     setOpenDialog(true);
     setDeleteAttachmentID(id);
-
-
-
-
-
   };
 
   const handlePreviewOpen = (imageSrc) => {
@@ -262,25 +267,32 @@ const Attachments = (props) => {
 
     setSelectedFiles((prevFiles) => {
       // Find the file to be deleted
-      const fileToDelete = prevFiles.find(file => file.id === deleteAttachmentID);
-  
+      const fileToDelete = prevFiles.find(
+        (file) => file.id === deleteAttachmentID
+      );
+
       // Filter out the file with the deleteAttachmentID
-      const updatedFiles = prevFiles.filter(file => file.id !== deleteAttachmentID);
-  
+      const updatedFiles = prevFiles.filter(
+        (file) => file.id !== deleteAttachmentID
+      );
+
       // Check if the label is present in any object in defaultAttachment
-      const defaultAttachmentObject = defaultAttachment.find(attachment => attachment.attachment_label === fileToDelete?.attachment_label);
-  
-    
+      const defaultAttachmentObject = defaultAttachment.find(
+        (attachment) =>
+          attachment.attachment_label === fileToDelete?.attachment_label
+      );
+
       // If the default attachment object is found, push it back into selected files
       if (defaultAttachmentObject) {
-          updatedFiles.push({...defaultAttachmentObject,id:0, default_attachment: "Y"});
+        updatedFiles.push({
+          ...defaultAttachmentObject,
+          id: 0,
+          default_attachment: "Y",
+        });
       }
-  
+
       return updatedFiles;
-  });
-   
-
-
+    });
     setSubmitting(false);
     setOpenDialog(false);
     setDeleteAttachmentID("");
@@ -357,16 +369,17 @@ const Attachments = (props) => {
         <Box>
           <Tooltip title="Attach File">
             <Files
-              className="files-dropzone"
+              
               onError={handleError}
               onChange={handleFileChange}
-              accepts={acceptedFormats}
+              accepts={["image/*", "application/pdf", "application/zip"]}
               multiple
               clickable
               onDragOver={handleDragOver}
               onDrop={handleDrop}
+              onDragLeave={handleDragLeave}
             >
-              <Box className="upload-image-placeholder">
+              <Box className={`upload-image-placeholder ${isDragging ? "dragging" : ""}`}>
                 <label
                   htmlFor="upload-file-input"
                   className="upload-file-input"
@@ -429,7 +442,7 @@ const Attachments = (props) => {
                 </Typography>
 
                 <Box className="single-img-box">
-                  {file.file_url  && (
+                  {file.file_url && (
                     <IconButton
                       className="close-icon-btn"
                       size="small"
@@ -549,6 +562,8 @@ const Attachments = (props) => {
                 ))}
             </Box>
           </Modal>
+          {/* EOF Image Preview Modal */}
+
         </Box>
       </AccordionCard>
 
