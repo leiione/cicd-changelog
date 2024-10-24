@@ -113,12 +113,6 @@ const Attachments = (props) => {
     }
   };
 
-  const defaultfiles = selectedFiles.filter((file) => file.id === 0);
-  const nonDefaultFiles = selectedFiles.filter(
-    (file) =>
-      file.default_attachment === undefined || file.default_attachment === "N"
-  );
-
   const handleDragOver = (event) => {
     event.preventDefault();
     const files = Array.from(event.dataTransfer.files);
@@ -369,7 +363,6 @@ const Attachments = (props) => {
         <Box>
           <Tooltip title="Attach File">
             <Files
-              
               onError={handleError}
               onChange={handleFileChange}
               accepts={["image/*", "application/pdf", "application/zip"]}
@@ -379,7 +372,11 @@ const Attachments = (props) => {
               onDrop={handleDrop}
               onDragLeave={handleDragLeave}
             >
-              <Box className={`upload-image-placeholder ${isDragging ? "dragging" : ""}`}>
+              <Box
+                className={`upload-image-placeholder ${
+                  isDragging ? "dragging" : ""
+                }`}
+              >
                 <label
                   htmlFor="upload-file-input"
                   className="upload-file-input"
@@ -396,111 +393,117 @@ const Attachments = (props) => {
             </Files>
           </Tooltip>
           <Grid container spacing={1} className="upload-image-row">
-            {defaultfiles.map((file, index) => (
-              <Grid item xs={2} sm={2} md={2} key={index}>
-                <Typography
-                  className="mt-2 d-block text-truncate"
-                  variant="caption"
-                >
-                  {file.attachment_label && (
-                    <span>{file.attachment_label}</span>
-                  )}
-                </Typography>
-                <Tooltip title="Attache File">
-                  <Files
-                    className="files-dropzone"
-                    onError={handleError}
-                    onChange={(uploadedFile) =>
-                      handelDefaultFileChange(
-                        uploadedFile,
-                        file.attachment_label
-                      )
-                    } // Pass file and atta_label
-                    accepts={getAcceptedFormats(file.attachment_type)} // Make it
-                    clickable
-                    multiple={false} // Disable multi-select
-                  >
-                    <Box className="empty-single-img-box">
-                      <Typography variant="body2" color="textSecondary">
-                        <FontAwesomeIcon icon={faPlusCircle} size="lg" />
+            {selectedFiles.length > 0 &&
+              selectedFiles.map((file, index) => (
+                <>
+                  {file.id === 0 && (
+                    <Grid item xs={2} sm={2} md={2} key={index}>
+                      <Typography
+                        className="mt-2 d-block text-truncate"
+                        variant="caption"
+                      >
+                        {file.attachment_label && (
+                          <span>{file.attachment_label}</span>
+                        )}
                       </Typography>
-                    </Box>
-                  </Files>
-                </Tooltip>
-              </Grid>
-            ))}
-
-            {nonDefaultFiles.map((file, index) => (
-              <Grid item xs={2} sm={2} md={2} key={index}>
-                <Typography
-                  className="mt-2 d-block text-truncate"
-                  variant="caption"
-                >
-                  {file.attachment_label && (
-                    <span>{file.attachment_label}</span>
+                      <Tooltip title="Attach File">
+                        <Files
+                          className="files-dropzone"
+                          onError={handleError}
+                          onChange={(uploadedFile) =>
+                            handelDefaultFileChange(
+                              uploadedFile,
+                              file.attachment_label
+                            )
+                          } // Pass file and atta_label
+                          accepts={getAcceptedFormats(file.attachment_type)} // Make it
+                          clickable
+                          multiple={false} // Disable multi-select
+                        >
+                          <Box className="empty-single-img-box">
+                            <Typography variant="body2" color="textSecondary">
+                              <FontAwesomeIcon icon={faPlusCircle} size="lg" />
+                            </Typography>
+                          </Box>
+                        </Files>
+                      </Tooltip>
+                    </Grid>
                   )}
-                </Typography>
+                  {(file.default_attachment === undefined ||
+                    file.default_attachment === "N") && (
+                    <Grid item xs={2} sm={2} md={2} key={index}>
+                      <Typography
+                        className="mt-2 d-block text-truncate"
+                        variant="caption"
+                      >
+                        {file.attachment_label && (
+                          <span>{file.attachment_label}</span>
+                        )}
+                      </Typography>
 
-                <Box className="single-img-box">
-                  {file.file_url && (
-                    <IconButton
-                      className="close-icon-btn"
-                      size="small"
-                      onClick={() => removeFile(file.id)}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
+                      <Box className="single-img-box">
+                        {file.file_url && (
+                          <IconButton
+                            className="close-icon-btn"
+                            size="small"
+                            onClick={() => removeFile(file.id)}
+                          >
+                            <CloseIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                        <IconButton
+                          className="preview-icon-btn"
+                          size="small"
+                          onClick={() => handlePreviewOpen(file)}
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                        {(file.type?.startsWith("image/") ||
+                          file.attachment_type?.startsWith("image/")) && (
+                          <img
+                            className="img-preview"
+                            src={file.file_url || file.preview?.url}
+                            alt={file.filename || file.name}
+                          />
+                        )}
+
+                        {(file.type?.includes("pdf") ||
+                          file.attachment_type?.includes("pdf")) && (
+                          <div className="display-pdf-box">
+                            <FontAwesomeIcon icon={faFilePdf} size="2xl" />
+                          </div>
+                        )}
+
+                        {(file.type?.includes("zip") ||
+                          file.attachment_type?.includes("zip")) && (
+                          <div className="display-pdf-box">
+                            <FontAwesomeIcon icon={faFileZip} size="2xl" />
+                          </div>
+                        )}
+                      </Box>
+
+                      {(!file.file_url || file?.lodingStatus) &&
+                        (uploadProgress[file.name] ? (
+                          <LinearProgress className="mt-2" />
+                        ) : (
+                          <LinearProgress
+                            variant="determinate"
+                            value={100}
+                            className={`mt-2 linear-progress progress-success`}
+                          />
+                        ))}
+
+                      <Typography
+                        className="mt-2 d-block text-truncate"
+                        variant="caption"
+                      >
+                        {file.filename ? file.filename : file.name}
+                      </Typography>
+                    </Grid>
                   )}
-                  <IconButton
-                    className="preview-icon-btn"
-                    size="small"
-                    onClick={() => handlePreviewOpen(file)}
-                  >
-                    <VisibilityIcon fontSize="small" />
-                  </IconButton>
-                  {(file.type?.startsWith("image/") ||
-                    file.attachment_type?.startsWith("image/")) && (
-                    <img
-                      className="img-preview"
-                      src={file.file_url || file.preview?.url}
-                      alt={file.filename || file.name}
-                    />
-                  )}
+                </>
+              ))}
 
-                  {(file.type?.includes("pdf") ||
-                    file.attachment_type?.includes("pdf")) && (
-                    <div className="display-pdf-box">
-                      <FontAwesomeIcon icon={faFilePdf} size="2xl" />
-                    </div>
-                  )}
-
-                  {(file.type?.includes("zip") ||
-                    file.attachment_type?.includes("zip")) && (
-                    <div className="display-pdf-box">
-                      <FontAwesomeIcon icon={faFileZip} size="2xl" />
-                    </div>
-                  )}
-                </Box>
-
-                {(!file.file_url || file?.lodingStatus) &&
-                  (uploadProgress[file.name] ? (
-                    <LinearProgress className="mt-2" />
-                  ) : (
-                    <LinearProgress
-                      variant="determinate"
-                      value={100}
-                      className={`mt-2 linear-progress progress-success`}
-                    />
-                  ))}
-
-                <Typography
-                  className="mt-2 d-block text-truncate"
-                  variant="caption"
-                >
-                  {file.filename ? file.filename : file.name}
-                </Typography>
-              </Grid>
-            ))}
             {selectedFiles.length > 0 && selectedFiles.length < 4 && (
               <Grid item xs={2} sm={2} md={2} className="mt-4">
                 <Tooltip title="Attache File">
@@ -563,7 +566,6 @@ const Attachments = (props) => {
             </Box>
           </Modal>
           {/* EOF Image Preview Modal */}
-
         </Box>
       </AccordionCard>
 
