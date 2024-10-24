@@ -260,33 +260,34 @@ const Attachments = (props) => {
     });
 
     setSelectedFiles((prevFiles) => {
-      // Find the file to be deleted
-      const fileToDelete = prevFiles.find(
+      // Find the index of the file to be deleted
+      const fileIndex = prevFiles.findIndex(
         (file) => file.id === deleteAttachmentID
       );
-
+    
       // Filter out the file with the deleteAttachmentID
       const updatedFiles = prevFiles.filter(
         (file) => file.id !== deleteAttachmentID
       );
-
+    
       // Check if the label is present in any object in defaultAttachment
       const defaultAttachmentObject = defaultAttachment.find(
         (attachment) =>
-          attachment.attachment_label === fileToDelete?.attachment_label
+          attachment.attachment_label === prevFiles[fileIndex]?.attachment_label
       );
-
-      // If the default attachment object is found, push it back into selected files
+    
+      // If the default attachment object is found, insert it back into updatedFiles at the same index
       if (defaultAttachmentObject) {
-        updatedFiles.push({
+        updatedFiles.splice(fileIndex, 0, {
           ...defaultAttachmentObject,
           id: 0,
           default_attachment: "Y",
         });
       }
-
+    
       return updatedFiles;
     });
+    
     setSubmitting(false);
     setOpenDialog(false);
     setDeleteAttachmentID("");
