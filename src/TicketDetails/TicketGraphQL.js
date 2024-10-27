@@ -480,3 +480,14 @@ export const DELETE_TICKET_ATTACHMENT = gql`
   }
 `;
 
+export const GET_ACTIVITIES = gql`
+  query activities($ticket_id: Int!) {
+    activities(ticket_id: $ticket_id) {
+      ticket_id
+      date_time
+      last_modified
+      action
+      details
+    }
+  }
+`;
