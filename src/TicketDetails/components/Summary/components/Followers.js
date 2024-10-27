@@ -10,6 +10,7 @@ import {
   ListItemAvatar,
   ListItemText,
   ListItemButton,
+  TextField,
 } from "@mui/material";
 import { useQuery } from "@apollo/client";
 import { GET_FOLLOWERS } from "TicketDetails/TicketGraphQL";
@@ -33,6 +34,7 @@ const Followers = (props) => {
   const [selectedFollowers, setFollowers] = useState([]);
   const [tempFollowers, setTempFollowers] = useState([]); // Temporary state for editing
   const [anchorEl, setAnchorEl] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(""); // State for search input
   const openMenu = Boolean(anchorEl);
 
   const { data } = useQuery(GET_FOLLOWERS, {
@@ -67,6 +69,7 @@ const Followers = (props) => {
   const handlePopoverClose = (event) => {
     preventEvent(event);
     setTempFollowers(selectedFollowers); // Reset changes if not saved
+    setSearchTerm(""); // Clear the search field
     setAnchorEl(null);
   };
 
@@ -76,6 +79,7 @@ const Followers = (props) => {
       ticket_id: ticket.ticket_id,
       followers: followerEmails,
     });
+    setSearchTerm(""); // Clear the search field
     setFollowers(tempFollowers); // Persist changes
     setAnchorEl(null);
   };
@@ -93,6 +97,20 @@ const Followers = (props) => {
     preventEvent(event);
     setAnchorEl(event.currentTarget);
   };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredFollowers = data?.followers
+    ?.filter((follower) =>
+      follower.realname.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      const aDisabled = !a.email;
+      const bDisabled = !b.email;
+      return aDisabled - bDisabled;
+    });
 
   return (
     <>
@@ -141,10 +159,20 @@ const Followers = (props) => {
               horizontal: "left",
             }}
           >
+            <TextField
+              placeholder="Search followers"
+              className="p-3"
+              variant="standard"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              fullWidth
+              autoFocus
+              autoComplete="off"
+              margin="dense"
+            />
             <List className="paper-height-300 overflow-y-auto">
-              {data &&
-                data.followers &&
-                data.followers.map((follower) => {
+              {filteredFollowers &&
+                filteredFollowers.map((follower) => {
                   const isDisabled = !follower.email;
                   return (
                     <Tooltip

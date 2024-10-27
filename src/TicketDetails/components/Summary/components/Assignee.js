@@ -10,6 +10,7 @@ import {
   ListItemButton,
   ListItemAvatar,
   ListItemText,
+  TextField,
 } from "@mui/material";
 import { preventEvent } from "Common/helper";
 import { useQuery } from "@apollo/client";
@@ -17,6 +18,8 @@ import { GET_ASSIGNEES } from "TicketDetails/TicketGraphQL";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/pro-light-svg-icons";
 import AvatarText from "Common/AvatarText";
+import { showSnackbar } from "config/store";
+import { useDispatch } from "react-redux";
 
 const fetchAssigneeName = (assigneeID, data) => {
   if (data && data.assignees) {
@@ -33,7 +36,10 @@ const Assignee = (props) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedAssignees, setAssignees] = useState([]);
   const [tempAssignees, setTempAssignees] = useState([]); // Temporary state for editing
+  const [searchTerm, setSearchTerm] = useState(""); // State for search input
   const openMenu = Boolean(anchorEl);
+  const dispatch = useDispatch();
+
 
   const { data } = useQuery(GET_ASSIGNEES, {
     fetchPolicy: "network-only",
@@ -64,8 +70,10 @@ const Assignee = (props) => {
   const handlePopoverClose = (event) => {
     preventEvent(event);
     setTempAssignees(selectedAssignees); // Reset changes if not saved
+    setSearchTerm(""); // Clear the search field
     setAnchorEl(null);
   };
+  
 
   const handleSave = async () => {
     // Map the tempAssignees to only include fields expected by the AssigneeInput type
@@ -78,6 +86,8 @@ const Assignee = (props) => {
       ticket_id: ticket.ticket_id,
       assignees: assignees,
     });
+    setSearchTerm(""); // Clear the search field
+
     setAnchorEl(null);
   };
 
@@ -90,7 +100,11 @@ const Assignee = (props) => {
         tempAssignees.filter((a) => a.appuser_id !== assignee.appuser_id)
       );
     } else {
-      setTempAssignees([...tempAssignees, assignee]);
+      if (tempAssignees.length < 2) {
+        setTempAssignees([...tempAssignees, assignee]);
+      } else {
+        dispatch(showSnackbar({ message: "You can only select up to 2 assignees.", severity: "error" }));
+      }
     }
   };
 
@@ -98,6 +112,14 @@ const Assignee = (props) => {
     preventEvent(event);
     setAnchorEl(event.currentTarget);
   };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredAssignees = data?.assignees?.filter((assignee) =>
+    assignee.realname.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <>
@@ -149,10 +171,20 @@ const Assignee = (props) => {
               horizontal: "left",
             }}
           >
+            <TextField
+              placeholder="Search assignees"
+              className="p-3"
+              variant="standard"
+              fullWidth
+              value={searchTerm}
+              autoFocus
+              autoComplete="off"
+              onChange={handleSearchChange}
+              margin="dense"
+            />
             <List className="paper-height-300 overflow-y-auto">
-              {data &&
-                data.assignees &&
-                data.assignees.map((assignee) => {
+              {filteredAssignees &&
+                filteredAssignees.map((assignee) => {
                   return (
                     <Tooltip
                       key={assignee.appuser_id}
