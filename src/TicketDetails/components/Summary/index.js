@@ -15,6 +15,7 @@ import ServiceContact from "./components/ServiceContact";
 import LinkedTickets from "./components/LinkedTickets";
 import {
   GET_TICKET,
+  GET_ACTIVITIES,
   GET_TICKET_ATTACHMENTS,
   UPDATE_TICKET_MUTATION,
 } from "TicketDetails/TicketGraphQL";
@@ -79,6 +80,8 @@ const Summary = (props) => {
           { query: GET_TICKET, variables: { id: customer.ticket_id }
           },
           { query: GET_TICKET_ATTACHMENTS, variables: { ticket_id: customer.ticket_id }
+          },
+          { query: GET_ACTIVITIES, variables: { ticket_id: customer.ticket_id }
           },
         ],
       });
