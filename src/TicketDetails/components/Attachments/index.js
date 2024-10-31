@@ -25,6 +25,7 @@ import {
   ADD_TICKET_ATTACHMENT,
   DELETE_TICKET_ATTACHMENT,
   GET_TICKET_ATTACHMENTS,
+  GET_ACTIVITIES
 } from "TicketDetails/TicketGraphQL";
 import { useMutation, useQuery } from "@apollo/client";
 import { readFileAsBase64 } from "Common/helper";
@@ -219,6 +220,10 @@ const Attachments = (props) => {
       try {
         const { data } = await addTicketAttachment({
           variables: { input_attachment },
+          refetchQueries: [
+            { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }
+            }
+          ]
         });
 
         setUploadProgress((prevProgress) => ({
@@ -257,6 +262,10 @@ const Attachments = (props) => {
     setSubmitting(true);
     await deleteAttachment({
       variables: { id: deleteAttachmentID },
+      refetchQueries: [
+        { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }
+        }
+      ]
     });
 
     setSelectedFiles((prevFiles) => {
