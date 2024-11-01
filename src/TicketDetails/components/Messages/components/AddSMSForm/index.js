@@ -7,6 +7,7 @@ import {
   ADD_NEW_TICKET_SMS,
   GET_TICKET_MESSAGES,
   GET_TICKET,
+  GET_ACTIVITIES
 } from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
@@ -170,6 +171,7 @@ const AddSMSForm = (props) => {
             variables: { ticket_id: ticket.ticket_id },
           },
           { query: GET_TICKET, variables: { id: ticket.ticket_id } },
+          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }},
         ],
         update: (cache, { data }) => {
           if (data.sendTicketSMS && data.sendTicketSMS.status === "failed") {

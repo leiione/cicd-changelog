@@ -6,6 +6,7 @@ import {
   ADD_LINKED_TICKET_MUTATION,
   GET_LINKED_TICKETS,
   GET_TICKET,
+  GET_ACTIVITIES
 } from "TicketDetails/TicketGraphQL";
 import { useMutation } from "@apollo/client";
 import { useDispatch } from "react-redux";
@@ -34,6 +35,7 @@ function LinkedTicketNew(props) {
         refetchQueries: [
           { query: GET_LINKED_TICKETS, variables: { ticket_id: ticketId } },
           { query: GET_TICKET, variables: { id: ticketId } },
+          { query: GET_ACTIVITIES, variables: { ticket_id: ticketId } },
         ],
       });
       dispatch(

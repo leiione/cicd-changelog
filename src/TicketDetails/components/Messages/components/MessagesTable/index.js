@@ -2,7 +2,7 @@ import React from "react";
 import TablePagination from "@mui/material/TablePagination";
 import { List, Typography } from "@mui/material";
 import { useMutation } from "@apollo/client";
-import { UPDATE_MESSAGE_MUTATION, GET_TICKET_MESSAGES, UPDATE_NOTE_MUTATION, GET_TICKET_NOTES } from "TicketDetails/TicketGraphQL";
+import { UPDATE_MESSAGE_MUTATION, GET_TICKET_MESSAGES, UPDATE_NOTE_MUTATION, GET_TICKET_NOTES, GET_ACTIVITIES } from "TicketDetails/TicketGraphQL";
 import Note from "./components/Note";
 import Email from "./components/Email";
 import SMS from "./components/SMS";
@@ -35,6 +35,7 @@ const MessagesTable = (props) => {
         },
         refetchQueries: [
           { query: GET_TICKET_MESSAGES, variables: { ticket_id: ticketId } },
+          { query: GET_ACTIVITIES, variables: { ticket_id: ticketId }},
         ],
       }).finally(() => {
         dispatch(showSnackbar({ message: "Message deleted successfully", severity: "success" }))
@@ -60,6 +61,7 @@ const MessagesTable = (props) => {
         },
         refetchQueries: [
           { query: GET_TICKET_NOTES, variables: { ticket_id: ticket.ticket_id } },
+          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }},
         ],
       }).finally(() => {
         dispatch(showSnackbar({ message: "Note deleted successfully", severity: "success" }))

@@ -16,7 +16,7 @@ import { Close } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 import { useMutation } from "@apollo/client";
-import { ADD_TICKET_SIGNATURE, GET_TICKET } from "TicketDetails/TicketGraphQL";
+import { ADD_TICKET_SIGNATURE, GET_TICKET, GET_ACTIVITIES } from "TicketDetails/TicketGraphQL";
 import moment from "moment-timezone";
 import ProgressButton from "Common/ProgressButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -81,6 +81,7 @@ const Signature = (props) => {
           },
           refetchQueries: [
             { query: GET_TICKET, variables: { id: ticket.ticket_id } },
+            { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }},
           ],
         }).finally(() => {
           setLoading(false);

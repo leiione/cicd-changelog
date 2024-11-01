@@ -19,7 +19,7 @@ import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { cloneDeep, find, get, isEmpty, omit, sortBy, trim } from "lodash";
 import { preventEvent } from "Common/helper";
 import { useMutation } from "@apollo/client";
-import { GET_TICKET, SAVE_TICKET_TASKS } from "TicketDetails/TicketGraphQL";
+import { GET_TICKET, SAVE_TICKET_TASKS, GET_ACTIVITIES } from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { setCardPreferences, showSnackbar } from "config/store";
 import ProgressButton from "Common/ProgressButton";
@@ -166,6 +166,7 @@ const Tasks = (props) => {
         },
         refetchQueries: [
           { query: GET_TICKET, variables: { id: ticket.ticket_id } },
+          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }},
         ],
       });
       dispatch(

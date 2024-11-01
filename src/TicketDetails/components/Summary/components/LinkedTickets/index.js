@@ -21,6 +21,7 @@ import {
   GET_LINKED_TICKETS,
   GET_TICKET,
   REMOVE_LINKED_TICKET,
+  GET_ACTIVITIES
 } from "TicketDetails/TicketGraphQL";
 import { useMutation, useQuery } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
@@ -78,6 +79,7 @@ const LinkedTicketContent = (props) => {
           refetchQueries: [
             { query: GET_LINKED_TICKETS, variables: { ticket_id } },
             { query: GET_TICKET, variables: { id: ticket_id } },
+            { query: GET_ACTIVITIES, variables: { ticket_id }},
           ],
         });
         dispatch(

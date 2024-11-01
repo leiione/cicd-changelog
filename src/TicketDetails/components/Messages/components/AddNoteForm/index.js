@@ -7,6 +7,7 @@ import ProgressButton from "Common/ProgressButton";
 import {
   ADD_NEW_TICKET_NOTE,
   UPLOAD_FILE_MUTATION,
+  GET_ACTIVITIES
 } from "TicketDetails/TicketGraphQL";
 import { useMutation } from "@apollo/client";
 import { GET_TICKET_NOTES, GET_TICKET } from "./../../../../TicketGraphQL";
@@ -273,7 +274,6 @@ const AddNoteForm = (props) => {
     reValidateMode: "onSubmit",
   });
   const onSubmit = async (values) => {
-    console.log(values);
     try {
       const variables = {
         ticket_id: ticket.ticket_id,
@@ -292,6 +292,7 @@ const AddNoteForm = (props) => {
             variables: { ticket_id: ticket.ticket_id },
           },
           { query: GET_TICKET, variables: { id: ticket.ticket_id } },
+          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }},
         ],
         update: (cache, { data }) => {
           dispatch(
