@@ -57,7 +57,7 @@ const Activity = (props) => {
     const allRows = data.activities.map((activity, index) => ({
       id: index + 1,
       date: formatDate(activity.date_time),
-      lastModified: formatDate(activity.last_modified),
+      // lastModified: formatDate(activity.last_modified),
       type: activity.action,
       details: activity.details,
     }));
