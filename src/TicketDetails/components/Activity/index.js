@@ -68,7 +68,7 @@ const Activity = (props) => {
 
   const columns = [
     { field: "date", headerName: "Date", width: 150, flex: 1 },
-    { field: "lastModified", headerName: "Last Modified", width: 150, flex: 1 },
+    // { field: "lastModified", headerName: "Last Modified", width: 150, flex: 1 },
     { field: "type", headerName: "Type", width: 120, flex: 1 },
     { field: "details", headerName: "Details", width: 500, flex: 3 },
   ];
