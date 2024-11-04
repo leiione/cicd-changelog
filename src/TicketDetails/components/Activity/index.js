@@ -40,24 +40,12 @@ const Activity = (props) => {
 
   const [searchText, setSearchText] = useState("");
 
-  const formatDate = (timestamp) => {
-    const date = new Date(parseInt(timestamp));
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    }).format(date);
-  };
-
   const rows = useMemo(() => {
     if (loading || error || !data) return [];
     const allRows = data.activities.map((activity, index) => ({
       id: index + 1,
       date: activity.date_time,
-      // lastModified: formatDate(activity.last_modified),
+      appuser: activity.appuser,
       type: activity.action,
       details: activity.details,
     }));
@@ -68,7 +56,7 @@ const Activity = (props) => {
 
   const columns = [
     { field: "date", headerName: "Date", width: 150, flex: 1 },
-    // { field: "lastModified", headerName: "Last Modified", width: 150, flex: 1 },
+    { field: "appuser", headerName: "Users", width: 150, flex: 1 },
     { field: "type", headerName: "Type", width: 120, flex: 1 },
     { field: "details", headerName: "Details", width: 500, flex: 3 },
   ];

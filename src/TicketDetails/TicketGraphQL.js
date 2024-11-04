@@ -485,7 +485,7 @@ export const GET_ACTIVITIES = gql`
     activities(ticket_id: $ticket_id) {
       ticket_id
       date_time
-      last_modified
+      appuser
       action
       details
     }
