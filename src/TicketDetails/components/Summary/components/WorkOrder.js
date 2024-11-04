@@ -4,7 +4,8 @@ import { Editor } from "@tinymce/tinymce-react";
 import {
   GET_DETAIL_TEXT,
   UPDATE_DETAIL_TEXT,
-  GET_TICKET
+  GET_TICKET,
+  GET_ACTIVITIES
 } from "TicketDetails/TicketGraphQL";
 import { Button } from "@mui/material";
 import { useDispatch } from "react-redux";
@@ -69,6 +70,7 @@ const WorkOrder = ({
         },
         refetchQueries: [
           { query: GET_TICKET, variables: { id: ticket_id } },
+          { query: GET_ACTIVITIES, variables: { ticket_id }},
         ],
       });
       if (data.updateTicket.ticket_id) {
