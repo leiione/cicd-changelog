@@ -180,6 +180,10 @@ const Attachments = (props) => {
     try {
       const { data } = await addTicketAttachment({
         variables: { input_attachment },
+        refetchQueries: [
+          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }
+          }
+        ]
       });
 
       setUploadProgress((prevProgress) => ({
