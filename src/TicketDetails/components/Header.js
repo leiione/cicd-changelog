@@ -8,9 +8,12 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  Grid,
+  MenuList,
+  Box
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { MoreVert } from "@mui/icons-material";
+import { MoreVert, ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import { preventEvent } from "Common/helper";
 import { includes } from "lodash";
 import DialogAlert from "components/DialogAlert";
@@ -33,6 +36,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const style = {
+  width: 355
+};
+
 const Header = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -45,9 +52,11 @@ const Header = (props) => {
     toggleOffCRMDrawer,
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
+  const [assignmentTypeAnchorEl, setAssignmentTypeAnchorEl] = useState(null);
   const [openDelete, toggleDelete] = useState(null);
   const [loading, setLoading] = useState(false);
   const [copyTicket, setCopyTicket] = useState(false);
+  const [assignedNamePopover, setAssignedNamePopover] = useState(null); // State for assigned_name popover
 
   const [deleteTicket] = useMutation(DELETE_TICKET);
 
@@ -87,9 +96,19 @@ const Header = (props) => {
     setAnchorEl(null);
   };
 
+  const handleAssignedNameClick = (event) => {
+    setAssignedNamePopover(event.currentTarget); // Set anchor element
+  };
+
+  const handleAssignedNamePopoverClose = () => {
+    setAssignedNamePopover(null); // Close popover
+  };
+
   setTimeout(() => {
     setCopyTicket(false);
   }, 4000);
+
+  const typeOptions = ["Subscriber", "Infrastructure", "Equipment"];
 
   return (
     <>
@@ -159,7 +178,76 @@ const Header = (props) => {
                 <FontAwesomeIcon icon={faCopy} />
               </IconButton>
             </Tooltip>
-            <Typography variant="h6">{ticket.assigned_name}</Typography>
+            <Typography
+              variant="h6"
+              onClick={handleAssignedNameClick} // Add click handler here
+              style={{ cursor: "pointer" }}
+            >
+              {ticket.assigned_name}
+            </Typography>
+            <Popover
+              open={Boolean(assignedNamePopover)}
+              anchorEl={assignedNamePopover}
+              onClose={handleAssignedNamePopoverClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+            >
+              <Box sx={style}>
+                <Grid container spacing={2} style={{ padding: "20px 15px" }}>
+                  <Grid item xs={5}>
+                    <Typography variant="subtitle1" className="text-dark">
+                      Assignment Type:
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Typography variant="subtitle1" className="text-muted">
+                      Select Assignment Type
+                      <IconButton
+                        style={{ padding: 0 }}
+                        onClick={(e) => setAssignmentTypeAnchorEl(e.currentTarget)}
+                      >
+                        {assignmentTypeAnchorEl ? (
+                          <ArrowDropUp className="f-20" />
+                        ) : (
+                          <ArrowDropDown className="f-20" />
+                        )}
+                      </IconButton>
+                      {assignmentTypeAnchorEl && (
+                        <Popover
+                          open={Boolean(assignmentTypeAnchorEl)}
+                          anchorEl={assignmentTypeAnchorEl}
+                          onClose={() => setAssignmentTypeAnchorEl(null)}
+                          anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "center",
+                          }}
+                          transformOrigin={{
+                            vertical: "top",
+                            horizontal: "center",
+                          }}
+                        >
+                          <MenuList>
+                            {typeOptions.map((type, index) => (
+                              <MenuItem
+                                key={index}
+                                onClick={() => {
+                                  // Implement selection logic if needed
+                                  setAssignmentTypeAnchorEl(null); // Close the popover
+                                }}
+                              >
+                                {type}
+                              </MenuItem>
+                            ))}
+                          </MenuList>
+                        </Popover>
+                      )}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Popover>
             <Tooltip title="Work Order" placement="top">
               <IconButton
                 className="text-light has-hover-light mr-2"
