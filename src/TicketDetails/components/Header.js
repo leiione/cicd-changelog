@@ -10,8 +10,10 @@ import {
   Typography,
   Grid,
   MenuList,
+  Button,
   Box
 } from "@mui/material";
+import ProgressButton from "Common/ProgressButton";
 import { makeStyles } from "@mui/styles";
 import { MoreVert, ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import { preventEvent } from "Common/helper";
@@ -24,6 +26,14 @@ import { showSnackbar } from "config/store";
 import CSAT from "Common/CSAT";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy, faFileLines } from "@fortawesome/pro-regular-svg-icons";
+import AssignmentFields from "../../AddTicket/components/AssignmentFields";
+import { useForm } from "react-hook-form";
+import {
+  GET_TICKET,
+  GET_ACTIVITIES,
+  GET_TICKET_ATTACHMENTS,
+  UPDATE_TICKET_MUTATION,
+} from "TicketDetails/TicketGraphQL";
 
 const useStyles = makeStyles((theme) => ({
   header: {
@@ -49,14 +59,17 @@ const Header = (props) => {
     setopen1,
     hideContentDrawer,
     appuser_id,
-    toggleOffCRMDrawer,
+    toggleOffCRMDrawer
   } = props;
+
   const [anchorEl, setAnchorEl] = useState(null);
   const [assignmentTypeAnchorEl, setAssignmentTypeAnchorEl] = useState(null);
   const [openDelete, toggleDelete] = useState(null);
   const [loading, setLoading] = useState(false);
   const [copyTicket, setCopyTicket] = useState(false);
-  const [assignedNamePopover, setAssignedNamePopover] = useState(null); // State for assigned_name popover
+  
+  const [assignedNamePopover, setAssignedNamePopover] = useState(null);
+  const [selectedType, setSelectedType] = useState("Select Assignment Type"); // Initialize with default value
 
   const [deleteTicket] = useMutation(DELETE_TICKET);
 
@@ -97,11 +110,11 @@ const Header = (props) => {
   };
 
   const handleAssignedNameClick = (event) => {
-    setAssignedNamePopover(event.currentTarget); // Set anchor element
+    setAssignedNamePopover(event.currentTarget);
   };
 
   const handleAssignedNamePopoverClose = () => {
-    setAssignedNamePopover(null); // Close popover
+    setAssignedNamePopover(null);
   };
 
   setTimeout(() => {
@@ -109,6 +122,57 @@ const Header = (props) => {
   }, 4000);
 
   const typeOptions = ["Subscriber", "Infrastructure", "Equipment"];
+
+  let initialValues = {
+    category_type: ticket.category_type 
+  }
+  let form = useForm({
+    defaultValues: initialValues,
+    mode: "onChange",
+    reValidateMode: "onSubmit",
+  });
+
+  const {
+    control,
+    watch,
+    setValue,
+    formState: { isSubmitting },
+    handleSubmit
+  } = form;
+  const values = watch()
+
+  const commonProps = {
+    values,
+    control,
+    setValue
+  }
+
+  let isFormValid = values.category_type && (values.location_id > 0 || values.equipment_id > 0 || values.customer_id > 0)
+  const [updateTicket] = useMutation(UPDATE_TICKET_MUTATION);
+
+  const onSubmit = async (values) => {
+    try {
+      values.ticket_id = ticket.ticket_id
+      await updateTicket({
+        variables: {
+          input_ticket: values,
+        },
+        refetchQueries: [
+          { query: GET_TICKET, variables: { id: ticket.ticket_id }
+          },
+          { query: GET_TICKET_ATTACHMENTS, variables: { ticket_id: ticket.ticket_id }
+          },
+          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }
+          },
+        ],
+      });
+      dispatch(showSnackbar({ message: "Ticket updated successfully", severity: "success" }))
+      handleAssignedNamePopoverClose()
+    } catch (error) {
+      const msg = error.message.replace("GraphQL error: ", "")
+      dispatch(showSnackbar({ message: msg, severity: "error" }))
+    }
+  }
 
   return (
     <>
@@ -178,9 +242,10 @@ const Header = (props) => {
                 <FontAwesomeIcon icon={faCopy} />
               </IconButton>
             </Tooltip>
+            
             <Typography
               variant="h6"
-              onClick={handleAssignedNameClick} // Add click handler here
+              onClick={handleAssignedNameClick}
               style={{ cursor: "pointer" }}
             >
               {ticket.assigned_name}
@@ -202,8 +267,10 @@ const Header = (props) => {
                     </Typography>
                   </Grid>
                   <Grid item xs={7}>
-                    <Typography variant="subtitle1" className="text-muted">
-                      Select Assignment Type
+                    <Box display="flex" alignItems="center">
+                      <Typography variant="subtitle1" className="text-muted">
+                        {selectedType}
+                      </Typography>
                       <IconButton
                         style={{ padding: 0 }}
                         onClick={(e) => setAssignmentTypeAnchorEl(e.currentTarget)}
@@ -214,37 +281,58 @@ const Header = (props) => {
                           <ArrowDropDown className="f-20" />
                         )}
                       </IconButton>
-                      {assignmentTypeAnchorEl && (
-                        <Popover
-                          open={Boolean(assignmentTypeAnchorEl)}
-                          anchorEl={assignmentTypeAnchorEl}
-                          onClose={() => setAssignmentTypeAnchorEl(null)}
-                          anchorOrigin={{
-                            vertical: "bottom",
-                            horizontal: "center",
-                          }}
-                          transformOrigin={{
-                            vertical: "top",
-                            horizontal: "center",
-                          }}
-                        >
-                          <MenuList>
-                            {typeOptions.map((type, index) => (
-                              <MenuItem
-                                key={index}
-                                onClick={() => {
-                                  // Implement selection logic if needed
-                                  setAssignmentTypeAnchorEl(null); // Close the popover
-                                }}
-                              >
-                                {type}
-                              </MenuItem>
-                            ))}
-                          </MenuList>
-                        </Popover>
-                      )}
-                    </Typography>
+                    </Box>
+                    {assignmentTypeAnchorEl && (
+                      <Popover
+                        open={Boolean(assignmentTypeAnchorEl)}
+                        anchorEl={assignmentTypeAnchorEl}
+                        onClose={() => setAssignmentTypeAnchorEl(null)}
+                        anchorOrigin={{
+                          vertical: "bottom",
+                          horizontal: "center",
+                        }}
+                        transformOrigin={{
+                          vertical: "top",
+                          horizontal: "center",
+                        }}
+                      >
+                        <MenuList>
+                          {typeOptions.map((type, index) => (
+                            <MenuItem
+                              key={index}
+                              // selected={type.toLowerCase() === ticket.category_type.toLowerCase()}
+                              onClick={() => {
+                                setValue("category_type", type)
+                                setAssignmentTypeAnchorEl(null)
+                                setSelectedType(type)
+                              }}
+                            >
+                              {type}
+                            </MenuItem>
+                          ))}
+                        </MenuList>
+                      </Popover>
+                    )}
                   </Grid>
+                  {selectedType !== "Select Assignment Type" ? <AssignmentFields {...commonProps} /> : ''}
+                </Grid>
+                <Grid item xs={12}>
+                  <div className="text-right">
+                    <ProgressButton
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      style={{ padding: "5px" }}
+                      onClick={handleSubmit(onSubmit)}
+                      isSubmitting={isSubmitting}
+                      disabled={!isFormValid}
+                    >
+                      Create
+                    </ProgressButton>
+                    <Button color="default" variant="outlined" size="small" style={{ padding: "5px" }} onClick={() => handleAssignedNamePopoverClose()}>
+                      Cancel
+                    </Button>
+                  </div>
                 </Grid>
               </Box>
             </Popover>
