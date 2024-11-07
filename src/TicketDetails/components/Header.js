@@ -327,7 +327,7 @@ const Header = (props) => {
                       isSubmitting={isSubmitting}
                       disabled={!isFormValid}
                     >
-                      Create
+                      Save
                     </ProgressButton>
                     <Button color="default" variant="outlined" size="small" style={{ padding: "5px" }} onClick={() => handleAssignedNamePopoverClose()}>
                       Cancel
