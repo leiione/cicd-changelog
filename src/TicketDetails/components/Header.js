@@ -114,6 +114,7 @@ const Header = (props) => {
   };
 
   const handleAssignedNamePopoverClose = () => {
+    setSelectedType("Select Assignment Type");
     setAssignedNamePopover(null);
   };
 
@@ -147,7 +148,7 @@ const Header = (props) => {
     setValue
   }
 
-  let isFormValid = values.category_type && (values.location_id > 0 || values.equipment_id > 0 || values.customer_id > 0)
+  let isFormValid = selectedType !== "Select Assignment Type" && values.category_type && (values.location_id > 0 || values.equipment_id > 0 || values.customer_id > 0)
   const [updateTicket] = useMutation(UPDATE_TICKET_MUTATION);
 
   const onSubmit = async (values) => {
