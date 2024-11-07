@@ -246,8 +246,8 @@ const Header = (props) => {
             
             <Typography
               variant="h6"
-              onClick={handleAssignedNameClick}
-              style={{ cursor: "pointer" }}
+              onClick={["Resolved", "Closed"].includes(ticket.status) ? null : handleAssignedNameClick}
+              style={{ cursor: ["Resolved", "Closed"].includes(ticket.status) ? "default" : "pointer" }}
             >
               {ticket.assigned_name}
             </Typography>
