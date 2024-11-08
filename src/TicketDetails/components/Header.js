@@ -115,6 +115,7 @@ const Header = (props) => {
 
   const handleAssignedNamePopoverClose = () => {
     setSelectedType("Select Assignment Type");
+    reset(); // Reset the entire form, clearing all values, including category_type
     setAssignedNamePopover(null);
   };
 
@@ -137,6 +138,7 @@ const Header = (props) => {
     control,
     watch,
     setValue,
+    reset, // Import reset to reset the entire form
     formState: { isSubmitting },
     handleSubmit
   } = form;
@@ -301,7 +303,6 @@ const Header = (props) => {
                           {typeOptions.map((type, index) => (
                             <MenuItem
                               key={index}
-                              // selected={type.toLowerCase() === ticket.category_type.toLowerCase()}
                               onClick={() => {
                                 setValue("category_type", type)
                                 setAssignmentTypeAnchorEl(null)
@@ -330,7 +331,7 @@ const Header = (props) => {
                     >
                       Save
                     </ProgressButton>
-                    <Button color="default" variant="outlined" size="small" style={{ padding: "5px" }} onClick={() => handleAssignedNamePopoverClose()}>
+                    <Button color="default" variant="outlined" size="small" style={{ padding: "5px" }} onClick={handleAssignedNamePopoverClose}>
                       Cancel
                     </Button>
                   </div>
