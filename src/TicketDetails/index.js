@@ -106,7 +106,7 @@ const TicketDetails = (props) => {
     skip: !ticket_id,
   });
 
-  const ticket = useMemo(() => (!loading && data && data.ticket ? data.ticket : ticketData),
+  const ticket = useMemo(() => (!loading && data && data.ticket ? data.ticket : {...ticketData, assigned_name: `${ticketData.ticket_contact_name} (${ticketData.customer_id})`}),
     [loading, data, ticketData]
   );
 
