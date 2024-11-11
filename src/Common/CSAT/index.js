@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useSelector, useDispatch } from "react-redux"
+import { useDispatch } from "react-redux"
 import makeStyles from '@mui/styles/makeStyles';
 import { SentimentSatisfiedTwoTone, SentimentDissatisfiedTwoTone, SentimentVerySatisfiedTwoTone, SentimentSatisfiedAlt } from "@mui/icons-material"
 import { get, omit } from "lodash"
@@ -15,12 +15,13 @@ import {
   Typography,
   Collapse,
   Grid,
-  Button,
+  FormControl,
+  RadioGroup,
 } from "@mui/material";
-import HookRadioGroup from "../hookFields/HookRadioGroup";
+import ProgressButton from "Common/ProgressButton";
 import HookTextField from "../hookFields/HookTextField";
 import { showSnackbar } from "../../config/store";
-
+import { preventEvent } from "Common/helper";
 
 const dissatisfiedIcon = <SentimentDissatisfiedTwoTone />
 const neutralIcon = <SentimentSatisfiedTwoTone />
@@ -48,7 +49,7 @@ const buttonColorValues = {
 }
 
 const useStyles = makeStyles(theme => ({
-  experiencePopoverBtn: { color: "#7D87B8", padding: "8px 12px", borderRadius: 8 },
+  experiencePopoverBtn: { color: "#7D87B8", padding: "0px", borderRadius: 8 },
 }))
 
 const scoreMap = { dissatisfied: 1, neutral: 2, satisfied: 3 }
@@ -84,6 +85,7 @@ const CSATForm = props => {
   } = form
 
   const values = watch()
+
   const handleClose = isCancelled => e => {
     setAnchorEl(null)
     if (isCancelled) {
@@ -96,7 +98,6 @@ const CSATForm = props => {
 
   const handleChange = event => {
     let score = 0
-
     if (event.target.value === "dissatisfied") {
       score = 1
       setTargetIcon(dissatisfiedIcon)
@@ -138,6 +139,7 @@ const CSATForm = props => {
   }
 
   const handleClick = event => {
+    preventEvent(event)
     setAnchorEl(event.currentTarget)
     setValue("score", scoreMap[value])
   }
@@ -150,7 +152,8 @@ const CSATForm = props => {
       disableRipple
       className={`${classes.experiencePopoverBtn} ${value !== null ? btnColor : ""}`}
       size="large">
-      {value === null ? <SentimentSatisfiedAlt /> : TargetIcon}
+      {value === null ? <SentimentSatisfiedAlt /> : TargetIcon}  
+      <Typography className="font-weight-normal" style={{ paddingLeft: 10 }}>Feedback</Typography>
     </IconButton>
     <Popover
       id="mouse-over-popover"
@@ -177,40 +180,40 @@ const CSATForm = props => {
             <Typography className="text-white pr-4 pl-2 py-1">{sayThanks ? "Thanks for your feedback" : "How’s this experience?"}</Typography>
           </Grid>
           <Grid item xs="auto">
-
-            <HookRadioGroup row aria-label="score"
-              control={control}
-              name="score"
-              onChange={handleChange}
-            >
-              <FormControlLabel
-                className="dissatisfied"
-                value="dissatisfied"
-                control={<Radio />}
-                onClick={() => {
-                  setFeedbackBox(true)
-                }}
-                label={dissatisfiedIcon}
-              />
-              <FormControlLabel
-                className="neutral"
-                value="neutral"
-                control={<Radio />}
-                onClick={() => {
-                  setFeedbackBox(true)
-                }}
-                label={neutralIcon}
-              />
-              <FormControlLabel
-                className="satisfied"
-                value="satisfied"
-                control={<Radio />}
-                onClick={() => {
-                  setFeedbackBox(true)
-                }}
-                label={satisfiedIcon}
-              />
-            </HookRadioGroup>
+            <FormControl component="fieldset" className="mb-0">
+              <RadioGroup row aria-label="score" name="score" value={String(emojiValues[values.score])} onChange={handleChange}>
+                <FormControlLabel
+                  className="dissatisfied"
+                  value="dissatisfied"
+                  control={<Radio />}
+                  onClick={(event) => {
+                    setFeedbackBox(true)
+                    handleChange(event)
+                  }}
+                  label={dissatisfiedIcon}
+                />
+                <FormControlLabel
+                  className="neutral"
+                  value="neutral"
+                  control={<Radio />}
+                  onClick={(event) => {
+                    setFeedbackBox(true)
+                    handleChange(event)
+                  }}
+                  label={neutralIcon}
+                />
+                <FormControlLabel
+                  className="satisfied"
+                  value="satisfied"
+                  control={<Radio />}
+                  onClick={(event) => {
+                    setFeedbackBox(true)
+                    handleChange(event)
+                  }}
+                  label={satisfiedIcon}
+                />
+              </RadioGroup>
+            </FormControl>
           </Grid>
         </Grid>
       </Box>
@@ -233,16 +236,17 @@ const CSATForm = props => {
               />
             </Grid>
             <Grid item xs="auto">
-              <Button
+              <ProgressButton
                 color="primary"
                 size="small"
                 disableRipple
+                className={classes.btnWidth}
                 onClick={() => {
                   sumbitFeedback()
                 }}
               >
                 Send
-              </Button>
+              </ProgressButton>
             </Grid>
           </Grid>
         </div>
@@ -252,7 +256,7 @@ const CSATForm = props => {
 }
 
 const CSAT = props => {
-  const { category, isSettings } = props
+  const { category, isSettings, appuser_id, handlePopoverClose } = props
   const classes = useStyles()
   const dispatch = useDispatch()
   const defaultCsatValues = useMemo(() => ({ score: 0, note: "" }), []);
@@ -266,7 +270,6 @@ const CSAT = props => {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [OpenfeedbackBox, setFeedbackBox] = useState(csat.category === category ? score !== 0 : null)
   const [saveSurvey] = useMutation(SAVE_SURVEY)
-  const appuser_id = useSelector(state => get(state, "user.appuser_id", 0))
 
   const open = Boolean(anchorEl)
 
@@ -305,6 +308,7 @@ const CSAT = props => {
           setbtnColor(null)
         }, 2500)
         dispatch(showSnackbar({ message: "Feedback successfully submitted", severity: "success" }))
+        handlePopoverClose()
       } catch (err) {
         const msg = err.message.replace("GraphQL error: ", "")
         dispatch(showSnackbar({ message: msg, severity: "error" }))

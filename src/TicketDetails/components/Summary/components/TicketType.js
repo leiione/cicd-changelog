@@ -1,62 +1,155 @@
 import React from "react";
-import { Button, Menu, MenuItem } from "@mui/material";
-import { preventEvent } from "../../../../Common/helper";
+import { Button, Popover, List, ListItem, TextField } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
+import DialogAlert from "components/DialogAlert";
+import { preventEvent } from "../../../../Common/helper";
+
+const useStyles = makeStyles((theme) => ({
+  paperHeight: {
+    maxHeight: 300,
+    overflowY: "auto",
+  },
+}));
 
 const TicketType = (props) => {
-  const { customer } = props;
+  const classes = useStyles();
+  const { customer, ticketTypes, handleUpdate } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const openMenu = Boolean(anchorEl);
+  const [type, setType] = React.useState();
+  const [openDelete, toggleDelete] = React.useState(null);
+  const [updateParams, setUpdateParams] = React.useState({});
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  React.useEffect(() => {
+    if (customer && customer.type) {
+      setType(customer.type ? customer.type : "Open");
+    }
+  }, [customer]);
+
+  const openPopover = Boolean(anchorEl);
   const handleClick = (event) => {
     preventEvent(event);
+
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
   const handlePopoverClose = (event) => {
     preventEvent(event);
+    setSearchQuery("");
+
     setAnchorEl(null);
   };
+
+  const handleListItemClick = (event, taskType) => {
+    preventEvent(event);
+
+    event.stopPropagation();
+    setUpdateParams({
+      ticket_id: customer.ticket_id,
+      type: taskType.ticket_type_desc,
+    });
+    toggleDelete(true);
+    handlePopoverClose();
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+    event.stopPropagation();
+  };
+
+  const filteredTicketTypes = ticketTypes.filter((taskType) =>
+    taskType.ticket_type_desc.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <>
       <Button
         color="default"
         onClick={handleClick}
-        endIcon={openMenu ? <KeyboardArrowDown /> : <KeyboardArrowUp />}
+        endIcon={openPopover ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
       >
-        <span className="text-dark font-weight-normal f-13">
-          {customer.type ? customer.type : "Open"}
-        </span>
+        <span className="text-dark font-weight-normal">{type}</span>
       </Button>
 
-      <Menu
-        id="basic-menu"
+      <Popover
+        open={openPopover}
         anchorEl={anchorEl}
-        open={openMenu}
         onClose={handlePopoverClose}
-        MenuListProps={{
-          "aria-labelledby": "basic-button",
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        PaperProps={{
+          className: classes.paperHeight,
         }}
       >
-        <MenuItem onClick={handlePopoverClose} color="default">
-          Task
-        </MenuItem>
-        <MenuItem onClick={handlePopoverClose} color="default">
-          Onsite Repair
-        </MenuItem>
-        <MenuItem onClick={handlePopoverClose} color="default">
-          Onsite Install
-        </MenuItem>
-        <MenuItem onClick={handlePopoverClose} color="default">
-          Onsite Other
-        </MenuItem>
-        <MenuItem onClick={handlePopoverClose} color="default">
-          Onsite Site Survey
-        </MenuItem>
-        <MenuItem onClick={handlePopoverClose} color="default">
-          Phone Call
-        </MenuItem>
-      </Menu>
+        <TextField
+          placeholder="Search..."
+          className="p-3"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          fullWidth
+          autoFocus
+          autoComplete="off"
+          variant="standard"
+          onClick={(event) => preventEvent(event)}
+        />
+
+        <List>
+          {filteredTicketTypes.length > 0 ? (
+            filteredTicketTypes.map((taskType) => (
+              <ListItem
+                key={taskType.ticket_type_id}
+                button
+                onClick={(event) => handleListItemClick(event, taskType)}
+              >
+                {taskType.ticket_type_desc}
+              </ListItem>
+            ))
+          ) : (
+            <ListItem disabled>No matching ticket types</ListItem>
+          )}
+        </List>
+      </Popover>
+
+      {openDelete && (
+        <DialogAlert
+          open={openDelete}
+          message={
+            <span>
+              The selected type has an existing template that will replace the
+              ticket content.
+              <br /> Are you sure you want to change the ticket type?
+            </span>
+          }
+          buttonsList={[
+            {
+              label: "Yes",
+              size: "medium",
+              color: "primary",
+              isProgress: true,
+              onClick: (event) => {
+                handleUpdate(updateParams);
+                event.stopPropagation();
+                setType(updateParams.type);
+                toggleDelete(false);
+              },
+            },
+            {
+              label: "No",
+              size: "medium",
+              color: "default",
+              onClick: (event) => {
+                toggleDelete(false);
+                event.stopPropagation();
+              },
+            },
+          ]}
+        />
+      )}
     </>
   );
 };
+
 export default TicketType;

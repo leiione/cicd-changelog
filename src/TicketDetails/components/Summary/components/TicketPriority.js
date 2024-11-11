@@ -1,31 +1,42 @@
 import React from "react";
 import { IconButton, MenuItem, Popover } from "@mui/material";
-import {
-  ArrowCircleDownOutlined,
-  ArrowCircleUpOutlined,
-  RemoveCircleOutlineOutlined,
-} from "@mui/icons-material";
 import { preventEvent } from "../../../../Common/helper";
+import { getPriorityIcon } from "utils/getPriorityIcon";
 
 const TicketPriority = (props) => {
-  const { customer } = props;
+  const { customer, handleUpdate } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [priority, setPriority] = React.useState();
+  // 2. Use the useMutation hook with the defined mutation
+
+  React.useEffect(() => {
+    if (customer && customer.priority) {
+      setPriority(customer.priority);
+    }
+  }, [customer]);
+
   const openMenu = Boolean(anchorEl);
   const handleClick = (event) => {
     preventEvent(event);
     setAnchorEl(event.currentTarget);
   };
-  const handlePopoverClose = (event) => {
+  const handlePopoverClose = (event, selectedPriority) => {
+    if (selectedPriority !== "backdropClick") {
+      handleUpdate({
+        ticket_id: customer.ticket_id,
+        priority: selectedPriority,
+      });
+      setPriority(selectedPriority);
+    }
+
     preventEvent(event);
     setAnchorEl(null);
   };
 
-  console.log("Ticket", customer);
-
   return (
     <>
-      <IconButton color="default" onClick={handleClick}>
-        <ArrowCircleDownOutlined className="text-secondary" />
+      <IconButton color="default" size="small" onClick={handleClick}>
+        {getPriorityIcon(priority)}
       </IconButton>
 
       <Popover
@@ -38,16 +49,25 @@ const TicketPriority = (props) => {
           horizontal: "left",
         }}
       >
-        <MenuItem onClick={handlePopoverClose} color="default">
-          <ArrowCircleDownOutlined className="mr-2 text-secondary" /> Priority:
-          Low
+        <MenuItem
+          onClick={(event) => handlePopoverClose(event, "Low")}
+          color="default"
+        >
+          {getPriorityIcon("Low")}
+          Priority: Low
         </MenuItem>
-        <MenuItem onClick={handlePopoverClose} color="default">
-          <RemoveCircleOutlineOutlined className="mr-2 text-warning" />
-          Priority: Medium
+        <MenuItem
+          onClick={(event) => handlePopoverClose(event, "Normal")}
+          color="default"
+        >
+          {getPriorityIcon("Normal")}
+          Priority: Normal
         </MenuItem>
-        <MenuItem onClick={handlePopoverClose} color="default">
-          <ArrowCircleUpOutlined className="mr-2 text-success" /> Priority: High
+        <MenuItem
+          onClick={(event) => handlePopoverClose(event, "High")}
+          color="default"
+        >
+          {getPriorityIcon("High")} Priority: High
         </MenuItem>
       </Popover>
     </>
