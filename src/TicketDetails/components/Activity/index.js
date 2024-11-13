@@ -4,35 +4,12 @@ import HeaderMenuOptions from "components/HeaderMenuOptions";
 import { DataGrid } from "@mui/x-data-grid";
 import { useQuery } from "@apollo/client";
 import { GET_ACTIVITIES } from "TicketDetails/TicketGraphQL";
-import { TextField, Box, InputAdornment } from "@mui/material";
+import { TextField, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { makeStyles } from "@mui/styles";
-
-// Custom styles
-const useStyles = makeStyles(() => ({
-  searchWrapper: {
-    display: "flex",
-    justifyContent: "flex-end",
-    padding: "8px 16px", // Adjust padding for spacing
-    marginBottom: "10px",
-  },
-  searchField: {
-    width: "100%",
-    maxWidth: "200px", // Optional: Set max width to keep it compact
-    "& .MuiOutlinedInput-root": {
-      borderRadius: "20px", // Rounded corners
-      paddingRight: "8px", // Space between text and icon
-    },
-    "& .MuiOutlinedInput-input": {
-      padding: "10px 14px", // Adjust padding inside the input
-    },
-  },
-}));
 
 const Activity = (props) => {
   const { appuser_id, customer } = props;
-  const classes = useStyles();
-  
+
   const { data, loading, error } = useQuery(GET_ACTIVITIES, {
     variables: { ticket_id: customer.ticket_id },
     fetchPolicy: "network-only",
@@ -68,16 +45,14 @@ const Activity = (props) => {
   return (
     <AccordionCard
       label="Activity"
-      className="pt-0"
       menuOption={
         <div className="d-flex align-items-center">
           <HeaderMenuOptions appuser_id={appuser_id} category="Activity Card" />
         </div>
       }
     >
-      <Box className={classes.searchWrapper}>
+      <div className="text-right">
         <TextField
-          className={classes.searchField}
           variant="outlined"
           size="small"
           placeholder="Search"
@@ -91,7 +66,7 @@ const Activity = (props) => {
             ),
           }}
         />
-      </Box>
+      </div>
       <div style={{ width: "100%" }}>
         {loading ? (
           <p>Loading activities...</p>
