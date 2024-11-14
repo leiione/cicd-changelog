@@ -15,8 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMessagePlus,
   faNote,
-  faTrash,
-  faReply,
+  faTrash
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
 
 import moment from "moment-timezone";
@@ -75,11 +74,6 @@ const Note = (props) => {
                 <Typography variant="caption">
                   {moment(message.date_added).format("MMM DD, YYYY hh:mm")}
                 </Typography>
-              </Grid>
-              <Grid item xs="auto">
-                <MuiIconButton size="small">
-                  <FontAwesomeIcon className="primary-hover" icon={faReply} />
-                </MuiIconButton>
               </Grid>
               <Grid item xs="auto">
                 <MuiIconButton size="small">
