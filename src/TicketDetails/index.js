@@ -26,6 +26,7 @@ import { setInitialUserPreferences } from "config/store";
 import UserPreferences from "components/UserPreferences";
 import QueueJobs from "./components/Summary/components/QueueJobs";
 import CustomFields from "./components/CustomFields";
+import PropTypes from 'prop-types';
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -106,7 +107,7 @@ const TicketDetails = (props) => {
     skip: !ticket_id,
   });
 
-  const ticket = useMemo(() => (!loading && data && data.ticket ? data.ticket : {...ticketData, assigned_name: `${ticketData.ticket_contact_name} (${ticketData.customer_id})`}),
+  const ticket = useMemo(() => (!loading && data?.ticket ? data.ticket : { ...ticketData, assigned_name: ticketData?.subscriber_name ? `${ticketData.subscriber_name} (${ticketData.customer_id})` : ticketData?.assigned_name }),
     [loading, data, ticketData]
   );
 
@@ -196,7 +197,7 @@ const TicketDetails = (props) => {
 
           {!hideInprogress &&
             <>
-             <CustomFields
+              <CustomFields
                 loading={loading}
                 ticket={ticket}
                 appuser_id={appuser_id}
@@ -328,5 +329,20 @@ const TicketContainer = props => {
     </>
   )
 }
+
+TicketDetails.propTypes = {
+  ticket: PropTypes.shape({
+    subscriber_name: PropTypes.string,
+    customer_id: PropTypes.string,
+    assigned_name: PropTypes.string,
+  }).isRequired,
+  category: PropTypes.string,
+  hideContentDrawer: PropTypes.bool,
+  toggleOffCRMDrawer: PropTypes.func,
+  handleOpenTicket: PropTypes.func,
+  appuser_id: PropTypes.string,
+  enableQueueJobs: PropTypes.bool,
+  lablesVisible: PropTypes.bool,
+};
 
 export default TicketContainer;
