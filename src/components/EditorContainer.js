@@ -16,6 +16,17 @@ const EditorContainer = (props) => {
 
   const handleEditorSetup = (editor) => {
     editorRef.current = editor;
+
+    // Transform URLs to ensure HTTPS
+    editor.on("BeforeSetContent", (e) => {
+      if (e.content) {
+        e.content = e.content.replace(
+          /<a\s[^>]*href="(?!https?:\/\/)([^"]+)"/g,
+          '<a href="https://$1"'
+        );
+      }
+    });
+
     editor.on("change input undo redo", () => {
       handleEditorChange(editor.getContent());
     });
@@ -37,13 +48,12 @@ const EditorContainer = (props) => {
         content_style: `body { font-family:Helvetica,Arial,sans-serif; font-size:12px; background-color: ${background}; }
                         .quote-text { background-color: #f7f7f7; border: 1px solid #ccc; margin : 0 !important; padding :1rem; font-size: 12px;}
                         `,
-                        
-        readonly: false, // Make editor generally editable
+        readonly: false,
         extended_valid_elements: "div[contenteditable|class]",
-        placeholder: "Write Something here..."
-
-        
-      
+        placeholder: "Write Something here...",
+        link_default_protocol: "https",
+        automatic_uploads: false,
+        link_assume_external_targets: true, // Ensure external links are treated as absolute
       }}
       onEditorChange={handleEditorChange}
     />
