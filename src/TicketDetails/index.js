@@ -15,14 +15,14 @@ import GlobalSnackbar from "Common/GlobalSnackbar";
 import Messages from "./components/Messages";
 import Attachments from "./components/Attachments";
 import DialogAlert from "components/DialogAlert"; // Import DialogAlert
-import BomDrawer from "./components/BillsOfMaterial/components/BomDrawer"; 
+import BomDrawer from "./components/BillsOfMaterial/components/BomDrawer";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import htmlToPdfmake from "html-to-pdfmake";
 import { GET_USER_PREFERENCES, SAVE_USER_PREFERENCES } from "components/UserPreferences/UserPreferencesGraphQL";
 import { saveUserPreferences } from "components/UserPreferences/savePreferencesUtils";
 import moment from "moment-timezone";
-import { setInitialUserPreferences } from "config/store";
+import { populateISPUserSettings, setInitialUserPreferences } from "config/store";
 import UserPreferences from "components/UserPreferences";
 import QueueJobs from "./components/Summary/components/QueueJobs";
 import CustomFields from "./components/CustomFields";
@@ -283,7 +283,7 @@ const TicketDetails = (props) => {
 
 const TicketContainer = props => {
   const dispatch = useDispatch()
-  const { isSigningOut } = props
+  const { isSigningOut, timeZone } = props
   const userPreferencesTimeStamp = useSelector(state => state.userPreferencesTimeStamp)
   const summaryCard = useSelector(state => state.summaryCard)
   const tasksCard = useSelector(state => state.tasksCard)
@@ -322,6 +322,15 @@ const TicketContainer = props => {
     }
   }, [data, loading, dispatch, isSigningOut])
 
+  useEffect(() => {
+    if (timeZone) {
+      dispatch(populateISPUserSettings({ timeZone }))
+    } else {
+      // app was rendered outside main app so fetch separately
+    }
+  }, [dispatch, timeZone])
+
+
   return (
     <>
       <UserPreferences />
@@ -343,6 +352,11 @@ TicketDetails.propTypes = {
   appuser_id: PropTypes.string,
   enableQueueJobs: PropTypes.bool,
   lablesVisible: PropTypes.bool,
+};
+
+TicketContainer.propTypes = {
+  isSigningOut: PropTypes.bool,
+  timeZone: PropTypes.string,
 };
 
 export default TicketContainer;

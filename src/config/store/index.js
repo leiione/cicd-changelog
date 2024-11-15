@@ -3,6 +3,7 @@ import { createSlice, configureStore } from '@reduxjs/toolkit'
 const counterSlice = createSlice({
   name: 'crm-redux',
   initialState: {
+    timeZone: '',
     ispId: null,
     settingsPreferences: {},
     user: {},

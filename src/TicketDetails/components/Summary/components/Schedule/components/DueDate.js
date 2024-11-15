@@ -8,9 +8,17 @@ import dayjs from "dayjs";
 import DialogAlert from "components/DialogAlert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDay } from "@fortawesome/pro-regular-svg-icons";
+import { useSelector } from "react-redux";
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const DueDate = (props) => {
   const { ticket, updateTicket } = props;
+  const ispTimezone = useSelector(state => state.timeZone)
+
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [tempDueDate, setTempDueDate] = React.useState(
     ticket.due_by_date || moment().format("YYYY-MM-DD")
@@ -79,7 +87,7 @@ const DueDate = (props) => {
       >
         <div style={{ margin: "-10px" }}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateCalendar value={dayjs(tempDueDate)} onChange={handleChange} />
+            <DateCalendar value={dayjs.tz(tempDueDate, ispTimezone)} onChange={handleChange} />
           </LocalizationProvider>
         </div>
         <Divider />
