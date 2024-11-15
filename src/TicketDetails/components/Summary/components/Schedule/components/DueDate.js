@@ -42,7 +42,7 @@ const DueDate = (props) => {
 
   const dueDate = !ticket.due_by_date
     ? "Select a date"
-    : moment(ticket.due_by_date).format("MMM DD, YYYY");
+    : moment(ticket.due_by_date, "YYYY-MM-DD").format("MMM DD, YYYY");
   const handleChange = (newDate) => {
     const isBeforeDate = moment(newDate.$d).isBefore(new Date(), "day");
     if (isBeforeDate) {
