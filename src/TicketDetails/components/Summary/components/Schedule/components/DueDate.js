@@ -41,7 +41,7 @@ const DueDate = (props) => {
   };
 
   const onSaveDueDate = () => {
-    updateTicket({ ticket_id: ticket.ticket_id, due_by_date: tempDueDate });
+    updateTicket({ ticket_id: ticket.ticket_id, due_by_date: moment(tempDueDate.$d).format('YYYY-MM-DD') });
     handleClose();
   };
 
