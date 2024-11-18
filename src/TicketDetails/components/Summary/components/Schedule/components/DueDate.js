@@ -67,7 +67,7 @@ const DueDate = (props) => {
           icon={faCalendarDay}
           className=" fa-fw text-muted f-16 mr-2"
         />
-        Due Datee
+        Due Date
         <Typography
           variant="subtitle1"
           className={`primary-on-hover d-inline-block ml-2`}
