@@ -260,10 +260,10 @@ const Email = (props) => {
           },
         ]}
       />
-      {Boolean(previewAttachment) &&
+      {Boolean(previewAttachment) && (
         <Modal open={Boolean(previewAttachment)} onClose={() => setPreviewAttachment(null)}>
           <Box className="box-modal-preview">
-            {previewAttachment && previewAttachment.attachment_type.startsWith("image/") ? (
+            {IMAGE_EXTENSION_LIST.some(ext => previewAttachment.filename.toLowerCase().endsWith(ext)) ? (
               <img
                 src={previewAttachment.file_url}
                 alt="Preview"
@@ -292,7 +292,8 @@ const Email = (props) => {
             )}
           </Box>
         </Modal>
-      }
+      )}
+
     </>
   );
 };
