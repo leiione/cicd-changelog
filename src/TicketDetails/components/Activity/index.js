@@ -1,15 +1,23 @@
 import React, { useMemo, useState, useCallback } from "react";
 import AccordionCard from "../../../Common/AccordionCard";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
 import { useQuery } from "@apollo/client";
 import { GET_ACTIVITIES } from "TicketDetails/TicketGraphQL";
 import { TextField, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import h2p from "html2plaintext"
+import HistoryDialog from "components/HistoryDialog";
+import { preventEvent } from "Common/helper";
+import { cloneDeep, isEmpty, replace } from "lodash";
 
 const Activity = (props) => {
+  const apiRef = useGridApiRef();
   const { appuser_id, customer } = props;
-
+  const [detailDialog, setDetailDialog] = useState({
+    open: false,
+    history: {},
+  });
   const { data, loading, error } = useQuery(GET_ACTIVITIES, {
     variables: { ticket_id: customer.ticket_id },
     fetchPolicy: "network-only",
@@ -24,7 +32,8 @@ const Activity = (props) => {
       date: activity.date_time,
       appuser: activity.appuser,
       type: activity.action,
-      details: activity.details,
+      details: h2p(activity.details),
+      raw_details: activity.details,
     }));
     return allRows.filter((row) =>
       row.details.toLowerCase().includes(searchText.toLowerCase())
@@ -41,6 +50,22 @@ const Activity = (props) => {
   const handleSearchChange = useCallback((event) => {
     setSearchText(event.target.value);
   }, []);
+
+  const handleCellClick = (params, event) => {
+    event.stopPropagation();
+    preventEvent(event)
+    apiRef.current.setRowSelectionModel([params.id])
+    setDetailDialog({ open: true, history: params.row });
+  };
+
+  let html = detailDialog.open ? cloneDeep(detailDialog.history.raw_details) : ''
+  html = replace(html, /<p[^>]*>/g, '')
+  html = replace(html, /<\/p>/g, '')
+  html = replace(html, /&lt;/g, "<")
+  html = replace(html, /&gt;/g, ">")
+  html = replace(html, /undefined/g, '')
+  html = replace(html, /&nbsp/g, '  ')
+  const detailText = !isEmpty(html) ? html : ""
 
   return (
     <AccordionCard
@@ -74,17 +99,31 @@ const Activity = (props) => {
           <p>Error loading activities: {error.message}</p>
         ) : (
           <DataGrid
+            apiRef={apiRef}
             rows={rows}
             columns={columns}
             pageSize={5}
             rowsPerPageOptions={[5, 10, 20]}
             disableColumnMenu
             autoHeight
-            disableSelectionOnClick
+            onCellClick={handleCellClick}
           />
         )}
       </div>
-    </AccordionCard>
+      {detailDialog.open && (
+        <HistoryDialog
+          open={detailDialog.open}
+          handleClose={() => {
+            setDetailDialog({ open: false, history: {} })
+            apiRef.current.setRowSelectionModel([])
+          }}
+          timestamp={detailDialog.history.date}
+        >
+          {detailText}
+        </HistoryDialog>
+      )
+      }
+    </AccordionCard >
   );
 };
 
