@@ -3,7 +3,7 @@ import { MenuItem, Select, FormControl } from "@mui/material";
 import { preventEvent } from "../../../../Common/helper";
 import { useQuery } from "@apollo/client";
 import { GET_TICKET_LINK_TYPES } from "TicketDetails/TicketGraphQL";
-import { capitalize } from "lodash";
+import { startCase } from "lodash";
 
 const TickeLinkType = (props) => {
   const { tickeLinkType, setTicketLinkType } = props;
@@ -41,7 +41,7 @@ const TickeLinkType = (props) => {
               value={type}
               onClick={(event) => handlePopoverClose(event, type)}
             >
-              {capitalize(type.name)}
+              {startCase(type.name)}
             </MenuItem>
           ))}
         </Select>
