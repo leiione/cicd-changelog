@@ -184,7 +184,7 @@ const Summary = (props) => {
                   </Typography>
                   <Typography variant="caption">
                     Last updated by: <strong>{customer.last_updated_by}</strong>{" "}
-                    on {customer.timestamp}
+                    on {customer.last_updated_by_time}
                   </Typography>
                 </div>
               </div>
