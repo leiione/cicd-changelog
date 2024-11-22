@@ -155,24 +155,41 @@ const TicketStatus = (props) => {
           variant="standard"
           onClick={(event) => preventEvent(event)}
         />
-
-
-
         {filteredStatuses &&
-          filteredStatuses.map((taskStatus) => (
-            <Tooltip title={resolvingClosingMessage(taskStatus.name)}>
-              <span>
-                <MenuItem
-                  key={taskStatus.id}
-                  onClick={(event) => handlePopoverClose(event, taskStatus.name)}
-                  color="default"
-                  disabled={Boolean(resolvingClosingMessage(taskStatus.name))}
+          filteredStatuses.map((taskStatus) => {
+            const isResolvedDisabled =
+              taskStatus.name === "Resolved" &&
+              ticket.tasks &&
+              ticket.tasks[0] &&
+              !ticket.tasks[0].is_completed;
+
+            return (
+              <Tooltip title={resolvingClosingMessage(taskStatus.name)} key={taskStatus.id}>
+                <span
+                  onClick={(event) => {
+                    if (isResolvedDisabled || Boolean(resolvingClosingMessage(taskStatus.name))) {
+                      preventEvent(event); // Stop propagation explicitly for disabled items
+                    }
+                  }}
                 >
-                  {taskStatus.name}
-                </MenuItem>
-              </span>
-            </Tooltip>
-          ))}
+                  <MenuItem
+                    onClick={(event) => {
+                      if (isResolvedDisabled || Boolean(resolvingClosingMessage(taskStatus.name))) {
+                        preventEvent(event); // Prevent action on disabled items
+                      } else {
+                        handlePopoverClose(event, taskStatus.name);
+                      }
+                    }}
+                    color="default"
+                    disabled={isResolvedDisabled || Boolean(resolvingClosingMessage(taskStatus.name))}
+                  >
+                    {taskStatus.name}
+                  </MenuItem>
+                </span>
+              </Tooltip>
+            );
+          })
+        }
       </Menu>
     </>
   );
