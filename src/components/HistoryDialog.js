@@ -2,11 +2,8 @@ import React from "react"
 import { Dialog, DialogContent, DialogTitle, Typography, Grid, IconButton } from "@mui/material"
 import { Close as CloseIcon } from "@mui/icons-material"
 import { isEmpty, split } from "lodash"
-import moment from "moment-timezone"
-import { useSelector } from "react-redux"
 
 const HistoryDialog = props => {
-  const ispTimezone = useSelector(state => state.timeZone)
   const { children, timestamp, open, handleClose, maxWidth = "sm", contentComparison, ...rest } = props
 
   const splitText = split(children, `\n`)
@@ -26,7 +23,7 @@ const HistoryDialog = props => {
       <DialogTitle id="alert-dialog-title">
         <Grid container alignItems="center" justifyContent="space-between">
           <Grid item xs="auto">
-            <Typography variant={"h6"}>History - {moment.tz(timestamp, ispTimezone).format("MMM DD, YYYY hh:mm A")}</Typography>
+            <Typography variant={"h6"}>History - {timestamp}</Typography>
           </Grid>
           <Grid item xs="auto">
             <IconButton onClick={handleClose} size="large">
