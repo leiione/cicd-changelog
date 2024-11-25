@@ -108,7 +108,7 @@ const AddTicket = (props) => {
     ticket_contact_name: '',
     ticket_contact_numbers: '',
     task_id: ticket && ticket.task_id !== undefined ? ticket.task_id : 0, 
-    description: ticket && ticket.task !== undefined ? ticket.task : null, 
+    description: ticket && ticket.description !== undefined ? ticket.description : null, 
   }
 
   if (ticket && ticket.initSelectedCustId > 0) {

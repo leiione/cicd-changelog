@@ -6,7 +6,7 @@ import { cloneDeep } from "lodash";
 import DialogAlert from "components/DialogAlert";
 
 const TaskMenuOptions = (props) => {
-  const { show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, handleOpenTicket, disabled, setOnEditMode, onEdit } = props;
+  const { ticket_id, show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, handleOpenTicket, disabled, setOnEditMode, onEdit } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [openAlert, setOpenAlert] = React.useState(null);
   const [isSubmitting] = React.useState(null);
@@ -40,7 +40,7 @@ const TaskMenuOptions = (props) => {
   }
 
   const onConvertTask = async () => {
-    handleOpenTicket({task}, "microservice");
+    handleOpenTicket({...task, description: `${task.task} (Ticket #${ticket_id})`}, "microservice");
   }
 
   const handleEdit = () => {
@@ -64,7 +64,7 @@ const TaskMenuOptions = (props) => {
             horizontal: "left",
           }}
         >
-          <MenuItem onClick={() => handleOpenTicket(task, "microservice")} disabled={disabled}> Convert to ticket</MenuItem>
+          <MenuItem onClick={() => onConvertTask(task, "microservice")} disabled={disabled}> Convert to ticket</MenuItem>
           {!task.is_default &&
             <>
               <MenuItem onClick={handleEdit}> Edit</MenuItem>
