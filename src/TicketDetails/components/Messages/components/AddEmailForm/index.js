@@ -290,7 +290,7 @@ const AddEmailForm = (props) => {
           } else {
             dispatch(
               showSnackbar({
-                message: "Email was sent successdully.",
+                message: "Email was sent successfully",
                 severity: "success",
               })
             );
