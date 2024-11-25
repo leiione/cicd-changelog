@@ -75,13 +75,16 @@ const Followers = (props) => {
 
   const handleSave = async () => {
     const followerEmails = tempFollowers.map((follower) => follower.email);
+  
+    // Optimistically update the UI
+    setFollowers(tempFollowers); // Immediately update the displayed followers
+    setTimeout(() => setAnchorEl(null), 0); // Close the popover immediately
+    setSearchTerm(""); // Clear the search field
+  
     await updateTicket({
       ticket_id: ticket.ticket_id,
       followers: followerEmails,
     });
-    setSearchTerm(""); // Clear the search field
-    setFollowers(tempFollowers); // Persist changes
-    setAnchorEl(null);
   };
 
   const handleSelectFollower = (follower) => {
@@ -112,25 +115,23 @@ const Followers = (props) => {
       return aDisabled - bDisabled;
     });
 
-  return (
-    <>
-      <Grid container spacing={1} className="mb-2">
-        <Grid item xs="auto">
-          <Typography variant="subtitle1">Followers: </Typography>
-        </Grid>
-        <Grid item xs="auto" onClick={handleClick}>
-          {ticket && ticket.followers && ticket.followers.length > 0 ? (
-            ticket.followers.split(",").map((follower) => {
-              const followerName = fetchFollowerNameCallback(follower);
-              return (
+    return (
+      <>
+        <Grid container spacing={1} className="mb-2">
+          <Grid item xs="auto">
+            <Typography variant="subtitle1">Followers: </Typography>
+          </Grid>
+          <Grid item xs="auto" onClick={handleClick}>
+            {selectedFollowers.length > 0 ? (
+              selectedFollowers.map((follower) => (
                 <Typography
                   variant="subtitle1"
                   className="d-flex align-items-center mb-1"
-                  key={follower}
+                  key={follower.email}
                 >
-                  {followerName && (
+                  {follower.realname && (
                     <AvatarText
-                      title={followerName}
+                      title={follower.realname}
                       charCount={1}
                       sx={{
                         width: 20,
@@ -139,93 +140,92 @@ const Followers = (props) => {
                       className="mr-2"
                     />
                   )}
-                  {followerName || ""}
+                  {follower.realname || ""}
                 </Typography>
-              );
-            })
-          ) : (
-            <IconButton color="primary" onClick={handleClick} size="small">
-              <FontAwesomeIcon icon={faPlusCircle} />
-            </IconButton>
-          )}
-
-          <Popover
-            open={openMenu}
-            anchorEl={anchorEl}
-            onClose={handlePopoverClose}
-            classes={{ paper: "overflow-hidden" }}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left",
-            }}
-          >
-            <TextField
-              placeholder="Search followers"
-              className="p-3"
-              variant="standard"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              fullWidth
-              autoFocus
-              autoComplete="off"
-              margin="dense"
-            />
-            <List className="paper-height-300 overflow-y-auto">
-              {filteredFollowers &&
-                filteredFollowers.map((follower) => {
-                  const isDisabled = !follower.email;
-                  return (
-                    <Tooltip
-                      key={follower.appuser_id}
-                      title={
-                        isDisabled
-                          ? "This appuser does not have an associated email account."
-                          : follower.email
-                      }
-                      placement="top"
-                    >
-                      <ListItemButton
-                        disablePadding
-                        disabled={isDisabled}
-                        selected={tempFollowers.some(
-                          (a) => a.email === follower.email
-                        )}
-                        onClick={() => handleSelectFollower(follower)}
+              ))
+            ) : (
+              <IconButton color="primary" onClick={handleClick} size="small">
+                <FontAwesomeIcon icon={faPlusCircle} />
+              </IconButton>
+            )}
+    
+            <Popover
+              open={openMenu}
+              anchorEl={anchorEl}
+              onClose={handlePopoverClose}
+              classes={{ paper: "overflow-hidden" }}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+            >
+              <TextField
+                placeholder="Search followers"
+                className="p-3"
+                variant="standard"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                fullWidth
+                autoFocus
+                autoComplete="off"
+                margin="dense"
+              />
+              <List className="paper-height-300 overflow-y-auto">
+                {filteredFollowers &&
+                  filteredFollowers.map((follower) => {
+                    const isDisabled = !follower.email;
+                    return (
+                      <Tooltip
+                        key={follower.email}
+                        title={
+                          isDisabled
+                            ? "This appuser does not have an associated email account."
+                            : follower.email
+                        }
+                        placement="top"
                       >
-                        <ListItemAvatar>
-                          <AvatarText
-                            title={follower.realname}
-                            charCount={1}
-                            className="mx-auto"
-                            sx={{
-                              width: 20,
-                              height: 20,
-                            }}
-                          />
-                        </ListItemAvatar>
-                        <ListItemText primary={follower.realname} />
-                      </ListItemButton>
-                    </Tooltip>
-                  );
-                })}
-            </List>
-            <div className="drawer-footer">
-              <Button color="primary" variant="outlined" onClick={handleSave}>
-                Save
-              </Button>
-              <Button
-                color="default"
-                variant="outlined"
-                onClick={handlePopoverClose}
-              >
-                Cancel
-              </Button>
-            </div>
-          </Popover>
+                        <ListItemButton
+                          disablePadding
+                          disabled={isDisabled}
+                          selected={tempFollowers.some(
+                            (a) => a.email === follower.email
+                          )}
+                          onClick={() => handleSelectFollower(follower)}
+                        >
+                          <ListItemAvatar>
+                            <AvatarText
+                              title={follower.realname}
+                              charCount={1}
+                              className="mx-auto"
+                              sx={{
+                                width: 20,
+                                height: 20,
+                              }}
+                            />
+                          </ListItemAvatar>
+                          <ListItemText primary={follower.realname} />
+                        </ListItemButton>
+                      </Tooltip>
+                    );
+                  })}
+              </List>
+              <div className="drawer-footer">
+                <Button color="primary" variant="outlined" onClick={handleSave}>
+                  Save
+                </Button>
+                <Button
+                  color="default"
+                  variant="outlined"
+                  onClick={handlePopoverClose}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </Popover>
+          </Grid>
         </Grid>
-      </Grid>
-    </>
-  );
+      </>
+    );
 };
 
 export default Followers;
