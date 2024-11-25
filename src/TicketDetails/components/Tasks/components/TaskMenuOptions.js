@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { IconButton, MenuItem, Popover } from "@mui/material";
 import { MoreVert } from "@mui/icons-material";
 import { preventEvent } from "../../../../Common/helper";
@@ -6,7 +7,7 @@ import { cloneDeep } from "lodash";
 import DialogAlert from "components/DialogAlert";
 
 const TaskMenuOptions = (props) => {
-  const { ticket_id, show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, handleOpenTicket, disabled, setOnEditMode, onEdit } = props;
+  const { show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, handleOpenTicket, disabled, setOnEditMode, onEdit } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [openAlert, setOpenAlert] = React.useState(null);
   const [isSubmitting] = React.useState(null);
@@ -40,7 +41,7 @@ const TaskMenuOptions = (props) => {
   }
 
   const onConvertTask = async () => {
-    handleOpenTicket({...task, description: `${task.task} (Ticket #${ticket_id})`}, "microservice");
+    handleOpenTicket({ ...task, description: task.task }, "microservice");
   }
 
   const handleEdit = () => {
@@ -64,7 +65,7 @@ const TaskMenuOptions = (props) => {
             horizontal: "left",
           }}
         >
-          <MenuItem onClick={() => onConvertTask(task, "microservice")} disabled={disabled}> Convert to ticket</MenuItem>
+          <MenuItem onClick={onConvertTask} disabled={disabled}> Convert to ticket</MenuItem>
           {!task.is_default &&
             <>
               <MenuItem onClick={handleEdit}> Edit</MenuItem>
@@ -98,5 +99,18 @@ const TaskMenuOptions = (props) => {
       )}
     </>
   );
+}
+
+TaskMenuOptions.propTypes = {
+  show: PropTypes.bool.isRequired,
+  task: PropTypes.object.isRequired,
+  ticketTasks: PropTypes.array.isRequired,
+  setTicketTasks: PropTypes.func.isRequired,
+  onSaveTaskChanges: PropTypes.func.isRequired,
+  handleOpenTicket: PropTypes.func.isRequired,
+  disabled: PropTypes.bool.isRequired,
+  setOnEditMode: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
 };
+
 export default React.memo(TaskMenuOptions);
