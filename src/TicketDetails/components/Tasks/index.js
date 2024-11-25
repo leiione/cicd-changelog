@@ -361,7 +361,6 @@ const Tasks = (props) => {
                                       onClick={() => onTaskClick(task)}
                                         style={{ color: '#0053F4', cursor: 'pointer' }}
                                       >
-                                        {`Ticket ${task.converted_ticket_id} `}
                                         {`${task.task}${" *"}`}
                                       </span>
                                     ) : (
