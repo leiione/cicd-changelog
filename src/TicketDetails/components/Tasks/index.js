@@ -364,7 +364,7 @@ const Tasks = (props) => {
                                         {`${task.task}${" *"}`}
                                       </span>
                                     ) : (
-                                      `${task.task}`
+                                      `${task.task}${isTaskRequired ? " *" : ""}`
                                     )}
                                   </Typography>
                                 }
