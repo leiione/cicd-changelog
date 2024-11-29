@@ -39,6 +39,7 @@ export const GET_TICKET = gql`
         is_default
         rank
         converted_ticket_id
+        flag_ticket_deleted
       }
       infrastructure {
         id

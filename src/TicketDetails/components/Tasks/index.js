@@ -149,7 +149,7 @@ const Tasks = (props) => {
     try {
       setSubmitting(true)
       const tasks = newTasks.map((x, index) => ({
-        ...omit(x, ["is_default", "__typename"]),
+        ...omit(x, ["is_default", "__typename", "flag_ticket_deleted"]),
         rank: index + 1,
       }));
 
@@ -262,7 +262,7 @@ const Tasks = (props) => {
                             {...provided.dragHandleProps}
                             style={{
                               ...getItemStyle(snapshot.isDragging, provided.draggableProps.style),
-                              backgroundColor: task.converted_ticket_id !== null ? '#e7f2fe' : 'inherit',
+                              backgroundColor: task.converted_ticket_id > 0 && !task.flag_ticket_deleted ? '#e7f2fe' : 'inherit',
                             }}
                             onMouseOver={() => setHover(index)}
                             onMouseLeave={() => setHover(-1)}
@@ -278,7 +278,7 @@ const Tasks = (props) => {
                                 <TaskMenuOptions
                                   ticket_id={ticket.ticket_id}
                                   show={isHovered === index}
-                                  disabled={onEditMode.index === index || task.converted_ticket_id !== null}
+                                  disabled={onEditMode.index === index || (task.converted_ticket_id > 0 && !task.flag_ticket_deleted)}
                                   task={task}
                                   ticketTasks={ticketTasks}
                                   setTicketTasks={setTicketTasks}
@@ -292,7 +292,7 @@ const Tasks = (props) => {
                                     checked={task.is_completed}
                                     onChange={() => onCompleteTask(index)}
                                     inputProps={{ "aria-label": "controlled" }}
-                                    disabled={onEditMode.index === index || task.converted_ticket_id !== null}
+                                    disabled={onEditMode.index === index || (task.converted_ticket_id > 0 && !task.flag_ticket_deleted)}
                                     size="small"
                                   />
                                 </ListItemIcon>
@@ -356,7 +356,7 @@ const Tasks = (props) => {
                                     }
                                     style={{ width: "90%" }}
                                   >
-                                    {task.converted_ticket_id !== null ? (
+                                    {task.converted_ticket_id > 0 && !task.flag_ticket_deleted ? (
                                       <span
                                       onClick={() => onTaskClick(task)}
                                         style={{ color: '#0053F4', cursor: 'pointer' }}

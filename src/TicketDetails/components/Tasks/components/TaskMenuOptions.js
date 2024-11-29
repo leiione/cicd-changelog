@@ -54,7 +54,7 @@ const TaskMenuOptions = (props) => {
       <IconButton color="default" onClick={handleClick}>
         <MoreVert style={!show ? { visibility: "hidden" } : {}} />
       </IconButton>
-      {openMenu && task.converted_ticket_id == null &&
+      {openMenu && (task.converted_ticket_id == null || task.flag_ticket_deleted) &&
         <Popover
           open={openMenu}
           anchorEl={anchorEl}
