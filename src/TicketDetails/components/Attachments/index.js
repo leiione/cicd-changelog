@@ -74,7 +74,7 @@ const Attachments = (props) => {
     );
   }, [selectedFiles, setDefaultAttacmentCount]);
 
-  const handleFileChange = (files) => {
+  const handleFileChange = async(files) => {
     const newFiles = Array.from(files);
     const existingFileNames = new Set(selectedFiles.map((file) => file.name));
 
@@ -84,7 +84,54 @@ const Attachments = (props) => {
 
     const updatedFiles = [...selectedFiles, ...filteredNewFiles];
     setSelectedFiles(updatedFiles);
-    startUpload(filteredNewFiles);
+    await startUpload(filteredNewFiles);
+    dispatch(showSnackbar({ message: "File uploaded successfully" }));
+  };
+
+  const startUpload = async (files) => {
+    const uploadPromises = files.map(async (file) => {
+      const progressKey = file.name;
+      const fileData = await readFileAsBase64(file);
+      setUploadProgress((prevProgress) => ({
+        ...prevProgress,
+        [progressKey]: true,
+      }));
+  
+      const input_attachment = {
+        filename: file.name,
+        attachment_label: file.attachment_label ?? "",
+        attachment_type: file.type,
+        file: fileData,
+        ticket_id: ticket.ticket_id,
+        is_additional_attachment: true,
+        flag_attachments_required: false,
+      };
+  
+      try {
+        const { data } = await addTicketAttachment({
+          variables: { input_attachment },
+          refetchQueries: [
+            { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id } }
+          ]
+        });
+  
+        setUploadProgress((prevProgress) => ({
+          ...prevProgress,
+          [progressKey]: false,
+        }));
+  
+        setFileToUpdate({ file, data });
+      } catch {
+        dispatch(
+          showSnackbar({
+            message: "Failed to upload file",
+            severity: "error",
+          })
+        );
+      }
+    });
+  
+    await Promise.all(uploadPromises);
   };
 
   const handelDefaultFileChange = (files, attachment_label) => {
@@ -192,6 +239,11 @@ const Attachments = (props) => {
       }));
 
       setFileToUpdate({ file, data });
+
+      dispatch(showSnackbar({ message: "File uploaded successfully" }));
+
+
+
     } catch {
       dispatch(
         showSnackbar({
@@ -202,50 +254,7 @@ const Attachments = (props) => {
     }
   };
 
-  const startUpload = async (files) => {
-    files.forEach(async (file) => {
-      const progressKey = file.name;
-      const fileData = await readFileAsBase64(file);
-      setUploadProgress((prevProgress) => ({
-        ...prevProgress,
-        [progressKey]: true,
-      }));
-
-      const input_attachment = {
-        filename: file.name,
-        attachment_label: file.attachment_label ?? "",
-        attachment_type: file.type,
-        file: fileData,
-        ticket_id: ticket.ticket_id,
-        is_additional_attachment: true,
-        flag_attachments_required: false,
-      };
-
-      try {
-        const { data } = await addTicketAttachment({
-          variables: { input_attachment },
-          refetchQueries: [
-            { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }
-            }
-          ]
-        });
-
-        setUploadProgress((prevProgress) => ({
-          ...prevProgress,
-          [progressKey]: false,
-        }));
-
-        setFileToUpdate({ file, data });
-      } catch {
-        dispatch(
-          showSnackbar({
-            message: "Failed to upload file",
-            severity: "error",
-          })
-        );
-      }
-    });
-  };
+  
 
   const removeFile = (id) => {
     setOpenDialog(true);
@@ -497,15 +506,9 @@ const Attachments = (props) => {
                       </Box>
 
                       {(!file.file_url || file?.lodingStatus) &&
-                        (uploadProgress[file.name] ? (
+                        (uploadProgress[file.name] && (
                           <LinearProgress className="mt-2" />
-                        ) : (
-                          <LinearProgress
-                            variant="determinate"
-                            value={100}
-                            className={`mt-2 linear-progress progress-success`}
-                          />
-                        ))}
+                        ) )}
 
                       <Typography
                         className="mt-2 d-block text-truncate"
