@@ -31,7 +31,7 @@ const TicketStatus = (props) => {
     setAnchorEl(event.currentTarget);
   };
   const handlePopoverClose = (event, status) => {
-    if (status !== "backdropClick") {
+    if (status !== "backdropClick" && status !== "escapeKeyDown" && status !== "tabKeyDown") {
       setStatus(status);
       handleUpdate({
         ticket_id: ticket.ticket_id,
