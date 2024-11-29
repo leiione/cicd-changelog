@@ -35,15 +35,16 @@ const AddEmailFields = (props) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   const values = watch();
-
   const attachFiles = async (files) => {
-    files.forEach(async (file) => {
+    let newAttachments = [];
+    for (let file of files) {
       const fileData = await readFileAsBase64(file);
-      setValue("attachments", [
-        ...(values.attachments || []),
-        { file: fileData, filename: file.name },
-      ]);
-    });
+      newAttachments.push({ file: fileData, filename: file.name })
+    };
+    setValue("attachments", [
+      ...(values.attachments || []),
+      ...newAttachments
+    ]);
   };
 
 
@@ -274,7 +275,7 @@ const AddEmailForm = (props) => {
             variables: { ticket_id: ticket.ticket_id },
           },
           { query: GET_TICKET, variables: { id: ticket.ticket_id } },
-          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }},
+          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id } },
         ],
         update: (cache, { data }) => {
           if (
@@ -290,7 +291,7 @@ const AddEmailForm = (props) => {
           } else {
             dispatch(
               showSnackbar({
-                message: "Email was sent successdully.",
+                message: "Email was sent successfully",
                 severity: "success",
               })
             );

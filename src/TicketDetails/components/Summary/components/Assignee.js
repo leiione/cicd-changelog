@@ -76,20 +76,26 @@ const Assignee = (props) => {
   
 
   const handleSave = async () => {
-    // Map the tempAssignees to only include fields expected by the AssigneeInput type
+    // Optimistically update the UI
+    setAssignees(tempAssignees); // Immediately update the selected assignees state
+    setTimeout(() => setAnchorEl(null), 0); // Close the popover immediately
+    setSearchTerm(""); // Clear the search field
+  
     const assignees = tempAssignees.map((assignee) => ({
       appuser_id: assignee.appuser_id,
       realname: assignee.realname,
     }));
-
+  
+    // Perform the mutation
     await updateTicket({
       ticket_id: ticket.ticket_id,
       assignees: assignees,
     });
-    setSearchTerm(""); // Clear the search field
-
-    setAnchorEl(null);
   };
+  
+  
+  
+  
 
   const handleSelectAssignee = (assignee) => {
     const isSelected = tempAssignees.some(
@@ -128,38 +134,30 @@ const Assignee = (props) => {
           <Typography variant="subtitle1">Assignees: </Typography>
         </Grid>
         <Grid item xs="auto" onClick={handleClick}>
-          {ticket &&
-          ticket.assignees &&
-          Array.isArray(ticket.assignees) &&
-          ticket.assignees.length > 0 ? (
-            ticket.assignees.map((assigneeId) => {
-              const assigneeName = fetchAssigneeNameCallback(assigneeId);
-              return (
-                <Typography
-                  variant="subtitle1"
-                  className="d-flex align-items-center mb-1"
-                  key={assigneeId}
-                >
-                  {assigneeName && (
-                    <AvatarText
-                      title={assigneeName}
-                      charCount={1}
-                      sx={{
-                        width: 20,
-                        height: 20,
-                      }}
-                      className="mr-2"
-                    />
-                  )}
-                  {assigneeName || ""}
-                </Typography>
-              );
-            })
-          ) : (
-            <IconButton color="primary" onClick={handleClick} size="small">
-              <FontAwesomeIcon icon={faPlusCircle} />
-            </IconButton>
-          )}
+        {selectedAssignees.length > 0 ? (
+          selectedAssignees.map((assignee) => (
+            <Typography
+              variant="subtitle1"
+              className="d-flex align-items-center mb-1"
+              key={assignee.appuser_id}
+            >
+              <AvatarText
+                title={assignee.realname}
+                charCount={1}
+                sx={{
+                  width: 20,
+                  height: 20,
+                }}
+                className="mr-2"
+              />
+              {assignee.realname}
+            </Typography>
+          ))
+        ) : (
+          <IconButton color="primary" onClick={handleClick} size="small">
+            <FontAwesomeIcon icon={faPlusCircle} />
+          </IconButton>
+        )}
 
           <Popover
             open={openMenu}

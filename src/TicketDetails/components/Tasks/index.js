@@ -276,7 +276,7 @@ const Tasks = (props) => {
                             {task.task_id > 0 &&
                               <>
                                 <TaskMenuOptions
-                                  ticket={ticket}
+                                  ticket_id={ticket.ticket_id}
                                   show={isHovered === index}
                                   disabled={onEditMode.index === index || task.converted_ticket_id !== null}
                                   task={task}
@@ -361,11 +361,10 @@ const Tasks = (props) => {
                                       onClick={() => onTaskClick(task)}
                                         style={{ color: '#0053F4', cursor: 'pointer' }}
                                       >
-                                        {`Ticket ${task.converted_ticket_id} `}
                                         {`${task.task}${" *"}`}
                                       </span>
                                     ) : (
-                                      `${task.task}${isTaskRequired ? " *" : ""}`
+                                      `${task.task}${isTaskRequired && task.is_default ? " *" : ""}`
                                     )}
                                   </Typography>
                                 }

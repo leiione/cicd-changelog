@@ -16,7 +16,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const DueDate = (props) => {
-  const { ticket, updateTicket } = props;
+  const { ticket, updateTicket, hasDueDate, setHasDueDate } = props;
   const ispTimezone = useSelector(state => state.timeZone)
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -24,6 +24,7 @@ const DueDate = (props) => {
     ticket.due_by_date || moment().format("YYYY-MM-DD")
   );
   const [tempDate, setTempDate] = React.useState(ticket.due_by_date);
+  const [dueDateDisplay, setDueDateDisplay] = React.useState(ticket.due_by_date);
   const [openPrompt, togglePrompt] = React.useState(false);
 
   useEffect(() => {
@@ -41,16 +42,19 @@ const DueDate = (props) => {
   };
 
   const onSaveDueDate = () => {
+    setDueDateDisplay(moment(tempDueDate.$d).format('YYYY-MM-DD'));
     updateTicket({ ticket_id: ticket.ticket_id, due_by_date: moment(tempDueDate.$d).format('YYYY-MM-DD') });
+    if (!hasDueDate) setHasDueDate(true);
     handleClose();
   };
 
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
-  const dueDate = !ticket.due_by_date
+  const dueDate = !ticket.due_by_date && !dueDateDisplay
     ? "Select a date"
-    : moment(ticket.due_by_date, "YYYY-MM-DD").format("MMM DD, YYYY");
+    : moment(dueDateDisplay || ticket.due_by_date, "YYYY-MM-DD").format("MMM DD, YYYY");
+
   const handleChange = (newDate) => {
     const isBeforeDate = moment(newDate.$d).isBefore(new Date(), "day");
     if (isBeforeDate) {

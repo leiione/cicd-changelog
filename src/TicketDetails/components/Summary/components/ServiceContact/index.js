@@ -108,7 +108,7 @@ const ServiceContact = (props) => {
       setSelectedAddress(contactAddress);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contactAddress, onEditMode]);
+  }, [contactAddress]);
 
   useEffect(() => {
     if (
@@ -315,7 +315,12 @@ const ServiceContact = (props) => {
                     className="bg-white text-muted"
                     size="large"
                     style={{ padding: "5px" }}
-                    onClick={() => setEditMode(false)}
+                    onClick={() => {
+                      setEditMode(false)
+                      if (selectedAddress !== contactAddress) {
+                        setSelectedAddress(contactAddress);
+                      }
+                    }}
                   >
                     Cancel
                   </Button>

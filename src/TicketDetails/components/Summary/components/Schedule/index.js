@@ -6,12 +6,14 @@ import PreferredArrival from "./components/PreferredArrival";
 import AppointmentDuration from "./components/AppointmentDuration";
 import { useDispatch, useSelector } from "react-redux";
 import { setCardPreferences } from "config/store";
+import moment from "moment-timezone";
 
 const Schedule = (props) => {
   const dispatch = useDispatch();
   const { ticket, updateTicket, isSubmitting } = props;
   const summaryCard = useSelector((state) => state.summaryCard);
   const preferences = summaryCard ? summaryCard.subComponent : {};
+  const [hasDueDate, setHasDueDate] = React.useState(moment(ticket.due_by_date).isValid());
 
   const handleCollapse = () => {
     dispatch(
@@ -50,13 +52,14 @@ const Schedule = (props) => {
               <AppointmentDuration ticket={ticket} updateTicket={updateTicket} />
             </Grid>
             <Grid item xs={12}>
-              <DueDate ticket={ticket} updateTicket={updateTicket} />
+              <DueDate ticket={ticket} updateTicket={updateTicket} hasDueDate={hasDueDate} setHasDueDate={setHasDueDate} />
             </Grid>
             <Grid item xs={12}>
               <PreferredArrival
                 isSubmitting={isSubmitting}
                 ticket={ticket}
                 updateTicket={updateTicket}
+                hasDueDate={hasDueDate}
               />
             </Grid>
           </Grid>
