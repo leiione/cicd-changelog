@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClock } from "@fortawesome/pro-regular-svg-icons";
 
 const PreferredArrival = (props) => {
-  const { isSubmitting, ticket, updateTicket } = props;
+  const { isSubmitting, ticket, updateTicket, hasDueDate } = props;
   const earliestArrivalTime = moment(ticket.earliest_arrival_time && moment(ticket.earliest_arrival_time, [moment.ISO_8601, "HH:mm"]).isValid() ? ticket.earliest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
   const latestArrivalTime = moment(ticket.earliest_arrival_time && ticket.latest_arrival_time && moment(ticket.latest_arrival_time, [moment.ISO_8601, "HH:mm"]).isValid() ? ticket.latest_arrival_time : "08:00:00", [moment.ISO_8601, "HH:mm"])
 
@@ -49,7 +49,9 @@ const PreferredArrival = (props) => {
   }, [ticket.earliest_arrival_time, ticket.latest_arrival_time, startTime, endTime, earliestArrivalTime, latestArrivalTime])
 
   const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
+    if (hasDueDate) {
+      setAnchorEl(event.currentTarget);
+    }
   };
 
   const handleClose = () => {
@@ -74,11 +76,13 @@ const PreferredArrival = (props) => {
 
   return (
     <>
-      <Typography variant="subtitle1" onClick={handleClick} className="pointer">
-      <FontAwesomeIcon icon={faClock} className=" fa-fw text-muted f-16 mr-2" />Preferred Arrival
-        <Typography variant="subtitle1" className={`primary-on-hover d-inline-block ml-2`}>
-          {arrivalTime}
-        </Typography>
+      <Typography variant="subtitle1" onClick={handleClick} className={hasDueDate ? "pointer" : ''}>
+        <FontAwesomeIcon icon={faClock} className=" fa-fw text-muted f-16 mr-2" />Preferred Arrival
+        <Tooltip title={hasDueDate ? "" : "Select a Due Date first."} placement="top">
+          <Typography variant="subtitle1" className={`${hasDueDate ? 'primary-on-hover' : ''} d-inline-block ml-2`}>
+            {hasDueDate ? arrivalTime : "Select a time"}
+          </Typography>
+        </Tooltip>
       </Typography>
       <Popover
         id={id}

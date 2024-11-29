@@ -16,7 +16,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const DueDate = (props) => {
-  const { ticket, updateTicket } = props;
+  const { ticket, updateTicket, hasDueDate, setHasDueDate } = props;
   const ispTimezone = useSelector(state => state.timeZone)
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -44,6 +44,7 @@ const DueDate = (props) => {
   const onSaveDueDate = () => {
     setDueDateDisplay(moment(tempDueDate.$d).format('YYYY-MM-DD'));
     updateTicket({ ticket_id: ticket.ticket_id, due_by_date: moment(tempDueDate.$d).format('YYYY-MM-DD') });
+    if (!hasDueDate) setHasDueDate(true);
     handleClose();
   };
 
