@@ -46,7 +46,13 @@ const TicketStatus = (props) => {
   const tooltipMsgs = useMemo(() => {
     let resolvingTooltipMsgs = [];
     let closingTooltipMsgs = [];
-    const hasUncompletedTask = find(ticket.tasks, (task) => !task.is_completed && (task.is_default || (task.converted_ticket_id > 0 && !task.flag_ticket_deleted)));
+    const hasConvertedTask = find(ticket.tasks, (task) => !task.is_completed && task.converted_ticket_id > 0 && !task.flag_ticket_deleted);
+    if (hasConvertedTask) {
+      resolvingTooltipMsgs.push("- all tasks to be checked");
+      closingTooltipMsgs.push("- all tasks to be checked");
+    }
+
+    const hasUncompletedTask = find(ticket.tasks, (task) => !task.is_completed && task.is_default);
     const hasUncompletedAttachments = defaultAttacmentCount > 0;
     if (ticket.update_requirements && ticket.update_requirements.length > 0) {
       ticket.update_requirements.forEach((req) => {
