@@ -85,7 +85,7 @@ const Attachments = (props) => {
     const updatedFiles = [...selectedFiles, ...filteredNewFiles];
     setSelectedFiles(updatedFiles);
     await startUpload(filteredNewFiles);
-    dispatch(showSnackbar({ message: "File uploaded successfully" }));
+    dispatch(showSnackbar({ message: "Attachment added successfully" }));
   };
 
   const startUpload = async (files) => {
@@ -240,7 +240,7 @@ const Attachments = (props) => {
 
       setFileToUpdate({ file, data });
 
-      dispatch(showSnackbar({ message: "File uploaded successfully" }));
+      dispatch(showSnackbar({ message: "Attachment added successfully" }));
 
 
 
