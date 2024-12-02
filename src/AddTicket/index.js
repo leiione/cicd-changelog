@@ -96,9 +96,9 @@ const AddTicket = (props) => {
   // console.log("From microfrontend" ,ticket)
 
   let initialValues = {
-    category_type: "",
+    category_type: ticket && ticket.category_type !== undefined ? ticket.category_type.charAt(0) + ticket.category_type.slice(1).toLowerCase() : "",
     priority: "Normal",
-    ticket_type_id: 0,
+    ticket_type_id: ticket && ticket.ticket_type_id !== undefined ? ticket.ticket_type_id : 0,
     equipment_id: 0,
     location_id: 0,
     customer_id: 0,

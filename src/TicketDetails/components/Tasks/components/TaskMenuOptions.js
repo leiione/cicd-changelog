@@ -5,9 +5,11 @@ import { MoreVert } from "@mui/icons-material";
 import { preventEvent } from "../../../../Common/helper";
 import { cloneDeep } from "lodash";
 import DialogAlert from "components/DialogAlert";
+import { useQuery } from "@apollo/client"
+import { GET_TICKET } from "../../../TicketGraphQL";
 
 const TaskMenuOptions = (props) => {
-  const { show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, handleOpenTicket, disabled, setOnEditMode, onEdit } = props;
+  const { ticket, show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, handleOpenTicket, disabled, setOnEditMode, onEdit } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [openAlert, setOpenAlert] = React.useState(null);
   const [isSubmitting] = React.useState(null);
@@ -41,7 +43,7 @@ const TaskMenuOptions = (props) => {
   }
 
   const onConvertTask = async () => {
-    handleOpenTicket({ ...task, description: task.task }, "microservice");
+    handleOpenTicket({ ...task, description: task.task, category_type: ticket.category_type, ticket_type_id: ticket.ticket_type_id }, "microservice");
   }
 
   const handleEdit = () => {

@@ -277,6 +277,7 @@ const Tasks = (props) => {
                               <>
                                 <TaskMenuOptions
                                   ticket_id={ticket.ticket_id}
+                                  ticket={ticket}
                                   show={isHovered === index}
                                   disabled={onEditMode.index === index || task.converted_ticket_id !== null}
                                   task={task}
