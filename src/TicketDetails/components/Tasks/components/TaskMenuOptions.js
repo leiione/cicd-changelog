@@ -43,7 +43,7 @@ const TaskMenuOptions = (props) => {
   }
 
   const onConvertTask = async () => {
-    handleOpenTicket({ ...task, description: task.task, category_type: ticket.category_type, ticket_type_id: ticket.ticket_type_id }, "microservice");
+    handleOpenTicket({ ...task, description: task.task, category_type: ticket.category_type, ticket_type_id: ticket.ticket_type_id, assigned_name: ticket.subscriber.first_name+' '+ticket.subscriber.last_name }, "microservice");
   }
 
   const handleEdit = () => {
@@ -56,7 +56,7 @@ const TaskMenuOptions = (props) => {
       <IconButton color="default" onClick={handleClick}>
         <MoreVert style={!show ? { visibility: "hidden" } : {}} />
       </IconButton>
-      {openMenu && (task.converted_ticket_id == null || task.flag_ticket_deleted) &&
+      {openMenu && task.converted_ticket_id == null &&
         <Popover
           open={openMenu}
           anchorEl={anchorEl}

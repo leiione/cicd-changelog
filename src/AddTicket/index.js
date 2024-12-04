@@ -102,7 +102,7 @@ const AddTicket = (props) => {
     equipment_id: 0,
     location_id: 0,
     customer_id: 0,
-    assigned_name: '',
+    assigned_name: ticket && ticket.assigned_name !== undefined ? ticket.assigned_name : null,
     address: '',
     ticket_contact_emails: '',
     ticket_contact_name: '',
