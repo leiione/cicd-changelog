@@ -46,6 +46,12 @@ const TicketStatus = (props) => {
   const tooltipMsgs = useMemo(() => {
     let resolvingTooltipMsgs = [];
     let closingTooltipMsgs = [];
+    const hasConvertedTask = find(ticket.tasks, (task) => !task.is_completed && task.converted_ticket_id > 0 && !task.flag_ticket_deleted);
+    if (hasConvertedTask) {
+      resolvingTooltipMsgs.push("- all tasks to be checked");
+      closingTooltipMsgs.push("- all tasks to be checked");
+    }
+
     const hasUncompletedTask = find(ticket.tasks, (task) => !task.is_completed && task.is_default);
     const hasUncompletedAttachments = defaultAttacmentCount > 0;
     if (ticket.update_requirements && ticket.update_requirements.length > 0) {
@@ -124,7 +130,6 @@ const TicketStatus = (props) => {
     event.stopPropagation();
   };
 
-
   return (
     <>
       <Button
@@ -144,7 +149,7 @@ const TicketStatus = (props) => {
           "aria-labelledby": "basic-button",
         }}
       >
-       <TextField
+        <TextField
           placeholder="Search..."
           className="p-3"
           value={searchQuery}
@@ -157,31 +162,25 @@ const TicketStatus = (props) => {
         />
         {filteredStatuses &&
           filteredStatuses.map((taskStatus) => {
-            const isResolvedDisabled =
-              taskStatus.name === "Resolved" &&
-              ticket.tasks &&
-              ticket.tasks[0] &&
-              !ticket.tasks[0].is_completed;
-
             return (
               <Tooltip title={resolvingClosingMessage(taskStatus.name)} key={taskStatus.id}>
                 <span
                   onClick={(event) => {
-                    if (isResolvedDisabled || Boolean(resolvingClosingMessage(taskStatus.name))) {
+                    if (Boolean(resolvingClosingMessage(taskStatus.name))) {
                       preventEvent(event); // Stop propagation explicitly for disabled items
                     }
                   }}
                 >
                   <MenuItem
                     onClick={(event) => {
-                      if (isResolvedDisabled || Boolean(resolvingClosingMessage(taskStatus.name))) {
+                      if (Boolean(resolvingClosingMessage(taskStatus.name))) {
                         preventEvent(event); // Prevent action on disabled items
                       } else {
                         handlePopoverClose(event, taskStatus.name);
                       }
                     }}
                     color="default"
-                    disabled={isResolvedDisabled || Boolean(resolvingClosingMessage(taskStatus.name))}
+                    disabled={Boolean(resolvingClosingMessage(taskStatus.name))}
                   >
                     {taskStatus.name}
                   </MenuItem>
