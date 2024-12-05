@@ -5,8 +5,6 @@ import { MoreVert } from "@mui/icons-material";
 import { preventEvent } from "../../../../Common/helper";
 import { cloneDeep } from "lodash";
 import DialogAlert from "components/DialogAlert";
-import { useQuery } from "@apollo/client"
-import { GET_TICKET } from "../../../TicketGraphQL";
 
 const TaskMenuOptions = (props) => {
   const { ticket, show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, handleOpenTicket, disabled, setOnEditMode, onEdit } = props;
