@@ -45,7 +45,7 @@ const InfrastructureField = (props) => {
     }else if (values.assigned_name) {
       setSelected({ label: values.assigned_name, value: values.location_id });
     }
-  }, [values.location_id, infrastructureOptions, selected])
+  }, [values.location_id, values.assigned_name, infrastructureOptions, selected])
 
   if (error) return <ErrorPage error={error} />
 

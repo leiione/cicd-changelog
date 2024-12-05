@@ -45,7 +45,7 @@ const EquipmentField = (props) => {
     }else if (values.assigned_name) {
       setSelected({ label: values.assigned_name, value: values.equipment_id });
     }
-  }, [values.equipment_id, equipmentOptions, selected])
+  }, [values.equipment_id, values.assigned_name, equipmentOptions, selected])
 
   if (error) return <ErrorPage error={error} />
 

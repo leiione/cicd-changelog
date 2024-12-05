@@ -45,7 +45,7 @@ const SubscriberField = (props) => {
     } else if (values.assigned_name) {
       setSelected({ label: values.assigned_name, value: values.customer_id });
     }
-  }, [values.customer_id, subscriberOptions, selected])
+  }, [values.customer_id, values.assigned_name, subscriberOptions, selected])
 
   if (error) return <ErrorPage error={error} />
 
