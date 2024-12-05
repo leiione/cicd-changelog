@@ -477,6 +477,7 @@ export const GET_ACTIVITIES = gql`
       appuser
       action
       details
+      category
     }
   }
 `;
