@@ -52,7 +52,7 @@ const TaskMenuOptions = (props) => {
       assigned_name = ticket.assigned_name;
       assigned_id = ticket.infrastructure.id;
     }
-    handleOpenTicket({ ...task, description: task.task, category_type: ticket.category_type, ticket_type_id: ticket.ticket_type_id, assigned_name: assigned_name, assigned_id: assigned_id }, "microservice");
+    handleOpenTicket({ ...task, description: task.task, category_type: ticket.category_type, assigned_name: assigned_name, assigned_id: assigned_id }, "microservice");
   }
 
   const handleEdit = () => {
