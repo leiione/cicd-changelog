@@ -43,7 +43,18 @@ const TaskMenuOptions = (props) => {
   }
 
   const onConvertTask = async () => {
-    handleOpenTicket({ ...task, description: task.task, category_type: ticket.category_type, ticket_type_id: ticket.ticket_type_id, assigned_name: ticket.subscriber.first_name+' '+ticket.subscriber.last_name }, "microservice");
+    var assigned_id, assigned_name = ''
+    if(ticket.category_type === 'SUBSCRIBER'){
+      assigned_name = ticket.subscriber.first_name + ' ' + ticket.subscriber.last_name;
+      assigned_id = ticket.subscriber.customer_id
+    }else if(ticket.category_type === 'EQUIPMENT'){
+      assigned_name = ticket.assigned_name;
+      assigned_id = ticket.equipment_id;
+    }else if(ticket.category_type === 'INFRASTRUCTURE'){
+      assigned_name = ticket.assigned_name;
+      assigned_id = ticket.infrastructure.id;
+    }
+    handleOpenTicket({ ...task, description: task.task, category_type: ticket.category_type, ticket_type_id: ticket.ticket_type_id, assigned_name: assigned_name, assigned_id: assigned_id }, "microservice");
   }
 
   const handleEdit = () => {
