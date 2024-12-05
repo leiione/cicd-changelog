@@ -10,6 +10,7 @@ import {
   Box,
   Modal,
   Button,
+  Tooltip,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -25,6 +26,8 @@ import parse from "html-react-parser";
 import PropTypes from "prop-types";
 import DialogAlert from "components/DialogAlert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { NO_RIGHTS_MSG } from "utils/messages";
+import usePermission from "config/usePermission";
 
 const Note = (props) => {
   const { message, onDeleteNote, handleQouteNote } = props;
@@ -33,6 +36,8 @@ const Note = (props) => {
   const [submitting, setSubmitting] = useState(false);
   const [openPreview, setOpenPreview] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
+  const permitDelete = usePermission("ticket_note_message", "flag_delete", "notes")
+
 
   const lineLen = message.content
     ? message.content.split(/\r|\r\n|\n/g).length
@@ -78,20 +83,24 @@ const Note = (props) => {
               <Grid item xs="auto">
                 <MuiIconButton size="small">
                   <FontAwesomeIcon
-                  className="primary-hover"
+                    className="primary-hover"
                     icon={faMessagePlus}
                     onClick={() => handleQouteNote("note", message)}
                   />
                 </MuiIconButton>
               </Grid>
               <Grid item xs="auto">
-                <MuiIconButton size="small">
-                  <FontAwesomeIcon
-                  className="primary-hover"
-                    icon={faTrash}
-                    onClick={() => setOpenDialog(true)}
-                  />
-                </MuiIconButton>
+                <Tooltip title={!permitDelete ? NO_RIGHTS_MSG : ""}>
+                  <span>
+                    <MuiIconButton size="small" disabled={!permitDelete}>
+                      <FontAwesomeIcon
+                        className="primary-hover"
+                        icon={faTrash}
+                        onClick={() => setOpenDialog(true)}
+                      />
+                    </MuiIconButton>
+                  </span>
+                </Tooltip>
               </Grid>
             </Grid>
           }

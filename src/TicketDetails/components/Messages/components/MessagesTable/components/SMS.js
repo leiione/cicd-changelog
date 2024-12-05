@@ -7,6 +7,7 @@ import {
   ListItemAvatar,
   ListItemText,
   Popover,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,6 +22,7 @@ import parse from "html-react-parser";
 import moment from "moment-timezone";
 import LinesEllipsis from "react-lines-ellipsis";
 import DialogAlert from "components/DialogAlert";
+import { NO_RIGHTS_MSG } from "utils/messages";
 
 const SMSPopover = (props) => {
   const { anchorEl, message, handleClose, toEmail } = props;
@@ -87,7 +89,7 @@ const SMSPopover = (props) => {
 };
 
 const SMS = (props) => {
-  const { message, onDeleteMessage, handleQouteNote, handleReplySMS } = props;
+  const { message, onDeleteMessage, handleQouteNote, handleReplySMS, permitDelete } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [more, toggleMore] = React.useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
@@ -184,9 +186,13 @@ const SMS = (props) => {
                 </IconButton>
               </Grid>
               <Grid item xs="auto">
-                <IconButton size="small" onClick={handleDeleteClick}>
-                  <FontAwesomeIcon className="primary-hover" icon={faTrash} />
-                </IconButton>
+                <Tooltip title={!permitDelete ? NO_RIGHTS_MSG : ""}>
+                  <span>
+                    <IconButton size="small" onClick={handleDeleteClick} disabled={!permitDelete}>
+                      <FontAwesomeIcon className="primary-hover" icon={faTrash} />
+                    </IconButton>
+                  </span>
+                </Tooltip>
               </Grid>
             </Grid>
           }

@@ -9,12 +9,14 @@ import SMS from "./components/SMS";
 import ErrorPage from "components/ErrorPage";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
+import usePermission from "config/usePermission";
 
 const MessagesTable = (props) => {
   const { messages, error, ticket, handleQouteNote, handleReplyEmail, handleReplySMS } = props;
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const dispatch = useDispatch()
+  const permitDelete = usePermission("ticket_note_message", "flag_delete") 
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -92,9 +94,9 @@ const MessagesTable = (props) => {
           }
           switch (message.integration_id) {
             case 1:
-              return <Email message={message} onDeleteMessage={onDeleteMessage} handleQouteNote={handleQouteNote} handleReplyEmail={handleReplyEmail} />
+              return <Email permitDelete={permitDelete} message={message} onDeleteMessage={onDeleteMessage} handleQouteNote={handleQouteNote} handleReplyEmail={handleReplyEmail} />
             case 3:
-              return <SMS message={message} handleQouteNote={handleQouteNote} onDeleteMessage={() => onDeleteMessage(message.id, message.ticket_id) } handleReplySMS={handleReplySMS} />
+              return <SMS permitDelete={permitDelete} message={message} handleQouteNote={handleQouteNote} onDeleteMessage={() => onDeleteMessage(message.id, message.ticket_id) } handleReplySMS={handleReplySMS} />
             default:
               return null // via FB, etc.
           }

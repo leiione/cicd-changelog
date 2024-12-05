@@ -10,6 +10,7 @@ import {
   ListItemText,
   Modal,
   Popover,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -27,6 +28,7 @@ import DialogAlert from "components/DialogAlert";
 import { getExtensionFromFilename } from "Common/helper";
 import { IMAGE_EXTENSION_LIST } from "Common/constants";
 import { includes } from "lodash";
+import { NO_RIGHTS_MSG } from "utils/messages";
 
 const EmailPopover = (props) => {
   const { anchorEl, message, handleClose, toEmail } = props;
@@ -102,7 +104,7 @@ const EmailPopover = (props) => {
 };
 
 const Email = (props) => {
-  const { message, onDeleteMessage, handleQouteNote, handleReplyEmail } = props;
+  const { message, onDeleteMessage, handleQouteNote, handleReplyEmail, permitDelete } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [more, toggleMore] = React.useState(false);
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -171,9 +173,13 @@ const Email = (props) => {
                 </IconButton>
               </Grid>
               <Grid item xs="auto">
-                <IconButton size="small" className="primary-hover" onClick={() => setOpenDialog(true)}>
-                  <FontAwesomeIcon className="primary-hover" icon={faTrash} />
-                </IconButton>
+              <Tooltip title={!permitDelete ? NO_RIGHTS_MSG : ""}>
+                  <span>
+                    <IconButton size="small" className="primary-hover" onClick={() => setOpenDialog(true)} disabled={!permitDelete}>
+                      <FontAwesomeIcon className="primary-hover" icon={faTrash} />
+                    </IconButton>
+                  </span>
+                </Tooltip>
               </Grid>
             </Grid>
           }

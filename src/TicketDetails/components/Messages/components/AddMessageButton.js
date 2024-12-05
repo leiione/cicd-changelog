@@ -4,13 +4,16 @@ import { Menu, MenuItem } from "@mui/material";
 import ButtonWithLabel from "Common/ButtonWithLabel";
 import { preventEvent } from "Common/helper";
 import { setCardPreferences } from "config/store";
+import usePermission from "config/usePermission";
 import React from "react";
 import { useDispatch } from "react-redux";
+import { NO_RIGHTS_MSG } from "utils/messages";
 
 const AddMessageButton = (props) => {
   const dispatch = useDispatch();
   const { setAddNew, error, lablesVisible } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const permitCreate = usePermission("ticket_note_message", "flag_create")
 
   const onIconClick = (event) => {
     preventEvent(event);
@@ -33,11 +36,11 @@ const AddMessageButton = (props) => {
     <>
       <span>
         <ButtonWithLabel
-          buttonLabel="Add Message"
+          buttonLabel={!permitCreate ? NO_RIGHTS_MSG : "Add Message"}
           lablesVisible={lablesVisible}
           onClick={onIconClick}
           buttonIcon={<FontAwesomeIcon className="primary-hover" icon={faMessageLines} size="lg" />}
-          disabled={error}
+          disabled={error || !permitCreate}
         />
       </span>
       <Menu

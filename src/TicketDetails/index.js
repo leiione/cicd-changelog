@@ -27,6 +27,7 @@ import UserPreferences from "components/UserPreferences";
 import QueueJobs from "./components/Summary/components/QueueJobs";
 import CustomFields from "./components/CustomFields";
 import PropTypes from 'prop-types';
+import usePermission from "config/usePermission";
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -96,6 +97,7 @@ const TicketDetails = (props) => {
     enableQueueJobs,
   } = props;
   const snackbar = useSelector((state) => state.snackbar);
+  const permitMessageView = usePermission("ticket_note_message", "flag_read") 
 
   const { ticket_id } = ticketData;
 
@@ -211,12 +213,14 @@ const TicketDetails = (props) => {
                 lablesVisible={lablesVisible}
                 handleOpenTicket={handleOpenTicket}
               />
-              <Messages
-                handleIconButton={handleIconButton}
-                ticket={ticket}
-                lablesVisible={lablesVisible}
-                appuser_id={appuser_id}
-              />
+              {permitMessageView &&
+                <Messages
+                  handleIconButton={handleIconButton}
+                  ticket={ticket}
+                  lablesVisible={lablesVisible}
+                  appuser_id={appuser_id}
+                />
+              }
               <Attachments
                 handleIconButton={handleIconButton}
                 ticket={ticket}
@@ -283,7 +287,7 @@ const TicketDetails = (props) => {
 
 const TicketContainer = props => {
   const dispatch = useDispatch()
-  const { isSigningOut, timeZone } = props
+  const { isSigningOut, timeZone, settingsPreferences, user } = props
   const userPreferencesTimeStamp = useSelector(state => state.userPreferencesTimeStamp)
   const summaryCard = useSelector(state => state.summaryCard)
   const tasksCard = useSelector(state => state.tasksCard)
@@ -324,11 +328,11 @@ const TicketContainer = props => {
 
   useEffect(() => {
     if (timeZone) {
-      dispatch(populateISPUserSettings({ timeZone }))
+      dispatch(populateISPUserSettings({ timeZone, settingsPreferences, user }))
     } else {
       // app was rendered outside main app so fetch separately
     }
-  }, [dispatch, timeZone])
+  }, [dispatch, timeZone, settingsPreferences, user])
 
 
   return (
