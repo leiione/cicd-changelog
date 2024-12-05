@@ -54,8 +54,6 @@ const Activity = (props) => {
       row.details.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [data, loading, error, searchText, selectedFilters]);
-  
-  
 
   const columns = [
     { field: "date", headerName: "Date", width: 150, flex: 1 },
