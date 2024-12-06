@@ -26,9 +26,9 @@ const ChildDrawers = (props) => {
     if (title === "Work Order") {
       return (
         <>
-          {title}{" "}
+          {title}
           <IconButton
-            className="ml-2"
+            className="ml-2 text-light"
             onClick={() => {
               handlePrint(ticketDetail);
             }}

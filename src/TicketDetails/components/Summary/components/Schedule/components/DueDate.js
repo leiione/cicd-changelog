@@ -9,22 +9,24 @@ import DialogAlert from "components/DialogAlert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDay } from "@fortawesome/pro-regular-svg-icons";
 import { useSelector } from "react-redux";
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const DueDate = (props) => {
   const { ticket, updateTicket, hasDueDate, setHasDueDate } = props;
-  const ispTimezone = useSelector(state => state.timeZone)
+  const ispTimezone = useSelector((state) => state.timeZone);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [tempDueDate, setTempDueDate] = React.useState(
     ticket.due_by_date || moment().format("YYYY-MM-DD")
   );
   const [tempDate, setTempDate] = React.useState(ticket.due_by_date);
-  const [dueDateDisplay, setDueDateDisplay] = React.useState(ticket.due_by_date);
+  const [dueDateDisplay, setDueDateDisplay] = React.useState(
+    ticket.due_by_date
+  );
   const [openPrompt, togglePrompt] = React.useState(false);
 
   useEffect(() => {
@@ -42,8 +44,11 @@ const DueDate = (props) => {
   };
 
   const onSaveDueDate = () => {
-    setDueDateDisplay(moment(tempDueDate.$d).format('YYYY-MM-DD'));
-    updateTicket({ ticket_id: ticket.ticket_id, due_by_date: moment(tempDueDate.$d).format('YYYY-MM-DD') });
+    setDueDateDisplay(moment(tempDueDate.$d).format("YYYY-MM-DD"));
+    updateTicket({
+      ticket_id: ticket.ticket_id,
+      due_by_date: moment(tempDueDate.$d).format("YYYY-MM-DD"),
+    });
     if (!hasDueDate) setHasDueDate(true);
     handleClose();
   };
@@ -51,9 +56,12 @@ const DueDate = (props) => {
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
-  const dueDate = !ticket.due_by_date && !dueDateDisplay
-    ? "Select a date"
-    : moment(dueDateDisplay || ticket.due_by_date, "YYYY-MM-DD").format("MMM DD, YYYY");
+  const dueDate =
+    !ticket.due_by_date && !dueDateDisplay
+      ? "Select a date"
+      : moment(dueDateDisplay || ticket.due_by_date, "YYYY-MM-DD").format(
+          "MMM DD, YYYY"
+        );
 
   const handleChange = (newDate) => {
     const isBeforeDate = moment(newDate.$d).isBefore(new Date(), "day");
@@ -71,7 +79,7 @@ const DueDate = (props) => {
           icon={faCalendarDay}
           className=" fa-fw text-muted f-16 mr-2"
         />
-        Due Date
+        Due Date:
         <Typography
           variant="subtitle1"
           className={`primary-on-hover d-inline-block ml-2`}
@@ -91,25 +99,18 @@ const DueDate = (props) => {
       >
         <div style={{ margin: "-10px" }}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateCalendar value={dayjs.tz(tempDueDate, ispTimezone)} onChange={handleChange} />
+            <DateCalendar
+              value={dayjs.tz(tempDueDate, ispTimezone)}
+              onChange={handleChange}
+            />
           </LocalizationProvider>
         </div>
         <Divider />
         <div className="text-right">
-          <Button
-            color="primary"
-            size="large"
-            style={{ padding: "5px" }}
-            onClick={onSaveDueDate}
-          >
+          <Button color="primary" onClick={onSaveDueDate}>
             Save
           </Button>
-          <Button
-            className="bg-white text-muted"
-            size="large"
-            style={{ padding: "5px" }}
-            onClick={handleClose}
-          >
+          <Button color="default" onClick={handleClose}>
             Cancel
           </Button>
         </div>

@@ -21,7 +21,7 @@ import {
   GET_LINKED_TICKETS,
   GET_TICKET,
   REMOVE_LINKED_TICKET,
-  GET_ACTIVITIES
+  GET_ACTIVITIES,
 } from "TicketDetails/TicketGraphQL";
 import { useMutation, useQuery } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
@@ -79,7 +79,7 @@ const LinkedTicketContent = (props) => {
           refetchQueries: [
             { query: GET_LINKED_TICKETS, variables: { ticket_id } },
             { query: GET_TICKET, variables: { id: ticket_id } },
-            { query: GET_ACTIVITIES, variables: { ticket_id }},
+            { query: GET_ACTIVITIES, variables: { ticket_id } },
           ],
         });
         dispatch(
@@ -118,7 +118,7 @@ const LinkedTicketContent = (props) => {
                     onClick={() => onLinkedTicketClick(item)}
                   >
                     <Grid container spacing={1} key={index} alignItems="center">
-                      <Grid item xs="auto">
+                      <Grid item xs={2}>
                         <Typography
                           variant="subtitle1"
                           className="text-primary"
@@ -152,13 +152,16 @@ const LinkedTicketContent = (props) => {
                               />
                             </Tooltip>
                           )}
-                            <Tooltip title={`Status: ${item.status}`} placement="top">
-                            <Typography
-                            variant="subtitle1"
-                            className="mx-2 text-dark"
+                          <Tooltip
+                            title={`Status: ${item.status}`}
+                            placement="top"
                           >
-                            {item.status}
-                          </Typography>
+                            <Typography
+                              variant="subtitle1"
+                              className="mx-2 text-dark"
+                            >
+                              {item.status}
+                            </Typography>
                           </Tooltip>
                           <IconButton
                             className="ml-auto"
