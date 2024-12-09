@@ -3,29 +3,22 @@ import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 
 const Filter = ({ setFilter }) => {
   const allOptions = ["All", "Task", "Attachment", "Message", "Note", "Log"];
-  const [filters, setFilters] = useState(["All"]);
+  const [filters, setFilters] = useState(["All"]); // Initially, only "All" is selected
 
   const handleFilter = (event, newFilters) => {
-    if (newFilters.includes("All")) {
-      // If "All" is selected, toggle between all selected or none selected
-      if (filters.includes("All")) {
-        setFilters([]);
-        setFilter([]);
-      } else {
-        setFilters(allOptions);
-        setFilter(allOptions);
-      }
+    if (newFilters.includes("All") && newFilters.length === 1) {
+      // If "All" is selected, reset to only "All"
+      setFilters(["All"]);
+      setFilter(["All"]);
+    } else if (newFilters.includes("All")) {
+      // If another filter is clicked while "All" is selected, deselect "All"
+      const updatedFilters = newFilters.filter((filter) => filter !== "All");
+      setFilters(updatedFilters);
+      setFilter(updatedFilters);
     } else {
-      // Allow individual deselection and automatically manage "All"
-      if (newFilters.length === allOptions.length - 1) {
-        // If all individual options are selected, include "All"
-        setFilters(allOptions);
-        setFilter(allOptions);
-      } else {
-        // Update with the current selection, excluding "All"
-        setFilters(newFilters);
-        setFilter(newFilters);
-      }
+      // If another filter is selected, update the state with that filter
+      setFilters(newFilters);
+      setFilter(newFilters);
     }
   };
 
@@ -35,7 +28,7 @@ const Filter = ({ setFilter }) => {
       onChange={handleFilter}
       aria-label="filter"
       size="small"
-      exclusive={false}
+      exclusive={false} // Allow multiple selections programmatically
     >
       {allOptions.map((option) => (
         <ToggleButton key={option} value={option} aria-label={option}>
