@@ -41,7 +41,6 @@ const TaskMenuOptions = (props) => {
   }
 
   const onConvertTask = async () => {
-    console.log('ticket', ticket)
     var assigned_id, assigned_name = ''
     if(ticket.category_type === 'SUBSCRIBER'){
       assigned_name = ticket.subscriber.first_name + ' ' + ticket.subscriber.last_name;
