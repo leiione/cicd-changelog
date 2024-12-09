@@ -6,19 +6,19 @@ const Filter = ({ setFilter }) => {
   const [filters, setFilters] = useState(["All"]); // Initially, only "All" is selected
 
   const handleFilter = (event, newFilters) => {
-    if (newFilters.includes("All") && newFilters.length === 1) {
-      // If "All" is selected, reset to only "All"
+    if (newFilters.includes("All") && filters.length > 1) {
+      // If "All" is clicked while other filters are active, reset to "All"
       setFilters(["All"]);
       setFilter(["All"]);
-    } else if (newFilters.includes("All")) {
-      // If another filter is clicked while "All" is selected, deselect "All"
+    } else if (newFilters.includes("All") && newFilters.length === 1) {
+      // If "All" is clicked by itself, keep "All" selected
+      setFilters(["All"]);
+      setFilter(["All"]);
+    } else {
+      // If any other filter is clicked, deselect "All"
       const updatedFilters = newFilters.filter((filter) => filter !== "All");
       setFilters(updatedFilters);
       setFilter(updatedFilters);
-    } else {
-      // If another filter is selected, update the state with that filter
-      setFilters(newFilters);
-      setFilter(newFilters);
     }
   };
 
