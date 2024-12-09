@@ -41,6 +41,7 @@ const TaskMenuOptions = (props) => {
   }
 
   const onConvertTask = async () => {
+    console.log('ticket', ticket)
     var assigned_id, assigned_name = ''
     if(ticket.category_type === 'SUBSCRIBER'){
       assigned_name = ticket.subscriber.first_name + ' ' + ticket.subscriber.last_name;
@@ -50,7 +51,7 @@ const TaskMenuOptions = (props) => {
       assigned_id = ticket.equipment_id;
     }else if(ticket.category_type === 'INFRASTRUCTURE'){
       assigned_name = ticket.assigned_name;
-      assigned_id = ticket.infrastructure.id;
+      assigned_id = ticket.location_id;
     }
     handleOpenTicket({ ...task, description: task.task, category_type: ticket.category_type, assigned_name: assigned_name, assigned_id: assigned_id }, "microservice");
   }
