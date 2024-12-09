@@ -6,26 +6,26 @@ const Filter = ({ setFilter }) => {
   const [filters, setFilters] = useState(["All"]);
 
   const handleFilter = (event, newFilters) => {
-    if (newFilters.includes("All") && newFilters.length === 1) {
-      // If only "All" is selected, select all options
-      setFilters(allOptions);
-      setFilter(allOptions);
-    } else if (newFilters.includes("All") && newFilters.length > 1) {
-      // If "All" is selected along with others, deselect "All"
-      const updatedFilters = newFilters.filter((filter) => filter !== "All");
-      setFilters(updatedFilters);
-      setFilter(updatedFilters);
-    } else if (
-      newFilters.length === allOptions.length - 1 &&
-      !newFilters.includes("All")
-    ) {
-      // If all options except "All" are selected, select "All" automatically
-      setFilters(allOptions);
-      setFilter(allOptions);
+    if (newFilters.includes("All")) {
+      // If "All" is selected, toggle between all selected or none selected
+      if (filters.includes("All")) {
+        setFilters([]);
+        setFilter([]);
+      } else {
+        setFilters(allOptions);
+        setFilter(allOptions);
+      }
     } else {
-      // Update with the current selection
-      setFilters(newFilters);
-      setFilter(newFilters);
+      // Allow individual deselection and automatically manage "All"
+      if (newFilters.length === allOptions.length - 1) {
+        // If all individual options are selected, include "All"
+        setFilters(allOptions);
+        setFilter(allOptions);
+      } else {
+        // Update with the current selection, excluding "All"
+        setFilters(newFilters);
+        setFilter(newFilters);
+      }
     }
   };
 
@@ -37,24 +37,11 @@ const Filter = ({ setFilter }) => {
       size="small"
       exclusive={false}
     >
-      <ToggleButton value="All" aria-label="All">
-        All
-      </ToggleButton>
-      <ToggleButton value="Task" aria-label="Task">
-        Task
-      </ToggleButton>
-      <ToggleButton value="Attachment" aria-label="Attachment">
-        Attachment
-      </ToggleButton>
-      <ToggleButton value="Message" aria-label="Message">
-        Message
-      </ToggleButton>
-      <ToggleButton value="Note" aria-label="Note">
-        Note
-      </ToggleButton>
-      <ToggleButton value="Log" aria-label="Log">
-        Log
-      </ToggleButton>
+      {allOptions.map((option) => (
+        <ToggleButton key={option} value={option} aria-label={option}>
+          {option}
+        </ToggleButton>
+      ))}
     </ToggleButtonGroup>
   );
 };
