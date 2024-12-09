@@ -15,13 +15,15 @@ const AddNoteButton = (props) => {
 
   const handleAdd = (event, type) => {
     preventEvent(event);
-    setAddNew(type);
-    dispatch(
-      setCardPreferences({
-        card: "messagesCard",
-        preferences: { expanded: true },
-      })
-    );
+    if(permitCreate) {
+      setAddNew(type);
+      dispatch(
+        setCardPreferences({
+          card: "messagesCard",
+          preferences: { expanded: true },
+        })
+      );
+    }
   };
 
   return (

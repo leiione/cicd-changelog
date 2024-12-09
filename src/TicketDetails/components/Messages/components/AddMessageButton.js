@@ -17,19 +17,22 @@ const AddMessageButton = (props) => {
 
   const onIconClick = (event) => {
     preventEvent(event);
-    setAnchorEl(event.currentTarget);
+    if(permitCreate) {
+      setAnchorEl(event.currentTarget);
+    }
   };
 
   const handleAdd = (event, type) => {
     preventEvent(event);
-    setAddNew(type);
-    setAnchorEl(null);
-    dispatch(
-      setCardPreferences({
-        card: "messagesCard",
-        preferences: { expanded: true },
-      })
-    );
+    if(permitCreate) {
+      setAddNew(type);
+      dispatch(
+        setCardPreferences({
+          card: "messagesCard",
+          preferences: { expanded: true },
+        })
+      );
+    }
   };
 
   return (
