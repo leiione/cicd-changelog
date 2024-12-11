@@ -83,7 +83,7 @@ const Note = (props) => {
               <Grid item xs="auto">
                 <MuiIconButton size="small">
                   <FontAwesomeIcon
-                    className="primary-hover"
+                    className="primary-on-hover"
                     icon={faMessagePlus}
                     onClick={() => handleQouteNote("note", message)}
                   />
@@ -94,7 +94,7 @@ const Note = (props) => {
                   <span>
                     <MuiIconButton size="small" disabled={!permitDelete}>
                       <FontAwesomeIcon
-                        className="primary-hover"
+                        className="primary-on-hover"
                         icon={faTrash}
                         onClick={() => setOpenDialog(true)}
                       />

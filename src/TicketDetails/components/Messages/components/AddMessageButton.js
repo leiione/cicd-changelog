@@ -42,7 +42,7 @@ const AddMessageButton = (props) => {
           buttonLabel={!permitCreate ? NO_RIGHTS_MSG : "Add Message"}
           lablesVisible={lablesVisible}
           onClick={onIconClick}
-          buttonIcon={<FontAwesomeIcon className="primary-hover" icon={faMessageLines} size="lg" />}
+          buttonIcon={<FontAwesomeIcon className="primary-on-hover" icon={faMessageLines} size="lg" />}
           disabled={error || !permitCreate}
         />
       </span>

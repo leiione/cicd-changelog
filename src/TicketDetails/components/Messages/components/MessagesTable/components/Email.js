@@ -163,20 +163,20 @@ const Email = (props) => {
                 </Typography>
               </Grid>
               {message.traffic === 'INBOUND' && <Grid item xs="auto">
-                <IconButton className="primary-hover" size="small" onClick={() => handleReplyEmail(isHtml ? h2p(text) : parse(text), replyEmail)}>
-                  <FontAwesomeIcon icon={faReply} className="primary-hover" />
+                <IconButton className="primary-on-hover" size="small" onClick={() => handleReplyEmail(isHtml ? h2p(text) : parse(text), replyEmail)}>
+                  <FontAwesomeIcon icon={faReply} className="primary-on-hover" />
                 </IconButton>
               </Grid>}
               <Grid item xs="auto">
-                <IconButton size="small" className="primary-hover">
-                  <FontAwesomeIcon className="primary-hover" icon={faMessagePlus} onClick={() => handleQouteNote("email", message)} />
+                <IconButton size="small" className="primary-on-hover">
+                  <FontAwesomeIcon className="primary-on-hover" icon={faMessagePlus} onClick={() => handleQouteNote("email", message)} />
                 </IconButton>
               </Grid>
               <Grid item xs="auto">
               <Tooltip title={!permitDelete ? NO_RIGHTS_MSG : ""}>
                   <span>
-                    <IconButton size="small" className="primary-hover" onClick={() => setOpenDialog(true)} disabled={!permitDelete}>
-                      <FontAwesomeIcon className="primary-hover" icon={faTrash} />
+                    <IconButton size="small" className="primary-on-hover" onClick={() => setOpenDialog(true)} disabled={!permitDelete}>
+                      <FontAwesomeIcon className="primary-on-hover" icon={faTrash} />
                     </IconButton>
                   </span>
                 </Tooltip>

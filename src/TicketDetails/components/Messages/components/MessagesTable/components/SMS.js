@@ -172,14 +172,14 @@ const SMS = (props) => {
                       handleReplySMS(isHtml ? h2p(text) : parse(text), replySMS)
                     }
                   >
-                    <FontAwesomeIcon className="primary-hover" icon={faReply} />
+                    <FontAwesomeIcon className="primary-on-hover" icon={faReply} />
                   </IconButton>
                 </Grid>
               )}
               <Grid item xs="auto">
                 <IconButton size="small">
                   <FontAwesomeIcon
-                  className="primary-hover"
+                  className="primary-on-hover"
                     icon={faMessagePlus}
                     onClick={() => handleQouteNote("sms", message)}
                   />
@@ -189,7 +189,7 @@ const SMS = (props) => {
                 <Tooltip title={!permitDelete ? NO_RIGHTS_MSG : ""}>
                   <span>
                     <IconButton size="small" onClick={handleDeleteClick} disabled={!permitDelete}>
-                      <FontAwesomeIcon className="primary-hover" icon={faTrash} />
+                      <FontAwesomeIcon className="primary-on-hover" icon={faTrash} />
                     </IconButton>
                   </span>
                 </Tooltip>

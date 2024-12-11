@@ -168,8 +168,8 @@ const AddEmailFields = (props) => {
               clickable
               maxFileSize={maxFileSize}
             >
-              <IconButton aria-label="attachment" className="primary-hover">
-                <AttachFile className="primary-hover" />
+              <IconButton aria-label="attachment" className="primary-on-hover">
+                <AttachFile className="primary-on-hover" />
               </IconButton>
             </Files>
           </Tooltip>

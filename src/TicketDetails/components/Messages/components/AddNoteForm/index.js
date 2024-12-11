@@ -159,8 +159,8 @@ const AddNoteFields = (props) => {
             clickable
             maxFileSize={maxFileSize}
           >
-            <IconButton aria-label="attachment" className="primary-hover">
-              <AttachFileIcon className="primary-hover" />
+            <IconButton aria-label="attachment" className="primary-on-hover">
+              <AttachFileIcon className="primary-on-hover" />
             </IconButton>
           </Files>
         </Tooltip>

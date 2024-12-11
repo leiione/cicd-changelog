@@ -32,7 +32,7 @@ const AddNoteButton = (props) => {
           buttonLabel={permitCreate ? "Add Note" : NO_RIGHTS_MSG}
           lablesVisible={lablesVisible}
           onClick={(event) => handleAdd(event, "note")}
-          buttonIcon={<FontAwesomeIcon className="primary-hover" icon={faNote} size="lg" />}
+          buttonIcon={<FontAwesomeIcon className="primary-on-hover" icon={faNote} size="lg" />}
           disabled={!permitCreate}
         />
     </>
