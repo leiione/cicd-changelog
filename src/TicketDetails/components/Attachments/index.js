@@ -7,10 +7,12 @@ import {
   Typography,
   LinearProgress,
   IconButton,
-  Modal,
   Grid,
   Chip,
   Tooltip,
+  Dialog,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -25,12 +27,13 @@ import {
   ADD_TICKET_ATTACHMENT,
   DELETE_TICKET_ATTACHMENT,
   GET_TICKET_ATTACHMENTS,
-  GET_ACTIVITIES
+  GET_ACTIVITIES,
 } from "TicketDetails/TicketGraphQL";
 import { useMutation, useQuery } from "@apollo/client";
 import { readFileAsBase64 } from "Common/helper";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import DialogAlert from "components/DialogAlert";
+import { Close } from "@mui/icons-material";
 
 const Attachments = (props) => {
   const { ticket, setDefaultAttacmentCount } = props;
@@ -74,7 +77,7 @@ const Attachments = (props) => {
     );
   }, [selectedFiles, setDefaultAttacmentCount]);
 
-  const handleFileChange = async(files) => {
+  const handleFileChange = async (files) => {
     const newFiles = Array.from(files);
     const existingFileNames = new Set(selectedFiles.map((file) => file.name));
 
@@ -96,7 +99,7 @@ const Attachments = (props) => {
         ...prevProgress,
         [progressKey]: true,
       }));
-  
+
       const input_attachment = {
         filename: file.name,
         attachment_label: file.attachment_label ?? "",
@@ -106,20 +109,23 @@ const Attachments = (props) => {
         is_additional_attachment: true,
         flag_attachments_required: false,
       };
-  
+
       try {
         const { data } = await addTicketAttachment({
           variables: { input_attachment },
           refetchQueries: [
-            { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id } }
-          ]
+            {
+              query: GET_ACTIVITIES,
+              variables: { ticket_id: ticket.ticket_id },
+            },
+          ],
         });
-  
+
         setUploadProgress((prevProgress) => ({
           ...prevProgress,
           [progressKey]: false,
         }));
-  
+
         setFileToUpdate({ file, data });
       } catch {
         dispatch(
@@ -130,7 +136,7 @@ const Attachments = (props) => {
         );
       }
     });
-  
+
     await Promise.all(uploadPromises);
   };
 
@@ -228,9 +234,8 @@ const Attachments = (props) => {
       const { data } = await addTicketAttachment({
         variables: { input_attachment },
         refetchQueries: [
-          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }
-          }
-        ]
+          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id } },
+        ],
       });
 
       setUploadProgress((prevProgress) => ({
@@ -241,9 +246,6 @@ const Attachments = (props) => {
       setFileToUpdate({ file, data });
 
       dispatch(showSnackbar({ message: "Attachment added successfully" }));
-
-
-
     } catch {
       dispatch(
         showSnackbar({
@@ -253,8 +255,6 @@ const Attachments = (props) => {
       );
     }
   };
-
-  
 
   const removeFile = (id) => {
     setOpenDialog(true);
@@ -276,9 +276,8 @@ const Attachments = (props) => {
     await deleteAttachment({
       variables: { id: deleteAttachmentID },
       refetchQueries: [
-        { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }
-        }
-      ]
+        { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id } },
+      ],
     });
 
     setSelectedFiles((prevFiles) => {
@@ -286,18 +285,18 @@ const Attachments = (props) => {
       const fileIndex = prevFiles.findIndex(
         (file) => file.id === deleteAttachmentID
       );
-    
+
       // Filter out the file with the deleteAttachmentID
       const updatedFiles = prevFiles.filter(
         (file) => file.id !== deleteAttachmentID
       );
-    
+
       // Check if the label is present in any object in defaultAttachment
       const defaultAttachmentObject = defaultAttachment.find(
         (attachment) =>
           attachment.attachment_label === prevFiles[fileIndex]?.attachment_label
       );
-    
+
       // If the default attachment object is found, insert it back into updatedFiles at the same index
       if (defaultAttachmentObject) {
         updatedFiles.splice(fileIndex, 0, {
@@ -306,10 +305,10 @@ const Attachments = (props) => {
           default_attachment: "Y",
         });
       }
-    
+
       return updatedFiles;
     });
-    
+
     setSubmitting(false);
     setOpenDialog(false);
     setDeleteAttachmentID("");
@@ -415,19 +414,21 @@ const Attachments = (props) => {
               </Box>
             </Files>
           </Tooltip>
-          <Grid container spacing={1} className="upload-image-row">
+          <Grid container spacing={1}>
             {selectedFiles.length > 0 &&
               selectedFiles.map((file, index) => (
                 <>
                   {file.id === 0 && (
                     <Grid item xs={2} sm={2} md={2} key={index}>
                       <Typography
-                        className="mt-2 d-block text-truncate"
+                        className={`mt-2 d-block text-truncate ${
+                          !file.attachment_label ? "invisible" : ""
+                        }`}
                         variant="caption"
                       >
-                        {file.attachment_label && (
-                          <span>{file.attachment_label}</span>
-                        )}
+                        {file.attachment_label
+                          ? file.attachment_label
+                          : "Empty"}
                       </Typography>
                       <Tooltip title="Attach File">
                         <Files
@@ -443,11 +444,11 @@ const Attachments = (props) => {
                           clickable
                           multiple={false} // Disable multi-select
                         >
-                          <Box className="empty-single-img-box">
+                          <div className="attachment-card">
                             <Typography variant="body2" color="textSecondary">
                               <FontAwesomeIcon icon={faPlusCircle} size="lg" />
                             </Typography>
-                          </Box>
+                          </div>
                         </Files>
                       </Tooltip>
                     </Grid>
@@ -456,18 +457,20 @@ const Attachments = (props) => {
                     file.default_attachment === "N") && (
                     <Grid item xs={2} sm={2} md={2} key={index}>
                       <Typography
-                        className="mt-2 d-block text-truncate"
+                        className={`mt-2 d-block text-truncate ${
+                          !file.attachment_label ? "invisible" : ""
+                        }`}
                         variant="caption"
                       >
-                        {file.attachment_label && (
-                          <span>{file.attachment_label}</span>
-                        )}
+                        {file.attachment_label
+                          ? file.attachment_label
+                          : "Empty"}
                       </Typography>
 
-                      <Box className="single-img-box">
+                      <div className="attachment-card visible-on-hover">
                         {file.file_url && (
                           <IconButton
-                            className="close-icon-btn"
+                            className="close-icon-btn invisible"
                             size="small"
                             onClick={() => removeFile(file.id)}
                           >
@@ -475,7 +478,7 @@ const Attachments = (props) => {
                           </IconButton>
                         )}
                         <IconButton
-                          className="preview-icon-btn"
+                          className="preview-icon-btn invisible "
                           size="small"
                           onClick={() => handlePreviewOpen(file)}
                         >
@@ -484,7 +487,6 @@ const Attachments = (props) => {
                         {(file.type?.startsWith("image/") ||
                           file.attachment_type?.startsWith("image/")) && (
                           <img
-                            className="img-preview"
                             src={file.file_url || file.preview?.url}
                             alt={file.filename || file.name}
                           />
@@ -492,23 +494,19 @@ const Attachments = (props) => {
 
                         {(file.type?.includes("pdf") ||
                           file.attachment_type?.includes("pdf")) && (
-                          <div className="display-pdf-box">
-                            <FontAwesomeIcon icon={faFilePdf} size="2xl" />
-                          </div>
+                          <FontAwesomeIcon icon={faFilePdf} size="2xl" />
                         )}
 
                         {(file.type?.includes("zip") ||
                           file.attachment_type?.includes("zip")) && (
-                          <div className="display-pdf-box">
-                            <FontAwesomeIcon icon={faFileZip} size="2xl" />
-                          </div>
+                          <FontAwesomeIcon icon={faFileZip} size="2xl" />
                         )}
-                      </Box>
+                      </div>
 
                       {(!file.file_url || file?.lodingStatus) &&
-                        (uploadProgress[file.name] && (
+                        uploadProgress[file.name] && (
                           <LinearProgress className="mt-2" />
-                        ) )}
+                        )}
 
                       <Typography
                         className="mt-2 d-block text-truncate"
@@ -522,7 +520,13 @@ const Attachments = (props) => {
               ))}
 
             {selectedFiles.length > 0 && selectedFiles.length < 4 && (
-              <Grid item xs={2} sm={2} md={2} className="mt-4">
+              <Grid item xs={2} sm={2} md={2}>
+                <Typography
+                  className={`mt-2 d-block text-truncate invisible`}
+                  variant="caption"
+                >
+                  Not visible
+                </Typography>
                 <Tooltip title="Attache File">
                   <Files
                     className="files-dropzone"
@@ -531,11 +535,11 @@ const Attachments = (props) => {
                     accepts={acceptedFormats}
                     clickable
                   >
-                    <Box className="empty-single-img-box">
-                      <Typography variant="body2" color="textSecondary">
+                    <div className="attachment-card">
+                      <Typography variant="body2" color="primary">
                         <FontAwesomeIcon icon={faPlusCircle} size="lg" />
                       </Typography>
-                    </Box>
+                    </div>
                   </Files>
                 </Tooltip>
               </Grid>
@@ -543,33 +547,43 @@ const Attachments = (props) => {
           </Grid>
 
           {/* Image Preview Modal */}
-          <Modal open={openPreview} onClose={handlePreviewClose}>
-            <Box className="box-modal-preview">
-              <Typography
-                variant="body2"
-                className="mt-2"
-                display="flex"
-                alignItems="center"
-              >
-                {previewImage.filename || previewImage.name}
-                {previewImage.file_url && (
+          <Dialog open={openPreview} onClose={handlePreviewClose}>
+            <DialogTitle id="alert-dialog-title">
+              <Grid container spacing={1} alignItems="center">
+                <Grid item xs="auto">
+                  {previewImage.filename || previewImage.name}
+                </Grid>
+                <Grid item xs>
+                  {previewImage.file_url && (
+                    <IconButton
+                      component="a"
+                      href={previewImage.file_url}
+                      download={previewImage.filename || previewImage.name}
+                      aria-label="download"
+                      size="small"
+                      className="ml-2"
+                    >
+                      <GetAppIcon />
+                    </IconButton>
+                  )}
+                </Grid>
+                <Grid item xs="auto">
                   <IconButton
-                    component="a"
-                    href={previewImage.file_url}
-                    download={previewImage.filename || previewImage.name}
-                    aria-label="download"
+                    onClick={handlePreviewClose}
                     size="small"
-                    style={{ marginLeft: "8px" }}
+                    className="ml-auto"
                   >
-                    <GetAppIcon />
+                    <Close />
                   </IconButton>
-                )}
-              </Typography>
-
+                </Grid>
+              </Grid>
+            </DialogTitle>
+            <DialogContent>
               {previewImage &&
                 (previewImage.type?.startsWith("image/") ||
                 previewImage.attachment_type?.startsWith("image/") ? (
                   <img
+                   className="img-fluid"
                     src={
                       previewImage.file_url || URL.createObjectURL(previewImage)
                     }
@@ -580,8 +594,8 @@ const Attachments = (props) => {
                     Preview not available
                   </Typography>
                 ))}
-            </Box>
-          </Modal>
+            </DialogContent>
+          </Dialog>
           {/* EOF Image Preview Modal */}
         </Box>
       </AccordionCard>
@@ -592,7 +606,6 @@ const Attachments = (props) => {
         buttonsList={[
           {
             label: "Yes",
-            size: "medium",
             color: "primary",
             onClick: handleOnDelete,
             isProgress: true,
@@ -600,7 +613,6 @@ const Attachments = (props) => {
           },
           {
             label: "No",
-            size: "medium",
             color: "default",
             onClick: () => setOpenDialog(false),
             disabled: submitting,
