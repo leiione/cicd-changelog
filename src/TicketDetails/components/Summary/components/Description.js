@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, TextField, Typography } from "@mui/material";
 
 const Description = (props) => {
@@ -10,6 +10,14 @@ const Description = (props) => {
   const [error, setError] = useState(""); // State to track error
 
   const handleInlineEdit = () => setOpenInline(true);
+
+  useEffect(() => {
+    if (ticket.description !== descDisplay) {
+      setDescription(ticket.description);
+      setDescDisplay(ticket.description);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticket.description])
 
   const handleCancel = () => {
     setOpenInline(false);

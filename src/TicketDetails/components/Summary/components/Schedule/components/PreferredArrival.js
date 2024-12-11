@@ -45,17 +45,12 @@ const PreferredArrival = (props) => {
   const [arrivalTime, setArrivalTime] = useState("");
 
   useEffect(() => {
-    const arrivalTimeTemp = moment(earliestArrivalTime).isSame(
-      latestArrivalTime
-    )
-      ? moment(earliestArrivalTime).format("LT")
-      : `${moment(earliestArrivalTime).format("LT")} - ${moment(
-          latestArrivalTime
-        ).format("LT")}`;
-    if (!arrivalTime && arrivalTime !== arrivalTimeTemp) {
-      setArrivalTime(arrivalTimeTemp);
+    const arrivalTimeTemp = moment(earliestArrivalTime).isSame(latestArrivalTime) ? moment(earliestArrivalTime).format("LT") : `${moment(earliestArrivalTime).format("LT")} - ${moment(latestArrivalTime).format("LT")}`;
+    if (!arrivalTime || arrivalTime !== arrivalTimeTemp) {
+      setArrivalTime(arrivalTimeTemp)
     }
-  }, [arrivalTime, earliestArrivalTime, latestArrivalTime]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [earliestArrivalTime, latestArrivalTime, ticket.earliest_arrival_time, ticket.latest_arrival_time])
 
   React.useEffect(() => {
     if (preferred === "window") {

@@ -481,3 +481,47 @@ export const GET_ACTIVITIES = gql`
     }
   }
 `;
+
+export const TICKET_NOTE_SUBSCRIPTION = gql`
+  subscription TicketNote($ticket_id: Int!) {
+  ticketNote(ticket_id: $ticket_id) {
+    note_id
+  }
+}
+`;
+
+export const TICKET_SMS_SUBSCRIPTION = gql`
+subscription Subscription($ticket_id: Int!) {
+  ticketSMS(ticket_id: $ticket_id)
+}
+`;
+
+export const TICKET_EMAIL_SUBSCRIPTION = gql`
+subscription Subscription($ticket_id: Int!) {
+  ticketEmail(ticket_id: $ticket_id)
+}`;
+
+export const TICKET_SUBSCRIPTION = gql`
+  subscription ticket($ticket_id: Int!) {
+    ticket(ticket_id: $ticket_id) {
+      ticket_id
+    }
+  }
+`;
+
+export const TASK_SUBSCRIPTION = gql`
+  subscription Subscription($ticket_id: Int!) {
+    ticketTask(ticket_id: $ticket_id)
+  }
+`;
+
+export const LINKED_TICKETS_SUBSCRIPTION = gql`
+  subscription linkedTickets($ticket_id: Int!) {
+    linkedTickets(ticket_id: $ticket_id) {
+      id
+      ticket_id
+    }
+  }
+`;
+
+

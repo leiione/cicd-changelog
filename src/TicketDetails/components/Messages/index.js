@@ -6,8 +6,11 @@ import MessagesTable from "./components/MessagesTable";
 import {
   GET_TICKET_MESSAGES,
   GET_TICKET_NOTES,
+  TICKET_NOTE_SUBSCRIPTION,
+  TICKET_SMS_SUBSCRIPTION,
+  TICKET_EMAIL_SUBSCRIPTION
 } from "TicketDetails/TicketGraphQL";
-import { useQuery } from "@apollo/client";
+import { useQuery, useSubscription } from "@apollo/client";
 import Loader from "components/Loader";
 import { checkIfCacheExists } from "config/apollo";
 import AddMessageButton from "./components/AddMessageButton";
@@ -29,6 +32,7 @@ const Messages = (props) => {
     error: messageError,
     data,
     client,
+    refetch: refetchMessages
   } = useQuery(GET_TICKET_MESSAGES, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: "cache-and-network",
@@ -46,16 +50,41 @@ const Messages = (props) => {
     error: errorNotes,
     data: dataNotes,
     client: clientNotes,
+    refetch: refetchNotes,
   } = useQuery(GET_TICKET_NOTES, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: "cache-and-network",
     skip: !ticket.ticket_id,
   });
+  
   const cacheExistsNotes = checkIfCacheExists(clientNotes, {
     query: GET_TICKET_NOTES,
     variables: { ticket_id: ticket.ticket_id },
   });
 
+  useSubscription(TICKET_NOTE_SUBSCRIPTION, {
+    variables: { ticket_id: ticket.ticket_id },
+    onData: async ({ data: { data }, client }) => {
+      refetchNotes();
+    },
+  });
+
+  useSubscription(TICKET_SMS_SUBSCRIPTION, {
+    variables: { ticket_id: ticket.ticket_id },
+    onData: async ({ data: { data }, client }) => {
+      refetchMessages();
+    },
+  });
+
+  useSubscription(TICKET_EMAIL_SUBSCRIPTION, {
+    variables: { ticket_id: ticket.ticket_id },
+    onData: async ({ data: { data }, client }) => {
+      refetchMessages();
+    },
+  });
+
+  
+  
   // Initialize messages array
   let messages = [];
 

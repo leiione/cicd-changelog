@@ -22,8 +22,9 @@ import {
   GET_TICKET,
   REMOVE_LINKED_TICKET,
   GET_ACTIVITIES,
+  LINKED_TICKETS_SUBSCRIPTION
 } from "TicketDetails/TicketGraphQL";
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
 import { startCase, uniq } from "lodash";
 import { getPriorityIcon } from "utils/getPriorityIcon";
@@ -222,7 +223,7 @@ const LinkedTickets = (props) => {
   const [isLinkedTicketDrawerOpen, setIsLinkedTicketDrawerOpen] =
     useState(false);
 
-  const { loading, error, data } = useQuery(GET_LINKED_TICKETS, {
+  const { loading, error, data, refetch } = useQuery(GET_LINKED_TICKETS, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: "network-only",
     skip: !ticket.ticket_id || !preferences.linkedTickets, // fetch only when expanded
@@ -243,6 +244,13 @@ const LinkedTickets = (props) => {
     }
     return tickets;
   }, [loading, data]);
+  
+  useSubscription(LINKED_TICKETS_SUBSCRIPTION, {
+    variables: { ticket_id: ticket.ticket_id },
+    onData: async ({ data: { data }, client }) => {
+      refetch();
+    },
+  });
 
   const handleCollapse = () => {
     dispatch(

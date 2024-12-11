@@ -7,8 +7,8 @@ import Summary from "./components/Summary";
 import WorkOrder from "./components/Summary/components/WorkOrder";
 import Tasks from "./components/Tasks";
 // import BillsOfMaterial from "./components/BillsOfMaterial";
-import { GET_TICKET } from "./TicketGraphQL";
-import { useMutation, useQuery } from "@apollo/client";
+import { GET_TICKET, TICKET_SUBSCRIPTION, TASK_SUBSCRIPTION } from "./TicketGraphQL";
+import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
 import { useDispatch, useSelector } from "react-redux";
 import GlobalSnackbar from "Common/GlobalSnackbar";
@@ -103,7 +103,7 @@ const TicketDetails = (props) => {
 
   const [open1, setopen1] = useState(null);
 
-  const { loading, error, data } = useQuery(GET_TICKET, {
+  const { loading, error, data, refetch } = useQuery(GET_TICKET, {
     variables: { id: ticket_id },
     fetchPolicy: "network-only",
     skip: !ticket_id,
@@ -115,6 +115,20 @@ const TicketDetails = (props) => {
 
   const ticketTypes = !loading && data && data.ticketTypes ? data.ticketTypes : [];
   const ticketStatuses = !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
+
+  useSubscription(TICKET_SUBSCRIPTION, {
+    variables: { ticket_id: ticket.ticket_id },
+    onData: async ({ data: { data }, client }) => {
+      refetch();
+    },
+  });
+
+  useSubscription(TASK_SUBSCRIPTION, {
+    variables: { ticket_id: ticket.ticket_id },
+    onData: async ({ data: { data }, client }) => {
+      refetch();
+    },
+  });
 
   const handleIconButton = (event, childDrawer) => {
     preventEvent(event);
@@ -278,7 +292,7 @@ const TicketDetails = (props) => {
           ]}
         />
       )}
-      { openQueueJobs &&
+      {openQueueJobs &&
         <QueueJobs openQueueJobs={openQueueJobs} setOpenQueueJobs={setOpenQueueJobs} selectedAddress={selectedAddress} />
       }
     </div>
