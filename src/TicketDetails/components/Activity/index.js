@@ -11,6 +11,8 @@ import HistoryDialog from "components/HistoryDialog";
 import { preventEvent } from "Common/helper";
 import { cloneDeep, isEmpty, replace } from "lodash";
 import Filter from "./components/Filter";
+import Loader from "components/Loader";
+import ErrorPage from "components/ErrorPage";
 
 const Activity = (props) => {
   const apiRef = useGridApiRef();
@@ -29,7 +31,7 @@ const Activity = (props) => {
 
   const rows = useMemo(() => {
     if (loading || error || !data) return [];
-    
+
     const allRows = data.activities.map((activity, index) => ({
       id: index + 1,
       date: activity.date_time,
@@ -39,16 +41,16 @@ const Activity = (props) => {
       details: h2p(activity.details),
       raw_details: activity.details,
     }));
-  
+
     let filteredRows = allRows;
-  
+
     // Apply filter logic
     if (!selectedFilters.includes("All")) {
       filteredRows = allRows.filter((row) =>
         selectedFilters.includes(row.category) // Compare with exact category
       );
     }
-  
+
     // Apply search filter
     return filteredRows.filter((row) =>
       row.details.toLowerCase().includes(searchText.toLowerCase())
@@ -110,9 +112,9 @@ const Activity = (props) => {
       </div>
       <div style={{ width: "100%" }}>
         {loading ? (
-          <p>Loading activities...</p>
+          <Loader loaderStyle={{ textAlign: "center" }} />
         ) : error ? (
-          <p>Error loading activities: {error.message}</p>
+          <ErrorPage error={error} />
         ) : (
           <DataGrid
             apiRef={apiRef}

@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Divider, Grid, IconButton, Tooltip, Typography } from "@mui/material";
 import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import {
   ADD_NEW_TICKET_EMAIL,
   GET_TICKET_MESSAGES,
   GET_TICKET,
-  GET_ACTIVITIES
+  GET_ACTIVITIES,
+  GET_EMAIL_TEMPLATES
 } from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
@@ -18,12 +19,16 @@ import { readFileAsBase64 } from "Common/helper";
 import Files from "react-files";
 import { acceptedFormats, maxFileSize } from "Common/constants";
 import { AttachFile } from "@mui/icons-material";
+import { useSelector } from "react-redux";
+import { checkIfCacheExists } from "config/apollo";
+import ErrorPage from "components/ErrorPage";
+import Loader from "components/Loader";
 
 const defaultMoreFields = ["Cc", "Bcc"];
 
 const AddEmailFields = (props) => {
   const dispatch = useDispatch();
-  const { form, handleCancel, onSubmit } = props;
+  const { ticket, form, handleCancel, onSubmit, templates } = props;
   const {
     control,
     setValue,
@@ -93,6 +98,17 @@ const AddEmailFields = (props) => {
   const handleMessageChange = (content) => {
     setValue("message", content, { shouldValidate: true });
   };
+
+  const handleSelectedTemplate = (template) => {
+    setValue("subject", template.template_subject);
+    if (template.template_cc) {
+      setMoreFields([...moreFields, 'Cc'])
+      const ccTemp = template.template_cc.split(",").map((item, index) => ({ id: index, cc: item, customOption: true }));
+      setValue("cc", ccTemp);
+    } else {
+      setValue("cc", []);
+    }
+  }
 
   const isFormValid = React.useMemo(
     () =>
@@ -177,10 +193,14 @@ const AddEmailFields = (props) => {
       </Grid>
       <Grid item xs={12} className="mt-1">
         <EditorContainer
+          ticket={ticket}
           content={values.message}
           setContent={handleMessageChange}
           background={"#fcefef"}
           disabled={isSubmitting}
+          isSusbcriber={ticket.subscriber && ticket.subscriber.customer_id > 0}
+          templates={templates}
+          handleSelectedTemplate={handleSelectedTemplate}
         />
       </Grid>
       <Grid item xs={12} style={{ padding: '5px 0px' }}>
@@ -203,14 +223,40 @@ const AddEmailFields = (props) => {
           Cancel
         </Button>
       </Grid>
-    </Grid>
+    </Grid >
   );
 };
 
 const AddEmailForm = (props) => {
   const dispatch = useDispatch();
+  const isp_id = useSelector(state => state.ispId)
   const { ticket, handleCancel, replyMessage } = props;
   const [sendTicketEmail] = useMutation(ADD_NEW_TICKET_EMAIL);
+
+  const { loading, error, data, client } = useQuery(GET_EMAIL_TEMPLATES, {
+    variables: { isp_id },
+    fetchPolicy: "cache-and-network",
+    skip: !(ticket.subscriber && ticket.subscriber.customer_id > 0)
+  });
+
+  const cacheExists = checkIfCacheExists(client, {
+    query: GET_EMAIL_TEMPLATES,
+    variables: { isp_id },
+  });
+
+  const templates = useMemo(() => {
+    let list = [];
+    if ((!loading || cacheExists) && data && data.emailTemplates) {
+      data.emailTemplates.forEach(item => {
+        list.push({
+          ...item,
+          label: item.template_name,
+          value: item.me_id,
+        });
+      });
+    }
+    return list;
+  }, [loading, data, cacheExists]);
 
   const initialValues = React.useMemo(() => {
     const toEmail = [];
@@ -267,6 +313,7 @@ const AddEmailForm = (props) => {
         flag_internal: values.flag_internal,
         attachments: values.attachments,
       };
+
       await sendTicketEmail({
         variables,
         refetchQueries: [
@@ -305,12 +352,16 @@ const AddEmailForm = (props) => {
     }
   };
 
+  if (error) return <ErrorPage error={error} />
+  if (loading && !cacheExists) return <Loader loaderStyle={{ textAlign: "center" }} />
+
   return (
     <AddEmailFields
       form={form}
       ticket={ticket}
       handleCancel={handleCancel}
       onSubmit={onSubmit}
+      templates={templates}
     />
   );
 };

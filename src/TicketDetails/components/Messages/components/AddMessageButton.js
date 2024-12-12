@@ -33,6 +33,7 @@ const AddMessageButton = (props) => {
         })
       );
     }
+    setAnchorEl(null)
   };
 
   return (

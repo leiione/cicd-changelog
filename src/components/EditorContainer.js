@@ -1,9 +1,12 @@
 import React, { useRef } from "react";
 import { Editor } from "@tinymce/tinymce-react";
+import { useApolloClient } from "@apollo/client";
+import { EMAIL_TEMPLATE_PREVIEW } from "TicketDetails/TicketGraphQL";
 
 const EditorContainer = (props) => {
-  const { content, setContent, background = "white" } = props;
+  const client = useApolloClient()
   const editorRef = useRef(null);
+  const { content, setContent, background = "white", isSusbcriber, templates, ticket, handleSelectedTemplate } = props;
 
   const normalizeContent = (content) => {
     return content.replace(/<\/?(html|head|body)[^>]*>/g, "").trim();
@@ -13,6 +16,19 @@ const EditorContainer = (props) => {
     const normalizedContent = normalizeContent(content);
     setContent(normalizedContent);
   };
+
+  const handleOnTemplateSelect = async (editor, template) => {
+    const { data } = await client.query({
+      query: EMAIL_TEMPLATE_PREVIEW,
+      variables: { customer_id: ticket.subscriber.customer_id, me_id: template.me_id },
+      fetchPolicy: "network-only"
+    })
+    if (data) {
+      // editor.insertContent(data.previewMergeFields);
+      setContent(data.previewMergeFields);
+      handleSelectedTemplate(template);
+    }
+  }
 
   const handleEditorSetup = (editor) => {
     editorRef.current = editor;
@@ -30,6 +46,27 @@ const EditorContainer = (props) => {
     editor.on("change input undo redo", () => {
       handleEditorChange(editor.getContent());
     });
+
+    editor.ui.registry.addMenuButton('templates', {
+      text: 'Templates', // Button text
+      fetch: function (callback) {
+        let items = [];
+        for (const item of templates) {
+          const menuItem = {
+            type: 'menuitem',
+            text: item.template_name,
+            value: item.me_id,
+            onSetup: async function () {
+              this.onAction = async function () {
+                await handleOnTemplateSelect(editor, item);
+              };
+            },
+          };
+          items.push(menuItem);
+        }
+        callback(items);
+      }
+    });
   };
 
   return (
@@ -42,7 +79,7 @@ const EditorContainer = (props) => {
         branding: false,
         statusbar: false,
         plugins: "link lists",
-        toolbar: "bold italic underline | numlist bullist alignleft link",
+        toolbar: `${isSusbcriber ? 'templates | ' : ''}bold italic underline | numlist bullist alignleft link`,
         setup: handleEditorSetup,
         content_css: "default",
         content_style: `body { font-family:Helvetica,Arial,sans-serif; font-size:12px; background-color: ${background}; }

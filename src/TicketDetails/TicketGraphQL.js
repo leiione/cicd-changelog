@@ -525,3 +525,31 @@ export const LINKED_TICKETS_SUBSCRIPTION = gql`
 `;
 
 
+export const GET_EMAIL_TEMPLATES = gql`
+  query emailTemplates($isp_id: Int) {
+    emailTemplates(isp_id: $isp_id) {
+      me_id
+      isp_id
+      template_name
+      template_filter
+      template_from
+      template_cc
+      template_subject
+      template_confirm_email
+      template_text
+      subscriber_email
+      attachments
+      attachment_data {
+        filename
+        attachment_id
+        isp_id
+      }
+    }
+  }
+`
+
+export const EMAIL_TEMPLATE_PREVIEW = gql`
+  query previewMergeFields($isp_id: Float, $me_id: Float, $template_text: String, $customer_id: Float!) {
+    previewMergeFields(isp_id: $isp_id, me_id: $me_id, template_text: $template_text, customer_id: $customer_id)
+  }
+`
