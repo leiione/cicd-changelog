@@ -30,7 +30,7 @@ import {
   GET_ACTIVITIES,
   ATTACHMENT_SUBSCRIPTION,
 } from "TicketDetails/TicketGraphQL";
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import { readFileAsBase64 } from "Common/helper";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import DialogAlert from "components/DialogAlert";

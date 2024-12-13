@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback } from "react";
 import AccordionCard from "../../../Common/AccordionCard";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
 import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
-import { useQuery } from "@apollo/client";
+import { useQuery, useSubscription } from "@apollo/client";
 import { GET_ACTIVITIES, HISTORY_SUBSCRIPTION } from "TicketDetails/TicketGraphQL";
 import { TextField, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
