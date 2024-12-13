@@ -136,7 +136,7 @@ const Note = (props) => {
                   </Typography>
                   <Grid container spacing={1} className="upload-image-row mt-2">
                     {message.attachments.map((file, index) => (
-                      <Box key={index} className="single-img-box">
+                      <div key={index} className="attachment-card">
                         <MuiIconButton
                           className="preview-icon-btn"
                           size="small"
@@ -155,7 +155,7 @@ const Note = (props) => {
                             {file.file_name}
                           </Typography>
                         )}
-                      </Box>
+                      </div>
                     ))}
                   </Grid>
                 </>

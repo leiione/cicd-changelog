@@ -32,7 +32,7 @@ const FileUploadPreview = ({
       <Grid container spacing={1} className="upload-image-row">
         {selectedFiles.map((file) => (
           <Grid item xs={2} sm={2} md={2} key={file.name}>
-            <Box className="single-img-box">
+            <div className="attachment-card">
               <IconButton
                 className="close-icon-btn"
                 size="small"
@@ -59,7 +59,7 @@ const FileUploadPreview = ({
                   {file.name}
                 </Typography>
               )}
-            </Box>
+            </div>
             {uploadProgress[file.name] ? (
               <LinearProgress className="mt-2" />
             ) : (
