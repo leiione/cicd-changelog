@@ -13,7 +13,6 @@ if (vispDB === "SANDBOX") {
   CRM_URI = "https://crm-staging-mirror.ms-visp.net/graphql" //process.env.CRM_MS_URI_MIRROR || process.env.REACT_APP_CRM_MS_URI_MIRROR
   CRM_URI_WS = "wss://crm-staging-mirror.ms-visp.net/graphql" // process.env.CRM_MS_URI_MIRROR_WS || process.env.REACT_APP_CRM_MS_URI_MIRROR_WS
 }
-
 const httpLink = new HttpLink({
   uri: CRM_URI,
 });
