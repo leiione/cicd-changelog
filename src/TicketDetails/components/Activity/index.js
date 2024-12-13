@@ -3,7 +3,7 @@ import AccordionCard from "../../../Common/AccordionCard";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
 import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
 import { useQuery } from "@apollo/client";
-import { GET_ACTIVITIES } from "TicketDetails/TicketGraphQL";
+import { GET_ACTIVITIES, HISTORY_SUBSCRIPTION } from "TicketDetails/TicketGraphQL";
 import { TextField, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import h2p from "html2plaintext";
@@ -21,10 +21,20 @@ const Activity = (props) => {
     open: false,
     history: {},
   });
-  const { data, loading, error } = useQuery(GET_ACTIVITIES, {
+  const { data, loading, error , refetch: refetchHistory} = useQuery(GET_ACTIVITIES, {
     variables: { ticket_id: customer.ticket_id },
     fetchPolicy: "network-only",
   });
+
+
+  useSubscription(HISTORY_SUBSCRIPTION, {
+    variables: { ticket_id: customer.ticket_id },
+    onData: async ({ data: { data }, client }) => {
+      refetchHistory();
+    },
+  });
+
+
 
   const [searchText, setSearchText] = useState("");
   const [selectedFilters, setSelectedFilters] = useState(["All"]);

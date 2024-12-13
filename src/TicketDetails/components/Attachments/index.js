@@ -28,6 +28,7 @@ import {
   DELETE_TICKET_ATTACHMENT,
   GET_TICKET_ATTACHMENTS,
   GET_ACTIVITIES,
+  ATTACHMENT_SUBSCRIPTION,
 } from "TicketDetails/TicketGraphQL";
 import { useMutation, useQuery } from "@apollo/client";
 import { readFileAsBase64 } from "Common/helper";
@@ -52,10 +53,21 @@ const Attachments = (props) => {
   const [attachmentCount, setAttachmentCount] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
-  const { data } = useQuery(GET_TICKET_ATTACHMENTS, {
+  const { data,    refetch: refetchAttachment} = useQuery(GET_TICKET_ATTACHMENTS, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: "network-only",
   });
+
+
+
+  useSubscription(ATTACHMENT_SUBSCRIPTION, {
+    variables: { ticket_id: ticket.ticket_id },
+    onData: async ({ data: { data }, client }) => {
+      refetchAttachment();
+    },
+  });
+
+
 
   useEffect(() => {
     if (data) {

@@ -515,6 +515,21 @@ export const TASK_SUBSCRIPTION = gql`
   }
 `;
 
+export const ATTACHMENT_SUBSCRIPTION = gql`
+  subscription Subscription($ticket_id: Int!) {
+    ticketAttachment(ticket_id: $ticket_id)
+  }
+`;
+
+export const HISTORY_SUBSCRIPTION = gql`
+  subscription Subscription($ticket_id: Int!) {
+    ticketHistory(ticket_id: $ticket_id)
+  }
+`;
+
+
+
+
 export const LINKED_TICKETS_SUBSCRIPTION = gql`
   subscription linkedTickets($ticket_id: Int!) {
     linkedTickets(ticket_id: $ticket_id) {
