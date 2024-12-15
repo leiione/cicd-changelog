@@ -568,3 +568,25 @@ export const EMAIL_TEMPLATE_PREVIEW = gql`
     previewMergeFields(isp_id: $isp_id, me_id: $me_id, template_text: $template_text, customer_id: $customer_id)
   }
 `
+
+
+export const GET_TICKET_CUSTOM_FIELDS = gql`query TicketCustomFields($ticketId: Int!) {
+  ticketCustomFields(ticket_id: $ticketId) {
+    ticket_id
+    field_value
+    field_label
+    field_id
+  }
+}`
+
+
+export const SAVE_TICKET_CUSTOM_FIELDS = gql`
+mutation AddTicketCustomField($ticketId: Int!, $inputCustomField: [TicketCustomFieldInput]) {
+  addTicketCustomField(ticket_id: $ticketId, input_custom_field: $inputCustomField) {
+    field_id
+    field_label
+    field_value
+    ticket_id
+  }
+}
+`
