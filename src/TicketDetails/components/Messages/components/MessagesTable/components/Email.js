@@ -216,7 +216,7 @@ const Email = (props) => {
                     {message.attachments.map((file, index) => {
                       const type = getExtensionFromFilename(file.filename)
                       return (
-                        <Box key={index} className="single-img-box">
+                        <div key={index} className="attachment-card">
                           <IconButton
                             className="preview-icon-btn"
                             size="small"
@@ -235,7 +235,7 @@ const Email = (props) => {
                               {file.filename}
                             </Typography>
                           )}
-                        </Box>
+                        </div>
                       )
                     })}
                   </Grid>
