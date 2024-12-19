@@ -554,6 +554,7 @@ export const GET_EMAIL_TEMPLATES = gql`
       template_text
       subscriber_email
       attachments
+      custom_filter
       attachment_data {
         filename
         attachment_id

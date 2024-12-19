@@ -301,6 +301,7 @@ const TicketDetails = (props) => {
 
 const TicketContainer = props => {
   const dispatch = useDispatch()
+  const ispId = localStorage.getItem("Visp.ispId")
   const { isSigningOut, timeZone, settingsPreferences, user } = props
   const userPreferencesTimeStamp = useSelector(state => state.userPreferencesTimeStamp)
   const summaryCard = useSelector(state => state.summaryCard)
@@ -341,12 +342,12 @@ const TicketContainer = props => {
   }, [data, loading, dispatch, isSigningOut])
 
   useEffect(() => {
-    if (timeZone) {
-      dispatch(populateISPUserSettings({ timeZone, settingsPreferences, user }))
+    if (ispId && timeZone) {
+      dispatch(populateISPUserSettings({ ispId, timeZone, settingsPreferences, user }))
     } else {
       // app was rendered outside main app so fetch separately
     }
-  }, [dispatch, timeZone, settingsPreferences, user])
+  }, [dispatch, timeZone, settingsPreferences, user, ispId])
 
 
   return (

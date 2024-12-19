@@ -23,6 +23,7 @@ import { useSelector } from "react-redux";
 import { checkIfCacheExists } from "config/apollo";
 import ErrorPage from "components/ErrorPage";
 import Loader from "components/Loader";
+import { includes } from "lodash";
 
 const defaultMoreFields = ["Cc", "Bcc"];
 
@@ -229,7 +230,7 @@ const AddEmailFields = (props) => {
 
 const AddEmailForm = (props) => {
   const dispatch = useDispatch();
-  const isp_id = useSelector(state => state.ispId)
+  const isp_id = Number(useSelector(state => state.ispId))
   const { ticket, handleCancel, replyMessage } = props;
   const [sendTicketEmail] = useMutation(ADD_NEW_TICKET_EMAIL);
 
@@ -248,15 +249,18 @@ const AddEmailForm = (props) => {
     let list = [];
     if ((!loading || cacheExists) && data && data.emailTemplates) {
       data.emailTemplates.forEach(item => {
-        list.push({
-          ...item,
-          label: item.template_name,
-          value: item.me_id,
-        });
+        const flagSubscriberEmail = item.subscriber_email > "" && includes([0, "Y", "N"], item.custom_filter)
+        if (item.isp_id === isp_id && !flagSubscriberEmail) {
+          list.push({
+            ...item,
+            label: item.template_name,
+            value: item.me_id,
+          });
+        }
       });
     }
     return list;
-  }, [loading, data, cacheExists]);
+  }, [loading, data, cacheExists, isp_id]);
 
   const initialValues = React.useMemo(() => {
     const toEmail = [];
