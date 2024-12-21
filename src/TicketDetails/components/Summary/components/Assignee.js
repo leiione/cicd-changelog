@@ -3,7 +3,6 @@ import {
   Grid,
   Typography,
   Popover,
-  Button,
   IconButton,
   List,
   Tooltip,
@@ -35,7 +34,7 @@ const Assignee = (props) => {
   const { ticket, updateTicket } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedAssignees, setAssignees] = useState([]);
-  const [tempAssignees, setTempAssignees] = useState([]); // Temporary state for editing
+  //const [tempAssignees, setTempAssignees] = useState([]); // Temporary state for editing
   const [searchTerm, setSearchTerm] = useState(""); // State for search input
   const openMenu = Boolean(anchorEl);
   const dispatch = useDispatch();
@@ -63,55 +62,53 @@ const Assignee = (props) => {
         realname: fetchAssigneeNameCallback(assigneeId),
       }));
       setAssignees(initialAssignees);
-      setTempAssignees(initialAssignees); // Initialize tempAssignees
+      //setTempAssignees(initialAssignees); // Initialize tempAssignees
     }
-  }, [ticket, data, fetchAssigneeNameCallback]);
+  }, [ticket, data, fetchAssigneeNameCallback]);   
+  
+  const handleSelectAssignee = async (assignee) => {
+    const isSelected = selectedAssignees.some(
+      (a) => a.appuser_id === assignee.appuser_id
+    );
+    let updatedAssignees;
+  
+    if (isSelected) {
+      // Remove the selected assignee
+      updatedAssignees = selectedAssignees.filter(
+        (a) => a.appuser_id !== assignee.appuser_id
+      );
+    } else {
+      if (selectedAssignees.length < 2) {
+        // Add the new assignee
+        updatedAssignees = [...selectedAssignees, assignee];
+      } else {
+        dispatch(
+          showSnackbar({
+            message: "You can only select up to 2 assignees.",
+            severity: "error",
+          })
+        );
+        return;
+      }
+    }
+  
+    // Update the state immediately
+    setAssignees(updatedAssignees);
+  
+    // Persist the changes to the backend
+    await updateTicket({
+      ticket_id: ticket.ticket_id,
+      assignees: updatedAssignees.map((a) => ({
+        appuser_id: a.appuser_id,
+        realname: a.realname,
+      })),
+    });
+  };
 
   const handlePopoverClose = (event) => {
     preventEvent(event);
-    setTempAssignees(selectedAssignees); // Reset changes if not saved
     setSearchTerm(""); // Clear the search field
-    setAnchorEl(null);
-  };
-  
-
-  const handleSave = async () => {
-    // Optimistically update the UI
-    setAssignees(tempAssignees); // Immediately update the selected assignees state
-    setTimeout(() => setAnchorEl(null), 0); // Close the popover immediately
-    setSearchTerm(""); // Clear the search field
-  
-    const assignees = tempAssignees.map((assignee) => ({
-      appuser_id: assignee.appuser_id,
-      realname: assignee.realname,
-    }));
-  
-    // Perform the mutation
-    await updateTicket({
-      ticket_id: ticket.ticket_id,
-      assignees: assignees,
-    });
-  };
-  
-  
-  
-  
-
-  const handleSelectAssignee = (assignee) => {
-    const isSelected = tempAssignees.some(
-      (a) => a.appuser_id === assignee.appuser_id
-    );
-    if (isSelected) {
-      setTempAssignees(
-        tempAssignees.filter((a) => a.appuser_id !== assignee.appuser_id)
-      );
-    } else {
-      if (tempAssignees.length < 2) {
-        setTempAssignees([...tempAssignees, assignee]);
-      } else {
-        dispatch(showSnackbar({ message: "You can only select up to 2 assignees.", severity: "error" }));
-      }
-    }
+    setAnchorEl(null); // Close the popover
   };
 
   const handleClick = (event) => {
@@ -191,7 +188,7 @@ const Assignee = (props) => {
                     >
                       <ListItemButton
                         disablePadding
-                        selected={tempAssignees.some(
+                        selected={selectedAssignees.some(
                           (a) => a.appuser_id === assignee.appuser_id
                         )}
                         onClick={() => handleSelectAssignee(assignee)}
@@ -213,19 +210,8 @@ const Assignee = (props) => {
                   );
                 })}
             </List>
-            <div className="drawer-footer">
-              <Button color="primary" variant="outlined" onClick={handleSave}>
-                Save
-              </Button>
-              <Button
-                color="default"
-                variant="outlined"
-                onClick={handlePopoverClose}
-              >
-                Cancel
-              </Button>
-            </div>
           </Popover>
+
         </Grid>
       </Grid>
     </>

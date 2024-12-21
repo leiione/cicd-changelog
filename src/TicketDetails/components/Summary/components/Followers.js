@@ -3,7 +3,6 @@ import {
   Grid,
   Typography,
   Popover,
-  Button,
   Tooltip,
   IconButton,
   List,
@@ -32,7 +31,7 @@ const fetchFollowerName = (followerEmail, data) => {
 const Followers = (props) => {
   const { ticket, updateTicket } = props;
   const [selectedFollowers, setFollowers] = useState([]);
-  const [tempFollowers, setTempFollowers] = useState([]); // Temporary state for editing
+  // const [tempFollowers, setTempFollowers] = useState([]); // Temporary state for editing
   const [anchorEl, setAnchorEl] = useState(null);
   const [searchTerm, setSearchTerm] = useState(""); // State for search input
   const openMenu = Boolean(anchorEl);
@@ -61,39 +60,41 @@ const Followers = (props) => {
                 realname: fetchFollowerNameCallback(followerEmail),
               };
         });
-      setFollowers(initialFollowers);
-      setTempFollowers(initialFollowers); // Initialize tempFollowers
+      setFollowers(initialFollowers); // Initialize selectedFollowers only
     }
   }, [ticket, data, fetchFollowerNameCallback]);
+  
 
   const handlePopoverClose = (event) => {
     preventEvent(event);
-    setTempFollowers(selectedFollowers); // Reset changes if not saved
+    // setTempFollowers(selectedFollowers); // Reset changes if not saved
     setSearchTerm(""); // Clear the search field
     setAnchorEl(null);
   };
 
-  const handleSave = async () => {
-    const followerEmails = tempFollowers.map((follower) => follower.email);
+  const handleSelectFollower = async (follower) => {
+    const isSelected = selectedFollowers.some((a) => a.email === follower.email);
+    let updatedFollowers;
   
-    // Optimistically update the UI
-    setFollowers(tempFollowers); // Immediately update the displayed followers
-    setTimeout(() => setAnchorEl(null), 0); // Close the popover immediately
-    setSearchTerm(""); // Clear the search field
+    if (isSelected) {
+      // Remove the selected follower
+      updatedFollowers = selectedFollowers.filter(
+        (a) => a.email !== follower.email
+      );
+    } else {
+      // Add the new follower
+      updatedFollowers = [...selectedFollowers, follower];
+    }
   
+    // Update the state immediately
+    setFollowers(updatedFollowers);
+  
+    // Persist the changes to the backend
+    const followerEmails = updatedFollowers.map((f) => f.email);
     await updateTicket({
       ticket_id: ticket.ticket_id,
-      followers: followerEmails,
+      followers: followerEmails.join(","), // Update backend with comma-separated emails
     });
-  };
-
-  const handleSelectFollower = (follower) => {
-    const isSelected = tempFollowers.some((a) => a.email === follower.email);
-    if (isSelected) {
-      setTempFollowers(tempFollowers.filter((a) => a.email !== follower.email));
-    } else {
-      setTempFollowers([...tempFollowers, follower]);
-    }
   };
 
   const handleClick = (event) => {
@@ -149,79 +150,69 @@ const Followers = (props) => {
               </IconButton>
             )}
     
-            <Popover
-              open={openMenu}
-              anchorEl={anchorEl}
-              onClose={handlePopoverClose}
-              classes={{ paper: "overflow-hidden" }}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-            >
-              <TextField
-                placeholder="Search followers"
-                className="p-3"
-                variant="standard"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                fullWidth
-                autoFocus
-                autoComplete="off"
-                margin="dense"
-              />
-              <List className="paper-height-300 overflow-y-auto">
-                {filteredFollowers &&
-                  filteredFollowers.map((follower) => {
-                    const isDisabled = !follower.email;
-                    return (
-                      <Tooltip
-                        key={follower.email}
-                        title={
-                          isDisabled
-                            ? "This appuser does not have an associated email account."
-                            : follower.email
-                        }
-                        placement="top"
-                      >
-                        <ListItemButton
-                          disablePadding
-                          disabled={isDisabled}
-                          selected={tempFollowers.some(
-                            (a) => a.email === follower.email
-                          )}
-                          onClick={() => handleSelectFollower(follower)}
+              <Popover
+                open={openMenu}
+                anchorEl={anchorEl}
+                onClose={handlePopoverClose}
+                classes={{ paper: "overflow-hidden" }}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+              >
+                <TextField
+                  placeholder="Search followers"
+                  className="p-3"
+                  variant="standard"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  fullWidth
+                  autoFocus
+                  autoComplete="off"
+                  margin="dense"
+                />
+                <List className="paper-height-300 overflow-y-auto">
+                  {filteredFollowers &&
+                    filteredFollowers.map((follower) => {
+                      const isDisabled = !follower.email;
+                      return (
+                        <Tooltip
+                          key={follower.email}
+                          title={
+                            isDisabled
+                              ? "This appuser does not have an associated email account."
+                              : follower.email
+                          }
+                          placement="top"
                         >
-                          <ListItemAvatar>
-                            <AvatarText
-                              title={follower.realname}
-                              charCount={1}
-                              className="mx-auto"
-                              sx={{
-                                width: 20,
-                                height: 20,
-                              }}
-                            />
-                          </ListItemAvatar>
-                          <ListItemText primary={follower.realname} />
-                        </ListItemButton>
-                      </Tooltip>
-                    );
-                  })}
-              </List>
-              <div className="drawer-footer">
-                <Button color="primary" variant="outlined" onClick={handleSave}>
-                  Save
-                </Button>
-                <Button
-                  color="default"
-                  variant="outlined"
-                  onClick={handlePopoverClose}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </Popover>
+                          <ListItemButton
+                            disablePadding
+                            disabled={isDisabled}
+                            selected={selectedFollowers.some(
+                              (a) => a.email === follower.email
+                            )}
+                            onClick={() => handleSelectFollower(follower)}
+                          >
+                            <ListItemAvatar>
+                              <AvatarText
+                                title={follower.realname}
+                                charCount={1}
+                                className="mx-auto"
+                                sx={{
+                                  width: 20,
+                                  height: 20,
+                                }}
+                              />
+                            </ListItemAvatar>
+                            <ListItemText primary={follower.realname} />
+                          </ListItemButton>
+                        </Tooltip>
+                      );
+                    })}
+                </List>
+              </Popover>
+
+            
           </Grid>
         </Grid>
       </>
