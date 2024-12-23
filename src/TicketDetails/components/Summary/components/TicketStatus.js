@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
 
 const TicketStatus = (props) => {
   const classes = useStyles();
-  const { ticket, ticketStatuses, handleUpdate, defaultAttacmentCount } = props;
+  const { ticket, ticketStatuses, handleUpdate, defaultAttacmentCount,requiredCustomFieldsCount  } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [status, setStatus] = React.useState();
   const [searchQuery, setSearchQuery] = useState("");
@@ -52,8 +52,12 @@ const TicketStatus = (props) => {
       closingTooltipMsgs.push("- all tasks to be checked");
     }
 
+    console.log("here",requiredCustomFieldsCount);
+    
+
     const hasUncompletedTask = find(ticket.tasks, (task) => !task.is_completed && task.is_default);
     const hasUncompletedAttachments = defaultAttacmentCount > 0;
+    const hasRequiredCustomFields = requiredCustomFieldsCount > 0;
     if (ticket.update_requirements && ticket.update_requirements.length > 0) {
       ticket.update_requirements.forEach((req) => {
         if (req.flag_enabled === "Y") {
@@ -74,7 +78,14 @@ const TicketStatus = (props) => {
               }
               break;
             case "CUSTOM_FIELDS":
-              // TODO
+              if(hasRequiredCustomFields) {
+                if (isResolvingTicketRestricted && !resolvingTooltipMsgs.includes("- all custom fields")) {
+                  resolvingTooltipMsgs.push("- all custom fields");
+                }
+                if (isClosingTicketRestricted && !closingTooltipMsgs.includes("- all custom fields")) {
+                  closingTooltipMsgs.push("- all custom fields");
+                }
+              }
               break;
             case "ATTACHMENTS":
               if (hasUncompletedAttachments) {
@@ -100,7 +111,7 @@ const TicketStatus = (props) => {
       });
     }
     return { resolvingTooltipMsgs, closingTooltipMsgs };
-  }, [ticket.tasks, ticket.update_requirements, defaultAttacmentCount]);
+  }, [ticket.tasks, ticket.update_requirements, defaultAttacmentCount,requiredCustomFieldsCount]);
 
   const resolvingClosingMessage = (action) => {
     if (["Resolved", "Close"].includes(action)) {

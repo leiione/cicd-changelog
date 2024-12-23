@@ -86,6 +86,7 @@ const TicketDetails = (props) => {
   const [openQueueJobs, setOpenQueueJobs] = useState(false); // State for QueueJobs drawer
   const [selectedAddress, setSelectedAddress] = React.useState();
   const [defaultAttacmentCount, setDefaultAttacmentCount] = React.useState(0);
+  const [requiredCustomFieldsCount, setRequiredCustomFieldsCount] = useState(0);
   const {
     lablesVisible,
     ticket: ticketData,
@@ -202,6 +203,7 @@ const TicketDetails = (props) => {
             customer={ticket}
             ticketTypes={ticketTypes}
             ticketStatuses={ticketStatuses}
+            requiredCustomFieldsCount={requiredCustomFieldsCount}
             defaultAttacmentCount={defaultAttacmentCount}
             lablesVisible={lablesVisible}
             handleOpenTicket={handleOpenTicket}
@@ -219,6 +221,7 @@ const TicketDetails = (props) => {
                 appuser_id={appuser_id}
                 lablesVisible={lablesVisible}
                 handleOpenTicket={handleOpenTicket}
+                setRequiredCustomFieldsCount={setRequiredCustomFieldsCount}
               />
               <Tasks
                 loading={loading}

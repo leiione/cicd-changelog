@@ -18,6 +18,7 @@ import {
   GET_ACTIVITIES,
   GET_TICKET_ATTACHMENTS,
   UPDATE_TICKET_MUTATION,
+  GET_TICKET_CUSTOM_FIELDS,
 } from "TicketDetails/TicketGraphQL";
 import { useMutation } from "@apollo/client";
 import { useDispatch, useSelector } from "react-redux";
@@ -44,7 +45,8 @@ const Summary = (props) => {
     selectedAddress,
     setSelectedAddress,
     enableQueueJobs,
-    defaultAttacmentCount
+    defaultAttacmentCount,
+    requiredCustomFieldsCount
   } = props;
 
   const showSignature = true; // this should come from ticket type settings
@@ -83,6 +85,9 @@ const Summary = (props) => {
           },
           { query: GET_ACTIVITIES, variables: { ticket_id: customer.ticket_id }
           },
+          {
+            query: GET_TICKET_CUSTOM_FIELDS, variables: { ticketId: customer.ticket_id }
+          }
         ],
       });
       dispatch(
@@ -119,6 +124,7 @@ const Summary = (props) => {
               ticket={customer}
               ticketStatuses={ticketStatuses}
               defaultAttacmentCount={defaultAttacmentCount}
+              requiredCustomFieldsCount={requiredCustomFieldsCount}
               handleUpdate={handleUpdate}
             />
           </>

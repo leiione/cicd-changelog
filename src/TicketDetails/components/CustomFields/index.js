@@ -10,8 +10,9 @@ import {
   Box,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { useQuery, useMutation } from "@apollo/client";
+import { useQuery, useMutation, useSubscription } from "@apollo/client";
 import {
+  CUSTOM_FIELD_SUBSCRIPTION,
   GET_TICKET_CUSTOM_FIELDS,
   SAVE_TICKET_CUSTOM_FIELDS,
 } from "TicketDetails/TicketGraphQL";
@@ -21,7 +22,7 @@ import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 
 const CustomFields = (props) => {
-  const { appuser_id, ticket } = props;
+  const { appuser_id, ticket,setRequiredCustomFieldsCount } = props;
   const [isSubmitting, setisSubmitting] = useState(false);
   const dispatch = useDispatch();
 
@@ -31,6 +32,15 @@ const CustomFields = (props) => {
     fetchPolicy: "network-only",
     skip: !ticket.ticket_id,
   });
+
+
+  useSubscription(CUSTOM_FIELD_SUBSCRIPTION, {
+    variables: { ticket_id: ticket.ticket_id },
+    onData: async ({ data: { data }, client }) => {
+      refetch();
+    },
+  });
+
 
   const form = useForm({
     defaultValues: {},
@@ -53,8 +63,10 @@ const CustomFields = (props) => {
       }, {});
       setInitialValues(initialValues);
       form.reset(initialValues);
+      const requiredCount = data.ticketCustomFields.filter(field => field.is_required && field.field_value == "" ).length;
+      setRequiredCustomFieldsCount(requiredCount);
     }
-  }, [data, form]);
+  }, [data, form, setRequiredCustomFieldsCount]);
 
   useEffect(() => {
     if (isVisible && ticket.ticket_id) {
@@ -158,6 +170,7 @@ const CustomFields = (props) => {
                 <Grid item xs={3} key={fieldId}>
                   <TextField
                     fullWidth
+                    required={field.is_required}
                     id={`field-${fieldId}`}
                     label={field.field_label}
                     variant="standard"

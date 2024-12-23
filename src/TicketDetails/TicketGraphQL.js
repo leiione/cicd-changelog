@@ -514,6 +514,11 @@ export const TASK_SUBSCRIPTION = gql`
     ticketTask(ticket_id: $ticket_id)
   }
 `;
+export const CUSTOM_FIELD_SUBSCRIPTION = gql`
+  subscription Subscription($ticket_id: Int!) {
+    ticketCustomFields(ticket_id: $ticket_id)
+  }
+`;
 
 export const ATTACHMENT_SUBSCRIPTION = gql`
   subscription Subscription($ticket_id: Int!) {
@@ -577,6 +582,7 @@ export const GET_TICKET_CUSTOM_FIELDS = gql`query TicketCustomFields($ticketId: 
     field_value
     field_label
     field_id
+    is_required
   }
 }`
 
@@ -584,9 +590,6 @@ export const GET_TICKET_CUSTOM_FIELDS = gql`query TicketCustomFields($ticketId: 
 export const SAVE_TICKET_CUSTOM_FIELDS = gql`
 mutation AddTicketCustomField($ticketId: Int!, $inputCustomField: [TicketCustomFieldInput]) {
   addTicketCustomField(ticket_id: $ticketId, input_custom_field: $inputCustomField) {
-    field_id
-    field_label
-    field_value
     ticket_id
   }
 }
