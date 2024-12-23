@@ -3,7 +3,6 @@ import {
   Grid,
   Typography,
   Popover,
-  Button,
   IconButton,
   List,
   Tooltip,
@@ -65,18 +64,6 @@ const Assignee = (props) => {
       setTempAssignees(initialAssignees); // Initialize tempAssignees
     }
   }, [ticket, data, fetchAssigneeNameCallback]);
-
-  const areAssigneesEqual = (a, b) => {
-    // Extract only appuser_id arrays
-    const aIds = a.map((assignee) => assignee.appuser_id).sort(); // Sort for order-independence
-    const bIds = b.map((assignee) => assignee.appuser_id).sort();
-  
-    // Compare arrays
-    return (
-      aIds.length === bIds.length &&
-      aIds.every((id, index) => id === bIds[index]) // Ensure all IDs match
-    );
-  };
   
   const handlePopoverClose = async (event) => {
     preventEvent(event);
