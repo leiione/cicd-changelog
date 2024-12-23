@@ -212,11 +212,12 @@ const Email = (props) => {
                   <Typography variant="subtitle1" className="mt-3">
                     Attachments
                   </Typography>
-                  <Grid container spacing={1} className="upload-image-row mt-2">
+                  <Grid container spacing={1}>
                     {message.attachments.map((file, index) => {
                       const type = getExtensionFromFilename(file.filename)
                       return (
-                        <div key={index} className="attachment-card">
+                        <Grid item xs={2} sm={2} md={2}key={index}>
+                        <div  className="attachment-card">
                           <IconButton
                             className="preview-icon-btn"
                             size="small"
@@ -236,6 +237,7 @@ const Email = (props) => {
                             </Typography>
                           )}
                         </div>
+                        </Grid>
                       )
                     })}
                   </Grid>
