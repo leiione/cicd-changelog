@@ -16,7 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMessagePlus,
   faNote,
-  faTrash
+  faTrash,
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
 
 import moment from "moment-timezone";
@@ -36,8 +36,11 @@ const Note = (props) => {
   const [submitting, setSubmitting] = useState(false);
   const [openPreview, setOpenPreview] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
-  const permitDelete = usePermission("ticket_note_message", "flag_delete", "notes")
-
+  const permitDelete = usePermission(
+    "ticket_note_message",
+    "flag_delete",
+    "notes"
+  );
 
   const lineLen = message.content
     ? message.content.split(/\r|\r\n|\n/g).length
@@ -63,7 +66,11 @@ const Note = (props) => {
 
   return (
     <>
-      <ListItem key={message.note_id} alignItems="flex-start" className="border-bottom border-lighter">
+      <ListItem
+        key={message.note_id}
+        alignItems="flex-start"
+        className="border-bottom border-lighter"
+      >
         <ListItemAvatar sx={{ width: 24, height: 24, minWidth: 24 }}>
           <FontAwesomeIcon icon={faNote} />
         </ListItemAvatar>
@@ -134,28 +141,30 @@ const Note = (props) => {
                   <Typography variant="subtitle1" className="mt-3">
                     Attachments
                   </Typography>
-                  <Grid container spacing={1} className="upload-image-row mt-2">
+                  <Grid container spacing={1}>
                     {message.attachments.map((file, index) => (
-                      <div key={index} className="attachment-card">
-                        <MuiIconButton
-                          className="preview-icon-btn"
-                          size="small"
-                          onClick={() => handlePreviewOpen(file)}
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </MuiIconButton>
-                        {file.attachment_type.startsWith("image/") ? (
-                          <img
-                            className="img-preview"
-                            src={file.file_url}
-                            alt={file.file_name}
-                          />
-                        ) : (
-                          <Typography variant="body2" className="file-name">
-                            {file.file_name}
-                          </Typography>
-                        )}
-                      </div>
+                      <Grid item xs={2} sm={2} md={2} key={index}>
+                        <div className="attachment-card">
+                          <MuiIconButton
+                            className="preview-icon-btn"
+                            size="small"
+                            onClick={() => handlePreviewOpen(file)}
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </MuiIconButton>
+                          {file.attachment_type.startsWith("image/") ? (
+                            <img
+                              className="img-preview"
+                              src={file.file_url}
+                              alt={file.file_name}
+                            />
+                          ) : (
+                            <Typography variant="body2" className="file-name">
+                              {file.file_name}
+                            </Typography>
+                          )}
+                        </div>
+                      </Grid>
                     ))}
                   </Grid>
                 </>

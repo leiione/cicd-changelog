@@ -29,7 +29,7 @@ const FileUploadPreview = ({
   };
   return (
     <Box>
-      <Grid container spacing={1} className="upload-image-row">
+      <Grid container spacing={1}>
         {selectedFiles.map((file) => (
           <Grid item xs={2} sm={2} md={2} key={file.name}>
             <div className="attachment-card">
