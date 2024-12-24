@@ -70,7 +70,7 @@ jobs:
           command: |
             BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
             S3_BUCKET=microfrontend-crm-ms
-            aws s3 cp /workspace/build.zip s3://$S3_BUCKET/$BRANCH_NAME/build.zip --acl public-read
+            aws s3 sync /workspace/dist/ s3://$S3_BUCKET/$BRANCH_NAME/ --acl public-read
 
       - run:
           name: Invalidate CloudFront Cache
