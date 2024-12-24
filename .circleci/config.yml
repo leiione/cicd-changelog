@@ -1,0 +1,63 @@
+version: 2.1
+
+executors:
+  non-executor:
+    docker:
+      - image: circleci/node:18
+
+jobs:
+  build:
+    executor: node-executor
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: npm install
+      - run:
+          name: Build the application
+          command: npm run build
+
+      - run:
+          name: Zip the build artifacts
+          command: |
+            mkdir dist && cp -r build/* dist/
+            zip -r  build.zip dist
+      - persist_to_workspace:
+          root: .
+          paths:
+            - build.zip
+
+deploy:
+  docker:
+    - image: circleci/python:3.9
+  steps:
+    - checkout
+    - attach_workspace:
+        at: /workspace
+    - run:
+        name: Configure AWS CLI
+        command: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set region $AWS_REGION
+    
+    - run:
+        name: Upload to S3
+        command: |
+          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          S3_BUCKET=s3://microfrontend-crm-ms/
+          aws s3 cp /workspace/build.zip s3://$S3_BUCKET/$BRANCH_NAME/build.zip --acl public-read
+
+    - run:
+        name: Invalidate Cloudfront Cache
+        command: |
+          CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
+
+workflows:
+  build_and_deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
