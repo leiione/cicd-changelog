@@ -20,6 +20,11 @@ jobs:
           command: npm run build
 
       - run:
+          name: Create Dist folder and copy build artifact
+          command: |
+            mkdir dist && cp -r build/* dist/
+
+      - run:
           name: Install zip utility
           command: |
             apt-get update
@@ -34,7 +39,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - build.zip
+            - dist
 
   deploy:
     docker:
