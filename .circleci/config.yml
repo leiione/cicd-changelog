@@ -70,7 +70,7 @@ jobs:
       - run:
           name: Invalidate CloudFront Cache
           command: |
-            CLOUDFRONT_DIST_ID="your-cloudfront-distribution-id"
+            CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
             aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
 
 workflows:
