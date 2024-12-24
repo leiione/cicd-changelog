@@ -91,16 +91,19 @@ jobs:
           command: |
             BRANCH_NAME=staging
             DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
+            BUILD_NUM=$CIRCLE_BUILD_NUM  # Ensure BUILD_NUM is numeric
+            BUILD_URL="$CIRCLE_BUILD_URL"
             curl -X POST -H 'Content-Type: application/json' -d '{
               "payload": {
                 "activity": "Deployment Completed",
                 "title": "Deployment Notification",
-                "body": "Branch: '"$BRANCH_NAME"'\\nMicrofrontend URL: '"DEPLOY_URL"'",
+                "body": "Branch: '"$BRANCH_NAME"'\\nMicrofrontend URL: '"$DEPLOY_URL"'",
                 "build_num": '"$BUILD_NUM"',
                 "build_url": "'"$BUILD_URL"'",
                 "branch": "'"$BRANCH_NAME"'"
               }
-             }' $RINGCENTRAL
+            }' $RINGCENTRAL
+
 
 workflows:
   build_and_deploy:
