@@ -10,12 +10,19 @@ jobs:
     executor: node-executor
     steps:
       - checkout
+      
       - run:
           name: Install dependencies
-          command: npm install
+          command: npm install --legacy-peer-deps
+          
       - run:
           name: Build the application
           command: npm run build
+          
+      - run:
+        name: Install zip utility
+        command: apt-get update && apt-get install -y zip
+        
       - run:
           name: Zip the build artifacts
           command: |
@@ -28,11 +35,20 @@ jobs:
 
   deploy:
     docker:
-      - image: circleci/python:3.9  # For AWS CLI
+      - image: node:18  # For AWS CLI
     steps:
       - checkout
       - attach_workspace:
           at: /workspace
+
+      - run:
+          name: Install AWS CLI
+          command: |
+            apt-get update && apt-get install -y unzip
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            ./aws/install
+            
       - run:
           name: Configure AWS CLI
           command: |
