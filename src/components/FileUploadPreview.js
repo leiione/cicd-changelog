@@ -5,7 +5,9 @@ import {
   IconButton,
   Typography,
   LinearProgress,
-  Modal,
+  Dialog,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -32,7 +34,7 @@ const FileUploadPreview = ({
       <Grid container spacing={1}>
         {selectedFiles.map((file) => (
           <Grid item xs={2} sm={2} md={2} key={file.name}>
-            <div className="attachment-card">
+            <div className="attachment-card visible-on-hover">
               <IconButton
                 className="close-icon-btn"
                 size="small"
@@ -41,7 +43,7 @@ const FileUploadPreview = ({
                 <CloseIcon fontSize="small" />
               </IconButton>
               <IconButton
-                className="preview-icon-btn"
+                className="preview-icon-btn invisible"
                 size="small"
                 onClick={() => handlePreviewOpen(file)}
               >
@@ -52,7 +54,6 @@ const FileUploadPreview = ({
                   className="img-preview"
                   src={URL.createObjectURL(file)}
                   alt={file.name}
-                  style={{ display: "block" }}
                 />
               ) : (
                 <Typography variant="body2" className="file-name">
@@ -63,10 +64,11 @@ const FileUploadPreview = ({
             {uploadProgress[file.name] ? (
               <LinearProgress className="mt-2" />
             ) : (
-              <LinearProgress 
-              variant="determinate"
-              value={100}
-              className={`mt-2 linear-progress progress-success`} />
+              <LinearProgress
+                variant="determinate"
+                value={100}
+                className={`mt-2 linear-progress progress-success`}
+              />
             )}
 
             <Typography
@@ -79,33 +81,31 @@ const FileUploadPreview = ({
         ))}
       </Grid>
 
-            {/* Image Preview Modal */}
-      <Modal open={openPreview} onClose={handlePreviewClose}>
-        <Box className="box-modal-preview">
-          {
-           previewImage && previewImage?.type.startsWith("image/") ? (
+      {/* Image Preview Modal */}
+      <Dialog open={openPreview} onClose={handlePreviewClose}>
+        <DialogTitle>
+          <Typography variant="body2" className="mt-2">
+            {previewImage && previewImage?.name}
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          {previewImage && previewImage?.type.startsWith("image/") ? (
             <>
               <img
                 src={URL.createObjectURL(previewImage)}
                 alt="Preview"
                 style={{ width: "100%", height: "auto" }}
               />
-              <Typography variant="body2" className="mt-2">
-                {
-                 previewImage && previewImage?.name
-                }
-              </Typography>
             </>
           ) : (
             <Typography variant="body2" className="mt-2">
               Preview not available
             </Typography>
           )}
-        </Box>
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };
-
 
 export default FileUploadPreview;

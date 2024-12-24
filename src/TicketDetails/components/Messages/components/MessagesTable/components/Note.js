@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   Grid,
-  IconButton as MuiIconButton,
+  IconButton,
   Link,
   ListItem,
   ListItemAvatar,
@@ -88,24 +88,24 @@ const Note = (props) => {
                 </Typography>
               </Grid>
               <Grid item xs="auto">
-                <MuiIconButton size="small">
+                <IconButton size="small">
                   <FontAwesomeIcon
                     className="primary-on-hover"
                     icon={faMessagePlus}
                     onClick={() => handleQouteNote("note", message)}
                   />
-                </MuiIconButton>
+                </IconButton>
               </Grid>
               <Grid item xs="auto">
                 <Tooltip title={!permitDelete ? NO_RIGHTS_MSG : ""}>
                   <span>
-                    <MuiIconButton size="small" disabled={!permitDelete}>
+                    <IconButton size="small" disabled={!permitDelete}>
                       <FontAwesomeIcon
                         className="primary-on-hover"
                         icon={faTrash}
                         onClick={() => setOpenDialog(true)}
                       />
-                    </MuiIconButton>
+                    </IconButton>
                   </span>
                 </Tooltip>
               </Grid>
@@ -144,14 +144,14 @@ const Note = (props) => {
                   <Grid container spacing={1}>
                     {message.attachments.map((file, index) => (
                       <Grid item xs={2} sm={2} md={2} key={index}>
-                        <div className="attachment-card">
-                          <MuiIconButton
-                            className="preview-icon-btn"
+                        <div className="attachment-card visible-on-hover">
+                          <IconButton
+                            className="preview-icon-btn invisible"
                             size="small"
                             onClick={() => handlePreviewOpen(file)}
                           >
                             <VisibilityIcon fontSize="small" />
-                          </MuiIconButton>
+                          </IconButton>
                           {file.attachment_type.startsWith("image/") ? (
                             <img
                               className="img-preview"

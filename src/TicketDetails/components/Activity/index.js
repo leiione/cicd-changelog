@@ -108,6 +108,7 @@ const Activity = (props) => {
         <TextField
           variant="outlined"
           size="small"
+          className="mb-0"
           placeholder="Search"
           value={searchText}
           onChange={handleSearchChange}
