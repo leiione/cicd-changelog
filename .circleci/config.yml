@@ -1,9 +1,9 @@
 version: 2.1
 
 executors:
-  node-executor:
+  non-executor:
     docker:
-      - image: node:18
+      - image: circleci/node:18
 
 jobs:
   build:
@@ -11,48 +11,59 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install dependencies
+          name: Install Dependencies
           command: npm install --legacy-peer-deps
       - run:
           name: Build the application
           command: npm run build
+
       - run:
-          name: Install zip utility
-          command: apt-get update && apt-get install -y zip
+          name: Install zip Utility
+          command: sudo apt-get update && sudo apt-get install -y zip
       - run:
           name: Zip the build artifacts
           command: |
             mkdir dist && cp -r build/* dist/
-            zip -r build.zip dist
+            zip -r  build.zip dist
       - persist_to_workspace:
           root: .
           paths:
             - build.zip
 
-  deploy:
-    docker:
-      - image: node:18  # For AWS CLI
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /workspace
-      - run:
-          name: Configure AWS CLI
-          command: |
-            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-            aws configure set region $AWS_REGION
-      - run:
-          name: Upload to S3
-          command: |
-            BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-            S3_BUCKET="your-s3-bucket-name"
-            aws s3 cp /workspace/build.zip s3://$S3_BUCKET/$BRANCH_NAME/build.zip --acl public-read
-      - run:
-          name: Invalidate CloudFront Cache
-          command: |
-            CLOUDFRONT_DIST_ID="your-cloudfront-distribution-id"
-            aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
+deploy:
+  docker:
+    - image: node:18
+  steps:
+    - checkout
+    - attach_workspace:
+        at: /workspace
+
+    - run: 
+        name: Install AWS CLI
+        command: |
+          apt-get update && apt-get install -y unzip
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          ./aws/install
+    - run:
+        name: Configure AWS CLI
+        command: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set region $AWS_REGION
+    
+    - run:
+        name: Upload to S3
+        command: |
+          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          S3_BUCKET=s3://microfrontend-crm-ms/
+          aws s3 cp /workspace/build.zip s3://$S3_BUCKET/$BRANCH_NAME/build.zip --acl public-read
+
+    - run:
+        name: Invalidate Cloudfront Cache
+        command: |
+          CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
 
 workflows:
   build_and_deploy:
