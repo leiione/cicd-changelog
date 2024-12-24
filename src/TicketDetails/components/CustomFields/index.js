@@ -63,7 +63,7 @@ const CustomFields = (props) => {
       }, {});
       setInitialValues(initialValues);
       form.reset(initialValues);
-      const requiredCount = data.ticketCustomFields.filter(field => field.is_required && field.field_value == "" ).length;
+      const requiredCount = data.ticketCustomFields.filter(field => field.is_required && field.field_value === "" ).length;
       setRequiredCustomFieldsCount(requiredCount);
     }
   }, [data, form, setRequiredCustomFieldsCount]);
