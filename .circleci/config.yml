@@ -101,7 +101,8 @@ jobs:
                 "build_num": '"$BUILD_NUM"',
                 "build_url": "'"$BUILD_URL"'",
                 "branch": "'"$BRANCH_NAME"'",
-                "vcs_url": "'"$VCS_URL"'"
+                "vcs_url": "'"$VCS_URL"'",
+                "reponame": "'"$REPO_NAME"'"
               }
             }' $RINGCENTRAL
 
