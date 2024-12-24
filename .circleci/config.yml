@@ -17,6 +17,9 @@ jobs:
           name: Build the application
           command: npm run build
       - run:
+          name: Install zip utility
+          command: sudo apt-get update && sudo apt-get install -y zip
+      - run:
           name: Zip the build artifacts
           command: |
             mkdir dist && cp -r build/* dist/
