@@ -76,7 +76,9 @@ jobs:
           name: Invalidate CloudFront Cache
           command: |
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
+            BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
             aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
+            echo "Microfrontend is accessible at: https://microfrontend-crm-ms/$BRANCH_NAME"
 
 workflows:
   build_and_deploy:
