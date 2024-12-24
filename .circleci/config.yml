@@ -96,7 +96,7 @@ jobs:
                 "activity": "Deployment Completed",
                 "title": "Deployment Notification",
                 "body": "Branch: '"$BRANCH_NAME"'\\nMicrofrontend URL: '"DEPLOY_URL"'",
-                "build_num": "'"$BUILD_NUM"'",
+                "build_num": '"$BUILD_NUM"',
                 "build_url": "'"$BUILD_URL"'",
                 "branch": "'"$BRANCH_NAME"'"
               }
