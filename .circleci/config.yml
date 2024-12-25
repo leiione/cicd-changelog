@@ -103,7 +103,8 @@ jobs:
                 "branch": "'"$BRANCH_NAME"'",
                 "vcs_url": "'"$VCS_URL"'",
                 "reponame": "'"$REPO_NAME"'",
-                "username": "'"$USERNAME"'"
+                "username": "'"$USERNAME"'",
+                "status": "'"$STATUS"'"
               }
             }' $RINGCENTRAL
 
