@@ -3,7 +3,10 @@ import AccordionCard from "../../../Common/AccordionCard";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
 import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
 import { useQuery, useSubscription } from "@apollo/client";
-import { GET_ACTIVITIES, HISTORY_SUBSCRIPTION } from "TicketDetails/TicketGraphQL";
+import {
+  GET_ACTIVITIES,
+  HISTORY_SUBSCRIPTION,
+} from "TicketDetails/TicketGraphQL";
 import { TextField, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import h2p from "html2plaintext";
@@ -13,19 +16,30 @@ import { cloneDeep, isEmpty, replace } from "lodash";
 import Filter from "./components/Filter";
 import Loader from "components/Loader";
 import ErrorPage from "components/ErrorPage";
+import { makeStyles } from "@mui/styles";
 
+const useStyles = makeStyles({
+  tableHeightWrapper: {
+    maxHeight: 500,
+  },
+});
 const Activity = (props) => {
   const apiRef = useGridApiRef();
   const { appuser_id, customer } = props;
+  const classes = useStyles();
   const [detailDialog, setDetailDialog] = useState({
     open: false,
     history: {},
   });
-  const { data, loading, error , refetch: refetchHistory} = useQuery(GET_ACTIVITIES, {
+  const {
+    data,
+    loading,
+    error,
+    refetch: refetchHistory,
+  } = useQuery(GET_ACTIVITIES, {
     variables: { ticket_id: customer.ticket_id },
     fetchPolicy: "network-only",
   });
-
 
   useSubscription(HISTORY_SUBSCRIPTION, {
     variables: { ticket_id: customer.ticket_id },
@@ -33,8 +47,6 @@ const Activity = (props) => {
       refetchHistory();
     },
   });
-
-
 
   const [searchText, setSearchText] = useState("");
   const [selectedFilters, setSelectedFilters] = useState(["All"]);
@@ -56,8 +68,8 @@ const Activity = (props) => {
 
     // Apply filter logic
     if (!selectedFilters.includes("All")) {
-      filteredRows = allRows.filter((row) =>
-        selectedFilters.includes(row.category) // Compare with exact category
+      filteredRows = allRows.filter(
+        (row) => selectedFilters.includes(row.category) // Compare with exact category
       );
     }
 
@@ -85,7 +97,9 @@ const Activity = (props) => {
     setDetailDialog({ open: true, history: params.row });
   };
 
-  let html = detailDialog.open ? cloneDeep(detailDialog.history.raw_details) : "";
+  let html = detailDialog.open
+    ? cloneDeep(detailDialog.history.raw_details)
+    : "";
   html = replace(html, /<p[^>]*>/g, "");
   html = replace(html, /<\/p>/g, "");
   html = replace(html, /&lt;/g, "<");
@@ -121,7 +135,7 @@ const Activity = (props) => {
           }}
         />
       </div>
-      <div style={{ width: "100%" }}>
+      <div className={classes.tableHeightWrapper}>
         {loading ? (
           <Loader loaderStyle={{ textAlign: "center" }} />
         ) : error ? (

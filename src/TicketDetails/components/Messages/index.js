@@ -121,7 +121,7 @@ const Messages = (props) => {
       // add warning dialog
     }
     const formatMessage = `
-      <div class="quote-text">
+      <div class="quote-block">
       <p>${recipient}</p>
       ${message.replace(/\r|\r\n|\n/g, "<br>")}
       </blockquote><p>&nbsp;</p>

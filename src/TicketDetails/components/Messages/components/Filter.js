@@ -49,6 +49,7 @@ const Filter = ({ setFilter }) => {
       onChange={handleFilter} // Use onChange for group-level handling
       aria-label="filter"
       size="small"
+      className="mb-2"
       exclusive={false} // Allow multiple selections
     >
       <ToggleButton value="all" aria-label="All">

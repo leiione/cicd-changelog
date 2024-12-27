@@ -15,7 +15,7 @@ import {
   faMessagePlus,
   faTrash,
   faReply,
-  faMessageSms
+  faMessageSms,
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
 import h2p from "html2plaintext";
 import parse from "html-react-parser";
@@ -89,7 +89,13 @@ const SMSPopover = (props) => {
 };
 
 const SMS = (props) => {
-  const { message, onDeleteMessage, handleQouteNote, handleReplySMS, permitDelete } = props;
+  const {
+    message,
+    onDeleteMessage,
+    handleQouteNote,
+    handleReplySMS,
+    permitDelete,
+  } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [more, toggleMore] = React.useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
@@ -172,14 +178,17 @@ const SMS = (props) => {
                       handleReplySMS(isHtml ? h2p(text) : parse(text), replySMS)
                     }
                   >
-                    <FontAwesomeIcon className="primary-on-hover" icon={faReply} />
+                    <FontAwesomeIcon
+                      className="primary-on-hover"
+                      icon={faReply}
+                    />
                   </IconButton>
                 </Grid>
               )}
               <Grid item xs="auto">
                 <IconButton size="small">
                   <FontAwesomeIcon
-                  className="primary-on-hover"
+                    className="primary-on-hover"
                     icon={faMessagePlus}
                     onClick={() => handleQouteNote("sms", message)}
                   />
@@ -188,8 +197,15 @@ const SMS = (props) => {
               <Grid item xs="auto">
                 <Tooltip title={!permitDelete ? NO_RIGHTS_MSG : ""}>
                   <span>
-                    <IconButton size="small" onClick={handleDeleteClick} disabled={!permitDelete}>
-                      <FontAwesomeIcon className="primary-on-hover" icon={faTrash} />
+                    <IconButton
+                      size="small"
+                      onClick={handleDeleteClick}
+                      disabled={!permitDelete}
+                    >
+                      <FontAwesomeIcon
+                        className="primary-on-hover"
+                        icon={faTrash}
+                      />
                     </IconButton>
                   </span>
                 </Tooltip>
@@ -199,10 +215,7 @@ const SMS = (props) => {
           secondary={
             <>
               {more || lineLen < 6 ? (
-                <Typography
-                  variant="caption"
-                  style={{ whiteSpace: "pre-line" }}
-                >
+                <Typography variant="caption" className="text-preline">
                   {parse(text)}
                 </Typography>
               ) : (
@@ -210,11 +223,11 @@ const SMS = (props) => {
                   text={isHtml ? h2p(text) : text}
                   maxLine={5}
                   ellipsis=""
-                  style={{ whiteSpace: "pre-line", color: "#0009" }}
+                  className="text-preline"
                 />
               )}
               {lineLen > 6 && (
-                <div style={{ marginTop: "5px" }}>
+                <div className="mt-1">
                   <Link variant="caption" onClick={() => toggleMore(!more)}>
                     {more ? "Simplify..." : "More..."}
                   </Link>

@@ -7,7 +7,7 @@ import ProgressButton from "Common/ProgressButton";
 import {
   ADD_NEW_TICKET_NOTE,
   UPLOAD_FILE_MUTATION,
-  GET_ACTIVITIES
+  GET_ACTIVITIES,
 } from "TicketDetails/TicketGraphQL";
 import { useMutation } from "@apollo/client";
 import { GET_TICKET_NOTES, GET_TICKET } from "./../../../../TicketGraphQL";
@@ -186,19 +186,22 @@ const AddNoteFields = (props) => {
             removeFile={removeFile}
           />
         </Grid>
-       
       </Grid>
       <div className="text-right">
-          <ProgressButton
-            color="primary"
-            variant="outlined"
-            onClick={handleSubmit(onSubmit)}
-            isSubmitting={isSubmitting}
-            disabled={!isFormValid || isSubmitting || isUploading}
-          > Save
-          </ProgressButton>
-          <Button color="default" variant="outlined" onClick={handleCancel}>Cancel</Button>
-        </div>
+        <ProgressButton
+          color="primary"
+          variant="outlined"
+          onClick={handleSubmit(onSubmit)}
+          isSubmitting={isSubmitting}
+          disabled={!isFormValid || isSubmitting || isUploading}
+        >
+          {" "}
+          Save
+        </ProgressButton>
+        <Button color="default" variant="outlined" onClick={handleCancel}>
+          Cancel
+        </Button>
+      </div>
     </div>
   );
 };
@@ -215,36 +218,36 @@ const AddNoteForm = (props) => {
   const foramteQoutedContent = (qoutedContent) => {
     if (qoutedContent.from === "email") {
       return `
-      <div class="quote-text">
-          <div class="email-content"> ${replaceWhitespace(
+      <div class="quote-block">
+          <div class="quote-sender"> ${replaceWhitespace(
             qoutedContent.content.to_email
           )}</div>
-          <div class="email-subject"> ${replaceWhitespace(
+          <div class="quote-subject"> ${replaceWhitespace(
             qoutedContent.content.subject
           )}</div>
-          <div class="email-body">${replaceWhitespace(
+          <div class="quote-content">${replaceWhitespace(
             qoutedContent.content.message
           )}</div>
       </div><p>&nbsp</p>
         `;
     } else if (qoutedContent.from === "sms") {
       return `
-        <div class="quote-text">
-        <div class="email-content">${replaceWhitespace(
+        <div class="quote-block">
+        <div class="quote-sender">${replaceWhitespace(
           qoutedContent.content.to_email
         )} </div>
-        <div class="email-body"> ${replaceWhitespace(
+        <div class="quote-content"> ${replaceWhitespace(
           qoutedContent.content.message
         )}</div>
         </div><p>&nbsp</p>;
         `;
     } else if (qoutedContent.from === "note") {
       return `
-       <div class="quote-text">
-      <div class="email-content"> ${replaceWhitespace(
+       <div class="quote-block">
+      <div class="quote-sender"> ${replaceWhitespace(
         qoutedContent.content.appuser_name
       )} wrote: </div>
-      <div class="email-body"> ${replaceWhitespace(
+      <div class="quote-content"> ${replaceWhitespace(
         qoutedContent.content.content
       )} </div>
        </div><p>&nbsp;</p>
@@ -292,7 +295,7 @@ const AddNoteForm = (props) => {
             variables: { ticket_id: ticket.ticket_id },
           },
           { query: GET_TICKET, variables: { id: ticket.ticket_id } },
-          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }},
+          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id } },
         ],
         update: (cache, { data }) => {
           dispatch(

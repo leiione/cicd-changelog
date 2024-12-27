@@ -116,7 +116,7 @@ const Note = (props) => {
               {more || lineLen < 6 ? (
                 <Typography
                   variant="caption"
-                  style={{ whiteSpace: "pre-line" }}
+                  className="text-pre-line"
                 >
                   {parse(message.content)}
                 </Typography>
@@ -125,11 +125,11 @@ const Note = (props) => {
                   text={isHtml ? h2p(message.content) : message.content}
                   maxLine={10}
                   ellipsis=""
-                  style={{ whiteSpace: "pre-line", color: "#0009" }}
+                  className="text-pre-line"
                 />
               )}
               {lineLen > 6 && (
-                <div style={{ marginTop: "5px" }}>
+                <div className="mt-1">
                   <Link variant="caption" onClick={() => setMore(!more)}>
                     {more ? "Simplify..." : "More..."}
                   </Link>

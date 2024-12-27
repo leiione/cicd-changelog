@@ -222,10 +222,7 @@ const Email = (props) => {
           secondary={
             <>
               {more || lineLen < 4 ? (
-                <Typography
-                  variant="caption"
-                  style={{ whiteSpace: "pre-line" }}
-                >
+                <Typography variant="caption" className="text-pre-line">
                   {parse(text)}
                 </Typography>
               ) : (
@@ -233,11 +230,11 @@ const Email = (props) => {
                   text={isHtml ? h2p(text) : text}
                   maxLine={4}
                   ellipsis=""
-                  style={{ whiteSpace: "pre-line", color: "#0009" }}
+                  className="text-pre-line"
                 />
               )}
               {lineLen > 4 && (
-                <div style={{ marginTop: "5px" }}>
+                <div className="mt-1">
                   <Link variant="caption" onClick={() => toggleMore(!more)}>
                     {more ? "Simplify..." : "More..."}
                   </Link>

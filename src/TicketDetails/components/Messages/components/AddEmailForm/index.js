@@ -220,7 +220,7 @@ const AddEmailFields = (props) => {
         >
           Send
         </ProgressButton>
-        <Button color="primary" variant="outlined" onClick={handleCancel}>
+        <Button color="default" variant="outlined" onClick={handleCancel}>
           Cancel
         </Button>
       </Grid>

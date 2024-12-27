@@ -83,7 +83,7 @@ const EditorContainer = (props) => {
         setup: handleEditorSetup,
         content_css: "default",
         content_style: `body { font-family:Helvetica,Arial,sans-serif; font-size:12px; background-color: ${background}; }
-                        .quote-text { background-color: #f7f7f7; border: 1px solid #ccc; margin : 0 !important; padding :1rem; font-size: 12px;}
+                        .quote-block { background-color: #f7f7f7; border: 1px solid #ccc; margin : 0 !important; padding :1rem; font-size: 12px;}
                         `,
         readonly: false,
         extended_valid_elements: "div[contenteditable|class]",
