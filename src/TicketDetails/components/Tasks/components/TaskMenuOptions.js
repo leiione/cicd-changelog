@@ -42,13 +42,13 @@ const TaskMenuOptions = (props) => {
 
   const onConvertTask = async () => {
     var assigned_id, assigned_name = ''
-    if(ticket.category_type === 'SUBSCRIBER'){
+    if (ticket.category_type === 'SUBSCRIBER') {
       assigned_name = ticket.subscriber.first_name + ' ' + ticket.subscriber.last_name;
       assigned_id = ticket.subscriber.customer_id
-    }else if(ticket.category_type === 'EQUIPMENT'){
+    } else if (ticket.category_type === 'EQUIPMENT') {
       assigned_name = ticket.assigned_name;
       assigned_id = ticket.equipment_id;
-    }else if(ticket.category_type === 'INFRASTRUCTURE'){
+    } else if (ticket.category_type === 'INFRASTRUCTURE') {
       assigned_name = ticket.assigned_name;
       assigned_id = ticket.location_id;
     }
@@ -63,10 +63,10 @@ const TaskMenuOptions = (props) => {
 
   return (
     <>
-      <IconButton color="default" onClick={handleClick} style={!show || task.converted_ticket_id > 0 ? { visibility: "hidden" } : {}}>
+      <IconButton color="default" onClick={handleClick} style={!show || (task.converted_ticket_id > 0 && !task.flag_ticket_deleted) ? { visibility: "hidden" } : {}}>
         <MoreVert />
       </IconButton>
-      {openMenu && task.converted_ticket_id == null &&
+      {openMenu &&
         <Popover
           open={openMenu}
           anchorEl={anchorEl}
