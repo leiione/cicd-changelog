@@ -52,9 +52,6 @@ const TicketStatus = (props) => {
       closingTooltipMsgs.push("- all tasks to be checked");
     }
 
-    console.log("here", requiredCustomFieldsCount);
-
-
     const hasUncompletedTask = find(ticket.tasks, (task) => !task.is_completed && task.is_default);
     const hasUncompletedAttachments = defaultAttacmentCount > 0;
     const hasRequiredCustomFields = requiredCustomFieldsCount > 0;
@@ -120,7 +117,7 @@ const TicketStatus = (props) => {
       });
     }
     return { resolvingTooltipMsgs, closingTooltipMsgs };
-  }, [ticket.tasks, ticket.update_requirements, defaultAttacmentCount, requiredCustomFieldsCount, hasUncompletedSignature]);
+  }, [ticket.tasks, ticket.update_requirements, defaultAttacmentCount, requiredCustomFieldsCount, isSignatureAdded]);
 
   const resolvingClosingMessage = (action) => {
     if (["Resolved", "Close"].includes(action)) {

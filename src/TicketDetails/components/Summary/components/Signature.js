@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   Button,
@@ -41,7 +41,7 @@ const Signature = (props) => {
   const dispatch = useDispatch();
   const [addTicketSignature] = useMutation(ADD_TICKET_SIGNATURE);
 
-  const { ticket } = props;
+  const { ticket, setIsSignatureAdded } = props;
 
   const [openSignature, toggleSignature] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -81,7 +81,7 @@ const Signature = (props) => {
           },
           refetchQueries: [
             { query: GET_TICKET, variables: { id: ticket.ticket_id } },
-            { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }},
+            { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id } },
           ],
         }).finally(() => {
           setLoading(false);
@@ -104,6 +104,14 @@ const Signature = (props) => {
     }
   };
 
+  useEffect(() => {
+
+    if (ticket && ticket.signature_url) {
+      setIsSignatureAdded(true);
+    }
+
+  }, [ticket, setIsSignatureAdded])
+
   clearInterval(intervalVal);
   intervalVal = setInterval(checkSignPad, 1000);
 
@@ -118,7 +126,7 @@ const Signature = (props) => {
             <img
               src={ticket.signature_url}
               alt="signature"
-              style={{ maxHeight: "50px",maxWidth:"75%"}}
+              style={{ maxHeight: "50px", maxWidth: "75%" }}
             />
           ) : (
             <IconButton
