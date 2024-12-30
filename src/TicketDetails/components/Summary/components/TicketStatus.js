@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
 
 const TicketStatus = (props) => {
   const classes = useStyles();
-  const { ticket, ticketStatuses, handleUpdate, defaultAttacmentCount,requiredCustomFieldsCount  } = props;
+  const { ticket, ticketStatuses, handleUpdate, defaultAttacmentCount, requiredCustomFieldsCount, isSignatureAdded } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [status, setStatus] = React.useState();
   const [searchQuery, setSearchQuery] = useState("");
@@ -52,12 +52,13 @@ const TicketStatus = (props) => {
       closingTooltipMsgs.push("- all tasks to be checked");
     }
 
-    console.log("here",requiredCustomFieldsCount);
-    
+    console.log("here", requiredCustomFieldsCount);
+
 
     const hasUncompletedTask = find(ticket.tasks, (task) => !task.is_completed && task.is_default);
     const hasUncompletedAttachments = defaultAttacmentCount > 0;
     const hasRequiredCustomFields = requiredCustomFieldsCount > 0;
+    const hasUncompletedSignature = !isSignatureAdded;
     if (ticket.update_requirements && ticket.update_requirements.length > 0) {
       ticket.update_requirements.forEach((req) => {
         if (req.flag_enabled === "Y") {
@@ -78,7 +79,7 @@ const TicketStatus = (props) => {
               }
               break;
             case "CUSTOM_FIELDS":
-              if(hasRequiredCustomFields) {
+              if (hasRequiredCustomFields) {
                 if (isResolvingTicketRestricted && !resolvingTooltipMsgs.includes("- all custom fields")) {
                   resolvingTooltipMsgs.push("- all custom fields");
                 }
@@ -99,7 +100,15 @@ const TicketStatus = (props) => {
               }
               break;
             case "SIGNATURE":
-              // TODO
+              if (hasUncompletedSignature) {
+                if (isResolvingTicketRestricted && !resolvingTooltipMsgs.includes("- signature")) {
+                  resolvingTooltipMsgs.push("- signature");
+                }
+
+                if (isClosingTicketRestricted && !closingTooltipMsgs.includes("- signature")) {
+                  closingTooltipMsgs.push("- signature");
+                }
+              }
               break;
             case "FOLLOWERS":
               // TODO
@@ -111,7 +120,7 @@ const TicketStatus = (props) => {
       });
     }
     return { resolvingTooltipMsgs, closingTooltipMsgs };
-  }, [ticket.tasks, ticket.update_requirements, defaultAttacmentCount,requiredCustomFieldsCount]);
+  }, [ticket.tasks, ticket.update_requirements, defaultAttacmentCount, requiredCustomFieldsCount, hasUncompletedSignature]);
 
   const resolvingClosingMessage = (action) => {
     if (["Resolved", "Close"].includes(action)) {

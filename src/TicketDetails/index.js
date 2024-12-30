@@ -87,6 +87,7 @@ const TicketDetails = (props) => {
   const [selectedAddress, setSelectedAddress] = React.useState();
   const [defaultAttacmentCount, setDefaultAttacmentCount] = React.useState(0);
   const [requiredCustomFieldsCount, setRequiredCustomFieldsCount] = useState(0);
+  const [isSignatureAdded, setIsSignatureAdded] = useState(false);
   const {
     lablesVisible,
     ticket: ticketData,
@@ -211,6 +212,8 @@ const TicketDetails = (props) => {
             selectedAddress={selectedAddress}
             setSelectedAddress={setSelectedAddress}
             enableQueueJobs={enableQueueJobs}
+            isSignatureAdded={isSignatureAdded}
+            setIsSignatureAdded={setIsSignatureAdded}
           />
 
           {!hideInprogress &&

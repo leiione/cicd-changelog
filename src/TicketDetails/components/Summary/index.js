@@ -46,7 +46,9 @@ const Summary = (props) => {
     setSelectedAddress,
     enableQueueJobs,
     defaultAttacmentCount,
-    requiredCustomFieldsCount
+    requiredCustomFieldsCount,
+    isSignatureAdded,
+    setIsSignatureAdded,
   } = props;
 
   const showSignature = true; // this should come from ticket type settings
@@ -125,6 +127,7 @@ const Summary = (props) => {
               ticketStatuses={ticketStatuses}
               defaultAttacmentCount={defaultAttacmentCount}
               requiredCustomFieldsCount={requiredCustomFieldsCount}
+              isSignatureAdded={isSignatureAdded}
               handleUpdate={handleUpdate}
             />
           </>
@@ -182,7 +185,12 @@ const Summary = (props) => {
               <div className="border-left pl-3 py-3 h-100 d-flex flex-column">
                 <Assignee ticket={customer} updateTicket={handleUpdate} />
                 <Followers ticket={customer} updateTicket={handleUpdate} />
-                {showSignature && <Signature ticket={customer} />}
+                {showSignature && (
+                  <Signature
+                    ticket={customer}
+                    setIsSignatureAdded={setIsSignatureAdded}
+                  />
+                )}
                 <div className="mt-auto">
                   <Typography variant="caption" className="d-block mt-2">
                     Created by: <strong>{customer.created_by}</strong> on{" "}
