@@ -9,8 +9,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Close, Visibility } from "@mui/icons-material";
 
 const FileUploadPreview = ({
   selectedFiles,
@@ -36,40 +35,28 @@ const FileUploadPreview = ({
           <Grid item xs={2} sm={2} md={2} key={file.name}>
             <div className="attachment-card visible-on-hover">
               <IconButton
-                className="close-icon-btn"
+                className="close-icon-btn invisible"
                 size="small"
                 onClick={() => removeFile(file.name)}
               >
-                <CloseIcon fontSize="small" />
+                <Close fontSize="small" />
               </IconButton>
               <IconButton
                 className="preview-icon-btn invisible"
                 size="small"
                 onClick={() => handlePreviewOpen(file)}
               >
-                <VisibilityIcon fontSize="small" />
+                <Visibility fontSize="small" />
               </IconButton>
               {file.type.startsWith("image/") ? (
-                <img
-                  className="img-preview"
-                  src={URL.createObjectURL(file)}
-                  alt={file.name}
-                />
+                <img src={URL.createObjectURL(file)} alt={file.name} />
               ) : (
                 <Typography variant="body2" className="file-name">
                   {file.name}
                 </Typography>
               )}
             </div>
-            {uploadProgress[file.name] ? (
-              <LinearProgress className="mt-2" />
-            ) : (
-              <LinearProgress
-                variant="determinate"
-                value={100}
-                className={`mt-2 linear-progress progress-success`}
-              />
-            )}
+            {uploadProgress[file.name] && <LinearProgress className="mt-2" />}
 
             <Typography
               className="mt-2 d-block text-truncate"
@@ -84,9 +71,21 @@ const FileUploadPreview = ({
       {/* Image Preview Modal */}
       <Dialog open={openPreview} onClose={handlePreviewClose}>
         <DialogTitle>
-          <Typography variant="body2" className="mt-2">
-            {previewImage && previewImage?.name}
-          </Typography>
+          <Grid container spacing={1}>
+            <Grid item xs>
+              <Typography variant="body2" className="mt-2">
+                {previewImage && previewImage?.name}
+              </Typography>
+            </Grid>
+            <Grid item xs="auto">
+              <IconButton
+                onClick={handlePreviewClose}
+                size="small"
+              >
+                <Close />
+              </IconButton>
+            </Grid>
+          </Grid>
         </DialogTitle>
         <DialogContent>
           {previewImage && previewImage?.type.startsWith("image/") ? (
