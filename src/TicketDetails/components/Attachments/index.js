@@ -14,8 +14,6 @@ import {
   DialogContent,
   DialogTitle,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
 import { faFilePdf, faFileZip } from "@fortawesome/pro-duotone-svg-icons";
@@ -34,7 +32,7 @@ import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import { readFileAsBase64 } from "Common/helper";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import DialogAlert from "components/DialogAlert";
-import { Close } from "@mui/icons-material";
+import { Close, Visibility } from "@mui/icons-material";
 
 const Attachments = (props) => {
   const { ticket, setDefaultAttacmentCount } = props;
@@ -486,7 +484,7 @@ const Attachments = (props) => {
                             size="small"
                             onClick={() => removeFile(file.id)}
                           >
-                            <CloseIcon fontSize="small" />
+                            <Close fontSize="small" />
                           </IconButton>
                         )}
                         <IconButton
@@ -494,7 +492,7 @@ const Attachments = (props) => {
                           size="small"
                           onClick={() => handlePreviewOpen(file)}
                         >
-                          <VisibilityIcon fontSize="small" />
+                          <Visibility fontSize="small" />
                         </IconButton>
                         {(file.type?.startsWith("image/") ||
                           file.attachment_type?.startsWith("image/")) && (
@@ -583,7 +581,6 @@ const Attachments = (props) => {
                   <IconButton
                     onClick={handlePreviewClose}
                     size="small"
-                    className="ml-auto"
                   >
                     <Close />
                   </IconButton>

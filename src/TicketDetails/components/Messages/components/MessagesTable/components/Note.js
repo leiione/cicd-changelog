@@ -25,9 +25,9 @@ import h2p from "html2plaintext";
 import parse from "html-react-parser";
 import PropTypes from "prop-types";
 import DialogAlert from "components/DialogAlert";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import { NO_RIGHTS_MSG } from "utils/messages";
 import usePermission from "config/usePermission";
+import { Visibility } from "@mui/icons-material";
 
 const Note = (props) => {
   const { message, onDeleteNote, handleQouteNote } = props;
@@ -117,10 +117,7 @@ const Note = (props) => {
           secondary={
             <>
               {more || lineLen < 6 ? (
-                <Typography
-                  variant="caption"
-                  className="text-pre-line"
-                >
+                <Typography variant="caption" className="text-pre-line">
                   {parse(message.content)}
                 </Typography>
               ) : (
@@ -155,14 +152,10 @@ const Note = (props) => {
                             size="small"
                             onClick={() => handlePreviewOpen(file)}
                           >
-                            <VisibilityIcon fontSize="small" />
+                            <Visibility fontSize="small" />
                           </IconButton>
                           {file.attachment_type.startsWith("image/") ? (
-                            <img
-                              className="img-preview"
-                              src={file.file_url}
-                              alt={file.file_name}
-                            />
+                            <img src={file.file_url} alt={file.file_name} />
                           ) : (
                             <Typography variant="body2" className="file-name">
                               {file.file_name}
