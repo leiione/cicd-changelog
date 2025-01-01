@@ -20,7 +20,6 @@ import {
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
 
 import moment from "moment-timezone";
-import LinesEllipsis from "react-lines-ellipsis";
 import h2p from "html2plaintext";
 import parse from "html-react-parser";
 import PropTypes from "prop-types";
