@@ -42,10 +42,13 @@ const Note = (props) => {
     "notes"
   );
 
-  const lineLen = message.content
-    ? message.content.split(/\r|\r\n|\n/g).length
-    : 1;
   const isHtml = /<\/?[a-z][\s\S]*>/i.test(message.content);
+  const lineLen = message.content
+    ? isHtml
+      ? h2p(message.content).split(/\r|\r\n|\n/g).length +
+          (message.content.match(/<div|<p|<br/g) || []).length
+      : message.content.split(/\r|\r\n|\n/g).length
+    : 1;
 
   const handleOnDelete = async () => {
     setSubmitting(true);
@@ -121,12 +124,14 @@ const Note = (props) => {
                   {parse(message.content)}
                 </Typography>
               ) : (
-                <LinesEllipsis
-                  text={isHtml ? h2p(message.content) : message.content}
-                  maxLine={10}
-                  ellipsis=""
-                  className="text-pre-line"
-                />
+               
+                <Typography
+                variant="caption"
+                className="text-pre-line"
+                //need to apply eclippise through CSS
+                >
+                {parse(message.content)}
+               </Typography>
               )}
               {lineLen > 6 && (
                 <div className="mt-1">
