@@ -42,8 +42,6 @@ const Summary = (props) => {
     ticketStatuses,
     handleOpenTicket,
     setOpenQueueJobs,
-    selectedAddress,
-    setSelectedAddress,
     enableQueueJobs,
     defaultAttacmentCount,
     requiredCustomFieldsCount,
@@ -149,8 +147,6 @@ const Summary = (props) => {
                   ticket={customer}
                   updateTicket={handleUpdate}
                   isSubmitting={isSubmitting}
-                  selectedAddress={selectedAddress}
-                  setSelectedAddress={setSelectedAddress}
                 />
                 <Schedule
                   isSubmitting={isSubmitting}

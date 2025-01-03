@@ -1,11 +1,15 @@
 import React from "react"
-import { IconButton, MenuItem, MenuList, Popover } from "@mui/material"
+import { IconButton, MenuItem, MenuList, Popover, Typography } from "@mui/material"
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material"
 import ErrorPage from "components/ErrorPage"
 import Loader from "components/Loader"
+import { includes, sortBy } from "lodash"
+import { formatPhoneNumber, getFormattedPGAddress } from "utils/formatter"
+
+import PropTypes from 'prop-types';
 
 const SiteContactDropdown = props => {
-  const { selectedContact, setSelectedContact, loading, error, data } = props
+  const { values, loading, error, data, setValue } = props
   const [anchorEl, setAnchorEl] = React.useState(false)
   const open = Boolean(anchorEl);
 
@@ -23,13 +27,29 @@ const SiteContactDropdown = props => {
     return list; // eslint-disable-next-line
   }, [loading, error, data]);
 
-  const handleOnSelect = (value) => {
-    setSelectedContact(value)
+  const handleOnSelect = (selected) => {
+    const phone = selected.phone_numbers ? sortBy(
+      selected.phone_numbers.filter((x) => includes(["home", "work"], x.type)), ["type"]
+    ).map((phone) => formatPhoneNumber(phone.number)) : []
+    const email = selected.email_addresses ? selected.email_addresses.map((mail) => mail.email) : ""
+    setValue('site_contact_id', selected.value, { shouldValidate: true, shouldDirty: true })
+    setValue('ticket_contact_name', `${selected.first_name} ${selected.last_name}`, { shouldValidate: true, shouldDirty: true })
+    setValue('ticket_contact_numbers', phone.join(','), { shouldValidate: true, shouldDirty: true })
+    setValue('ticket_contact_emails', email.join(','), { shouldValidate: true, shouldDirty: true })
+    setValue('address', getFormattedPGAddress(selected.address), { shouldValidate: true, shouldDirty: true })
     setAnchorEl(null)
   }
 
+  const selectedContact = React.useMemo(() => {
+    const contact = contactOptions.find((contact) => contact.value === values.site_contact_id)
+    return contact
+  }, [contactOptions, values.site_contact_id])
+
   return (
-    <>
+    <Typography variant="subtitle1">
+      {selectedContact && selectedContact.value > 0
+        ? selectedContact.label
+        : "Choose Contact"}
       <IconButton style={{ padding: 0 }} onClick={e => setAnchorEl(e.currentTarget)}>
         {open ?
           <ArrowDropUp className="f-20" />
@@ -58,7 +78,7 @@ const SiteContactDropdown = props => {
                 contactOptions.map((option, index) => (
                   <MenuItem
                     key={index}
-                    selected={selectedContact.value === option.value}
+                    selected={values.site_contact_id === option.value}
                     onClick={(event) => handleOnSelect(option)}
                   >
                     {option.label}
@@ -71,8 +91,18 @@ const SiteContactDropdown = props => {
             </MenuList>
           )}
       </Popover>
-    </>
+    </Typography>
   )
 }
+
+SiteContactDropdown.propTypes = {
+  values: PropTypes.shape({
+    site_contact_id: PropTypes.number.isRequired,
+  }).isRequired,
+  loading: PropTypes.bool,
+  error: PropTypes.object,
+  data: PropTypes.object,
+  setValue: PropTypes.func.isRequired,
+};
 
 export default React.memo(SiteContactDropdown)

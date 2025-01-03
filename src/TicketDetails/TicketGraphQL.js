@@ -26,6 +26,7 @@ export const GET_TICKET = gql`
       subscriber
       address
       max_duration
+      ticket_contact_name
       ticket_contact_numbers
       ticket_contact_email
       location_id

@@ -84,7 +84,6 @@ const TicketDetails = (props) => {
   const [handleSave, setHandleSave] = useState(null); // State to hold handleSave function
   const hideInprogress = false // just mark this false during development
   const [openQueueJobs, setOpenQueueJobs] = useState(false); // State for QueueJobs drawer
-  const [selectedAddress, setSelectedAddress] = React.useState();
   const [defaultAttacmentCount, setDefaultAttacmentCount] = React.useState(0);
   const [requiredCustomFieldsCount, setRequiredCustomFieldsCount] = useState(0);
   const [isSignatureAdded, setIsSignatureAdded] = useState(false);
@@ -209,8 +208,6 @@ const TicketDetails = (props) => {
             lablesVisible={lablesVisible}
             handleOpenTicket={handleOpenTicket}
             setOpenQueueJobs={setOpenQueueJobs}
-            selectedAddress={selectedAddress}
-            setSelectedAddress={setSelectedAddress}
             enableQueueJobs={enableQueueJobs}
             isSignatureAdded={isSignatureAdded}
             setIsSignatureAdded={setIsSignatureAdded}
@@ -299,7 +296,7 @@ const TicketDetails = (props) => {
         />
       )}
       {openQueueJobs &&
-        <QueueJobs openQueueJobs={openQueueJobs} setOpenQueueJobs={setOpenQueueJobs} selectedAddress={selectedAddress} />
+        <QueueJobs openQueueJobs={openQueueJobs} setOpenQueueJobs={setOpenQueueJobs} selectedAddress={ticket.address} />
       }
     </div>
   );

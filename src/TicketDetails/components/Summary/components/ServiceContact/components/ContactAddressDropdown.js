@@ -1,4 +1,5 @@
 import React from "react"
+import PropTypes from 'prop-types';
 import { IconButton, MenuItem, MenuList, Popover } from "@mui/material"
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material"
 import { GET_CUSTOMER_ADDRESSES } from "TicketDetails/TicketGraphQL"
@@ -9,7 +10,7 @@ import { isEmpty, pick, startCase } from "lodash"
 import { getFormattedAddress, getFormattedPGAddress } from "utils/formatter"
 
 const ContactAddressDropdown = props => {
-  const { ticket, customer, customerAddress, selectedAddress, setSelectedAddress, cLoading, cError, cData } = props
+  const { ticket, customer, customerAddress, selectedAddress, setValue, cLoading, cError, cData } = props
   const [anchorEl, setAnchorEl] = React.useState(false)
   const open = Boolean(anchorEl);
 
@@ -59,7 +60,7 @@ const ContactAddressDropdown = props => {
   }, [ticket, cLoading, cError, cData])
 
   const handleOnSelect = (value) => {
-    setSelectedAddress(value)
+    setValue("address", value, { shouldValidate: true, shouldDirty: true })
     setAnchorEl(null)
   }
 
@@ -78,11 +79,11 @@ const ContactAddressDropdown = props => {
         onClose={() => setAnchorEl(null)}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'center',
+          horizontal: 'right',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'center',
+          horizontal: 'right',
         }}
       >
         {error || cError ? <ErrorPage error={error || cError} />
@@ -106,5 +107,16 @@ const ContactAddressDropdown = props => {
     </>
   )
 }
+
+ContactAddressDropdown.propTypes = {
+  ticket: PropTypes.object.isRequired,
+  customer: PropTypes.object.isRequired,
+  customerAddress: PropTypes.string,
+  selectedAddress: PropTypes.string,
+  setValue: PropTypes.func.isRequired,
+  cLoading: PropTypes.bool,
+  cError: PropTypes.object,
+  cData: PropTypes.object
+};
 
 export default React.memo(ContactAddressDropdown)
