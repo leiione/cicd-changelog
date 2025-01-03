@@ -87,7 +87,7 @@ const MessagesTable = (props) => {
 
   return (
     <div>
-      <List className="overflow-y-auto paper-height-500" style={messageList.length === 0 ? { textAlign: "center" } : {}}>
+      <List className="overflow-y-auto paper-height-500 messages-list-wrapper" style={messageList.length === 0 ? { textAlign: "center" } : {}}>
         {messageList.length > 0 ? messageList.map((message) => {
           if (message.note_id > 0) {
             return <Note message={message} onDeleteNote={onDeleteNote} handleQouteNote={handleQouteNote} />

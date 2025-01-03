@@ -80,7 +80,7 @@ const Note = (props) => {
           primary={
             <Grid container spacing={1} className="align-items-center mb-1">
               <Grid item xs>
-                <Typography variant="subtitle1">
+                <Typography variant="body1">
                   {message.appuser_name ? message.appuser_name : ""}
                 </Typography>
               </Grid>
