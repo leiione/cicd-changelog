@@ -73,7 +73,7 @@ jobs:
       - run:
           name: Upload to S3
           command: |
-            BRANCH_NAME=staging
+            BRANCH_NAME=${BRANCH_NAME}
             S3_BUCKET=microfrontend-crm-ms
             aws s3 sync /workspace/dist/ s3://$S3_BUCKET/$BRANCH_NAME/ --acl public-read
 
@@ -81,7 +81,7 @@ jobs:
           name: Invalidate CloudFront Cache
           command: |
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
-            BRANCH_NAME=staging
+            BRANCH_NAME=${BRANCH_NAME}
             aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
             DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
             echo "Microfrontend is accessible at: $DEPLOY_URL"
@@ -89,7 +89,7 @@ jobs:
       - run:
           name: Send Notification to RingCentral
           command: |
-            BRANCH_NAME=staging
+            BRANCH_NAME=${BRANCH_NAME}
             DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
             BUILD_NUM=$CIRCLE_BUILD_NUM  # Ensure BUILD_NUM is numeric
             BUILD_URL="$CIRCLE_BUILD_URL"
