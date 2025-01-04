@@ -28,6 +28,7 @@ import {
   SummarySkeletonLoader,
 } from "./components/SkeletonLoader";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
+import Stopwatch from "./components/Stopawtch";
 
 const Summary = (props) => {
   const dispatch = useDispatch();
@@ -200,6 +201,7 @@ const Summary = (props) => {
                     Last updated by: <strong>{customer.last_updated_by}</strong>{" "}
                     on {customer.last_updated_by_time}
                   </Typography>
+                  <Stopwatch />
                 </div>
               </div>
             )}
