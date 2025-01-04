@@ -158,7 +158,7 @@ const Email = (props) => {
             <Grid container spacing={1} className="align-items-center mb-1">
               <Grid item xs>
                 <Typography
-                  variant="body2"
+                  variant="body1"
                   className="text-truncate"
                   style={{ width: "70%" }}
                 >
