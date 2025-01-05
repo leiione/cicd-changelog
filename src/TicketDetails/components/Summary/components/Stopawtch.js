@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Chip, Popover, Typography, Box, Grid } from "@mui/material";
+import {
+  Chip,
+  Popover,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  IconButton,
+} from "@mui/material";
 import PlayCircleFilledWhiteOutlinedIcon from "@mui/icons-material/PlayCircleFilledWhiteOutlined";
 import StopCircleOutlinedIcon from "@mui/icons-material/StopCircleOutlined";
+import CloseIcon from "@mui/icons-material/Close";
 
 const Stopwatch = () => {
   const [seconds, setSeconds] = useState(0);
@@ -22,11 +31,21 @@ const Stopwatch = () => {
   }, [isActive]);
 
   const toggle = () => {
-    const currentTime = new Date().toLocaleTimeString();
+    const currentDate = new Date();
+    const logEntry = {
+      date: currentDate.toLocaleDateString(),
+      duration: formatTime(seconds),
+      timeRange: `${currentDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })} - ${new Date(currentDate.getTime() + seconds * 1000).toLocaleTimeString(
+        [],
+        { hour: "2-digit", minute: "2-digit" }
+      )}`,
+    };
+
     if (isActive) {
-      setLogs((prevLogs) => [...prevLogs, `Stopped at ${currentTime}`]);
-    } else {
-      setLogs((prevLogs) => [...prevLogs, `Started at ${currentTime}`]);
+      setLogs((prevLogs) => [...prevLogs, logEntry]);
     }
     setIsActive(!isActive);
   };
@@ -52,69 +71,118 @@ const Stopwatch = () => {
   const isLogsOpen = Boolean(anchorEl);
 
   return (
+    <Grid container spacing={2} className="pt-3">
+      <Grid item xs>
+        <Chip
+          label={formatTime(seconds)}
+          icon={
+            isActive ? (
+              <StopCircleOutlinedIcon className="text-danger" />
+            ) : (
+              <PlayCircleFilledWhiteOutlinedIcon className="text-primary" />
+            )
+          }
+          onClick={toggle}
+          variant="outlined"
+          color={isActive ? "error" : "primary"}
+          sx={{
+            borderColor: isActive ? "error.main" : "primary.main",
+          }}
+          aria-label={isActive ? "Pause Timer" : "Start Timer"}
+        />
+      </Grid>
+      <Grid item>
+        <Chip
+          label="Logs"
+          className="bg-white f-12"
+          onClick={handleLogsClick}
+          variant="outlined"
+          color="primary"
+          aria-label="View Logs"
+        />
 
-
-<Box display="flex" alignItems="center" gap={2}>
-
-<Grid container spacing={2}>
-    <Grid item xs={12} md={6}>
-      1
-    </Grid>
-    <Grid item xs={12} md={6}>
-      2    </Grid>
-  </Grid>
-      <Chip
-        label={formatTime(seconds)}
-        icon={
-          isActive ? (
-            <StopCircleOutlinedIcon className="text-danger" />
-          ) : (
-            <PlayCircleFilledWhiteOutlinedIcon className="text-primary" />
-          )
-        }
-        onClick={toggle}
-        variant="outlined"
-        color={isActive ? "error" : "primary"}
-        sx={{
-          borderColor: isActive ? "error.main" : "primary.main",
-        }}
-        aria-label={isActive ? "Pause Timer" : "Start Timer"}
-      />
-
-      <Chip
-        label="Logs"
-        className="bg-white f-12"
-        onClick={handleLogsClick}
-        variant="outlined"
-        color="primary"
-        aria-label="View Logs"
-      />
-
-      <Popover
-        open={isLogsOpen}
-        anchorEl={anchorEl}
-        onClose={handleLogsClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-      >
-        <Box p={2}>
-          <Typography variant="subtitle2">Logs</Typography>
-          {logs.length > 0 ? (
-            logs.map((log, index) => (
-              <Typography key={index} variant="body2">
-                {log}
+        <Popover
+          id="logs-popover"
+          open={isLogsOpen}
+          anchorEl={anchorEl}
+          onClose={handleLogsClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          <Card>
+            {/* Popover Header */}
+            <CardContent
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderBottom: "1px solid #ddd",
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                Logs
               </Typography>
-            ))
-          ) : (
-            <Typography variant="body">
-              No logs available.
-            </Typography>
-          )}
-        </Box>
-      </Popover>
-    </Box>
+              <IconButton size="small" onClick={handleLogsClose}>
+                <CloseIcon />
+              </IconButton>
+            </CardContent>
+
+            {/* Popover Body */}
+            <CardContent>
+              {logs.length > 0 ? (
+                logs.map((log, index) => (
+                  <Grid
+                    container
+                    key={index}
+                    spacing={1}
+                    sx={{
+                      mb: 2,
+                      borderBottom: "1px solid #ddd",
+                      pb: 1,
+                    }}
+                  >
+                    <Grid item xs={4}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: "bold", fontSize: "0.9rem" }}
+                      >
+                        {log.date}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontSize: "0.9rem", textAlign: "center" }}
+                      >
+                        {log.duration}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontSize: "0.8rem", textAlign: "right" }}
+                      >
+                        {log.timeRange}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                ))
+              ) : (
+                <Typography variant="body2" sx={{ mt: 1, textAlign: "center" }}>
+                  No logs available.
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Popover>
+      </Grid>
+    </Grid>
   );
 };
 

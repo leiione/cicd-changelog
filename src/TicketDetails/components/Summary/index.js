@@ -201,6 +201,7 @@ const Summary = (props) => {
                     Last updated by: <strong>{customer.last_updated_by}</strong>{" "}
                     on {customer.last_updated_by_time}
                   </Typography>
+                  {/* Added Stopwatch for Ticket */}
                   <Stopwatch />
                 </div>
               </div>
