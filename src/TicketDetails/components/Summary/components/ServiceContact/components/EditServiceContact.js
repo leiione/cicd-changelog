@@ -17,7 +17,7 @@ const EditServiceContact = (props) => {
   const {
     onEditMode,
     control,
-    watch,
+    values,
     setValue,
     isSubscriber,
     cLoading,
@@ -26,7 +26,6 @@ const EditServiceContact = (props) => {
     contact,
     ticket,
   } = props
-  const values = watch()
 
   return (
     <>
@@ -111,9 +110,10 @@ const EditServiceContactForm = (props) => {
     reValidateMode: "onSubmit"
   });
 
-  const { formState, handleSubmit } = form;
-
+  const { formState, handleSubmit, watch } = form;
   const { isSubmitting, isDirty } = formState;
+  const values = watch()
+
   const onSubmit = async (values) => {
     await updateTicket({ ticket_id: ticket.ticket_id, ...omit(values, ['main_company']) });
     setTimeout(() => {
@@ -123,7 +123,7 @@ const EditServiceContactForm = (props) => {
 
   return (
     <>
-      <EditServiceContact {...props}  {...form} />
+      <EditServiceContact {...props}  {...form} values={values} />
       {onEditMode && (
         <Grid item xs={9}>
           <Divider />
@@ -133,7 +133,7 @@ const EditServiceContactForm = (props) => {
               size="large"
               style={{ padding: "5px" }}
               onClick={handleSubmit(onSubmit)}
-              disabled={!isDirty}
+              disabled={!isDirty || !values.ticket_contact_name || !ticket.address}
               isSubmitting={isSubmitting}
             >
               Save
@@ -161,7 +161,7 @@ EditServiceContact.propTypes = {
   onEditMode: PropTypes.bool.isRequired,
   control: PropTypes.object.isRequired,
   isSubscriber: PropTypes.bool,
-  watch: PropTypes.func.isRequired,
+  values: PropTypes.object.isRequired,
   setValue: PropTypes.func,
   cLoading: PropTypes.bool,
   cError: PropTypes.string,
