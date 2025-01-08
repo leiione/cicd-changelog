@@ -117,15 +117,8 @@ const Stopwatch = () => {
         >
           <Card>
             {/* Popover Header */}
-            <CardContent
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                borderBottom: "1px solid #ddd",
-              }}
-            >
-              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            <CardContent className="d-flex align-items-center justify-content-between">
+              <Typography variant="h6">
                 Logs
               </Typography>
               <IconButton size="small" onClick={handleLogsClose}>
