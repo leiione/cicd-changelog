@@ -10,6 +10,12 @@ jobs:
     executor: node-executor
     steps:
       - run:
+          name: Install Prerequisites
+          command: |
+            apt-get update
+            apt-get install -y jq
+
+      - run:
           name: Notify RingCentral
           command: |
             curl --location --request POST 'https://hooks.ringcentral.com/webhook/v2/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvdCI6ImMiLCJvaSI6IjE0MjkyMDkwODkiLCJpZCI6IjI4MDk1NjkzMDcifQ.-WyR3x9Z_s0YYvmeB39uTLpTu0eWQYO9iSU-xu1U50Q' \
