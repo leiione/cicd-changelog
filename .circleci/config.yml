@@ -27,7 +27,8 @@ jobs:
                       --argjson build_num ${CIRCLE_BUILD_NUM} \
                       --arg build_url "${CIRCLE_BUILD_URL}" \
                       --arg vcs_url "${CIRCLE_REPOSITORY_URL}" \
-                      '{payload: {activity: $activity, title: $title, body: $body, icon: $icon, build_num: $build_num, build_url: $build_url, vcs_url: $vcs_url}}')"
+                      --arg branch "${CIRCLE_BRANCH}" \
+                      '{payload: {activity: $activity, title: $title, body: $body, icon: $icon, build_num: $build_num, build_url: $build_url, vcs_url: $vcs_url, branch: $branch}}')"
 
 workflows:
   notify_workflow:
