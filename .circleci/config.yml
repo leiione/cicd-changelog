@@ -77,7 +77,7 @@ jobs:
                 "title": "Visp ${CIRCLE_TAG} client: released to App",
                 "body": "[changelog/updates](https://github.com/VISPdevteam/Tickets-Micro-Frontend/releases/tag/${CIRCLE_TAG})",
                 "status": "success",
-                "build_num": "'"${CIRCLE_BUILD_NUM}"'",
+                "build_num": '${CIRCLE_BUILD_NUM}',
                 "branch": "${CIRCLE_BRANCH}",
                 "reponame": "${CIRCLE_PROJECT_REPONAME}",
                 "username": "${CIRCLE_USERNAME}",
