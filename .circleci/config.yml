@@ -30,7 +30,8 @@ jobs:
                       --arg branch "${CIRCLE_BRANCH}" \
                       --arg reponame "${CIRCLE_PROJECT_REPONAME}" \
                       --arg username "${CIRCLE_USERNAME}" \
-                      '{payload: {activity: $activity, title: $title, body: $body, icon: $icon, build_num: $build_num, build_url: $build_url, vcs_url: $vcs_url, branch: $branch, reponame: $reponame, username: $username}}')"
+                      --arg status "success" \
+                      '{payload: {activity: $activity, title: $title, body: $body, icon: $icon, build_num: $build_num, build_url: $build_url, vcs_url: $vcs_url, branch: $branch, reponame: $reponame, username: $username, status: $status}}')"
 
 workflows:
   notify_workflow:
