@@ -29,7 +29,8 @@ jobs:
                       --arg vcs_url "${CIRCLE_REPOSITORY_URL}" \
                       --arg branch "${CIRCLE_BRANCH}" \
                       --arg reponame "${CIRCLE_PROJECT_REPONAME}" \
-                      '{payload: {activity: $activity, title: $title, body: $body, icon: $icon, build_num: $build_num, build_url: $build_url, vcs_url: $vcs_url, branch: $branch, reponame: $reponame}}')"
+                      --arg username "${CIRCLE_USERNAME}" \
+                      '{payload: {activity: $activity, title: $title, body: $body, icon: $icon, build_num: $build_num, build_url: $build_url, vcs_url: $vcs_url, branch: $branch, reponame: $reponame, username: $username}}')"
 
 workflows:
   notify_workflow:
