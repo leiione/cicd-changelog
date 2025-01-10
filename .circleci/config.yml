@@ -26,7 +26,8 @@ jobs:
                       --arg icon "https://yt3.ggpht.com/a/AGF-l7_s7iCi6dgwawf4rkbIMwUo6WpZLkYw0k9h4w=s100-c-k-c0xffffffff-no-rj-mo" \
                       --argjson build_num ${CIRCLE_BUILD_NUM} \
                       --arg build_url "${CIRCLE_BUILD_URL}" \
-                      '{payload: {activity: $activity, title: $title, body: $body, icon: $icon, build_num: $build_num, build_url: $build_url}}')"
+                      --arg vcs_url "${CIRCLE_REPOSITORY_URL}" \
+                      '{payload: {activity: $activity, title: $title, body: $body, icon: $icon, build_num: $build_num, build_url: $build_url, vcs_url: $vcs_url}}')"
 
 workflows:
   notify_workflow:
