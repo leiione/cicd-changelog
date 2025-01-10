@@ -28,7 +28,8 @@ jobs:
                       --arg build_url "${CIRCLE_BUILD_URL}" \
                       --arg vcs_url "${CIRCLE_REPOSITORY_URL}" \
                       --arg branch "${CIRCLE_BRANCH}" \
-                      '{payload: {activity: $activity, title: $title, body: $body, icon: $icon, build_num: $build_num, build_url: $build_url, vcs_url: $vcs_url, branch: $branch}}')"
+                      --arg reponame "${CIRCLE_PROJECT_REPONAME}" \
+                      '{payload: {activity: $activity, title: $title, body: $body, icon: $icon, build_num: $build_num, build_url: $build_url, vcs_url: $vcs_url, branch: $branch, reponame: $reponame}}')"
 
 workflows:
   notify_workflow:
