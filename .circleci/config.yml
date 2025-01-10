@@ -115,10 +115,11 @@ jobs:
             --header 'Content-Type: application/json' \
             --data '{
               "activity": "Microfrontend New Deployment Notification",
-              "title": Visp '${CIRCLE_TAG}' client: released to App",
-              "body": "[changelog/updates](https://github.com/VISPdevteam/Tickets-Micro-Frontend/releases/tag/'${CIRCLE_TAG}')"
+              "title": "Visp '${CIRCLE_TAG}' client: released to App",
+              "body": "[changelog/updates](https://github.com/VISPdevteam/Tickets-Micro-Frontend/releases/tag/'${CIRCLE_TAG}')",
               "icon": "https://yt3.ggpht.com/a/AGF-l7_s7iCi6dgwawf4rkbIMwUo6WpZLkYw0k9h4w=s100-c-k-c0xffffffff-no-rj-mo"
-              }'
+            }'
+
 
 
 workflows:
