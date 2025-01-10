@@ -1,8 +1,10 @@
 version: 2.1
+
 executors:
   node-executor:
     docker:
       - image: node:18
+
 jobs:
   build:
     executor: node-executor
@@ -11,7 +13,6 @@ jobs:
       - run:
           name: Install dependencies
           command: npm install --legacy-peer-deps
-##############################################################
       - run:
           name: Build the application
           command: npm run build
@@ -27,12 +28,12 @@ jobs:
       - run:
           name: Zip the build artifacts
           command: |
-            mkdir dist && cp -r build/* dist/
             zip -r build.zip dist
       - persist_to_workspace:
           root: .
           paths:
             - dist
+
   deploy:
     docker:
       - image: node:18  # For AWS CLI
@@ -69,7 +70,6 @@ jobs:
           name: Invalidate CloudFront Cache
           command: |
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
-            BRANCH_NAME=staging
             aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
             DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
             echo "Microfrontend is accessible at: $DEPLOY_URL"
@@ -92,6 +92,7 @@ jobs:
                 "vcs_url": "https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
               }
             }'
+
 workflows:
   build_and_deploy:
     jobs:
