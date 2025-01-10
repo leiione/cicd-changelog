@@ -6,129 +6,22 @@ executors:
       - image: node:18
 
 jobs:
-  build:
+  notify:
     executor: node-executor
     steps:
-      - checkout
-
-      - run:
-          name: Install dependencies
-          command: npm install --legacy-peer-deps
-
-      - run:
-          name: Build the application
-          command: npm run build
-
-      - run:
-          name: Create Dist folder and copy build artifact
-          command: |
-            mkdir dist && cp -r build/* dist/
-
-      - run:
-          name: Install zip utility
-          command: |
-            apt-get update
-            apt-get install -y zip
-
-      - run:
-          name: Zip the build artifacts
-          command: |
-            mkdir dist && cp -r build/* dist/
-            zip -r build.zip dist
-
-      - persist_to_workspace:
-          root: .
-          paths:
-            - dist
-
-  deploy:
-    docker:
-      - image: node:18  # For AWS CLI
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /workspace
-      - run:
-          name: Install Prerequisites
-          command: |
-            apt-get update
-            apt-get install -y unzip less
-
-      - run:
-          name: Install AWS CLI
-          command: |
-            apt-get update
-            apt-get install -y unzip
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            ./aws/install
-
-      - run:
-          name: Configure AWS CLI
-          command: |
-            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-            aws configure set region $AWS_REGION
-
-      - run:
-          name: Upload to S3
-          command: |
-            BRANCH_NAME=staging
-            S3_BUCKET=microfrontend-crm-ms
-            aws s3 sync /workspace/dist/ s3://$S3_BUCKET/$BRANCH_NAME/ --acl public-read
-
-      - run:
-          name: Invalidate CloudFront Cache
-          command: |
-            CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
-            BRANCH_NAME=staging
-            aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
-            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
-            echo "Microfrontend is accessible at: $DEPLOY_URL"
-            
-      #- run:
-       #   name: Send Notification to RingCentral
-        #  command: |
-         #   BRANCH_NAME=staging
-          #  DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
-          #  BUILD_NUM=$CIRCLE_BUILD_NUM  # Ensure BUILD_NUM is numeric
-          #  BUILD_URL="$CIRCLE_BUILD_URL"
-          #  curl -X POST -H 'Content-Type: application/json' -d '{
-          #    "payload": {
-          #      "activity": "Deployment Completed",
-          #      "title": "Deployment Notification",
-          #      "body": "Build #'"$BUILD_NUM"' for branch: '"BRANCH_NAME"'\\nDeploy URL: '"DEPLOY_URL"'",
-          #      "build_num": '"$BUILD_NUM"',
-          #      "build_url": "'"$BUILD_URL"'",
-          #      "branch": "'"$BRANCH_NAME"'",
-          #      "vcs_url": "'"$VCS_URL"'",
-          #      "reponame": "'"$REPO_NAME"'",
-          #      "username": "'"$USERNAME"'",
-          #      "status": "'"$STATUS"'"
-          #    }
-          #  }' $RINGCENTRAL 
-
       - run:
           name: Notify RingCentral
           command: |
             curl --location --request POST 'https://hooks.ringcentral.com/webhook/v2/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvdCI6ImMiLCJvaSI6IjE0MjkyMDkwODkiLCJpZCI6IjI4MDk1NjkzMDcifQ.-WyR3x9Z_s0YYvmeB39uTLpTu0eWQYO9iSU-xu1U50Q' \
-              --header 'Content-Type: application/json' \
-              --data '{
-                "payload": {
-                "activity": "Microfrontend New Deployment Notification",
-                "title": "Visp '${CIRCLE_TAG}' client: released to App",
-                "body": "[changelog/updates](https://github.com/VISPdevteam/Tickets-Micro-Frontend/releases/tag/'${CIRCLE_TAG}')",
-                "icon": "https://yt3.ggpht.com/a/AGF-l7_s7iCi6dgwawf4rkbIMwUo6WpZLkYw0k9h4w=s100-c-k-c0xffffffff-no-rj-mo",
-                "build_num": ${CIRCLE_BUILD_NUM}
-              }
-            }'
-
-
+            --header 'Content-Type: application/json' \
+            --data "$(jq -n --arg activity "Microfrontend New Deployment Notification" \
+                      --arg title "Visp ${CIRCLE_TAG} client: released to App" \
+                      --arg body "[changelog/updates](https://github.com/VISPdevteam/Tickets-Micro-Frontend/releases/tag/${CIRCLE_TAG})" \
+                      --arg icon "https://yt3.ggpht.com/a/AGF-l7_s7iCi6dgwawf4rkbIMwUo6WpZLkYw0k9h4w=s100-c-k-c0xffffffff-no-rj-mo" \
+                      --argjson build_num ${CIRCLE_BUILD_NUM} \
+                      '{payload: {activity: $activity, title: $title, body: $body, icon: $icon, build_num: $build_num}}')"
 
 workflows:
-  build_and_deploy:
+  notify_workflow:
     jobs:
-      - build
-      - deploy:
-          requires:
-            - build
+      - notify
