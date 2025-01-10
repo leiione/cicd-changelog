@@ -112,9 +112,9 @@ jobs:
           name: Notify RingCentral
           command: |
             curl --location --request POST 'https://hooks.ringcentral.com/webhook/v2/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvdCI6ImMiLCJvaSI6IjE0MjkyMDkwODkiLCJpZCI6IjI4MDk1NjkzMDcifQ.-WyR3x9Z_s0YYvmeB39uTLpTu0eWQYO9iSU-xu1U50Q' \
-            --header 'Content-Type: application/json' \
-            --data '{
-              "payload":{
+              --header 'Content-Type: application/json' \
+              --data '{
+                "payload": {
                 "activity": "Microfrontend New Deployment Notification",
                 "title": "Visp '${CIRCLE_TAG}' client: released to App",
                 "body": "[changelog/updates](https://github.com/VISPdevteam/Tickets-Micro-Frontend/releases/tag/'${CIRCLE_TAG}')",
