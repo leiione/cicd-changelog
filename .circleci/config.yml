@@ -20,19 +20,14 @@ jobs:
           command: |
             curl --location --request POST 'https://hooks.ringcentral.com/webhook/v2/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvdCI6ImMiLCJvaSI6IjE0MjkyMDkwODkiLCJpZCI6IjI4MDk1NjkzMDcifQ.-WyR3x9Z_s0YYvmeB39uTLpTu0eWQYO9iSU-xu1U50Q' \
             --header 'Content-Type: application/json' \
-            --data "$(jq -n --arg activity "Microfrontend New Deployment Notification" \
-                      --arg title "Visp ${CIRCLE_TAG} client: released to App" \
-                      --arg body "[changelog/updates](https://github.com/VISPdevteam/Tickets-Micro-Frontend/releases/tag/${CIRCLE_TAG})" \
-                      --arg icon "https://yt3.ggpht.com/a/AGF-l7_s7iCi6dgwawf4rkbIMwUo6WpZLkYw0k9h4w=s100-c-k-c0xffffffff-no-rj-mo" \
-                      --argjson build_num ${CIRCLE_BUILD_NUM} \
-                      --arg build_url "${CIRCLE_BUILD_URL}" \
-                      --arg vcs_url "${CIRCLE_REPOSITORY_URL}" \
-                      --arg branch "${CIRCLE_BRANCH}" \
-                      --arg reponame "${CIRCLE_PROJECT_REPONAME}" \
-                      --arg username "${CIRCLE_USERNAME}" \
-                      --arg commit_hash "${CIRCLE_SHA1}" \
-                      --arg status "success" \
-                      '{payload: {activity: $activity, title: $title, body: $body, icon: $icon, build_num: $build_num, build_url: $build_url, vcs_url: $vcs_url, branch: $branch, reponame: $reponame, username: $username, commit_hash: $commit_hash, status: $status}}')"
+            --data '{
+              "payload": {
+                "activity": "Microfrontend New Deployment Notification",
+                "title": "Visp ${CIRCLE_TAG} client: released to App",
+                "body": "[changelog/updates](https://github.com/VISPdevteam/Tickets-Micro-Frontend/releases/tag/${CIRCLE_TAG})",
+                "status": "success"
+              }
+            }'
 
 workflows:
   notify_workflow:
