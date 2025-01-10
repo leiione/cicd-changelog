@@ -18,7 +18,7 @@ jobs:
           command: npm run build
       - run:
           name: Install zip Utility
-          command: sudo apt-get update && sudo apt-get install -y zip
+          command: apt-get update && apt-get install -y unzip
       - run:
           name: Zip the build artifacts
           command: |
