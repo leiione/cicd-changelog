@@ -45,11 +45,11 @@ const ContactNumberField = props => {
     phoneArr.forEach((phone, index) => {
       const phoneIndex = findIndex(contactNumbers, (o) => o.phone === phone);
       if (phoneIndex > -1) {
-        displayNumbers.push({ label: phoneLabel[phoneIndex], phone })
+        displayNumbers.push({ label: isSubscriber ? phoneLabel[phoneIndex] : contactNumbers[phoneIndex].label, phone })
       }
     })
     return displayNumbers;
-  }, [values.ticket_contact_numbers, contactNumbers])
+  }, [values.ticket_contact_numbers, contactNumbers, isSubscriber])
 
   const onPhoneChange = (value) => {
     let phoneArr = values.ticket_contact_numbers ? values.ticket_contact_numbers.split(',') : [];
