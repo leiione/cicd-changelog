@@ -397,7 +397,7 @@ const Attachments = (props) => {
             <Files
               onError={handleError}
               onChange={handleFileChange}
-              accepts={["image/*", "application/pdf", "application/zip"]}
+              accepts={["image/*", "application/pdf", "application/zip", "application/x-zip-compressed"]}
               multiple
               clickable
               onDragOver={handleDragOver}

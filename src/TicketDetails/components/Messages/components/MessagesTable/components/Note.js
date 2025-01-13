@@ -27,6 +27,11 @@ import DialogAlert from "components/DialogAlert";
 import { NO_RIGHTS_MSG } from "utils/messages";
 import usePermission from "config/usePermission";
 import { Visibility } from "@mui/icons-material";
+import { getExtensionFromFilename } from "Common/helper";
+import { IMAGE_EXTENSION_LIST } from "Common/constants";
+import { faFilePdf, faFileZip } from "@fortawesome/pro-regular-svg-icons";
+import { includes } from "lodash";
+
 
 const Note = (props) => {
   const { message, onDeleteNote, handleQouteNote } = props;
@@ -143,7 +148,10 @@ const Note = (props) => {
                     Attachments
                   </Typography>
                   <Grid container spacing={1}>
-                    {message.attachments.map((file, index) => (
+                    {message.attachments.map((file, index) =>{
+                      const type = getExtensionFromFilename(file.filename);
+
+                      return(
                       <Grid item xs={2} sm={2} md={2} key={index}>
                         <div className="attachment-card visible-on-hover">
                           <IconButton
@@ -153,16 +161,26 @@ const Note = (props) => {
                           >
                             <Visibility fontSize="small" />
                           </IconButton>
-                          {file.attachment_type.startsWith("image/") ? (
-                            <img src={file.file_url} alt={file.file_name} />
-                          ) : (
-                            <Typography variant="body2" className="file-name">
-                              {file.file_name}
-                            </Typography>
-                          )}
+                          {includes(IMAGE_EXTENSION_LIST, type) && (
+                              <img
+                                src={file.file_url || file.preview?.url}
+                                alt={file.filename || file.name}
+                              />
+                            )}
+
+                            {(file.type?.includes("pdf") ||
+                              file.attachment_type?.includes("pdf")) && (
+                              <FontAwesomeIcon icon={faFilePdf} size="2xl" />
+                            )}
+
+                            {(file.type?.includes("zip") ||
+                              file.attachment_type?.includes("zip")) && (
+                              <FontAwesomeIcon icon={faFileZip} size="2xl" />
+                            )}
+
                         </div>
-                      </Grid>
-                    ))}
+                      </Grid>)
+          })}
                   </Grid>
                 </>
               )}
