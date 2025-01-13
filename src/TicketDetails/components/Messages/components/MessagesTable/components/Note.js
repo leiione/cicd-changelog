@@ -7,9 +7,9 @@ import {
   ListItemAvatar,
   ListItemText,
   Typography,
-  Box,
-  Modal,
-  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   Tooltip,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,6 +18,8 @@ import {
   faNote,
   faTrash,
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
+import GetAppIcon from "@mui/icons-material/GetApp";
+import { Close } from "@mui/icons-material";
 
 import moment from "moment-timezone";
 import h2p from "html2plaintext";
@@ -209,37 +211,57 @@ const Note = (props) => {
           },
         ]}
       />
-      <Modal open={openPreview} onClose={handlePreviewClose}>
-        <Box className="box-modal-preview">
-          {previewImage && previewImage.attachment_type.startsWith("image/") ? (
-            <img
-              src={previewImage.file_url}
-              alt="Preview"
-              style={{ width: "100%", height: "auto" }}
-            />
-          ) : (
-            <Box>
-              <Typography variant="body2" className="mt-2">
-                Preview not available
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  const link = document.createElement("a");
-                  link.href = previewImage.file_url;
-                  link.download = previewImage.file_name;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
-              >
-                Download
-              </Button>
-            </Box>
-          )}
-        </Box>
-      </Modal>
+    
+     {/* Image Preview Modal */}
+     <Dialog open={openPreview} onClose={handlePreviewClose}>
+            <DialogTitle id="alert-dialog-title">
+              <Grid container spacing={1} alignItems="center">
+                <Grid item xs="auto">
+                  {previewImage.filename || previewImage.name}
+                </Grid>
+                <Grid item xs>
+                  {previewImage.file_url && (
+                    <IconButton
+                      component="a"
+                      href={previewImage.file_url}
+                      download={previewImage.filename || previewImage.name}
+                      aria-label="download"
+                      size="small"
+                      className="ml-2"
+                    >
+                      <GetAppIcon />
+                    </IconButton>
+                  )}
+                </Grid>
+                <Grid item xs="auto">
+                  <IconButton
+                    onClick={handlePreviewClose}
+                    size="small"
+                  >
+                    <Close />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            </DialogTitle>
+            <DialogContent>
+              {previewImage &&
+                (previewImage.type?.startsWith("image/") ||
+                previewImage.attachment_type?.startsWith("image/") ? (
+                  <img
+                   className="img-fluid"
+                    src={
+                      previewImage.file_url || URL.createObjectURL(previewImage)
+                    }
+                    alt="Preview"
+                  />
+                ) : (
+                  <Typography variant="body2" className="mt-2">
+                    Preview not available
+                  </Typography>
+                ))}
+            </DialogContent>
+          </Dialog>
+          {/* EOF Image Preview Modal */}
     </>
   );
 };
