@@ -33,6 +33,7 @@ const SiteContactDropdown = props => {
     ).map((phone) => formatPhoneNumber(phone.number)) : []
     const email = selected.email_addresses ? selected.email_addresses.map((mail) => mail.email) : ""
     setValue('site_contact_id', selected.value, { shouldValidate: true, shouldDirty: true })
+    setValue('main_company', selected.main_company, { shouldValidate: true, shouldDirty: true })
     setValue('ticket_contact_name', `${selected.first_name} ${selected.last_name}`, { shouldValidate: true, shouldDirty: true })
     setValue('ticket_contact_numbers', phone.join(','), { shouldValidate: true, shouldDirty: true })
     setValue('ticket_contact_emails', email.join(','), { shouldValidate: true, shouldDirty: true })

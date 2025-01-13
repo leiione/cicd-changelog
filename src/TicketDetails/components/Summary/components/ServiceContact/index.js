@@ -16,6 +16,8 @@ import { useQuery } from "@apollo/client";
 import { useDispatch, useSelector } from "react-redux";
 import { setCardPreferences } from "config/store";
 import EditServiceContact from "./components/EditServiceContact";
+import { checkIfCacheExists } from "config/apollo";
+import { ContactSkeletonLoader } from "../SkeletonLoader";
 
 const ServiceContact = (props) => {
   const dispatch = useDispatch();
@@ -31,19 +33,17 @@ const ServiceContact = (props) => {
       ? { location_id: ticket.location_id }
       : { equipment_id: ticket.equipment_id };
 
-  const {
-    loading: cLoading,
-    error: cError,
-    data: cData,
-  } = useQuery(GET_SITE_CONTACTS, {
+  const { loading, error, data, client } = useQuery(GET_SITE_CONTACTS, {
     variables,
     fetchPolicy: "network-only",
-    skip:
-      !onEditMode ||
-      isSubscriber ||
-      (ticket.category_type === "INFRASTRUCTURE"
+    skip: isSubscriber || (ticket.category_type === "INFRASTRUCTURE"
         ? !ticket.location_id
         : !ticket.equipment_id),
+  });
+
+  const cacheExists = checkIfCacheExists(client, {
+    query: GET_SITE_CONTACTS,
+    variables
   });
 
   const contact = useMemo(() => {
@@ -51,10 +51,10 @@ const ServiceContact = (props) => {
       ? { ...ticket.subscriber, ...ticket.subscriber.customer_details }
       : {};
 
-    if (!isSubscriber && cData && cData.serviceContacts) {
+    if (!isSubscriber && data && data.serviceContacts) {
       let phones = []
       let emails = []
-      cData.serviceContacts.forEach((item, index) => {
+      data.serviceContacts.forEach((item, index) => {
         if (ticket.site_contact_id === item.id || (!ticket.site_contact_id && index === 0)) {
           contact.last_name = item.last_name;
           contact.first_name = item.first_name;
@@ -67,7 +67,7 @@ const ServiceContact = (props) => {
       contact.email_addresses = emails
     }
     return contact;
-  }, [ticket, isSubscriber, cData]);
+  }, [ticket, isSubscriber, data]);
 
   const handleCollapse = () => {
     dispatch(
@@ -83,6 +83,10 @@ const ServiceContact = (props) => {
       })
     );
   };
+
+  if (loading && !cacheExists) {
+    return <ContactSkeletonLoader />
+  }
 
   return (
     <Grid container spacing={0} alignItems="center">
@@ -117,9 +121,9 @@ const ServiceContact = (props) => {
               onEditMode={onEditMode}
               setEditMode={setEditMode}
               isSubscriber={isSubscriber}
-              cLoading={cLoading}
-              cError={cError}
-              cData={cData}
+              cLoading={loading && !cacheExists}
+              cError={error}
+              cData={data}
               contact={contact}
               ticket={ticket}
               updateTicket={updateTicket}

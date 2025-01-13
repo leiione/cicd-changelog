@@ -43,7 +43,7 @@ const EditServiceContact = (props) => {
       <Grid item xs={12}>
         <Typography variant="subtitle1">
           <FontAwesomeIcon icon={faBuildings} className="fa-fw text-muted f-16 mr-2" />
-          {contact.main_company || "-"}
+          {values.main_company || "-"}
         </Typography>
       </Grid>
       <Grid item xs={12} className="d-inline-flex">
@@ -133,7 +133,7 @@ const EditServiceContactForm = (props) => {
               size="large"
               style={{ padding: "5px" }}
               onClick={handleSubmit(onSubmit)}
-              disabled={!isDirty || !values.ticket_contact_name || !ticket.address}
+              disabled={!isDirty || !values.ticket_contact_name || !values.address}
               isSubmitting={isSubmitting}
             >
               Save

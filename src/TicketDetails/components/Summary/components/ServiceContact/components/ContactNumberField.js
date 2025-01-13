@@ -60,7 +60,6 @@ const ContactNumberField = props => {
       phoneArr.push(value.phone);
     }
     setValue('ticket_contact_numbers', phoneArr.join(','), { shouldValidate: true, shouldDirty: true });
-    setAnchorEl(null);
   }
 
   return (
