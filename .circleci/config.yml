@@ -64,8 +64,8 @@ jobs:
           command: |
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
             aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
-            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
-            echo "Microfrontend is accessible at: $DEPLOY_URL"
+            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/${BRANCH_NAME}"
+            echo "Microfrontend is accessible at: ${DEPLOY_URL}"
       - run:
           name: Notify RingCentral
           command: |
