@@ -7,9 +7,9 @@ import {
   ListItemAvatar,
   ListItemText,
   Typography,
-  Box,
-  Modal,
-  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   Tooltip,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,6 +18,8 @@ import {
   faNote,
   faTrash,
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
+import GetAppIcon from "@mui/icons-material/GetApp";
+import { Close } from "@mui/icons-material";
 
 import moment from "moment-timezone";
 import h2p from "html2plaintext";
@@ -27,6 +29,11 @@ import DialogAlert from "components/DialogAlert";
 import { NO_RIGHTS_MSG } from "utils/messages";
 import usePermission from "config/usePermission";
 import { Visibility } from "@mui/icons-material";
+import { getExtensionFromFilename } from "Common/helper";
+import { IMAGE_EXTENSION_LIST } from "Common/constants";
+import { faFilePdf, faFileZip } from "@fortawesome/pro-regular-svg-icons";
+import { includes } from "lodash";
+
 
 const Note = (props) => {
   const { message, onDeleteNote, handleQouteNote } = props;
@@ -80,7 +87,7 @@ const Note = (props) => {
           primary={
             <Grid container spacing={1} className="align-items-center mb-1">
               <Grid item xs>
-                <Typography variant="subtitle1">
+                <Typography variant="body1">
                   {message.appuser_name ? message.appuser_name : ""}
                 </Typography>
               </Grid>
@@ -143,7 +150,10 @@ const Note = (props) => {
                     Attachments
                   </Typography>
                   <Grid container spacing={1}>
-                    {message.attachments.map((file, index) => (
+                    {message.attachments.map((file, index) =>{
+                      const type = getExtensionFromFilename(file.filename);
+
+                      return(
                       <Grid item xs={2} sm={2} md={2} key={index}>
                         <div className="attachment-card visible-on-hover">
                           <IconButton
@@ -153,16 +163,26 @@ const Note = (props) => {
                           >
                             <Visibility fontSize="small" />
                           </IconButton>
-                          {file.attachment_type.startsWith("image/") ? (
-                            <img src={file.file_url} alt={file.file_name} />
-                          ) : (
-                            <Typography variant="body2" className="file-name">
-                              {file.file_name}
-                            </Typography>
-                          )}
+                          {includes(IMAGE_EXTENSION_LIST, type) && (
+                              <img
+                                src={file.file_url || file.preview?.url}
+                                alt={file.filename || file.name}
+                              />
+                            )}
+
+                            {(file.type?.includes("pdf") ||
+                              file.attachment_type?.includes("pdf")) && (
+                              <FontAwesomeIcon icon={faFilePdf} size="2xl" />
+                            )}
+
+                            {(file.type?.includes("zip") ||
+                              file.attachment_type?.includes("zip")) && (
+                              <FontAwesomeIcon icon={faFileZip} size="2xl" />
+                            )}
+
                         </div>
-                      </Grid>
-                    ))}
+                      </Grid>)
+          })}
                   </Grid>
                 </>
               )}
@@ -191,37 +211,57 @@ const Note = (props) => {
           },
         ]}
       />
-      <Modal open={openPreview} onClose={handlePreviewClose}>
-        <Box className="box-modal-preview">
-          {previewImage && previewImage.attachment_type.startsWith("image/") ? (
-            <img
-              src={previewImage.file_url}
-              alt="Preview"
-              style={{ width: "100%", height: "auto" }}
-            />
-          ) : (
-            <Box>
-              <Typography variant="body2" className="mt-2">
-                Preview not available
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  const link = document.createElement("a");
-                  link.href = previewImage.file_url;
-                  link.download = previewImage.file_name;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
-              >
-                Download
-              </Button>
-            </Box>
-          )}
-        </Box>
-      </Modal>
+    
+     {/* Image Preview Modal */}
+     <Dialog open={openPreview} onClose={handlePreviewClose}>
+            <DialogTitle id="alert-dialog-title">
+              <Grid container spacing={1} alignItems="center">
+                <Grid item xs="auto">
+                  {previewImage.filename || previewImage.name}
+                </Grid>
+                <Grid item xs>
+                  {previewImage.file_url && (
+                    <IconButton
+                      component="a"
+                      href={previewImage.file_url}
+                      download={previewImage.filename || previewImage.name}
+                      aria-label="download"
+                      size="small"
+                      className="ml-2"
+                    >
+                      <GetAppIcon />
+                    </IconButton>
+                  )}
+                </Grid>
+                <Grid item xs="auto">
+                  <IconButton
+                    onClick={handlePreviewClose}
+                    size="small"
+                  >
+                    <Close />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            </DialogTitle>
+            <DialogContent>
+              {previewImage &&
+                (previewImage.type?.startsWith("image/") ||
+                previewImage.attachment_type?.startsWith("image/") ? (
+                  <img
+                   className="img-fluid"
+                    src={
+                      previewImage.file_url || URL.createObjectURL(previewImage)
+                    }
+                    alt="Preview"
+                  />
+                ) : (
+                  <Typography variant="body2" className="mt-2">
+                    Preview not available
+                  </Typography>
+                ))}
+            </DialogContent>
+          </Dialog>
+          {/* EOF Image Preview Modal */}
     </>
   );
 };

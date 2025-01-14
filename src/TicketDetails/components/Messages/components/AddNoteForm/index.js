@@ -219,38 +219,38 @@ const AddNoteForm = (props) => {
     if (qoutedContent.from === "email") {
       return `
       <div class="quote-block">
-          <div class="quote-sender"> ${replaceWhitespace(
+          <span class="quote-sender"> ${replaceWhitespace(
             qoutedContent.content.to_email
-          )}</div>
-          <div class="quote-subject"> ${replaceWhitespace(
+          )} wrote: </span>
+          <p class="quote-subject"> ${replaceWhitespace(
             qoutedContent.content.subject
-          )}</div>
-          <div class="quote-content">${replaceWhitespace(
+          )}</p>
+          <p class="quote-content">${replaceWhitespace(
             qoutedContent.content.message
-          )}</div>
-      </div><p>&nbsp</p>
+          )}</p><p>&nbsp</p>
+      </div>
         `;
     } else if (qoutedContent.from === "sms") {
       return `
         <div class="quote-block">
-        <div class="quote-sender">${replaceWhitespace(
+        <span class="quote-sender">${replaceWhitespace(
           qoutedContent.content.to_email
-        )} </div>
-        <div class="quote-content"> ${replaceWhitespace(
+        )} wrote: </span>
+        <p class="quote-content"> ${replaceWhitespace(
           qoutedContent.content.message
-        )}</div>
-        </div><p>&nbsp</p>;
+        )}</p><p>&nbsp</p>
+        </div>;
         `;
     } else if (qoutedContent.from === "note") {
       return `
        <div class="quote-block">
-      <div class="quote-sender"> ${replaceWhitespace(
+      <span class="quote-sender"> ${replaceWhitespace(
         qoutedContent.content.appuser_name
-      )} wrote: </div>
-      <div class="quote-content"> ${replaceWhitespace(
+      )} wrote: </span>
+      <p class="quote-content"> ${replaceWhitespace(
         qoutedContent.content.content
-      )} </div>
-       </div><p>&nbsp;</p>
+      )} </p><p>&nbsp</p>
+       </div>
       `;
     }
   };

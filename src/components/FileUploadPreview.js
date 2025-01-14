@@ -10,6 +10,9 @@ import {
   DialogTitle,
 } from "@mui/material";
 import { Close, Visibility } from "@mui/icons-material";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFilePdf, faFileZip } from "@fortawesome/pro-duotone-svg-icons";
+
 
 const FileUploadPreview = ({
   selectedFiles,
@@ -48,13 +51,24 @@ const FileUploadPreview = ({
               >
                 <Visibility fontSize="small" />
               </IconButton>
-              {file.type.startsWith("image/") ? (
-                <img src={URL.createObjectURL(file)} alt={file.name} />
-              ) : (
-                <Typography variant="body2" className="file-name">
-                  {file.name}
-                </Typography>
-              )}
+
+              {(file.type?.startsWith("image/") ||
+                file.attachment_type?.startsWith("image/")) && (
+                  <img
+                    src={file.file_url || file.preview?.url}
+                    alt={file.filename || file.name}
+                  />
+                )}
+
+              {(file.type?.includes("pdf") ||
+                file.attachment_type?.includes("pdf")) && (
+                  <FontAwesomeIcon icon={faFilePdf} size="2xl" />
+                )}
+              {(file.type?.includes("zip") ||
+                file.attachment_type?.includes("zip")) && (
+                  <FontAwesomeIcon icon={faFileZip} size="2xl" />
+                )}
+
             </div>
             {uploadProgress[file.name] && <LinearProgress className="mt-2" />}
 
