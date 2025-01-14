@@ -24,3 +24,16 @@ export const SummarySkeletonLoader = () => (
     </Grid>
   </Grid>
 )
+
+export const ContactSkeletonLoader = () => (
+  <Grid container spacing={1}>
+    <Grid item xs className="h-80">
+      <div className="py-3 pr-5">
+        <Skeleton animation="wave" style={{ height: 25, backgroundColor: "##dfdede", width: "15%" }} />
+        <Skeleton animation="wave" style={{ height: 90, backgroundColor: "##dfdede", width: "50%", margin: "-10px 10px" }} />
+        <Skeleton animation="wave" style={{ height: 25, backgroundColor: "##dfdede", width: "15%" }} />
+        <Skeleton animation="wave" style={{ height: 25, backgroundColor: "##dfdede", width: "20%" }} />
+      </div>
+    </Grid>
+  </Grid>
+)

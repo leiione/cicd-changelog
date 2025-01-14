@@ -56,8 +56,8 @@ jobs:
       - run:
           name: Upload to S3
           command: |
-            BRANCH_NAME=staging
-            S3_BUCKET=microfrontend-crm-ms
+            BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+            S3_BUCKET=microfrontend-crm-ms/branch
             aws s3 sync /workspace/dist/ s3://$S3_BUCKET/$BRANCH_NAME/ --acl public-read
       - run:
           name: Invalidate CloudFront Cache
