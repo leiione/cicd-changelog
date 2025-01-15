@@ -26,6 +26,7 @@ export const GET_TICKET = gql`
       subscriber
       address
       max_duration
+      ticket_contact_name
       ticket_contact_numbers
       ticket_contact_email
       location_id
@@ -39,6 +40,7 @@ export const GET_TICKET = gql`
         is_default
         rank
         converted_ticket_id
+        flag_ticket_deleted
       }
       infrastructure {
         id
@@ -294,18 +296,6 @@ export const SAVE_TICKET_TASKS = gql`
   }
 `;
 
-export const CONVERT_TAST_TO_TICKET = gql`
-  mutation convertTaskToTicket($input_ticket: TicketInput) {
-    convertTaskToTicket(input_ticket: $input_ticket) {
-      ticket_id
-      priority
-      status
-      description
-      summary: description
-    }
-  }
-`;
-
 export const GET_TICKET_MESSAGES = gql`
   query ticketMessages($ticket_id: Int!) {
     ticketMessages(ticket_id: $ticket_id) {
@@ -488,6 +478,120 @@ export const GET_ACTIVITIES = gql`
       appuser
       action
       details
+      category
     }
   }
 `;
+
+export const TICKET_NOTE_SUBSCRIPTION = gql`
+  subscription TicketNote($ticket_id: Int!) {
+  ticketNote(ticket_id: $ticket_id) {
+    note_id
+  }
+}
+`;
+
+export const TICKET_SMS_SUBSCRIPTION = gql`
+subscription Subscription($ticket_id: Int!) {
+  ticketSMS(ticket_id: $ticket_id)
+}
+`;
+
+export const TICKET_EMAIL_SUBSCRIPTION = gql`
+subscription Subscription($ticket_id: Int!) {
+  ticketEmail(ticket_id: $ticket_id)
+}`;
+
+export const TICKET_SUBSCRIPTION = gql`
+  subscription ticket($ticket_id: Int!) {
+    ticket(ticket_id: $ticket_id) {
+      ticket_id
+    }
+  }
+`;
+
+export const TASK_SUBSCRIPTION = gql`
+  subscription Subscription($ticket_id: Int!) {
+    ticketTask(ticket_id: $ticket_id)
+  }
+`;
+export const CUSTOM_FIELD_SUBSCRIPTION = gql`
+  subscription Subscription($ticket_id: Int!) {
+    ticketCustomFields(ticket_id: $ticket_id)
+  }
+`;
+
+export const ATTACHMENT_SUBSCRIPTION = gql`
+  subscription Subscription($ticket_id: Int!) {
+    ticketAttachment(ticket_id: $ticket_id)
+  }
+`;
+
+export const HISTORY_SUBSCRIPTION = gql`
+  subscription Subscription($ticket_id: Int!) {
+    ticketHistory(ticket_id: $ticket_id)
+  }
+`;
+
+
+
+
+export const LINKED_TICKETS_SUBSCRIPTION = gql`
+  subscription linkedTickets($ticket_id: Int!) {
+    linkedTickets(ticket_id: $ticket_id) {
+      id
+      ticket_id
+    }
+  }
+`;
+
+
+export const GET_EMAIL_TEMPLATES = gql`
+  query emailTemplates($isp_id: Int) {
+    emailTemplates(isp_id: $isp_id) {
+      me_id
+      isp_id
+      template_name
+      template_filter
+      template_from
+      template_cc
+      template_subject
+      template_confirm_email
+      template_text
+      subscriber_email
+      attachments
+      custom_filter
+      attachment_data {
+        filename
+        attachment_id
+        isp_id
+      }
+    }
+  }
+`
+
+export const EMAIL_TEMPLATE_PREVIEW = gql`
+  query previewMergeFields($isp_id: Float, $me_id: Float, $template_text: String, $customer_id: Float!) {
+    previewMergeFields(isp_id: $isp_id, me_id: $me_id, template_text: $template_text, customer_id: $customer_id)
+  }
+`
+
+
+export const GET_TICKET_CUSTOM_FIELDS = gql`query TicketCustomFields($ticketId: Int!) {
+  ticketCustomFields(ticket_id: $ticketId) {
+    ticket_id
+    field_value
+    field_label
+    field_id
+    is_required
+  }
+}`
+
+
+export const SAVE_TICKET_CUSTOM_FIELDS = gql`
+mutation AddTicketCustomField($ticketId: Int!, $inputCustomField: [TicketCustomFieldInput]) {
+  addTicketCustomField(ticket_id: $ticketId, input_custom_field: $inputCustomField) {
+    ticket_id
+  }
+}
+`

@@ -19,7 +19,11 @@ import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { cloneDeep, find, get, isEmpty, omit, sortBy, trim } from "lodash";
 import { preventEvent } from "Common/helper";
 import { useMutation } from "@apollo/client";
-import { GET_TICKET, SAVE_TICKET_TASKS, GET_ACTIVITIES } from "TicketDetails/TicketGraphQL";
+import {
+  GET_TICKET,
+  SAVE_TICKET_TASKS,
+  GET_ACTIVITIES,
+} from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { setCardPreferences, showSnackbar } from "config/store";
 import ProgressButton from "Common/ProgressButton";
@@ -60,16 +64,22 @@ const Tasks = (props) => {
   }, [loading, ticket.ticket_id, ticket.ticket_type_id, ticket.tasks]);
 
   const completed = ticketTasks.filter((x) => x.is_completed).length;
-  const taskCount = (ticketTasks.filter(x => x.task_id !== 0)).length;
+  const taskCount = ticketTasks.filter((x) => x.task_id !== 0).length;
   const error = onEditMode.index > -1 && isEmpty(trim(onEditMode.value));
   const isTaskRequired = React.useMemo(() => {
-    let required = false
-    if (ticket && ticket.update_requirements && ticket.update_requirements.length > 0) {
-      const taskReq = find(ticket.update_requirements, { requirement_option: "TASKS" })
-      required = taskReq && taskReq.flag_enabled === "Y"
+    let required = false;
+    if (
+      ticket &&
+      ticket.update_requirements &&
+      ticket.update_requirements.length > 0
+    ) {
+      const taskReq = find(ticket.update_requirements, {
+        requirement_option: "TASKS",
+      });
+      required = taskReq && taskReq.flag_enabled === "Y";
     }
-    return required
-  }, [ticket])
+    return required;
+  }, [ticket]);
 
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
@@ -147,9 +157,9 @@ const Tasks = (props) => {
 
   const onSaveTaskChanges = async (newTasks) => {
     try {
-      setSubmitting(true)
+      setSubmitting(true);
       const tasks = newTasks.map((x, index) => ({
-        ...omit(x, ["is_default", "__typename"]),
+        ...omit(x, ["is_default", "__typename", "flag_ticket_deleted"]),
         rank: index + 1,
       }));
 
@@ -166,7 +176,7 @@ const Tasks = (props) => {
         },
         refetchQueries: [
           { query: GET_TICKET, variables: { id: ticket.ticket_id } },
-          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }},
+          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id } },
         ],
       });
       dispatch(
@@ -175,11 +185,11 @@ const Tasks = (props) => {
           severity: "success",
         })
       );
-      setSubmitting(false)
+      setSubmitting(false);
     } catch (error) {
       const msg = error.message.replace("GraphQL error: ", "");
       dispatch(showSnackbar({ message: msg, severity: "error" }));
-      setSubmitting(false)
+      setSubmitting(false);
     }
   };
 
@@ -190,11 +200,11 @@ const Tasks = (props) => {
   };
 
   const onCancelTask = () => {
-    let newTasks = cloneDeep(ticketTasks)
-    newTasks = newTasks.filter(x => x.task_id !== 0)
+    let newTasks = cloneDeep(ticketTasks);
+    newTasks = newTasks.filter((x) => x.task_id !== 0);
     setTicketTasks(newTasks);
-    setOnEditMode({ index: -1, value: '' })
-  }
+    setOnEditMode({ index: -1, value: "" });
+  };
 
   const onTaskClick = (ticket) => {
     const updatedTicket = {
@@ -261,9 +271,17 @@ const Tasks = (props) => {
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                             style={{
-                              ...getItemStyle(snapshot.isDragging, provided.draggableProps.style),
-                              backgroundColor: task.converted_ticket_id !== null ? '#e7f2fe' : 'inherit',
+                              ...getItemStyle(
+                                snapshot.isDragging,
+                                provided.draggableProps.style
+                              )
                             }}
+                            className={
+                              task.converted_ticket_id > 0 &&
+                              !task.flag_ticket_deleted
+                                ? "bg-hover"
+                                : ""
+                            }
                             onMouseOver={() => setHover(index)}
                             onMouseLeave={() => setHover(-1)}
                             secondaryAction={
@@ -273,12 +291,17 @@ const Tasks = (props) => {
                               />
                             }
                           >
-                            {task.task_id > 0 &&
+                            {task.task_id > 0 && (
                               <>
                                 <TaskMenuOptions
+                                  ticket_id={ticket.ticket_id}
                                   ticket={ticket}
                                   show={isHovered === index}
-                                  disabled={onEditMode.index === index || task.converted_ticket_id !== null}
+                                  disabled={
+                                    onEditMode.index === index ||
+                                    (task.converted_ticket_id > 0 &&
+                                      !task.flag_ticket_deleted)
+                                  }
                                   task={task}
                                   ticketTasks={ticketTasks}
                                   setTicketTasks={setTicketTasks}
@@ -292,15 +315,26 @@ const Tasks = (props) => {
                                     checked={task.is_completed}
                                     onChange={() => onCompleteTask(index)}
                                     inputProps={{ "aria-label": "controlled" }}
-                                    disabled={onEditMode.index === index || task.converted_ticket_id !== null}
+                                    disabled={
+                                      onEditMode.index === index ||
+                                      (task.converted_ticket_id > 0 &&
+                                        !task.flag_ticket_deleted)
+                                    }
                                     size="small"
                                   />
                                 </ListItemIcon>
                               </>
-                            }
+                            )}
                             {onEditMode.index === index ? (
                               <ListItemText>
-                                <div className="position-relative" style={task.task_id === 0 ? { margin: "0px 20px 0px 53px" } : { marginRight: "20px" }}>
+                                <div
+                                  className="position-relative"
+                                  style={
+                                    task.task_id === 0
+                                      ? { margin: "0px 20px 0px 53px" }
+                                      : { marginRight: "20px" }
+                                  }
+                                >
                                   <TextField
                                     autoFocus
                                     variant="standard"
@@ -356,16 +390,23 @@ const Tasks = (props) => {
                                     }
                                     style={{ width: "90%" }}
                                   >
-                                    {task.converted_ticket_id !== null ? (
+                                    {task.converted_ticket_id > 0 &&
+                                    !task.flag_ticket_deleted ? (
                                       <span
-                                      onClick={() => onTaskClick(task)}
-                                        style={{ color: '#0053F4', cursor: 'pointer' }}
+                                        onClick={() => onTaskClick(task)}
+                                        style={{
+                                          color: "#0053F4",
+                                          cursor: "pointer",
+                                        }}
                                       >
-                                        {`Ticket ${task.converted_ticket_id} `}
                                         {`${task.task}${" *"}`}
                                       </span>
                                     ) : (
-                                      `${task.task}${isTaskRequired ? " *" : ""}`
+                                      `${task.task}${
+                                        isTaskRequired && task.is_default
+                                          ? " *"
+                                          : ""
+                                      }`
                                     )}
                                   </Typography>
                                 }

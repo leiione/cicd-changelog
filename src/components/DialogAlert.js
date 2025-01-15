@@ -34,7 +34,7 @@ const DialogAlert = props => {
                 return (
                   <LoadingButton
                     loading={button.isSubmitting}
-                    variant="contained"
+                    variant="outlined"
                     size={button.size || "medium"}
                     color={button.color}
                     onClick={button.onClick || voidFunction}
@@ -48,7 +48,7 @@ const DialogAlert = props => {
               }
               return (
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   size={button.size || "medium"}
                   color={button.color || 'default'}
                   onClick={button.onClick || voidFunction}

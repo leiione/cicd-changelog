@@ -1,31 +1,39 @@
 import React, { useState } from "react";
 import {
   Grid,
-  IconButton as MuiIconButton,
+  IconButton,
   Link,
   ListItem,
   ListItemAvatar,
   ListItemText,
   Typography,
-  Box,
-  Modal,
-  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Tooltip,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMessagePlus,
   faNote,
   faTrash,
-  faReply,
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
+import GetAppIcon from "@mui/icons-material/GetApp";
+import { Close } from "@mui/icons-material";
 
 import moment from "moment-timezone";
-import LinesEllipsis from "react-lines-ellipsis";
 import h2p from "html2plaintext";
 import parse from "html-react-parser";
 import PropTypes from "prop-types";
 import DialogAlert from "components/DialogAlert";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import { NO_RIGHTS_MSG } from "utils/messages";
+import usePermission from "config/usePermission";
+import { Visibility } from "@mui/icons-material";
+import { getExtensionFromFilename } from "Common/helper";
+import { IMAGE_EXTENSION_LIST } from "Common/constants";
+import { faFilePdf, faFileZip } from "@fortawesome/pro-regular-svg-icons";
+import { includes } from "lodash";
+
 
 const Note = (props) => {
   const { message, onDeleteNote, handleQouteNote } = props;
@@ -34,11 +42,19 @@ const Note = (props) => {
   const [submitting, setSubmitting] = useState(false);
   const [openPreview, setOpenPreview] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
+  const permitDelete = usePermission(
+    "ticket_note_message",
+    "flag_delete",
+    "notes"
+  );
 
-  const lineLen = message.content
-    ? message.content.split(/\r|\r\n|\n/g).length
-    : 1;
   const isHtml = /<\/?[a-z][\s\S]*>/i.test(message.content);
+  const lineLen = message.content
+    ? isHtml
+      ? h2p(message.content).split(/\r|\r\n|\n/g).length +
+          (message.content.match(/<div|<p|<br/g) || []).length
+      : message.content.split(/\r|\r\n|\n/g).length
+    : 1;
 
   const handleOnDelete = async () => {
     setSubmitting(true);
@@ -59,7 +75,11 @@ const Note = (props) => {
 
   return (
     <>
-      <ListItem key={message.note_id} alignItems="flex-start" className="border-bottom border-lighter">
+      <ListItem
+        key={message.note_id}
+        alignItems="flex-start"
+        className="border-bottom border-lighter"
+      >
         <ListItemAvatar sx={{ width: 24, height: 24, minWidth: 24 }}>
           <FontAwesomeIcon icon={faNote} />
         </ListItemAvatar>
@@ -67,7 +87,7 @@ const Note = (props) => {
           primary={
             <Grid container spacing={1} className="align-items-center mb-1">
               <Grid item xs>
-                <Typography variant="subtitle1">
+                <Typography variant="body1">
                   {message.appuser_name ? message.appuser_name : ""}
                 </Typography>
               </Grid>
@@ -77,49 +97,47 @@ const Note = (props) => {
                 </Typography>
               </Grid>
               <Grid item xs="auto">
-                <MuiIconButton size="small">
-                  <FontAwesomeIcon className="primary-hover" icon={faReply} />
-                </MuiIconButton>
-              </Grid>
-              <Grid item xs="auto">
-                <MuiIconButton size="small">
+                <IconButton size="small">
                   <FontAwesomeIcon
-                  className="primary-hover"
+                    className="primary-on-hover"
                     icon={faMessagePlus}
                     onClick={() => handleQouteNote("note", message)}
                   />
-                </MuiIconButton>
+                </IconButton>
               </Grid>
               <Grid item xs="auto">
-                <MuiIconButton size="small">
-                  <FontAwesomeIcon
-                  className="primary-hover"
-                    icon={faTrash}
-                    onClick={() => setOpenDialog(true)}
-                  />
-                </MuiIconButton>
+                <Tooltip title={!permitDelete ? NO_RIGHTS_MSG : ""}>
+                  <span>
+                    <IconButton size="small" disabled={!permitDelete}>
+                      <FontAwesomeIcon
+                        className="primary-on-hover"
+                        icon={faTrash}
+                        onClick={() => setOpenDialog(true)}
+                      />
+                    </IconButton>
+                  </span>
+                </Tooltip>
               </Grid>
             </Grid>
           }
           secondary={
             <>
               {more || lineLen < 6 ? (
-                <Typography
-                  variant="caption"
-                  style={{ whiteSpace: "pre-line" }}
-                >
+                <Typography variant="caption" className="text-pre-line">
                   {parse(message.content)}
                 </Typography>
               ) : (
-                <LinesEllipsis
-                  text={isHtml ? h2p(message.content) : message.content}
-                  maxLine={10}
-                  ellipsis=""
-                  style={{ whiteSpace: "pre-line", color: "#0009" }}
-                />
+               
+                <Typography
+                variant="caption"
+                className="text-pre-line"
+                //need to apply eclippise through CSS
+                >
+                {parse(message.content)}
+               </Typography>
               )}
               {lineLen > 6 && (
-                <div style={{ marginTop: "5px" }}>
+                <div className="mt-1">
                   <Link variant="caption" onClick={() => setMore(!more)}>
                     {more ? "Simplify..." : "More..."}
                   </Link>
@@ -131,29 +149,40 @@ const Note = (props) => {
                   <Typography variant="subtitle1" className="mt-3">
                     Attachments
                   </Typography>
-                  <Grid container spacing={1} className="upload-image-row mt-2">
-                    {message.attachments.map((file, index) => (
-                      <Box key={index} className="single-img-box">
-                        <MuiIconButton
-                          className="preview-icon-btn"
-                          size="small"
-                          onClick={() => handlePreviewOpen(file)}
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </MuiIconButton>
-                        {file.attachment_type.startsWith("image/") ? (
-                          <img
-                            className="img-preview"
-                            src={file.file_url}
-                            alt={file.file_name}
-                          />
-                        ) : (
-                          <Typography variant="body2" className="file-name">
-                            {file.file_name}
-                          </Typography>
-                        )}
-                      </Box>
-                    ))}
+                  <Grid container spacing={1}>
+                    {message.attachments.map((file, index) =>{
+                      const type = getExtensionFromFilename(file.filename);
+
+                      return(
+                      <Grid item xs={2} sm={2} md={2} key={index}>
+                        <div className="attachment-card visible-on-hover">
+                          <IconButton
+                            className="preview-icon-btn invisible"
+                            size="small"
+                            onClick={() => handlePreviewOpen(file)}
+                          >
+                            <Visibility fontSize="small" />
+                          </IconButton>
+                          {includes(IMAGE_EXTENSION_LIST, type) && (
+                              <img
+                                src={file.file_url || file.preview?.url}
+                                alt={file.filename || file.name}
+                              />
+                            )}
+
+                            {(file.type?.includes("pdf") ||
+                              file.attachment_type?.includes("pdf")) && (
+                              <FontAwesomeIcon icon={faFilePdf} size="2xl" />
+                            )}
+
+                            {(file.type?.includes("zip") ||
+                              file.attachment_type?.includes("zip")) && (
+                              <FontAwesomeIcon icon={faFileZip} size="2xl" />
+                            )}
+
+                        </div>
+                      </Grid>)
+          })}
                   </Grid>
                 </>
               )}
@@ -182,37 +211,57 @@ const Note = (props) => {
           },
         ]}
       />
-      <Modal open={openPreview} onClose={handlePreviewClose}>
-        <Box className="box-modal-preview">
-          {previewImage && previewImage.attachment_type.startsWith("image/") ? (
-            <img
-              src={previewImage.file_url}
-              alt="Preview"
-              style={{ width: "100%", height: "auto" }}
-            />
-          ) : (
-            <Box>
-              <Typography variant="body2" className="mt-2">
-                Preview not available
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  const link = document.createElement("a");
-                  link.href = previewImage.file_url;
-                  link.download = previewImage.file_name;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
-              >
-                Download
-              </Button>
-            </Box>
-          )}
-        </Box>
-      </Modal>
+    
+     {/* Image Preview Modal */}
+     <Dialog open={openPreview} onClose={handlePreviewClose}>
+            <DialogTitle id="alert-dialog-title">
+              <Grid container spacing={1} alignItems="center">
+                <Grid item xs="auto">
+                  {previewImage.filename || previewImage.name}
+                </Grid>
+                <Grid item xs>
+                  {previewImage.file_url && (
+                    <IconButton
+                      component="a"
+                      href={previewImage.file_url}
+                      download={previewImage.filename || previewImage.name}
+                      aria-label="download"
+                      size="small"
+                      className="ml-2"
+                    >
+                      <GetAppIcon />
+                    </IconButton>
+                  )}
+                </Grid>
+                <Grid item xs="auto">
+                  <IconButton
+                    onClick={handlePreviewClose}
+                    size="small"
+                  >
+                    <Close />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            </DialogTitle>
+            <DialogContent>
+              {previewImage &&
+                (previewImage.type?.startsWith("image/") ||
+                previewImage.attachment_type?.startsWith("image/") ? (
+                  <img
+                   className="img-fluid"
+                    src={
+                      previewImage.file_url || URL.createObjectURL(previewImage)
+                    }
+                    alt="Preview"
+                  />
+                ) : (
+                  <Typography variant="body2" className="mt-2">
+                    Preview not available
+                  </Typography>
+                ))}
+            </DialogContent>
+          </Dialog>
+          {/* EOF Image Preview Modal */}
     </>
   );
 };

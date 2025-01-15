@@ -3,7 +3,6 @@ import {
   Grid,
   Typography,
   Popover,
-  Button,
   Tooltip,
   IconButton,
   List,
@@ -32,9 +31,9 @@ const fetchFollowerName = (followerEmail, data) => {
 const Followers = (props) => {
   const { ticket, updateTicket } = props;
   const [selectedFollowers, setFollowers] = useState([]);
-  const [tempFollowers, setTempFollowers] = useState([]); // Temporary state for editing
+  const [tempFollowers, setTempFollowers] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [searchTerm, setSearchTerm] = useState(""); // State for search input
+  const [searchTerm, setSearchTerm] = useState("");
   const openMenu = Boolean(anchorEl);
 
   const { data } = useQuery(GET_FOLLOWERS, {
@@ -62,35 +61,46 @@ const Followers = (props) => {
               };
         });
       setFollowers(initialFollowers);
-      setTempFollowers(initialFollowers); // Initialize tempFollowers
+      setTempFollowers(initialFollowers);
     }
   }, [ticket, data, fetchFollowerNameCallback]);
 
-  const handlePopoverClose = (event) => {
+  const handlePopoverClose = async (event) => {
     preventEvent(event);
-    setTempFollowers(selectedFollowers); // Reset changes if not saved
-    setSearchTerm(""); // Clear the search field
     setAnchorEl(null);
-  };
 
-  const handleSave = async () => {
     const followerEmails = tempFollowers.map((follower) => follower.email);
-    await updateTicket({
-      ticket_id: ticket.ticket_id,
-      followers: followerEmails,
-    });
-    setSearchTerm(""); // Clear the search field
-    setFollowers(tempFollowers); // Persist changes
-    setAnchorEl(null);
+
+    console.log("Updating ticket with followers:", followerEmails);
+
+    try {
+      await updateTicket({
+        ticket_id: ticket.ticket_id,
+        followers: followerEmails.join(","),
+      });
+      setFollowers(tempFollowers); // Sync saved state
+      console.log("Ticket updated successfully.");
+    } catch (error) {
+      console.error("Error updating ticket:", error);
+    }
+
+    setSearchTerm("");
   };
 
   const handleSelectFollower = (follower) => {
     const isSelected = tempFollowers.some((a) => a.email === follower.email);
+
+    let updatedTempFollowers;
     if (isSelected) {
-      setTempFollowers(tempFollowers.filter((a) => a.email !== follower.email));
+      updatedTempFollowers = tempFollowers.filter(
+        (a) => a.email !== follower.email
+      );
     } else {
-      setTempFollowers([...tempFollowers, follower]);
+      updatedTempFollowers = [...tempFollowers, follower];
     }
+
+    setTempFollowers(updatedTempFollowers);
+    setFollowers(updatedTempFollowers); // Reflect changes immediately in the UI
   };
 
   const handleClick = (event) => {
@@ -119,30 +129,27 @@ const Followers = (props) => {
           <Typography variant="subtitle1">Followers: </Typography>
         </Grid>
         <Grid item xs="auto" onClick={handleClick}>
-          {ticket && ticket.followers && ticket.followers.length > 0 ? (
-            ticket.followers.split(",").map((follower) => {
-              const followerName = fetchFollowerNameCallback(follower);
-              return (
-                <Typography
-                  variant="subtitle1"
-                  className="d-flex align-items-center mb-1"
-                  key={follower}
-                >
-                  {followerName && (
-                    <AvatarText
-                      title={followerName}
-                      charCount={1}
-                      sx={{
-                        width: 20,
-                        height: 20,
-                      }}
-                      className="mr-2"
-                    />
-                  )}
-                  {followerName || ""}
-                </Typography>
-              );
-            })
+          {selectedFollowers.length > 0 ? (
+            selectedFollowers.map((follower) => (
+              <Typography
+                variant="subtitle1"
+                className="d-flex align-items-center mb-1"
+                key={follower.email}
+              >
+                {follower.realname && (
+                  <AvatarText
+                    title={follower.realname}
+                    charCount={1}
+                    sx={{
+                      width: 20,
+                      height: 20,
+                    }}
+                    className="mr-2"
+                  />
+                )}
+                {follower.realname || ""}
+              </Typography>
+            ))
           ) : (
             <IconButton color="primary" onClick={handleClick} size="small">
               <FontAwesomeIcon icon={faPlusCircle} />
@@ -176,7 +183,7 @@ const Followers = (props) => {
                   const isDisabled = !follower.email;
                   return (
                     <Tooltip
-                      key={follower.appuser_id}
+                      key={follower.email}
                       title={
                         isDisabled
                           ? "This appuser does not have an associated email account."
@@ -209,18 +216,6 @@ const Followers = (props) => {
                   );
                 })}
             </List>
-            <div className="drawer-footer">
-              <Button color="primary" variant="outlined" onClick={handleSave}>
-                Save
-              </Button>
-              <Button
-                color="default"
-                variant="outlined"
-                onClick={handlePopoverClose}
-              >
-                Cancel
-              </Button>
-            </div>
           </Popover>
         </Grid>
       </Grid>

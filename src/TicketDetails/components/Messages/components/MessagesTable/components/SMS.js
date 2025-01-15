@@ -7,6 +7,7 @@ import {
   ListItemAvatar,
   ListItemText,
   Popover,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,13 +15,14 @@ import {
   faMessagePlus,
   faTrash,
   faReply,
-  faMessageSms
+  faMessageSms,
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
 import h2p from "html2plaintext";
 import parse from "html-react-parser";
 import moment from "moment-timezone";
 import LinesEllipsis from "react-lines-ellipsis";
 import DialogAlert from "components/DialogAlert";
+import { NO_RIGHTS_MSG } from "utils/messages";
 
 const SMSPopover = (props) => {
   const { anchorEl, message, handleClose, toEmail } = props;
@@ -87,7 +89,13 @@ const SMSPopover = (props) => {
 };
 
 const SMS = (props) => {
-  const { message, onDeleteMessage, handleQouteNote, handleReplySMS } = props;
+  const {
+    message,
+    onDeleteMessage,
+    handleQouteNote,
+    handleReplySMS,
+    permitDelete,
+  } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [more, toggleMore] = React.useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
@@ -150,7 +158,7 @@ const SMS = (props) => {
             <Grid container spacing={1} className="align-items-center mb-1">
               <Grid item xs>
                 <Typography
-                  variant="body2"
+                  variant="body1"
                   className="text-truncate"
                   style={{ width: "70%" }}
                 >
@@ -170,33 +178,44 @@ const SMS = (props) => {
                       handleReplySMS(isHtml ? h2p(text) : parse(text), replySMS)
                     }
                   >
-                    <FontAwesomeIcon className="primary-hover" icon={faReply} />
+                    <FontAwesomeIcon
+                      className="primary-on-hover"
+                      icon={faReply}
+                    />
                   </IconButton>
                 </Grid>
               )}
               <Grid item xs="auto">
                 <IconButton size="small">
                   <FontAwesomeIcon
-                  className="primary-hover"
+                    className="primary-on-hover"
                     icon={faMessagePlus}
                     onClick={() => handleQouteNote("sms", message)}
                   />
                 </IconButton>
               </Grid>
               <Grid item xs="auto">
-                <IconButton size="small" onClick={handleDeleteClick}>
-                  <FontAwesomeIcon className="primary-hover" icon={faTrash} />
-                </IconButton>
+                <Tooltip title={!permitDelete ? NO_RIGHTS_MSG : ""}>
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={handleDeleteClick}
+                      disabled={!permitDelete}
+                    >
+                      <FontAwesomeIcon
+                        className="primary-on-hover"
+                        icon={faTrash}
+                      />
+                    </IconButton>
+                  </span>
+                </Tooltip>
               </Grid>
             </Grid>
           }
           secondary={
             <>
               {more || lineLen < 6 ? (
-                <Typography
-                  variant="caption"
-                  style={{ whiteSpace: "pre-line" }}
-                >
+                <Typography variant="caption" className="text-preline">
                   {parse(text)}
                 </Typography>
               ) : (
@@ -204,11 +223,11 @@ const SMS = (props) => {
                   text={isHtml ? h2p(text) : text}
                   maxLine={5}
                   ellipsis=""
-                  style={{ whiteSpace: "pre-line", color: "#0009" }}
+                  className="text-preline"
                 />
               )}
               {lineLen > 6 && (
-                <div style={{ marginTop: "5px" }}>
+                <div className="mt-1">
                   <Link variant="caption" onClick={() => toggleMore(!more)}>
                     {more ? "Simplify..." : "More..."}
                   </Link>

@@ -1,14 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, TextField, Typography } from "@mui/material";
 
 const Description = (props) => {
   const { ticket, updateTicket } = props;
   const [openInline, setOpenInline] = useState(false);
   const [description, setDescription] = useState(ticket.description);
+  const [descDisplay, setDescDisplay] = useState(ticket.description);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(""); // State to track error
 
   const handleInlineEdit = () => setOpenInline(true);
+
+  useEffect(() => {
+    if (ticket.description !== descDisplay) {
+      setDescription(ticket.description);
+      setDescDisplay(ticket.description);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticket.description])
 
   const handleCancel = () => {
     setOpenInline(false);
@@ -26,6 +35,7 @@ const Description = (props) => {
     try {
       await updateTicket({ ticket_id: ticket.ticket_id, ...toUpdate });
       setOpenInline(false); // Close the editor after successful update
+      setDescDisplay(description);
     } catch (error) {
       console.error("Failed to update the description:", error);
     } finally {
@@ -46,10 +56,10 @@ const Description = (props) => {
   return (
     <>
       {!openInline ? (
-        ticket.description ? (
+        ticket.description || descDisplay ? (
           <div className="cursor-pointer" onClick={handleInlineEdit}>
             <Typography variant="body1" className="break-word">
-              {ticket.description}
+              {descDisplay}
             </Typography>
           </div>
         ) : (

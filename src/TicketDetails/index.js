@@ -7,25 +7,27 @@ import Summary from "./components/Summary";
 import WorkOrder from "./components/Summary/components/WorkOrder";
 import Tasks from "./components/Tasks";
 // import BillsOfMaterial from "./components/BillsOfMaterial";
-import { GET_TICKET } from "./TicketGraphQL";
-import { useMutation, useQuery } from "@apollo/client";
+import { GET_TICKET, TICKET_SUBSCRIPTION, TASK_SUBSCRIPTION } from "./TicketGraphQL";
+import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
 import { useDispatch, useSelector } from "react-redux";
 import GlobalSnackbar from "Common/GlobalSnackbar";
 import Messages from "./components/Messages";
 import Attachments from "./components/Attachments";
 import DialogAlert from "components/DialogAlert"; // Import DialogAlert
-import BomDrawer from "./components/BillsOfMaterial/components/BomDrawer"; 
+import BomDrawer from "./components/BillsOfMaterial/components/BomDrawer";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import htmlToPdfmake from "html-to-pdfmake";
 import { GET_USER_PREFERENCES, SAVE_USER_PREFERENCES } from "components/UserPreferences/UserPreferencesGraphQL";
 import { saveUserPreferences } from "components/UserPreferences/savePreferencesUtils";
 import moment from "moment-timezone";
-import { setInitialUserPreferences } from "config/store";
+import { populateISPUserSettings, setInitialUserPreferences } from "config/store";
 import UserPreferences from "components/UserPreferences";
 import QueueJobs from "./components/Summary/components/QueueJobs";
 import CustomFields from "./components/CustomFields";
+import PropTypes from 'prop-types';
+import usePermission from "config/usePermission";
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -82,8 +84,9 @@ const TicketDetails = (props) => {
   const [handleSave, setHandleSave] = useState(null); // State to hold handleSave function
   const hideInprogress = false // just mark this false during development
   const [openQueueJobs, setOpenQueueJobs] = useState(false); // State for QueueJobs drawer
-  const [selectedAddress, setSelectedAddress] = React.useState();
   const [defaultAttacmentCount, setDefaultAttacmentCount] = React.useState(0);
+  const [requiredCustomFieldsCount, setRequiredCustomFieldsCount] = useState(0);
+  const [isSignatureAdded, setIsSignatureAdded] = useState(false);
   const {
     lablesVisible,
     ticket: ticketData,
@@ -95,23 +98,38 @@ const TicketDetails = (props) => {
     enableQueueJobs,
   } = props;
   const snackbar = useSelector((state) => state.snackbar);
+  const permitMessageView = usePermission("ticket_note_message", "flag_read") 
 
   const { ticket_id } = ticketData;
 
   const [open1, setopen1] = useState(null);
 
-  const { loading, error, data } = useQuery(GET_TICKET, {
+  const { loading, error, data, refetch } = useQuery(GET_TICKET, {
     variables: { id: ticket_id },
     fetchPolicy: "network-only",
     skip: !ticket_id,
   });
 
-  const ticket = useMemo(() => (!loading && data && data.ticket ? data.ticket : ticketData),
+  const ticket = useMemo(() => (!loading && data?.ticket ? data.ticket : { ...ticketData, assigned_name: ticketData?.subscriber_name ? `${ticketData.subscriber_name} (${ticketData.customer_id})` : ticketData?.assigned_name }),
     [loading, data, ticketData]
   );
 
   const ticketTypes = !loading && data && data.ticketTypes ? data.ticketTypes : [];
   const ticketStatuses = !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
+
+  useSubscription(TICKET_SUBSCRIPTION, {
+    variables: { ticket_id: ticket.ticket_id },
+    onData: async ({ data: { data }, client }) => {
+      refetch();
+    },
+  });
+
+  useSubscription(TASK_SUBSCRIPTION, {
+    variables: { ticket_id: ticket.ticket_id },
+    onData: async ({ data: { data }, client }) => {
+      refetch();
+    },
+  });
 
   const handleIconButton = (event, childDrawer) => {
     preventEvent(event);
@@ -185,23 +203,25 @@ const TicketDetails = (props) => {
             customer={ticket}
             ticketTypes={ticketTypes}
             ticketStatuses={ticketStatuses}
+            requiredCustomFieldsCount={requiredCustomFieldsCount}
             defaultAttacmentCount={defaultAttacmentCount}
             lablesVisible={lablesVisible}
             handleOpenTicket={handleOpenTicket}
             setOpenQueueJobs={setOpenQueueJobs}
-            selectedAddress={selectedAddress}
-            setSelectedAddress={setSelectedAddress}
             enableQueueJobs={enableQueueJobs}
+            isSignatureAdded={isSignatureAdded}
+            setIsSignatureAdded={setIsSignatureAdded}
           />
 
           {!hideInprogress &&
             <>
-             <CustomFields
+              <CustomFields
                 loading={loading}
                 ticket={ticket}
                 appuser_id={appuser_id}
                 lablesVisible={lablesVisible}
                 handleOpenTicket={handleOpenTicket}
+                setRequiredCustomFieldsCount={setRequiredCustomFieldsCount}
               />
               <Tasks
                 loading={loading}
@@ -210,12 +230,14 @@ const TicketDetails = (props) => {
                 lablesVisible={lablesVisible}
                 handleOpenTicket={handleOpenTicket}
               />
-              <Messages
-                handleIconButton={handleIconButton}
-                ticket={ticket}
-                lablesVisible={lablesVisible}
-                appuser_id={appuser_id}
-              />
+              {permitMessageView &&
+                <Messages
+                  handleIconButton={handleIconButton}
+                  ticket={ticket}
+                  lablesVisible={lablesVisible}
+                  appuser_id={appuser_id}
+                />
+              }
               <Attachments
                 handleIconButton={handleIconButton}
                 ticket={ticket}
@@ -273,8 +295,8 @@ const TicketDetails = (props) => {
           ]}
         />
       )}
-      { openQueueJobs &&
-        <QueueJobs openQueueJobs={openQueueJobs} setOpenQueueJobs={setOpenQueueJobs} selectedAddress={selectedAddress} />
+      {openQueueJobs &&
+        <QueueJobs openQueueJobs={openQueueJobs} setOpenQueueJobs={setOpenQueueJobs} selectedAddress={ticket.address} />
       }
     </div>
   );
@@ -282,7 +304,8 @@ const TicketDetails = (props) => {
 
 const TicketContainer = props => {
   const dispatch = useDispatch()
-  const { isSigningOut } = props
+  const ispId = localStorage.getItem("Visp.ispId")
+  const { isSigningOut, timeZone, settingsPreferences, user } = props
   const userPreferencesTimeStamp = useSelector(state => state.userPreferencesTimeStamp)
   const summaryCard = useSelector(state => state.summaryCard)
   const tasksCard = useSelector(state => state.tasksCard)
@@ -321,6 +344,15 @@ const TicketContainer = props => {
     }
   }, [data, loading, dispatch, isSigningOut])
 
+  useEffect(() => {
+    if (ispId && timeZone) {
+      dispatch(populateISPUserSettings({ ispId, timeZone, settingsPreferences, user }))
+    } else {
+      // app was rendered outside main app so fetch separately
+    }
+  }, [dispatch, timeZone, settingsPreferences, user, ispId])
+
+
   return (
     <>
       <UserPreferences />
@@ -328,5 +360,25 @@ const TicketContainer = props => {
     </>
   )
 }
+
+TicketDetails.propTypes = {
+  ticket: PropTypes.shape({
+    subscriber_name: PropTypes.string,
+    customer_id: PropTypes.string,
+    assigned_name: PropTypes.string,
+  }).isRequired,
+  category: PropTypes.string,
+  hideContentDrawer: PropTypes.bool,
+  toggleOffCRMDrawer: PropTypes.func,
+  handleOpenTicket: PropTypes.func,
+  appuser_id: PropTypes.string,
+  enableQueueJobs: PropTypes.bool,
+  lablesVisible: PropTypes.bool,
+};
+
+TicketContainer.propTypes = {
+  isSigningOut: PropTypes.bool,
+  timeZone: PropTypes.string,
+};
 
 export default TicketContainer;

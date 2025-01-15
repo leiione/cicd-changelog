@@ -1,15 +1,16 @@
 import React from "react";
 import {
-  Box,
   Button,
+  Dialog,
+  DialogContent,
   Grid,
   IconButton,
   Link,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Modal,
   Popover,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -27,6 +28,8 @@ import DialogAlert from "components/DialogAlert";
 import { getExtensionFromFilename } from "Common/helper";
 import { IMAGE_EXTENSION_LIST } from "Common/constants";
 import { includes } from "lodash";
+import { NO_RIGHTS_MSG } from "utils/messages";
+import { faFilePdf, faFileZip } from "@fortawesome/pro-regular-svg-icons";
 
 const EmailPopover = (props) => {
   const { anchorEl, message, handleClose, toEmail } = props;
@@ -42,74 +45,78 @@ const EmailPopover = (props) => {
         horizontal: "left",
       }}
       slotProps={{
-        paper: { style: { minWidth: "210px",width:"auto" } },
+        paper: { style: { minWidth: "210px", width: "auto" } },
       }}
       sx={{ pointerEvents: "none" }}
     >
-        <Grid container spacing={1}>
-          <Grid item xs={3}>
-            <Typography variant="subtitle1" className="text-right">
-              From:
-            </Typography>
-          </Grid>
-          <Grid item xs={9}>
-            <Typography variant="subtitle1">{message.from_email}</Typography>
-          </Grid>
-          <Grid item xs={3}  className="text-right">
-            <Typography variant="subtitle1">
-              To:
-            </Typography>
-          </Grid>
-          <Grid item xs={9}>
-              {toEmail.map((email, index) => (
-                  <Typography key={index}
-                    variant="subtitle1"
-                    style={{ wordWrap: "break-word" }}
-                  >
-                    {email}
-                  </Typography>
-              ))}
-          </Grid>
-          <Grid item xs={3}   className="text-right">
-            <Typography variant="subtitle1">
-              Cc:
-            </Typography>
-          </Grid>
-          <Grid item xs={9}>
-            <Typography variant="subtitle1">{message.cc}</Typography>
-          </Grid>
-          <Grid item xs={3}   className="text-right">
-            <Typography variant="subtitle1">
-              Bcc:
-            </Typography>
-          </Grid>
-          <Grid item xs={9}>
-            <Typography variant="subtitle1">{message.bcc}</Typography>
-          </Grid>
-          <Grid item xs={3}   className="text-right">
-            <Typography variant="subtitle1">
-              Subject:
-            </Typography>
-          </Grid>
-          <Grid item xs={9}>
-            <Typography variant="subtitle1" style={{ wordWrap: "break-word" }}>
-              {message.subject}
-            </Typography>
-          </Grid>
+      <Grid container spacing={1}>
+        <Grid item xs={3}>
+          <Typography variant="subtitle1" className="text-right">
+            From:
+          </Typography>
         </Grid>
+        <Grid item xs={9}>
+          <Typography variant="subtitle1">{message.from_email}</Typography>
+        </Grid>
+        <Grid item xs={3} className="text-right">
+          <Typography variant="subtitle1">To:</Typography>
+        </Grid>
+        <Grid item xs={9}>
+          {toEmail.map((email, index) => (
+            <Typography
+              key={index}
+              variant="subtitle1"
+              style={{ wordWrap: "break-word" }}
+            >
+              {email}
+            </Typography>
+          ))}
+        </Grid>
+        <Grid item xs={3} className="text-right">
+          <Typography variant="subtitle1">Cc:</Typography>
+        </Grid>
+        <Grid item xs={9}>
+          <Typography variant="subtitle1">{message.cc}</Typography>
+        </Grid>
+        <Grid item xs={3} className="text-right">
+          <Typography variant="subtitle1">Bcc:</Typography>
+        </Grid>
+        <Grid item xs={9}>
+          <Typography variant="subtitle1">{message.bcc}</Typography>
+        </Grid>
+        <Grid item xs={3} className="text-right">
+          <Typography variant="subtitle1">Subject:</Typography>
+        </Grid>
+        <Grid item xs={9}>
+          <Typography variant="subtitle1" style={{ wordWrap: "break-word" }}>
+            {message.subject}
+          </Typography>
+        </Grid>
+      </Grid>
     </Popover>
   );
 };
 
 const Email = (props) => {
-  const { message, onDeleteMessage, handleQouteNote, handleReplyEmail } = props;
+  const {
+    message,
+    onDeleteMessage,
+    handleQouteNote,
+    handleReplyEmail,
+    permitDelete,
+  } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [more, toggleMore] = React.useState(false);
   const [openDialog, setOpenDialog] = React.useState(false);
   const [isSubmitting, setSubmitting] = React.useState(false);
   const [previewAttachment, setPreviewAttachment] = React.useState(null);
   const toEmail = message.to_email ? message.to_email.split(",") : [];
-  const replyEmail = message.traffic === 'INBOUND' ? [message.from_email] : (message.to_email ? message.to_email.split(",") : [])
+  const replyEmail =
+    message.traffic === "INBOUND"
+      ? [message.from_email]
+      : message.to_email
+      ? message.to_email.split(",")
+      : [];
   const text = message.message;
 
   const linePlainLen = text.split(/\r|\r\n|\n/g).length;
@@ -126,7 +133,11 @@ const Email = (props) => {
 
   return (
     <>
-      <ListItem className="border-bottom border-lighter" key={message.id} alignItems="flex-start">
+      <ListItem
+        className="border-bottom border-lighter"
+        key={message.id}
+        alignItems="flex-start"
+      >
         <ListItemAvatar
           sx={{ width: 24, height: 24, minWidth: 24 }}
           onClick={(e) => setAnchorEl(e.currentTarget)}
@@ -143,16 +154,17 @@ const Email = (props) => {
           )}
         </ListItemAvatar>
         <ListItemText
-
           primary={
-            <Grid container spacing={1} className="align-items-center mb-1" >
+            <Grid container spacing={1} className="align-items-center mb-1">
               <Grid item xs>
                 <Typography
-                  variant="body2"
+                  variant="body1"
                   className="text-truncate"
                   style={{ width: "70%" }}
                 >
-                  {message.traffic === "INBOUND" ? message.from_email : message.to_email}
+                  {message.traffic === "INBOUND"
+                    ? message.from_email
+                    : message.to_email}
                 </Typography>
               </Grid>
               <Grid item xs="auto">
@@ -160,30 +172,57 @@ const Email = (props) => {
                   {moment(message.date).format("MMM DD, YYYY hh:mm")}
                 </Typography>
               </Grid>
-              {message.traffic === 'INBOUND' && <Grid item xs="auto">
-                <IconButton className="primary-hover" size="small" onClick={() => handleReplyEmail(isHtml ? h2p(text) : parse(text), replyEmail)}>
-                  <FontAwesomeIcon icon={faReply} className="primary-hover" />
-                </IconButton>
-              </Grid>}
+              {message.traffic === "INBOUND" && (
+                <Grid item xs="auto">
+                  <IconButton
+                    className="primary-on-hover"
+                    size="small"
+                    onClick={() =>
+                      handleReplyEmail(
+                        isHtml ? h2p(text) : parse(text),
+                        replyEmail
+                      )
+                    }
+                  >
+                    <FontAwesomeIcon
+                      icon={faReply}
+                      className="primary-on-hover"
+                    />
+                  </IconButton>
+                </Grid>
+              )}
               <Grid item xs="auto">
-                <IconButton size="small" className="primary-hover">
-                  <FontAwesomeIcon className="primary-hover" icon={faMessagePlus} onClick={() => handleQouteNote("email", message)} />
+                <IconButton size="small" className="primary-on-hover">
+                  <FontAwesomeIcon
+                    className="primary-on-hover"
+                    icon={faMessagePlus}
+                    onClick={() => handleQouteNote("email", message)}
+                  />
                 </IconButton>
               </Grid>
               <Grid item xs="auto">
-                <IconButton size="small" className="primary-hover" onClick={() => setOpenDialog(true)}>
-                  <FontAwesomeIcon className="primary-hover" icon={faTrash} />
-                </IconButton>
+                <Tooltip title={!permitDelete ? NO_RIGHTS_MSG : ""}>
+                  <span>
+                    <IconButton
+                      size="small"
+                      className="primary-on-hover"
+                      onClick={() => setOpenDialog(true)}
+                      disabled={!permitDelete}
+                    >
+                      <FontAwesomeIcon
+                        className="primary-on-hover"
+                        icon={faTrash}
+                      />
+                    </IconButton>
+                  </span>
+                </Tooltip>
               </Grid>
             </Grid>
           }
           secondary={
             <>
               {more || lineLen < 4 ? (
-                <Typography
-                  variant="caption"
-                  style={{ whiteSpace: "pre-line" }}
-                >
+                <Typography variant="caption" className="text-pre-line">
                   {parse(text)}
                 </Typography>
               ) : (
@@ -191,11 +230,11 @@ const Email = (props) => {
                   text={isHtml ? h2p(text) : text}
                   maxLine={4}
                   ellipsis=""
-                  style={{ whiteSpace: "pre-line", color: "#0009" }}
+                  className="text-pre-line"
                 />
               )}
               {lineLen > 4 && (
-                <div style={{ marginTop: "5px" }}>
+                <div className="mt-1">
                   <Link variant="caption" onClick={() => toggleMore(!more)}>
                     {more ? "Simplify..." : "More..."}
                   </Link>
@@ -206,31 +245,38 @@ const Email = (props) => {
                   <Typography variant="subtitle1" className="mt-3">
                     Attachments
                   </Typography>
-                  <Grid container spacing={1} className="upload-image-row mt-2">
+                  <Grid container spacing={1}>
                     {message.attachments.map((file, index) => {
-                      const type = getExtensionFromFilename(file.filename)
+                      const type = getExtensionFromFilename(file.filename);
                       return (
-                        <Box key={index} className="single-img-box">
-                          <IconButton
-                            className="preview-icon-btn"
-                            size="small"
-                            onClick={() => setPreviewAttachment(file)}
-                          >
-                            <Visibility fontSize="small" />
-                          </IconButton>
-                          {includes(IMAGE_EXTENSION_LIST, type) ? (
-                            <img
-                              className="img-preview"
-                              src={file.file_url}
-                              alt={file.filename}
-                            />
-                          ) : (
-                            <Typography variant="body2" className="file-name">
-                              {file.filename}
-                            </Typography>
-                          )}
-                        </Box>
-                      )
+                        <Grid item xs={2} sm={2} md={2} key={index}>
+                          <div className="attachment-card visible-on-hover">
+                            <IconButton
+                              className="preview-icon-btn invisible"
+                              size="small"
+                              onClick={() => setPreviewAttachment(file)}
+                            >
+                              <Visibility fontSize="small" />
+                            </IconButton>
+                            {includes(IMAGE_EXTENSION_LIST, type) && (
+                              <img
+                                src={file.file_url || file.preview?.url}
+                                alt={file.filename || file.name}
+                              />
+                            )}
+
+                            {(file.type?.includes("pdf") ||
+                              file.attachment_type?.includes("pdf")) && (
+                              <FontAwesomeIcon icon={faFilePdf} size="2xl" />
+                            )}
+
+                            {(file.type?.includes("zip") ||
+                              file.attachment_type?.includes("zip")) && (
+                              <FontAwesomeIcon icon={faFileZip} size="2xl" />
+                            )}
+                          </div>
+                        </Grid>
+                      );
                     })}
                   </Grid>
                 </>
@@ -260,17 +306,22 @@ const Email = (props) => {
           },
         ]}
       />
-      {Boolean(previewAttachment) &&
-        <Modal open={Boolean(previewAttachment)} onClose={() => setPreviewAttachment(null)}>
-          <Box className="box-modal-preview">
-            {previewAttachment && previewAttachment.attachment_type.startsWith("image/") ? (
+      {Boolean(previewAttachment) && (
+        <Dialog
+          open={Boolean(previewAttachment)}
+          onClose={() => setPreviewAttachment(null)}
+        >
+          <DialogContent>
+            {IMAGE_EXTENSION_LIST.some((ext) =>
+              previewAttachment.filename.toLowerCase().endsWith(ext)
+            ) ? (
               <img
                 src={previewAttachment.file_url}
                 alt="Preview"
                 style={{ width: "100%", height: "auto" }}
               />
             ) : (
-              <Box>
+              <>
                 <Typography variant="body2" className="mt-2">
                   Preview not available
                 </Typography>
@@ -288,11 +339,11 @@ const Email = (props) => {
                 >
                   Download
                 </Button>
-              </Box>
+              </>
             )}
-          </Box>
-        </Modal>
-      }
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };

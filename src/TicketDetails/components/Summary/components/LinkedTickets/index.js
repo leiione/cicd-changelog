@@ -21,9 +21,10 @@ import {
   GET_LINKED_TICKETS,
   GET_TICKET,
   REMOVE_LINKED_TICKET,
-  GET_ACTIVITIES
+  GET_ACTIVITIES,
+  LINKED_TICKETS_SUBSCRIPTION
 } from "TicketDetails/TicketGraphQL";
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
 import { startCase, uniq } from "lodash";
 import { getPriorityIcon } from "utils/getPriorityIcon";
@@ -79,7 +80,7 @@ const LinkedTicketContent = (props) => {
           refetchQueries: [
             { query: GET_LINKED_TICKETS, variables: { ticket_id } },
             { query: GET_TICKET, variables: { id: ticket_id } },
-            { query: GET_ACTIVITIES, variables: { ticket_id }},
+            { query: GET_ACTIVITIES, variables: { ticket_id } },
           ],
         });
         dispatch(
@@ -118,7 +119,7 @@ const LinkedTicketContent = (props) => {
                     onClick={() => onLinkedTicketClick(item)}
                   >
                     <Grid container spacing={1} key={index} alignItems="center">
-                      <Grid item xs="auto">
+                      <Grid item xs={2}>
                         <Typography
                           variant="subtitle1"
                           className="text-primary"
@@ -152,13 +153,16 @@ const LinkedTicketContent = (props) => {
                               />
                             </Tooltip>
                           )}
-                            <Tooltip title={`Status: ${item.status}`} placement="top">
-                            <Typography
-                            variant="subtitle1"
-                            className="mx-2 text-dark"
+                          <Tooltip
+                            title={`Status: ${item.status}`}
+                            placement="top"
                           >
-                            {item.status}
-                          </Typography>
+                            <Typography
+                              variant="subtitle1"
+                              className="mx-2 text-dark"
+                            >
+                              {item.status}
+                            </Typography>
                           </Tooltip>
                           <IconButton
                             className="ml-auto"
@@ -219,7 +223,7 @@ const LinkedTickets = (props) => {
   const [isLinkedTicketDrawerOpen, setIsLinkedTicketDrawerOpen] =
     useState(false);
 
-  const { loading, error, data } = useQuery(GET_LINKED_TICKETS, {
+  const { loading, error, data, refetch } = useQuery(GET_LINKED_TICKETS, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: "network-only",
     skip: !ticket.ticket_id || !preferences.linkedTickets, // fetch only when expanded
@@ -240,6 +244,13 @@ const LinkedTickets = (props) => {
     }
     return tickets;
   }, [loading, data]);
+  
+  useSubscription(LINKED_TICKETS_SUBSCRIPTION, {
+    variables: { ticket_id: ticket.ticket_id },
+    onData: async ({ data: { data }, client }) => {
+      refetch();
+    },
+  });
 
   const handleCollapse = () => {
     dispatch(

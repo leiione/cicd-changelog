@@ -96,19 +96,19 @@ const AddTicket = (props) => {
   // console.log("From microfrontend" ,ticket)
 
   let initialValues = {
-    category_type: "",
+    category_type: ticket && ticket.category_type !== undefined ? ticket.category_type.charAt(0) + ticket.category_type.slice(1).toLowerCase() : "",
     priority: "Normal",
     ticket_type_id: 0,
-    equipment_id: 0,
-    location_id: 0,
-    customer_id: 0,
-    assigned_name: '',
+    equipment_id: ticket && ticket.assigned_id !== undefined ? ticket.assigned_id : 0,
+    location_id: ticket && ticket.assigned_id !== undefined ? ticket.assigned_id : 0,
+    customer_id: ticket && ticket.assigned_id !== undefined ? ticket.assigned_id : 0,
+    assigned_name: ticket && ticket.assigned_name !== undefined ? ticket.assigned_name : null,
     address: '',
     ticket_contact_emails: '',
     ticket_contact_name: '',
     ticket_contact_numbers: '',
     task_id: ticket && ticket.task_id !== undefined ? ticket.task_id : 0, 
-    description: ticket && ticket.task !== undefined ? ticket.task : null, 
+    description: ticket && ticket.description !== undefined ? ticket.description : null, 
   }
 
   if (ticket && ticket.initSelectedCustId > 0) {

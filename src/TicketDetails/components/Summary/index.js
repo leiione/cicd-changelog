@@ -18,6 +18,7 @@ import {
   GET_ACTIVITIES,
   GET_TICKET_ATTACHMENTS,
   UPDATE_TICKET_MUTATION,
+  GET_TICKET_CUSTOM_FIELDS,
 } from "TicketDetails/TicketGraphQL";
 import { useMutation } from "@apollo/client";
 import { useDispatch, useSelector } from "react-redux";
@@ -27,6 +28,7 @@ import {
   SummarySkeletonLoader,
 } from "./components/SkeletonLoader";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
+import Stopwatch from "./components/Stopawtch";
 
 const Summary = (props) => {
   const dispatch = useDispatch();
@@ -41,10 +43,11 @@ const Summary = (props) => {
     ticketStatuses,
     handleOpenTicket,
     setOpenQueueJobs,
-    selectedAddress,
-    setSelectedAddress,
     enableQueueJobs,
-    defaultAttacmentCount
+    defaultAttacmentCount,
+    requiredCustomFieldsCount,
+    isSignatureAdded,
+    setIsSignatureAdded,
   } = props;
 
   const showSignature = true; // this should come from ticket type settings
@@ -83,6 +86,9 @@ const Summary = (props) => {
           },
           { query: GET_ACTIVITIES, variables: { ticket_id: customer.ticket_id }
           },
+          {
+            query: GET_TICKET_CUSTOM_FIELDS, variables: { ticketId: customer.ticket_id }
+          }
         ],
       });
       dispatch(
@@ -119,6 +125,8 @@ const Summary = (props) => {
               ticket={customer}
               ticketStatuses={ticketStatuses}
               defaultAttacmentCount={defaultAttacmentCount}
+              requiredCustomFieldsCount={requiredCustomFieldsCount}
+              isSignatureAdded={isSignatureAdded}
               handleUpdate={handleUpdate}
             />
           </>
@@ -140,8 +148,6 @@ const Summary = (props) => {
                   ticket={customer}
                   updateTicket={handleUpdate}
                   isSubmitting={isSubmitting}
-                  selectedAddress={selectedAddress}
-                  setSelectedAddress={setSelectedAddress}
                 />
                 <Schedule
                   isSubmitting={isSubmitting}
@@ -176,7 +182,12 @@ const Summary = (props) => {
               <div className="border-left pl-3 py-3 h-100 d-flex flex-column">
                 <Assignee ticket={customer} updateTicket={handleUpdate} />
                 <Followers ticket={customer} updateTicket={handleUpdate} />
-                {showSignature && <Signature ticket={customer} />}
+                {showSignature && (
+                  <Signature
+                    ticket={customer}
+                    setIsSignatureAdded={setIsSignatureAdded}
+                  />
+                )}
                 <div className="mt-auto">
                   <Typography variant="caption" className="d-block mt-2">
                     Created by: <strong>{customer.created_by}</strong> on{" "}
@@ -184,8 +195,10 @@ const Summary = (props) => {
                   </Typography>
                   <Typography variant="caption">
                     Last updated by: <strong>{customer.last_updated_by}</strong>{" "}
-                    on {customer.timestamp}
+                    on {customer.last_updated_by_time}
                   </Typography>
+                  {/* Added Stopwatch for Ticket */}
+                  <Stopwatch />
                 </div>
               </div>
             )}

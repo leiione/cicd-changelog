@@ -86,9 +86,12 @@ const AppointmentDuration = (props) => {
         className="pointer"
         style={{ display: "flex", alignItems: "center" }}
       >
-        <FontAwesomeIcon icon={faCalendarDay} className=" fa-fw text-muted f-16 mr-2" />
+        <FontAwesomeIcon
+          icon={faCalendarDay}
+          className=" fa-fw text-muted f-16 mr-2"
+        />
         <Typography variant="subtitle1">
-          Appointment Duration
+          Appointment Duration:
           <Typography
             variant="subtitle1"
             className={`primary-on-hover d-inline-block ml-2`}
@@ -131,9 +134,12 @@ const AppointmentDuration = (props) => {
           )}
         </div>
         <Divider />
-        <div className="text-right" style={{ padding: "0px" }}>
-          <Button color="primary" size="large" onClick={onSaveDuration}>
+        <div className="text-right">
+          <Button color="primary" onClick={onSaveDuration}>
             Save
+          </Button>
+          <Button color="default" onClick={handleClose}>
+            Cancel
           </Button>
         </div>
       </Popover>

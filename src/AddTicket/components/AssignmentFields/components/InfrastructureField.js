@@ -42,8 +42,10 @@ const InfrastructureField = (props) => {
     const selectedItem = find(infrastructureOptions, { value: values.location_id })
     if (selectedItem && selectedItem.value !== selected.value) {
       setSelected(selectedItem)
+    }else if (values.assigned_name) {
+      setSelected({ label: values.assigned_name, value: values.location_id });
     }
-  }, [values.location_id, infrastructureOptions, selected])
+  }, [values.location_id, values.assigned_name, infrastructureOptions, selected])
 
   if (error) return <ErrorPage error={error} />
 

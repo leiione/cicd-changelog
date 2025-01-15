@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Divider, Grid, IconButton, Tooltip, Typography } from "@mui/material";
 import EditorContainer from "components/EditorContainer";
 import ProgressButton from "Common/ProgressButton";
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import {
   ADD_NEW_TICKET_EMAIL,
   GET_TICKET_MESSAGES,
   GET_TICKET,
-  GET_ACTIVITIES
+  GET_ACTIVITIES,
+  GET_EMAIL_TEMPLATES
 } from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
@@ -18,12 +19,17 @@ import { readFileAsBase64 } from "Common/helper";
 import Files from "react-files";
 import { acceptedFormats, maxFileSize } from "Common/constants";
 import { AttachFile } from "@mui/icons-material";
+import { useSelector } from "react-redux";
+import { checkIfCacheExists } from "config/apollo";
+import ErrorPage from "components/ErrorPage";
+import Loader from "components/Loader";
+import { includes } from "lodash";
 
 const defaultMoreFields = ["Cc", "Bcc"];
 
 const AddEmailFields = (props) => {
   const dispatch = useDispatch();
-  const { form, handleCancel, onSubmit } = props;
+  const { ticket, form, handleCancel, onSubmit, templates, customerId } = props;
   const {
     control,
     setValue,
@@ -35,15 +41,16 @@ const AddEmailFields = (props) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   const values = watch();
-
   const attachFiles = async (files) => {
-    files.forEach(async (file) => {
+    let newAttachments = [];
+    for (let file of files) {
       const fileData = await readFileAsBase64(file);
-      setValue("attachments", [
-        ...(values.attachments || []),
-        { file: fileData, filename: file.name },
-      ]);
-    });
+      newAttachments.push({ file: fileData, filename: file.name })
+    };
+    setValue("attachments", [
+      ...(values.attachments || []),
+      ...newAttachments
+    ]);
   };
 
 
@@ -92,6 +99,17 @@ const AddEmailFields = (props) => {
   const handleMessageChange = (content) => {
     setValue("message", content, { shouldValidate: true });
   };
+
+  const handleSelectedTemplate = (template) => {
+    setValue("subject", template.template_subject);
+    if (template.template_cc) {
+      setMoreFields([...moreFields, 'Cc'])
+      const ccTemp = template.template_cc.split(",").map((item, index) => ({ id: index, cc: item, customOption: true }));
+      setValue("cc", ccTemp);
+    } else {
+      setValue("cc", []);
+    }
+  }
 
   const isFormValid = React.useMemo(
     () =>
@@ -167,8 +185,8 @@ const AddEmailFields = (props) => {
               clickable
               maxFileSize={maxFileSize}
             >
-              <IconButton aria-label="attachment" className="primary-hover">
-                <AttachFile className="primary-hover" />
+              <IconButton aria-label="attachment" className="primary-on-hover">
+                <AttachFile className="primary-on-hover" />
               </IconButton>
             </Files>
           </Tooltip>
@@ -176,10 +194,14 @@ const AddEmailFields = (props) => {
       </Grid>
       <Grid item xs={12} className="mt-1">
         <EditorContainer
+          ticket={ticket}
           content={values.message}
           setContent={handleMessageChange}
           background={"#fcefef"}
           disabled={isSubmitting}
+          isSusbcriber={customerId > 0}
+          templates={templates}
+          handleSelectedTemplate={handleSelectedTemplate}
         />
       </Grid>
       <Grid item xs={12} style={{ padding: '5px 0px' }}>
@@ -198,18 +220,48 @@ const AddEmailFields = (props) => {
         >
           Send
         </ProgressButton>
-        <Button color="primary" variant="outlined" onClick={handleCancel}>
+        <Button color="default" variant="outlined" onClick={handleCancel}>
           Cancel
         </Button>
       </Grid>
-    </Grid>
+    </Grid >
   );
 };
 
 const AddEmailForm = (props) => {
   const dispatch = useDispatch();
+  const isp_id = Number(useSelector(state => state.ispId))
   const { ticket, handleCancel, replyMessage } = props;
   const [sendTicketEmail] = useMutation(ADD_NEW_TICKET_EMAIL);
+  const customerId = ticket.subscriber && ticket.subscriber.customer_id > 0 ? ticket.subscriber.customer_id : 0
+
+  const { loading, error, data, client } = useQuery(GET_EMAIL_TEMPLATES, {
+    variables: { isp_id },
+    fetchPolicy: "cache-and-network",
+    skip: !customerId
+  });
+
+  const cacheExists = checkIfCacheExists(client, {
+    query: GET_EMAIL_TEMPLATES,
+    variables: { isp_id },
+  });
+
+  const templates = useMemo(() => {
+    let list = [];
+    if ((!loading || cacheExists) && data && data.emailTemplates) {
+      data.emailTemplates.forEach(item => {
+        const flagSubscriberEmail = item.subscriber_email > "" && includes([0, "Y", "N"], item.custom_filter)
+        if (item.isp_id === isp_id && !flagSubscriberEmail) {
+          list.push({
+            ...item,
+            label: item.template_name,
+            value: item.me_id,
+          });
+        }
+      });
+    }
+    return list;
+  }, [loading, data, cacheExists, isp_id]);
 
   const initialValues = React.useMemo(() => {
     const toEmail = [];
@@ -261,11 +313,12 @@ const AddEmailForm = (props) => {
           .join(",")
           .replace(/ /g, ""),
         message: values.message,
-        customer_id: ticket.customer_id || 0,
+        customer_id: customerId,
         subject: values.subject,
         flag_internal: values.flag_internal,
         attachments: values.attachments,
       };
+
       await sendTicketEmail({
         variables,
         refetchQueries: [
@@ -274,7 +327,7 @@ const AddEmailForm = (props) => {
             variables: { ticket_id: ticket.ticket_id },
           },
           { query: GET_TICKET, variables: { id: ticket.ticket_id } },
-          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }},
+          { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id } },
         ],
         update: (cache, { data }) => {
           if (
@@ -290,7 +343,7 @@ const AddEmailForm = (props) => {
           } else {
             dispatch(
               showSnackbar({
-                message: "Email was sent successdully.",
+                message: "Email was sent successfully",
                 severity: "success",
               })
             );
@@ -304,12 +357,17 @@ const AddEmailForm = (props) => {
     }
   };
 
+  if (error) return <ErrorPage error={error} />
+  if (loading && !cacheExists) return <Loader loaderStyle={{ textAlign: "center" }} />
+
   return (
     <AddEmailFields
       form={form}
       ticket={ticket}
       handleCancel={handleCancel}
       onSubmit={onSubmit}
+      templates={templates}
+      customerId={customerId}
     />
   );
 };

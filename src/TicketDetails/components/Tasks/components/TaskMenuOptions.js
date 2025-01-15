@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { IconButton, MenuItem, Popover } from "@mui/material";
 import { MoreVert } from "@mui/icons-material";
 import { preventEvent } from "../../../../Common/helper";
@@ -6,7 +7,7 @@ import { cloneDeep } from "lodash";
 import DialogAlert from "components/DialogAlert";
 
 const TaskMenuOptions = (props) => {
-  const { show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, handleOpenTicket, disabled, setOnEditMode, onEdit } = props;
+  const { ticket, show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, handleOpenTicket, disabled, setOnEditMode, onEdit } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [openAlert, setOpenAlert] = React.useState(null);
   const [isSubmitting] = React.useState(null);
@@ -40,7 +41,19 @@ const TaskMenuOptions = (props) => {
   }
 
   const onConvertTask = async () => {
-    handleOpenTicket({task}, "microservice");
+    var assigned_id, assigned_name = ''
+    if (ticket.category_type === 'SUBSCRIBER') {
+      assigned_name = ticket.subscriber.first_name + ' ' + ticket.subscriber.last_name;
+      assigned_id = ticket.subscriber.customer_id
+    } else if (ticket.category_type === 'EQUIPMENT') {
+      assigned_name = ticket.assigned_name;
+      assigned_id = ticket.equipment_id;
+    } else if (ticket.category_type === 'INFRASTRUCTURE') {
+      assigned_name = ticket.assigned_name;
+      assigned_id = ticket.location_id;
+    }
+
+    handleOpenTicket({ ...task, description: task.task, category_type: ticket.category_type, assigned_name: assigned_name, assigned_id: assigned_id }, "microservice");
   }
 
   const handleEdit = () => {
@@ -50,10 +63,10 @@ const TaskMenuOptions = (props) => {
 
   return (
     <>
-      <IconButton color="default" onClick={handleClick}>
-        <MoreVert style={!show ? { visibility: "hidden" } : {}} />
+      <IconButton color="default" onClick={handleClick} style={!show || (task.converted_ticket_id > 0 && !task.flag_ticket_deleted) ? { visibility: "hidden" } : {}}>
+        <MoreVert />
       </IconButton>
-      {openMenu && task.converted_ticket_id == null &&
+      {openMenu &&
         <Popover
           open={openMenu}
           anchorEl={anchorEl}
@@ -64,7 +77,7 @@ const TaskMenuOptions = (props) => {
             horizontal: "left",
           }}
         >
-          <MenuItem onClick={() => handleOpenTicket(task, "microservice")} disabled={disabled}> Convert to ticket</MenuItem>
+          <MenuItem onClick={onConvertTask} disabled={disabled}> Convert to ticket</MenuItem>
           {!task.is_default &&
             <>
               <MenuItem onClick={handleEdit}> Edit</MenuItem>
@@ -98,5 +111,18 @@ const TaskMenuOptions = (props) => {
       )}
     </>
   );
+}
+
+TaskMenuOptions.propTypes = {
+  show: PropTypes.bool.isRequired,
+  task: PropTypes.object.isRequired,
+  ticketTasks: PropTypes.array.isRequired,
+  setTicketTasks: PropTypes.func.isRequired,
+  onSaveTaskChanges: PropTypes.func.isRequired,
+  handleOpenTicket: PropTypes.func.isRequired,
+  disabled: PropTypes.bool.isRequired,
+  setOnEditMode: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
 };
+
 export default React.memo(TaskMenuOptions);

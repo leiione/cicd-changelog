@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
 
 const TicketStatus = (props) => {
   const classes = useStyles();
-  const { ticket, ticketStatuses, handleUpdate, defaultAttacmentCount } = props;
+  const { ticket, ticketStatuses, handleUpdate, defaultAttacmentCount, requiredCustomFieldsCount, isSignatureAdded } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [status, setStatus] = React.useState();
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,7 +31,7 @@ const TicketStatus = (props) => {
     setAnchorEl(event.currentTarget);
   };
   const handlePopoverClose = (event, status) => {
-    if (status !== "backdropClick") {
+    if (status !== "backdropClick" && status !== "escapeKeyDown" && status !== "tabKeyDown") {
       setStatus(status);
       handleUpdate({
         ticket_id: ticket.ticket_id,
@@ -46,8 +46,16 @@ const TicketStatus = (props) => {
   const tooltipMsgs = useMemo(() => {
     let resolvingTooltipMsgs = [];
     let closingTooltipMsgs = [];
+    const hasConvertedTask = find(ticket.tasks, (task) => !task.is_completed && task.converted_ticket_id > 0 && !task.flag_ticket_deleted);
+    if (hasConvertedTask) {
+      resolvingTooltipMsgs.push("- all tasks to be checked");
+      closingTooltipMsgs.push("- all tasks to be checked");
+    }
+
     const hasUncompletedTask = find(ticket.tasks, (task) => !task.is_completed && task.is_default);
     const hasUncompletedAttachments = defaultAttacmentCount > 0;
+    const hasRequiredCustomFields = requiredCustomFieldsCount > 0;
+    const hasUncompletedSignature = !isSignatureAdded;
     if (ticket.update_requirements && ticket.update_requirements.length > 0) {
       ticket.update_requirements.forEach((req) => {
         if (req.flag_enabled === "Y") {
@@ -68,7 +76,14 @@ const TicketStatus = (props) => {
               }
               break;
             case "CUSTOM_FIELDS":
-              // TODO
+              if (hasRequiredCustomFields) {
+                if (isResolvingTicketRestricted && !resolvingTooltipMsgs.includes("- all custom fields")) {
+                  resolvingTooltipMsgs.push("- all custom fields");
+                }
+                if (isClosingTicketRestricted && !closingTooltipMsgs.includes("- all custom fields")) {
+                  closingTooltipMsgs.push("- all custom fields");
+                }
+              }
               break;
             case "ATTACHMENTS":
               if (hasUncompletedAttachments) {
@@ -82,7 +97,15 @@ const TicketStatus = (props) => {
               }
               break;
             case "SIGNATURE":
-              // TODO
+              if (hasUncompletedSignature) {
+                if (isResolvingTicketRestricted && !resolvingTooltipMsgs.includes("- signature")) {
+                  resolvingTooltipMsgs.push("- signature");
+                }
+
+                if (isClosingTicketRestricted && !closingTooltipMsgs.includes("- signature")) {
+                  closingTooltipMsgs.push("- signature");
+                }
+              }
               break;
             case "FOLLOWERS":
               // TODO
@@ -94,7 +117,7 @@ const TicketStatus = (props) => {
       });
     }
     return { resolvingTooltipMsgs, closingTooltipMsgs };
-  }, [ticket.tasks, ticket.update_requirements, defaultAttacmentCount]);
+  }, [ticket.tasks, ticket.update_requirements, defaultAttacmentCount, requiredCustomFieldsCount, isSignatureAdded]);
 
   const resolvingClosingMessage = (action) => {
     if (["Resolved", "Close"].includes(action)) {
@@ -124,7 +147,6 @@ const TicketStatus = (props) => {
     event.stopPropagation();
   };
 
-
   return (
     <>
       <Button
@@ -144,7 +166,7 @@ const TicketStatus = (props) => {
           "aria-labelledby": "basic-button",
         }}
       >
-       <TextField
+        <TextField
           placeholder="Search..."
           className="p-3"
           value={searchQuery}
@@ -155,24 +177,35 @@ const TicketStatus = (props) => {
           variant="standard"
           onClick={(event) => preventEvent(event)}
         />
-
-
-
         {filteredStatuses &&
-          filteredStatuses.map((taskStatus) => (
-            <Tooltip title={resolvingClosingMessage(taskStatus.name)}>
-              <span>
-                <MenuItem
-                  key={taskStatus.id}
-                  onClick={(event) => handlePopoverClose(event, taskStatus.name)}
-                  color="default"
-                  disabled={Boolean(resolvingClosingMessage(taskStatus.name))}
+          filteredStatuses.map((taskStatus) => {
+            return (
+              <Tooltip title={resolvingClosingMessage(taskStatus.name)} key={taskStatus.id}>
+                <span
+                  onClick={(event) => {
+                    if (Boolean(resolvingClosingMessage(taskStatus.name))) {
+                      preventEvent(event); // Stop propagation explicitly for disabled items
+                    }
+                  }}
                 >
-                  {taskStatus.name}
-                </MenuItem>
-              </span>
-            </Tooltip>
-          ))}
+                  <MenuItem
+                    onClick={(event) => {
+                      if (Boolean(resolvingClosingMessage(taskStatus.name))) {
+                        preventEvent(event); // Prevent action on disabled items
+                      } else {
+                        handlePopoverClose(event, taskStatus.name);
+                      }
+                    }}
+                    color="default"
+                    disabled={Boolean(resolvingClosingMessage(taskStatus.name))}
+                  >
+                    {taskStatus.name}
+                  </MenuItem>
+                </span>
+              </Tooltip>
+            );
+          })
+        }
       </Menu>
     </>
   );

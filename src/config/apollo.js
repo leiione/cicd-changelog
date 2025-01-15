@@ -13,7 +13,6 @@ if (vispDB === "SANDBOX") {
   CRM_URI = process.env.CRM_MS_URI_MIRROR || process.env.REACT_APP_CRM_MS_URI_MIRROR
   CRM_URI_WS = process.env.CRM_MS_URI_MIRROR_WS || process.env.REACT_APP_CRM_MS_URI_MIRROR_WS
 }
-
 const httpLink = new HttpLink({
   uri: CRM_URI,
 });
