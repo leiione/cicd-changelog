@@ -118,6 +118,7 @@ const AddSMSForm = (props) => {
   const dispatch = useDispatch();
   const { ticket, handleCancel, recipient } = props;
   const [sendTicketSMS] = useMutation(ADD_NEW_TICKET_SMS);
+  const customerId = ticket.subscriber && ticket.subscriber.customer_id > 0 ? ticket.subscriber.customer_id : 0
 
   const initialValues = React.useMemo(() => {
     let toSMS = [];
@@ -159,7 +160,7 @@ const AddSMSForm = (props) => {
           .join(",")
           .replace(/ /g, ""),
         message: h2p(values.message),
-        customer_id: ticket.customer_id || 0,
+        customer_id: customerId,
         subject: values.subject,
         flag_internal: false
       };

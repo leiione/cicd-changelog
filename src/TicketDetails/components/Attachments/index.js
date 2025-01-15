@@ -354,20 +354,6 @@ const Attachments = (props) => {
 
   const { appuser_id } = props;
 
-  function getAcceptedFormats(attachmentType) {
-    let formats = [];
-
-    if (attachmentType.includes("image")) {
-      formats = ["image/jpeg", "image/png", "image/gif"];
-    } else if (attachmentType.includes("pdf")) {
-      formats = ["application/pdf"];
-    } else if (attachmentType.includes("zip")) {
-      formats = ["application/zip", "application/x-zip-compressed"];
-    }
-
-    return formats;
-  }
-
   return (
     <>
       <AccordionCard
@@ -450,7 +436,9 @@ const Attachments = (props) => {
                               file.attachment_label
                             )
                           } // Pass file and atta_label
-                          accepts={getAcceptedFormats(file.attachment_type)} // Make it
+                          accepts={
+                            ["image/*", "application/pdf", "application/zip", "application/x-zip-compressed"]
+                          } // Make it
                           clickable
                           multiple={false} // Disable multi-select
                         >

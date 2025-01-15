@@ -29,7 +29,7 @@ const defaultMoreFields = ["Cc", "Bcc"];
 
 const AddEmailFields = (props) => {
   const dispatch = useDispatch();
-  const { ticket, form, handleCancel, onSubmit, templates } = props;
+  const { ticket, form, handleCancel, onSubmit, templates, customerId } = props;
   const {
     control,
     setValue,
@@ -199,7 +199,7 @@ const AddEmailFields = (props) => {
           setContent={handleMessageChange}
           background={"#fcefef"}
           disabled={isSubmitting}
-          isSusbcriber={ticket.subscriber && ticket.subscriber.customer_id > 0}
+          isSusbcriber={customerId > 0}
           templates={templates}
           handleSelectedTemplate={handleSelectedTemplate}
         />
@@ -233,11 +233,12 @@ const AddEmailForm = (props) => {
   const isp_id = Number(useSelector(state => state.ispId))
   const { ticket, handleCancel, replyMessage } = props;
   const [sendTicketEmail] = useMutation(ADD_NEW_TICKET_EMAIL);
+  const customerId = ticket.subscriber && ticket.subscriber.customer_id > 0 ? ticket.subscriber.customer_id : 0
 
   const { loading, error, data, client } = useQuery(GET_EMAIL_TEMPLATES, {
     variables: { isp_id },
     fetchPolicy: "cache-and-network",
-    skip: !(ticket.subscriber && ticket.subscriber.customer_id > 0)
+    skip: !customerId
   });
 
   const cacheExists = checkIfCacheExists(client, {
@@ -312,7 +313,7 @@ const AddEmailForm = (props) => {
           .join(",")
           .replace(/ /g, ""),
         message: values.message,
-        customer_id: ticket.customer_id || 0,
+        customer_id: customerId,
         subject: values.subject,
         flag_internal: values.flag_internal,
         attachments: values.attachments,
@@ -366,6 +367,7 @@ const AddEmailForm = (props) => {
       handleCancel={handleCancel}
       onSubmit={onSubmit}
       templates={templates}
+      customerId={customerId}
     />
   );
 };
