@@ -57,13 +57,13 @@ jobs:
           name: Upload to S3
           command: |
             BRANCH_NAME=prod
-            S3_BUCKET=microfrontend-crm-ms/prod
+            S3_BUCKET=microfrontend-crm-ms
             aws s3 sync /workspace/dist/ s3://$S3_BUCKET/$BRANCH_NAME/ --acl public-read
       - run:
           name: Invalidate CloudFront Cache
           command: |
-            BRANCH_NAME=prod
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
+            BRANCH_NAME=prod
             aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
             DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
             echo "Microfrontend is accessible at: $DEPLOY_URL"
