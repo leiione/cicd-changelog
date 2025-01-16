@@ -17,6 +17,9 @@ jobs:
           name: Build the application
           command: npm run build
       - run:
+          name: Verify Build Artifacts
+          command: ls -la build/
+      - run:
           name: Create Dist folder and copy build artifacts
           command: mkdir dist && cp -r build/* dist/
       - run:
@@ -39,6 +42,9 @@ jobs:
       - attach_workspace:
           at: /workspace
       - run:
+          name: Verify Workspace Contents
+          command: ls -la /workspace/dist
+      - run:
           name: Install Prerequisites
           command: apt-get update && apt-get install -y unzip less
       - run:
@@ -60,6 +66,9 @@ jobs:
             S3_BUCKET=microfrontend-crm-ms
             aws s3 sync /workspace/dist/ s3://$S3_BUCKET/$BRANCH_NAME/ --acl public-read
       - run:
+          name: Verify S3 Upload
+          command: aws s3 ls s3://$S3_BUCKET/$BRANCH_NAME/
+      - run:
           name: Invalidate CloudFront Cache
           command: |
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
@@ -67,6 +76,9 @@ jobs:
             aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
             DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
             echo "Microfrontend is accessible at: $DEPLOY_URL"
+      - run:
+          name: Check CloudFront Invalidations
+          command: aws cloudfront list-invalidations --distribution-id $CLOUDFRONT_DIST_ID
       - run:
           name: Notify RingCentral
           command: |
