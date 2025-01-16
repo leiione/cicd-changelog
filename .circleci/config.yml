@@ -56,13 +56,13 @@ jobs:
       - run:
           name: Upload to S3
           command: |
-            BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-            S3_BUCKET=microfrontend-crm-ms/branch
+            BRANCH_NAME=prod
+            S3_BUCKET=microfrontend-crm-ms/prod
             aws s3 sync /workspace/dist/ s3://$S3_BUCKET/$BRANCH_NAME/ --acl public-read
       - run:
           name: Invalidate CloudFront Cache
           command: |
-            BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+            BRANCH_NAME=prod
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
             aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
             DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
