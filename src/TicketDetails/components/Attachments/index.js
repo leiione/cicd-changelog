@@ -16,7 +16,6 @@ import {
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
-import { faFilePdf, faFileZip } from "@fortawesome/pro-duotone-svg-icons";
 import Files from "react-files";
 import { acceptedFormats } from "Common/constants";
 import { useDispatch } from "react-redux";
@@ -29,10 +28,12 @@ import {
   ATTACHMENT_SUBSCRIPTION,
 } from "TicketDetails/TicketGraphQL";
 import { useMutation, useQuery, useSubscription } from "@apollo/client";
-import { readFileAsBase64 } from "Common/helper";
+import { getExtensionFromFilename, readFileAsBase64 } from "Common/helper";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import DialogAlert from "components/DialogAlert";
 import { Close, Visibility } from "@mui/icons-material";
+import { getSourceImage } from "utils/sourceImage";
+import { find } from "lodash";
 
 const Attachments = (props) => {
   const { ticket, setDefaultAttacmentCount } = props;
@@ -412,7 +413,11 @@ const Attachments = (props) => {
           </Tooltip>
           <Grid container spacing={1}>
             {selectedFiles.length > 0 &&
-              selectedFiles.map((file, index) => (
+              selectedFiles.map((file, index) => {
+                const type = getExtensionFromFilename(file.filename);
+                let src = find(getSourceImage, { key: type })
+                src = src || find(getSourceImage, { key: 'txt' });
+                return (
                 <>
                   {file.id === 0 && (
                     <Grid item xs={2} sm={2} md={2} key={index}>
@@ -482,23 +487,15 @@ const Attachments = (props) => {
                         >
                           <Visibility fontSize="small" />
                         </IconButton>
-                        {(file.type?.startsWith("image/") ||
-                          file.attachment_type?.startsWith("image/")) && (
-                          <img
+                        {src.isImage ? 
+                          <img  
                             src={file.file_url || file.preview?.url}
-                            alt={file.filename || file.name}
-                          />
-                        )}
-
-                        {(file.type?.includes("pdf") ||
-                          file.attachment_type?.includes("pdf")) && (
-                          <FontAwesomeIcon icon={faFilePdf} size="2xl" />
-                        )}
-
-                        {(file.type?.includes("zip") ||
-                          file.attachment_type?.includes("zip")) && (
-                          <FontAwesomeIcon icon={faFileZip} size="2xl" />
-                        )}
+                            alt={file.file_name}
+                            width={60}
+                            height={60}
+                            style={{ marginTop: 0 }}
+                          /> : src.value
+                        }
                       </div>
 
                       {(!file.file_url || file?.lodingStatus) &&
@@ -515,7 +512,7 @@ const Attachments = (props) => {
                     </Grid>
                   )}
                 </>
-              ))}
+              )})}
 
             {selectedFiles.length > 0 && selectedFiles.length < 4 && (
               <Grid item xs={2} sm={2} md={2}>

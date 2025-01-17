@@ -166,8 +166,8 @@ const Note = (props) => {
                               <img  
                                 src={file.file_url || file.preview?.url}
                                 alt={file.file_name}
-                                width={50}
-                                height={50}
+                                width={60}
+                                height={60}
                                 style={{ marginTop: 0 }}
                               /> : src.value
                             }

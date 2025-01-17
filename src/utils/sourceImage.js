@@ -15,6 +15,7 @@ export const getSourceImage = [
   { key: "jpg", value: <ImageIcon width={60} height={60} />, isImage: true },
   { key: "jpeg", value: <ImageIcon width={60} height={60} />, isImage: true },
   { key: "png", value: <ImageIcon width={60} height={60} />, isImage: true },
+  { key: "webp", value: <ImageIcon width={60} height={60} />, isImage: true },
   { key: "doc", value: <WordIcon width={60} height={60} /> },
   { key: "docx", value: <WordIcon width={60} height={60} /> },
   { key: "xls", value: <XLSIcon width={60} height={60} /> },
