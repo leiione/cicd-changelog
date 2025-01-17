@@ -19,7 +19,7 @@ import {
   faTrash,
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
 import GetAppIcon from "@mui/icons-material/GetApp";
-import { Close } from "@mui/icons-material";
+import { Close , Visibility } from "@mui/icons-material";
 
 import moment from "moment-timezone";
 import h2p from "html2plaintext";
@@ -28,12 +28,9 @@ import PropTypes from "prop-types";
 import DialogAlert from "components/DialogAlert";
 import { NO_RIGHTS_MSG } from "utils/messages";
 import usePermission from "config/usePermission";
-import { Visibility } from "@mui/icons-material";
 import { getExtensionFromFilename } from "Common/helper";
-import { IMAGE_EXTENSION_LIST } from "Common/constants";
-import { faFilePdf, faFileZip } from "@fortawesome/pro-regular-svg-icons";
-import { includes } from "lodash";
-
+import { find } from "lodash";
+import { getSourceImage } from "utils/sourceImage";
 
 const Note = (props) => {
   const { message, onDeleteNote, handleQouteNote } = props;
@@ -151,7 +148,9 @@ const Note = (props) => {
                   </Typography>
                   <Grid container spacing={1}>
                     {message.attachments.map((file, index) =>{
-                      const type = getExtensionFromFilename(file.filename);
+                      const type = getExtensionFromFilename(file.file_name);
+                      let src = find(getSourceImage, { key: type })
+                      src = src || find(getSourceImage, { key: 'txt' });
 
                       return(
                       <Grid item xs={2} sm={2} md={2} key={index}>
@@ -162,24 +161,16 @@ const Note = (props) => {
                             onClick={() => handlePreviewOpen(file)}
                           >
                             <Visibility fontSize="small" />
-                          </IconButton>
-                          {includes(IMAGE_EXTENSION_LIST, type) && (
-                              <img
+                            </IconButton>
+                            {src.isImage ? 
+                              <img  
                                 src={file.file_url || file.preview?.url}
-                                alt={file.filename || file.name}
-                              />
-                            )}
-
-                            {(file.type?.includes("pdf") ||
-                              file.attachment_type?.includes("pdf")) && (
-                              <FontAwesomeIcon icon={faFilePdf} size="2xl" />
-                            )}
-
-                            {(file.type?.includes("zip") ||
-                              file.attachment_type?.includes("zip")) && (
-                              <FontAwesomeIcon icon={faFileZip} size="2xl" />
-                            )}
-
+                                alt={file.file_name}
+                                width={50}
+                                height={50}
+                                style={{ marginTop: 0 }}
+                              /> : src.value
+                            }
                         </div>
                       </Grid>)
           })}

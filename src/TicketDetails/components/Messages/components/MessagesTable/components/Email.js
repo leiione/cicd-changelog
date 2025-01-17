@@ -27,9 +27,9 @@ import parse from "html-react-parser";
 import DialogAlert from "components/DialogAlert";
 import { getExtensionFromFilename } from "Common/helper";
 import { IMAGE_EXTENSION_LIST } from "Common/constants";
-import { includes } from "lodash";
+import { find } from "lodash";
 import { NO_RIGHTS_MSG } from "utils/messages";
-import { faFilePdf, faFileZip } from "@fortawesome/pro-regular-svg-icons";
+import { getSourceImage } from "utils/sourceImage";
 
 const EmailPopover = (props) => {
   const { anchorEl, message, handleClose, toEmail } = props;
@@ -248,6 +248,9 @@ const Email = (props) => {
                   <Grid container spacing={1}>
                     {message.attachments.map((file, index) => {
                       const type = getExtensionFromFilename(file.filename);
+                      let src = find(getSourceImage, { key: type })
+                      src = src || find(getSourceImage, { key: 'txt' });
+
                       return (
                         <Grid item xs={2} sm={2} md={2} key={index}>
                           <div className="attachment-card visible-on-hover">
@@ -258,22 +261,15 @@ const Email = (props) => {
                             >
                               <Visibility fontSize="small" />
                             </IconButton>
-                            {includes(IMAGE_EXTENSION_LIST, type) && (
-                              <img
+                            {src.isImage ? 
+                              <img  
                                 src={file.file_url || file.preview?.url}
-                                alt={file.filename || file.name}
-                              />
-                            )}
-
-                            {(file.type?.includes("pdf") ||
-                              file.attachment_type?.includes("pdf")) && (
-                              <FontAwesomeIcon icon={faFilePdf} size="2xl" />
-                            )}
-
-                            {(file.type?.includes("zip") ||
-                              file.attachment_type?.includes("zip")) && (
-                              <FontAwesomeIcon icon={faFileZip} size="2xl" />
-                            )}
+                                alt={file.file_name}
+                                width={50}
+                                height={50}
+                                style={{ marginTop: 0 }}
+                              /> : src.value
+                            }
                           </div>
                         </Grid>
                       );
