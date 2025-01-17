@@ -20,7 +20,7 @@ import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles({
   tableHeightWrapper: {
-    maxHeight: 500,
+    height: 500,
   },
 });
 const Activity = (props) => {
@@ -148,7 +148,6 @@ const Activity = (props) => {
             pageSize={5}
             rowsPerPageOptions={[5, 10, 20]}
             disableColumnMenu
-            autoHeight
             onCellClick={handleCellClick}
           />
         )}
