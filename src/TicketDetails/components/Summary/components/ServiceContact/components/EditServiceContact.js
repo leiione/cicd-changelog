@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faBuildings, faLocationDot } from "@fortawesome/pro-regular-svg-icons";
 import HookTextField from "Common/hookFields/HookTextField";
 import { useForm } from "react-hook-form";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { getPaymentStatusIcon, getPaymentStatusIconClass } from "utils/getPaymnetIcon";
 import ContactAddressDropdown from "./ContactAddressDropdown";
 import ContactNumberField from "./ContactNumberField";
@@ -109,6 +109,11 @@ const EditServiceContactForm = (props) => {
     mode: "onChange",
     reValidateMode: "onSubmit"
   });
+  
+  useEffect(() => {
+    form.reset(initialValues)
+    // eslint-disable-next-line
+  }, [ticket, contact]);
 
   const { formState, handleSubmit, watch } = form;
   const { isSubmitting, isDirty } = formState;
