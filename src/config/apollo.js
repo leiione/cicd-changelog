@@ -7,7 +7,6 @@ import { getMainDefinition } from "@apollo/client/utilities";
 const token = localStorage.getItem("Visp.token");
 const vispDB = localStorage.getItem("Visp.database") // SANDBOX || LIVE
 
-
 let CRM_URI = "https://crm-staging-mirror.ms-visp.net/graphql" // process.env.CRM_MS_URI_LIVE || process.env.REACT_APP_CRM_MS_URI_LIVE
 let CRM_URI_WS = "wss://crm-staging-mirror.ms-visp.net/graphql" // process.env.CRM_MS_URI_LIVE_WS || process.env.REACT_APP_CRM_MS_URI_LIVE_WS
 if (vispDB === "SANDBOX") {
@@ -15,7 +14,7 @@ if (vispDB === "SANDBOX") {
   CRM_URI_WS = "wss://crm-staging-mirror.ms-visp.net/graphql" // process.env.CRM_MS_URI_MIRROR_WS || process.env.REACT_APP_CRM_MS_URI_MIRROR_WS
 }
 const httpLink = new HttpLink({
-  uri: CRM_URI,
+  uri: 'https://crm-971.ms-visp.net/graphql',
 });
 
 const wsLink = new GraphQLWsLink(

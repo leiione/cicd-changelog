@@ -5,6 +5,7 @@ import { Close } from "@mui/icons-material"
 import makeStyles from "@mui/styles/makeStyles"
 import SearchRadius from "./components/SearchRadius"
 import TicketQueueTable from "./components/TicketQueueTable";
+import { getFormattedAddress, getFormattedPGAddress } from "utils/formatter";
 
 const useStyles = makeStyles(theme => ({
   drawerStyle: {
@@ -17,8 +18,16 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const QueueJobs = props => {
-  const { openQueueJobs, setOpenQueueJobs, selectedAddress } = props
+  const { openQueueJobs, setOpenQueueJobs, selectedAddress, ticket } = props
+  let baseAddress = selectedAddress
+  const isSubscriber = ticket.category_type === "SUBSCRIBER";
+  if (isSubscriber && ticket.subscriber) {
+    baseAddress = getFormattedAddress(ticket.subscriber.customer_details, 'main')
+  } else if (ticket.infrastructure) {
+    baseAddress = getFormattedPGAddress(ticket.infrastructure.address)
+  }
   const classes = useStyles()
+  const [radius, setRadius] = React.useState(3)
   
   const handleClose = () => {
     setOpenQueueJobs(false)    
@@ -55,7 +64,7 @@ const QueueJobs = props => {
                         &nbsp;
                         <Typography variant="subtitle1">
                             <FmdGoodOutlined className="text-muted f-20" style={{ marginRight: 5 }}/>
-                            {selectedAddress}
+                            {baseAddress}
                         </Typography>
                     </Grid>
                     <Grid item xs={4}>
@@ -63,11 +72,11 @@ const QueueJobs = props => {
                         Search Radius
                         </Typography>
                         &nbsp;
-                        <SearchRadius radius={5}/>
+                        <SearchRadius radius={radius} setRadius={setRadius} />
                     </Grid>
                 </Grid>
             </div>
-            <TicketQueueTable />
+            <TicketQueueTable ticket={ticket} radius={radius} />
         </div>
     </Drawer>
     </>

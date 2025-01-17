@@ -95,7 +95,6 @@ const TicketDetails = (props) => {
     toggleOffCRMDrawer,
     handleOpenTicket,
     appuser_id,
-    enableQueueJobs,
   } = props;
   const snackbar = useSelector((state) => state.snackbar);
   const permitMessageView = usePermission("ticket_note_message", "flag_read") 
@@ -208,7 +207,6 @@ const TicketDetails = (props) => {
             lablesVisible={lablesVisible}
             handleOpenTicket={handleOpenTicket}
             setOpenQueueJobs={setOpenQueueJobs}
-            enableQueueJobs={enableQueueJobs}
             isSignatureAdded={isSignatureAdded}
             setIsSignatureAdded={setIsSignatureAdded}
           />
@@ -296,7 +294,7 @@ const TicketDetails = (props) => {
         />
       )}
       {openQueueJobs &&
-        <QueueJobs openQueueJobs={openQueueJobs} setOpenQueueJobs={setOpenQueueJobs} selectedAddress={ticket.address} />
+        <QueueJobs openQueueJobs={openQueueJobs} setOpenQueueJobs={setOpenQueueJobs} selectedAddress={ticket.address} ticket={ticket} />
       }
     </div>
   );
@@ -305,7 +303,7 @@ const TicketDetails = (props) => {
 const TicketContainer = props => {
   const dispatch = useDispatch()
   const ispId = localStorage.getItem("Visp.ispId")
-  const { isSigningOut, timeZone, settingsPreferences, user } = props
+  const { isSigningOut, timeZone, settingsPreferences, user, flags } = props
   const userPreferencesTimeStamp = useSelector(state => state.userPreferencesTimeStamp)
   const summaryCard = useSelector(state => state.summaryCard)
   const tasksCard = useSelector(state => state.tasksCard)
@@ -346,11 +344,11 @@ const TicketContainer = props => {
 
   useEffect(() => {
     if (ispId && timeZone) {
-      dispatch(populateISPUserSettings({ ispId, timeZone, settingsPreferences, user }))
+      dispatch(populateISPUserSettings({ ispId, timeZone, settingsPreferences, user, flags }))
     } else {
       // app was rendered outside main app so fetch separately
     }
-  }, [dispatch, timeZone, settingsPreferences, user, ispId])
+  }, [dispatch, timeZone, settingsPreferences, user, ispId, flags])
 
 
   return (
@@ -372,13 +370,15 @@ TicketDetails.propTypes = {
   toggleOffCRMDrawer: PropTypes.func,
   handleOpenTicket: PropTypes.func,
   appuser_id: PropTypes.string,
-  enableQueueJobs: PropTypes.bool,
   lablesVisible: PropTypes.bool,
 };
 
 TicketContainer.propTypes = {
   isSigningOut: PropTypes.bool,
   timeZone: PropTypes.string,
+  settingsPreferences: PropTypes.object,
+  user: PropTypes.object,
+  flags: PropTypes.object,
 };
 
 export default TicketContainer;
