@@ -12,6 +12,7 @@ import {
   Popover,
   Tooltip,
   Typography,
+  DialogTitle,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -20,7 +21,7 @@ import {
   faReply,
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
 import moment from "moment-timezone";
-import { EmailOutlined, Visibility } from "@mui/icons-material";
+import { EmailOutlined, Visibility, Close } from "@mui/icons-material";
 import LinesEllipsis from "react-lines-ellipsis";
 import h2p from "html2plaintext";
 import parse from "html-react-parser";
@@ -30,6 +31,7 @@ import { IMAGE_EXTENSION_LIST } from "Common/constants";
 import { includes } from "lodash";
 import { NO_RIGHTS_MSG } from "utils/messages";
 import { faFilePdf, faFileZip } from "@fortawesome/pro-regular-svg-icons";
+import GetAppIcon from "@mui/icons-material/GetApp";
 
 const EmailPopover = (props) => {
   const { anchorEl, message, handleClose, toEmail } = props;
@@ -258,10 +260,16 @@ const Email = (props) => {
                             >
                               <Visibility fontSize="small" />
                             </IconButton>
+
                             {includes(IMAGE_EXTENSION_LIST, type) && (
                               <img
                                 src={file.file_url || file.preview?.url}
                                 alt={file.filename || file.name}
+                                style={{
+                                  width: "100%",
+                                  height: "auto",
+                                  objectFit: "contain",
+                                }}
                               />
                             )}
 
@@ -311,6 +319,36 @@ const Email = (props) => {
           open={Boolean(previewAttachment)}
           onClose={() => setPreviewAttachment(null)}
         >
+          <DialogTitle id="alert-dialog-title">
+            <Grid container spacing={1} alignItems="center">
+              <Grid item xs="auto">
+                {previewAttachment.filename || previewAttachment.name}
+              </Grid>
+              <Grid item xs>
+                {previewAttachment.file_url && (
+                  <IconButton
+                    component="a"
+                    href={previewAttachment.file_url}
+                    download={previewAttachment.filename || previewAttachment.name}
+                    aria-label="download"
+                    size="small"
+                    className="ml-2"
+                  >
+                    <GetAppIcon />
+                  </IconButton>
+                )}
+              </Grid>
+              <Grid item xs="auto">
+                <IconButton
+                  onClick={() => setPreviewAttachment(null)}
+                  size="small"
+                >
+                  <Close />
+                </IconButton>
+              </Grid>
+            </Grid>
+          </DialogTitle>
+
           <DialogContent>
             {IMAGE_EXTENSION_LIST.some((ext) =>
               previewAttachment.filename.toLowerCase().endsWith(ext)
