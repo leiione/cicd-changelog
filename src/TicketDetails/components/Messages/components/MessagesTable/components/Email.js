@@ -12,7 +12,6 @@ import {
   Popover,
   Tooltip,
   Typography,
-  DialogTitle,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -21,17 +20,16 @@ import {
   faReply,
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
 import moment from "moment-timezone";
-import { EmailOutlined, Visibility, Close } from "@mui/icons-material";
+import { EmailOutlined, Visibility } from "@mui/icons-material";
 import LinesEllipsis from "react-lines-ellipsis";
 import h2p from "html2plaintext";
 import parse from "html-react-parser";
 import DialogAlert from "components/DialogAlert";
 import { getExtensionFromFilename } from "Common/helper";
 import { IMAGE_EXTENSION_LIST } from "Common/constants";
-import { includes } from "lodash";
+import { find } from "lodash";
 import { NO_RIGHTS_MSG } from "utils/messages";
-import { faFilePdf, faFileZip } from "@fortawesome/pro-regular-svg-icons";
-import GetAppIcon from "@mui/icons-material/GetApp";
+import { getSourceImage } from "utils/sourceImage";
 
 const EmailPopover = (props) => {
   const { anchorEl, message, handleClose, toEmail } = props;
@@ -250,6 +248,9 @@ const Email = (props) => {
                   <Grid container spacing={1}>
                     {message.attachments.map((file, index) => {
                       const type = getExtensionFromFilename(file.filename);
+                      let src = find(getSourceImage, { key: type })
+                      src = src || find(getSourceImage, { key: 'txt' });
+
                       return (
                         <Grid item xs={2} sm={2} md={2} key={index}>
                           <div className="attachment-card visible-on-hover">
@@ -260,28 +261,15 @@ const Email = (props) => {
                             >
                               <Visibility fontSize="small" />
                             </IconButton>
-
-                            {includes(IMAGE_EXTENSION_LIST, type) && (
-                              <img
+                            {src.isImage ? 
+                              <img  
                                 src={file.file_url || file.preview?.url}
-                                alt={file.filename || file.name}
-                                style={{
-                                  width: "100%",
-                                  height: "auto",
-                                  objectFit: "contain",
-                                }}
-                              />
-                            )}
-
-                            {(file.type?.includes("pdf") ||
-                              file.attachment_type?.includes("pdf")) && (
-                              <FontAwesomeIcon icon={faFilePdf} size="2xl" />
-                            )}
-
-                            {(file.type?.includes("zip") ||
-                              file.attachment_type?.includes("zip")) && (
-                              <FontAwesomeIcon icon={faFileZip} size="2xl" />
-                            )}
+                                alt={file.file_name}
+                                width={50}
+                                height={50}
+                                style={{ marginTop: 0 }}
+                              /> : src.value
+                            }
                           </div>
                         </Grid>
                       );
@@ -319,36 +307,6 @@ const Email = (props) => {
           open={Boolean(previewAttachment)}
           onClose={() => setPreviewAttachment(null)}
         >
-          <DialogTitle id="alert-dialog-title">
-            <Grid container spacing={1} alignItems="center">
-              <Grid item xs="auto">
-                {previewAttachment.filename || previewAttachment.name}
-              </Grid>
-              <Grid item xs>
-                {previewAttachment.file_url && (
-                  <IconButton
-                    component="a"
-                    href={previewAttachment.file_url}
-                    download={previewAttachment.filename || previewAttachment.name}
-                    aria-label="download"
-                    size="small"
-                    className="ml-2"
-                  >
-                    <GetAppIcon />
-                  </IconButton>
-                )}
-              </Grid>
-              <Grid item xs="auto">
-                <IconButton
-                  onClick={() => setPreviewAttachment(null)}
-                  size="small"
-                >
-                  <Close />
-                </IconButton>
-              </Grid>
-            </Grid>
-          </DialogTitle>
-
           <DialogContent>
             {IMAGE_EXTENSION_LIST.some((ext) =>
               previewAttachment.filename.toLowerCase().endsWith(ext)
