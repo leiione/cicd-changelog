@@ -89,7 +89,7 @@ const TicketDetails = (props) => {
   const [isSignatureAdded, setIsSignatureAdded] = useState(false);
   const {
     lablesVisible,
-    ticket: ticketData,
+    ticket: ticketData = {},
     category,
     hideContentDrawer,
     toggleOffCRMDrawer,
@@ -101,8 +101,8 @@ const TicketDetails = (props) => {
   const permitMessageView = usePermission("ticket_note_message", "flag_read") 
 
   const { ticket_id } = ticketData;
-
   const [open1, setopen1] = useState(null);
+  const [ticketCached, setTicketCached] = useState({});
 
   const { loading, error, data, refetch } = useQuery(GET_TICKET, {
     variables: { id: ticket_id },
@@ -110,9 +110,14 @@ const TicketDetails = (props) => {
     skip: !ticket_id,
   });
 
-  const ticket = useMemo(() => (!loading && data?.ticket ? data.ticket : { ...ticketData, assigned_name: ticketData?.subscriber_name ? `${ticketData.subscriber_name} (${ticketData.customer_id})` : ticketData?.assigned_name }),
+  const ticket = useMemo(() => (!loading && data?.ticket ? data.ticket : { ...ticketData, assigned_name: ticketData.category_type === "SUBSCRIBER" && ticketData.customer_id > 0? `${ticketData.subscriber_name} (${ticketData.customer_id})` : ticketData?.assigned_name }),
     [loading, data, ticketData]
   );
+
+  useEffect(() => {
+    setTicketCached({ ...ticketCached, ...ticket });
+    // eslint-disable-next-line
+  }, [ticket])
 
   const ticketTypes = !loading && data && data.ticketTypes ? data.ticketTypes : [];
   const ticketStatuses = !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
@@ -187,7 +192,8 @@ const TicketDetails = (props) => {
     <div>
       {snackbar && snackbar.open && <GlobalSnackbar {...snackbar} />}
       <Header
-        ticket={ticket}
+        ticket={ticketCached}
+        setTicketCached={setTicketCached}
         category={category}
         setopen1={setopen1}
         hideContentDrawer={hideContentDrawer}
@@ -200,7 +206,7 @@ const TicketDetails = (props) => {
             loading={loading}
             appuser_id={appuser_id}
             handleIconButton={handleIconButton}
-            customer={ticket}
+            customer={ticketCached}
             ticketTypes={ticketTypes}
             ticketStatuses={ticketStatuses}
             requiredCustomFieldsCount={requiredCustomFieldsCount}
@@ -217,7 +223,7 @@ const TicketDetails = (props) => {
             <>
               <CustomFields
                 loading={loading}
-                ticket={ticket}
+                ticket={ticketCached}
                 appuser_id={appuser_id}
                 lablesVisible={lablesVisible}
                 handleOpenTicket={handleOpenTicket}
@@ -225,7 +231,7 @@ const TicketDetails = (props) => {
               />
               <Tasks
                 loading={loading}
-                ticket={ticket}
+                ticket={ticketCached}
                 appuser_id={appuser_id}
                 lablesVisible={lablesVisible}
                 handleOpenTicket={handleOpenTicket}
@@ -233,14 +239,14 @@ const TicketDetails = (props) => {
               {permitMessageView &&
                 <Messages
                   handleIconButton={handleIconButton}
-                  ticket={ticket}
+                  ticket={ticketCached}
                   lablesVisible={lablesVisible}
                   appuser_id={appuser_id}
                 />
               }
               <Attachments
                 handleIconButton={handleIconButton}
-                ticket={ticket}
+                ticket={ticketCached}
                 lablesVisible={lablesVisible}
                 appuser_id={appuser_id}
                 setDefaultAttacmentCount={setDefaultAttacmentCount}
@@ -253,7 +259,7 @@ const TicketDetails = (props) => {
               /> */}
               <Activity
                 handleIconButton={handleIconButton}
-                customer={ticket}
+                customer={ticketCached}
                 lablesVisible={lablesVisible}
                 appuser_id={appuser_id}
               />
@@ -296,7 +302,7 @@ const TicketDetails = (props) => {
         />
       )}
       {openQueueJobs &&
-        <QueueJobs openQueueJobs={openQueueJobs} setOpenQueueJobs={setOpenQueueJobs} selectedAddress={ticket.address} />
+        <QueueJobs openQueueJobs={openQueueJobs} setOpenQueueJobs={setOpenQueueJobs} selectedAddress={ticketCached.address} />
       }
     </div>
   );

@@ -48,8 +48,8 @@ const EditServiceContact = (props) => {
       </Grid>
       <Grid item xs={12} className="d-inline-flex">
         <FontAwesomeIcon
-          icon={getPaymentStatusIcon(ticket.payment_status)}
-          className={`fa-fw f-16 mr-2 ${getPaymentStatusIconClass(ticket.payment_status)}`}
+          icon={getPaymentStatusIcon(!isSubscriber ? null : values.payment_status)}
+          className={`fa-fw f-16 mr-2 ${getPaymentStatusIconClass(!isSubscriber ? null : values.payment_status)}`}
           style={{ fontSize: '2rem' }} // Increase icon size
         />
         {onEditMode ?
@@ -100,7 +100,8 @@ const EditServiceContactForm = (props) => {
         ? ticket.address
         : ticket.infrastructure_address,
       ticket_contact_numbers: ticket.ticket_contact_numbers,
-      ticket_contact_emails: ticket.ticket_contact_email
+      ticket_contact_emails: ticket.ticket_contact_emails || ticket.ticket_contact_email,
+      payment_status: ticket.payment_status || null
     };
   }, [ticket, contact]);
 
@@ -120,7 +121,7 @@ const EditServiceContactForm = (props) => {
   const values = watch()
 
   const onSubmit = async (values) => {
-    await updateTicket({ ticket_id: ticket.ticket_id, ...omit(values, ['main_company']) });
+    await updateTicket({ ticket_id: ticket.ticket_id, ...omit(values, ['main_company', 'payment_status']) });
     setTimeout(() => {
       setEditMode(false);
     }, 500); // so value wont change
