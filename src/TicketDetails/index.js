@@ -110,7 +110,7 @@ const TicketDetails = (props) => {
     skip: !ticket_id,
   });
 
-  const ticket = useMemo(() => (!loading && data?.ticket ? data.ticket : { ...ticketData, assigned_name: ticketData.category_type === "SUBSCRIBER" && ticketData.customer_id > 0? `${ticketData.subscriber_name} (${ticketData.customer_id})` : ticketData?.assigned_name }),
+  const ticket = useMemo(() => (!loading && data?.ticket ? data.ticket : { ...ticketData }),
     [loading, data, ticketData]
   );
 
