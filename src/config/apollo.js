@@ -14,7 +14,7 @@ if (vispDB === "SANDBOX") {
   CRM_URI_WS = "wss://crm-staging-mirror.ms-visp.net/graphql" // process.env.CRM_MS_URI_MIRROR_WS || process.env.REACT_APP_CRM_MS_URI_MIRROR_WS
 }
 const httpLink = new HttpLink({
-  uri: 'https://crm-971.ms-visp.net/graphql',
+  uri: 'https://k8s-crm-branch-971.ms-visp.net/graphql',
 });
 
 const wsLink = new GraphQLWsLink(
