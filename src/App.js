@@ -10,7 +10,7 @@ import AddTicket from "AddTicket";
 
 const App = ({ theme, container, category, ...rest }) => {
   LicenseInfo.setLicenseKey(
-    "87e0aec7e210b546954ef56bc9d381ffTz02ODY5MCxFPTE3MTg0Mjg0MjE3MTQsUz1wcm8sTE09c3Vic2NyaXB0aW9uLEtWPTI="
+    "fd66ab9dddde526bc16fd7b6b658b42eTz03MTIyNCxFPTE3MjE2MjQ2OTkwMDAsUz1wcmVtaXVtLExNPXN1YnNjcmlwdGlvbixLVj0y"
   );
 
   const generateClassName = createGenerateClassName({
