@@ -135,7 +135,7 @@ const AddTicket = (props) => {
       await addTicket({
         variables: {
           input_ticket: {
-            ...omit(values, ["initSelected"]),
+            ...omit(values, ["initSelected", "payment_status", "subscriber"]),
             category_type: toUpper(values.category_type),
           },
         },
