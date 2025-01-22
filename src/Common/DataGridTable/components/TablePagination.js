@@ -38,7 +38,9 @@ const useStyles = makeStyles((theme) => ({
       "&:after": { border: "0 !important" },
     },
     "& .MuiSelect-select": {
-      fontWeight: 500,
+      fontWeight: 400,
+      color: "#616161",
+      fontSize: 11,
     },
   },
 }));
@@ -101,7 +103,7 @@ const TablePagination = ({ count }) => {
       className="mt-1 align-items-center"
     >
       <Grid item xs="auto">
-        <Typography variant="body2">{`Rows per page:`}</Typography>
+        <Typography variant="caption">{`Rows per page:`}</Typography>
       </Grid>
       <Grid item xs="auto">
         <TextField
@@ -123,7 +125,7 @@ const TablePagination = ({ count }) => {
       </Grid>
 
       <Grid item xs="auto" className="mx-4">
-        <Typography>{`${currentNumber} - ${currentLastNumber} of ${count}`}</Typography>
+        <Typography variant="caption">{`${currentNumber} - ${currentLastNumber} of ${count}`}</Typography>
       </Grid>
       <Grid item xs="auto">
         <IconButton
