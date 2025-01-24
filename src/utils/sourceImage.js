@@ -1,30 +1,25 @@
-import { ReactComponent as DefaultImage} from "assets/Generic.svg"
-import { ReactComponent as WordIcon } from "assets/word.svg"
-import {ReactComponent as ImageIcon } from "assets/image.svg"
-import { ReactComponent as PDFIcon } from "assets/pdf.svg"
-import { ReactComponent as XLSIcon } from "assets/xlxs.svg"
-import { ReactComponent as LinksIcon } from "assets/links.svg"
-import { ReactComponent as ZipIcon } from "assets/zip.svg"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileCsv, faFileDoc, faFilePdf, faFilePpt, faFileText, faFileXls, faFileZip, faLinkSlash } from "@fortawesome/pro-duotone-svg-icons";
 
 export const getSourceImage = [
-  { key: "txt", value: <DefaultImage width={60} height={60} /> },
-  { key: "csv", value: <DefaultImage width={60} height={60} /> },
-  { key: "jpg", value: <ImageIcon width={60} height={60} />, isImage: true },
-  { key: "bmp", value: <ImageIcon width={60} height={60} />, isImage: true },
-  { key: "gif", value: <ImageIcon width={60} height={60} />, isImage: true },
-  { key: "jpg", value: <ImageIcon width={60} height={60} />, isImage: true },
-  { key: "jpeg", value: <ImageIcon width={60} height={60} />, isImage: true },
-  { key: "png", value: <ImageIcon width={60} height={60} />, isImage: true },
-  { key: "webp", value: <ImageIcon width={60} height={60} />, isImage: true },
-  { key: "doc", value: <WordIcon width={60} height={60} /> },
-  { key: "docx", value: <WordIcon width={60} height={60} /> },
-  { key: "xls", value: <XLSIcon width={60} height={60} /> },
-  { key: "xlsx", value: <XLSIcon width={60} height={60} /> },
-  { key: "pdf", value: <PDFIcon width={60} height={60} /> },
-  { key: "ppt", value: <DefaultImage width={60} height={60} /> },
-  { key: "pptx", value: <DefaultImage width={60} height={60} /> },
-  { key: "htm", value: <LinksIcon width={60} height={60} /> },
-  { key: "html", value: <LinksIcon width={60} height={60} /> },
-  { key: "zip", value: <ZipIcon width={60} height={60} /> },
-  { key: "rar", value: <ZipIcon width={60} height={60} /> }
+  { key: "txt", value: <FontAwesomeIcon icon={faFileText} size="2xl" /> },
+  { key: "csv", value: <FontAwesomeIcon icon={faFileCsv} size="2xl" /> },
+  { key: "jpg", value: '', isImage: true },
+  { key: "bmp", value: '', isImage: true },
+  { key: "gif", value: '', isImage: true },
+  { key: "jpg", value: '', isImage: true },
+  { key: "jpeg", value: '', isImage: true },
+  { key: "png", value: '', isImage: true },
+  { key: "webp", value: '', isImage: true },
+  { key: "doc", value: <FontAwesomeIcon icon={faFileDoc} size="2xl" /> },
+  { key: "docx", value: <FontAwesomeIcon icon={faFileDoc} size="2xl" /> },
+  { key: "xls", value:  <FontAwesomeIcon icon={faFileXls} size="2xl" /> },
+  { key: "xlsx", value: <FontAwesomeIcon icon={faFileXls} size="2xl" /> },
+  { key: "pdf", value: <FontAwesomeIcon icon={faFilePdf} size="2xl" /> },
+  { key: "ppt", value:  <FontAwesomeIcon icon={faFilePpt} size="2xl" /> },
+  { key: "pptx", value: <FontAwesomeIcon icon={faFilePpt} size="2xl" /> },
+  { key: "htm", value:  <FontAwesomeIcon icon={faLinkSlash} size="2xl" /> },
+  { key: "html", value: <FontAwesomeIcon icon={faLinkSlash} size="2xl" /> },
+  { key: "zip", value: <FontAwesomeIcon icon={faFileZip} size="2xl" /> },
+  { key: "rar", value: <FontAwesomeIcon icon={faFileZip} size="2xl" /> }
 ]
