@@ -300,7 +300,7 @@ const TicketDetails = (props) => {
         />
       )}
       {openQueueJobs &&
-        <QueueJobs openQueueJobs={openQueueJobs} setOpenQueueJobs={setOpenQueueJobs} selectedAddress={ticketCached.address} />
+        <QueueJobs openQueueJobs={openQueueJobs} setOpenQueueJobs={setOpenQueueJobs} selectedAddress={ticketCached.address} ticket={ticketCached}/>
       }
     </div>
   );
