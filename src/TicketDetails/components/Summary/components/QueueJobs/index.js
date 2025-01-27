@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const QueueJobs = props => {
-  const { openQueueJobs, setOpenQueueJobs, selectedAddress, ticket } = props
+  const { openQueueJobs, setOpenQueueJobs, selectedAddress, ticket, handleOpenTicket } = props
   let baseAddress = selectedAddress
   const isSubscriber = ticket.category_type === "SUBSCRIBER";
   if (isSubscriber && ticket.subscriber) {
@@ -76,7 +76,7 @@ const QueueJobs = props => {
                     </Grid>
                 </Grid>
             </div>
-            <TicketQueueTable ticket={ticket} radius={radius} />
+          <TicketQueueTable ticket={ticket} radius={radius} handleOpenTicket={handleOpenTicket} />
         </div>
     </Drawer>
     </>

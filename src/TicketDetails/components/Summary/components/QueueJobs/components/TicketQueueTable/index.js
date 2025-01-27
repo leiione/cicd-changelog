@@ -1,12 +1,25 @@
-import React from "react";
-import { DataGrid } from "@mui/x-data-grid";
+import React, { useRef, useState } from "react";
 import { useQuery } from "@apollo/client";
 import { checkIfCacheExists } from "config/apollo";
 import { queueTicketColumns } from "../../../TicketConstants"
 import { GET_QUEUED_JOBS } from "TicketDetails/TicketGraphQL";
+import DataGridTable from "Common/DataGridTable";
+import { makeStyles } from "@mui/styles";
+import { Loader } from "react-bootstrap-typeahead";
+import { filter } from "lodash";
+
+const useStyles = makeStyles({
+  tableHeightWrapper: {
+    height: 500,
+  },
+});
 
 const TicketQueueTable = (props) => {
-  const { ticket, radius = 3 } = props
+  const classes = useStyles();
+  const ref = useRef(null);
+  const { ticket, radius = 3, handleOpenTicket } = props
+  const [selectedRow, setSelectedRow] = useState([])
+
   const isSubscriber = ticket.category_type === "SUBSCRIBER";
   let variables = { radius_mile: radius };
   if (isSubscriber) {
@@ -27,25 +40,27 @@ const TicketQueueTable = (props) => {
 
   let getQueuedJobs = []
   if (!loading && !error && cacheExists) {
-    getQueuedJobs = data.queuedJobs;
+    getQueuedJobs = filter(data.queuedJobs, (job) => job.ticket_id !== ticket.ticket_id);
   }
+
+  const handleCellClick = (event, params) => {
+    setSelectedRow([params.id])
+    handleOpenTicket(params.row, 'docked', ticket);
+  };
+
   return (
-    <div>
-      <DataGrid
-        sx={{ height: 400, maxHeight: 400 }}
-        density="compact"
-        rowHeight={30}
-        rows={getQueuedJobs}
-        columns={queueTicketColumns}
-        pageSizeOptions={[10, 25, 50]}
-        initialState={{
-          pagination: {
-            paginationModel: { pageSize: 10 },
-          },
-        }}
-        loading={loading}
-      />
-    </div>
+     <div className={classes.tableHeightWrapper}>
+      <React.Suspense fallback={<Loader />}>
+        <DataGridTable
+          containerHeight={ref.current ? ref.current.clientHeight : 300}
+          rows={getQueuedJobs}
+          columns={queueTicketColumns}
+          loading={loading}
+          handleRowClick={handleCellClick}
+          selectedRow={selectedRow}
+        />
+      </React.Suspense>
+      </div>
   );
 };
 

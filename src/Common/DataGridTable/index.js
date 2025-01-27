@@ -30,7 +30,9 @@ const DataGridTable = ({
   handleRowClick,
 }) => {
   const apiRef = useGridApiRef();
-  const dgColumn = React.useMemo(() => getDataGridColumns({ columns }), [columns]);
+  const dgColumn = React.useMemo(() => getDataGridColumns({
+    columns, loading, fullWidth, enableInlineEditing, handleUpdateCell, ispTimeZone, currency
+  }), [columns, currency, enableInlineEditing, fullWidth, handleUpdateCell, ispTimeZone, loading]);
 
   const handleCellClick = debounce((params, event) => {
     event.stopPropagation();
