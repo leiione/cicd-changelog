@@ -10,82 +10,109 @@ jobs:
     executor: node-executor
     steps:
       - checkout
+
       - run:
           name: Install dependencies
           command: npm install --legacy-peer-deps
+      
       - run:
           name: Build the application
-          command: npm run build
+          command: CI=false npm run build
+
       - run:
-          name: Create Dist folder and copy build artifacts
-          command: mkdir dist && cp -r build/* dist/
+          name: Create Dist folder and copy build artifact
+          command: |
+            mkdir dist && cp -r build/* dist/
+
       - run:
           name: Install zip utility
           command: |
             apt-get update
             apt-get install -y zip
+
       - run:
           name: Zip the build artifacts
-          command: zip -r build.zip dist
+          command: |
+            mkdir dist && cp -r build/* dist/
+            zip -r build.zip dist
+
       - persist_to_workspace:
           root: .
           paths:
             - dist
 
   deploy:
-    executor: node-executor
+    docker:
+      - image: node:18  # For AWS CLI
     steps:
       - checkout
       - attach_workspace:
           at: /workspace
       - run:
           name: Install Prerequisites
-          command: apt-get update && apt-get install -y unzip less
+          command: |
+            apt-get update
+            apt-get install -y unzip less
+
       - run:
           name: Install AWS CLI
           command: |
+            apt-get update
+            apt-get install -y unzip
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             ./aws/install
+
       - run:
           name: Configure AWS CLI
           command: |
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
             aws configure set region $AWS_REGION
+
+      - run:
+          name: Determine Target S3 Bucket
+          command: |
+            BRANCH_NAME=${CIRCLE_BRANCH}
+            if [ "$BRANCH_NAME" == "develop" ]; then
+              S3_BUCKET="staging"
+            elif [ "$BRANCH_NAME" == "master" ]; then
+              S3_BUCKET="production"
+            else
+              S3_BUCKET="$BRANCH_NAME"
+            fi
+            echo "S3_BUCKET=$S3_BUCKET" >> $BASH_ENV
+            echo "Deploying to S3 bucket: $S3_BUCKET"
+
       - run:
           name: Upload to S3
           command: |
-            BRANCH_NAME=staging
-            S3_BUCKET=microfrontend-crm-ms
-            aws s3 sync /workspace/dist/ s3://$S3_BUCKET/$BRANCH_NAME/ --acl public-read
+            source $BASH_ENV
+            aws s3 sync /workspace/dist/ s3://microfrontend-crm-ms/$S3_BUCKET/ --acl public-read
+            echo "Uploaded files to s3://microfrontend-crm-ms/$S3_BUCKET/"
+
       - run:
           name: Invalidate CloudFront Cache
           command: |
-            BRANCH_NAME=staging
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
+            source $BASH_ENV
             aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
-            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
+            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$S3_BUCKET"
             echo "Microfrontend is accessible at: $DEPLOY_URL"
+      
       - run:
-          name: Notify RingCentral
+          name: Send Notification to RingCentral
           command: |
-            curl --location --request POST 'https://hooks.ringcentral.com/webhook/v2/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvdCI6ImMiLCJvaSI6IjE0MjkyMDkwODkiLCJpZCI6IjI4MDk1NjkzMDcifQ.-WyR3x9Z_s0YYvmeB39uTLpTu0eWQYO9iSU-xu1U50Q' \
-            --header 'Content-Type: application/json' \
-            --data '{
-              "payload": {
-                "activity": "Microfrontend New Deployment Notification",
-                "title": "Visp ${CIRCLE_TAG} client: released to App",
-                "body": "[changelog/updates](https://github.com/VISPdevteam/Tickets-Micro-Frontend/releases/tag/${CIRCLE_TAG})",
-                "status": "success",
-                "build_num": '${CIRCLE_BUILD_NUM}',
-                "branch": "${CIRCLE_BRANCH}",
-                "reponame": "${CIRCLE_PROJECT_REPONAME}",
-                "username": "${CIRCLE_USERNAME}",
-                "build_url": "https://circleci.com/gh/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BUILD_NUM}",
-                "vcs_url": "https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
-              }
-            }'
+            source $BASH_ENV
+            BUILD_NUM=$CIRCLE_BUILD_NUM
+            BUILD_URL=$CIRCLE_BUILD_URL
+            VCS_URL=$CIRCLE_REPOSITORY_URL
+            REPO_NAME=$CIRCLE_PROJECT_REPONAME
+            USERNAME=$CIRCLE_USERNAME
+            STATUS="success"
+            PAYLOAD="{\"payload\": {\"activity\": \"Deployment Completed\", \"title\": \"Deployment Notification\", \"body\": \"Deployment to $S3_BUCKET completed.\nDeploy URL: $DEPLOY_URL\", \"build_num\": $BUILD_NUM, \"build_url\": \"$BUILD_URL\", \"branch\": \"$BRANCH_NAME\", \"vcs_url\": \"$VCS_URL\", \"reponame\": \"$REPO_NAME\", \"username\": \"$USERNAME\", \"status\": \"$STATUS\"}}"
+            echo "Payload: $PAYLOAD"
+            curl -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" $RINGCENTRAL
 
 workflows:
   build_and_deploy:
@@ -94,4 +121,3 @@ workflows:
       - deploy:
           requires:
             - build
-            
