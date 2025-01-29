@@ -7,9 +7,6 @@ import {
   ListItemAvatar,
   ListItemText,
   Typography,
-  Dialog,
-  DialogContent,
-  DialogTitle,
   Tooltip,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,8 +15,6 @@ import {
   faNote,
   faTrash,
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
-import GetAppIcon from "@mui/icons-material/GetApp";
-import { Close , Visibility } from "@mui/icons-material";
 
 import moment from "moment-timezone";
 import h2p from "html2plaintext";
@@ -28,17 +23,13 @@ import PropTypes from "prop-types";
 import DialogAlert from "components/DialogAlert";
 import { NO_RIGHTS_MSG } from "utils/messages";
 import usePermission from "config/usePermission";
-import { getExtensionFromFilename } from "Common/helper";
-import { find } from "lodash";
-import { getSourceImage } from "utils/sourceImage";
+import FileUploadPreview from "components/FileUploadPreview";
 
 const Note = (props) => {
   const { message, onDeleteNote, handleQouteNote } = props;
   const [more, setMore] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [openPreview, setOpenPreview] = useState(false);
-  const [previewImage, setPreviewImage] = useState("");
   const permitDelete = usePermission(
     "ticket_note_message",
     "flag_delete",
@@ -58,16 +49,6 @@ const Note = (props) => {
     await onDeleteNote(message.note_id);
     setOpenDialog(false);
     setSubmitting(false);
-  };
-
-  const handlePreviewOpen = (imageSrc) => {
-    setPreviewImage(imageSrc);
-    setOpenPreview(true);
-  };
-
-  const handlePreviewClose = () => {
-    setOpenPreview(false);
-    setPreviewImage("");
   };
 
   return (
@@ -146,35 +127,9 @@ const Note = (props) => {
                   <Typography variant="subtitle1" className="mt-3">
                     Attachments
                   </Typography>
-                  <Grid container spacing={1}>
-                    {message.attachments.map((file, index) =>{
-                      const type = getExtensionFromFilename(file.file_name);
-                      let src = find(getSourceImage, { key: type })
-                      src = src || find(getSourceImage, { key: 'txt' });
-
-                      return(
-                      <Grid item xs={2} sm={2} md={2} key={index}>
-                        <div className="attachment-card visible-on-hover">
-                          <IconButton
-                            className="preview-icon-btn invisible"
-                            size="small"
-                            onClick={() => handlePreviewOpen(file)}
-                          >
-                            <Visibility fontSize="small" />
-                            </IconButton>
-                            {src.isImage ? 
-                              <img  
-                                src={file.file_url || file.preview?.url}
-                                alt={file.file_name}
-                                width={60}
-                                height={60}
-                                style={{ marginTop: 0 }}
-                              /> : src.value
-                            }
-                        </div>
-                      </Grid>)
-          })}
-                  </Grid>
+                  <FileUploadPreview
+                    selectedFiles={message.attachments}
+                  />                    
                 </>
               )}
             </>
@@ -202,57 +157,6 @@ const Note = (props) => {
           },
         ]}
       />
-    
-     {/* Image Preview Modal */}
-     <Dialog open={openPreview} onClose={handlePreviewClose}>
-            <DialogTitle id="alert-dialog-title">
-              <Grid container spacing={1} alignItems="center">
-                <Grid item xs="auto">
-                  {previewImage.filename || previewImage.name}
-                </Grid>
-                <Grid item xs>
-                  {previewImage.file_url && (
-                    <IconButton
-                      component="a"
-                      href={previewImage.file_url}
-                      download={previewImage.filename || previewImage.name}
-                      aria-label="download"
-                      size="small"
-                      className="ml-2"
-                    >
-                      <GetAppIcon />
-                    </IconButton>
-                  )}
-                </Grid>
-                <Grid item xs="auto">
-                  <IconButton
-                    onClick={handlePreviewClose}
-                    size="small"
-                  >
-                    <Close />
-                  </IconButton>
-                </Grid>
-              </Grid>
-            </DialogTitle>
-            <DialogContent>
-              {previewImage &&
-                (previewImage.type?.startsWith("image/") ||
-                previewImage.attachment_type?.startsWith("image/") ? (
-                  <img
-                   className="img-fluid"
-                    src={
-                      previewImage.file_url || URL.createObjectURL(previewImage)
-                    }
-                    alt="Preview"
-                  />
-                ) : (
-                  <Typography variant="body2" className="mt-2">
-                    Preview not available
-                  </Typography>
-                ))}
-            </DialogContent>
-          </Dialog>
-          {/* EOF Image Preview Modal */}
     </>
   );
 };

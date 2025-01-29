@@ -13,7 +13,56 @@ import { Close, Visibility } from "@mui/icons-material";
 import { getExtensionFromFilename } from "Common/helper";
 import { getSourceImage } from "utils/sourceImage";
 import { find } from "lodash";
+import GetAppIcon from "@mui/icons-material/GetApp";
 
+export const PreviewFileDialog = (props) => {
+  const { openPreview, handlePreviewClose, file } = props;
+  return (
+    <Dialog open={openPreview} onClose={handlePreviewClose}>
+      <DialogTitle id="alert-dialog-title">
+        <Grid container spacing={1} alignItems="center">
+          <Grid item xs="auto">
+            {file.name}
+          </Grid>
+          <Grid item xs>
+            {file.file_url && (
+              <IconButton
+                component="a"
+                href={file.file_url}
+                download={file.name}
+                aria-label="download"
+                size="small"
+                className="ml-2"
+              >
+                <GetAppIcon />
+              </IconButton>
+            )}
+          </Grid>
+          <Grid item xs="auto">
+            <IconButton
+              onClick={handlePreviewClose}
+              size="small"
+            >
+              <Close />
+            </IconButton>
+          </Grid>
+        </Grid>
+      </DialogTitle>
+      <DialogContent>
+        {file.isImage ? (
+          <img
+            src={file.file_url}
+            alt="Preview"
+            style={{ width: "100%", height: "auto" }}
+          />
+        ) : <div style={{ margin: 50, textAlign: "center" }}>
+          {file.preview}
+        </div>
+        }
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 const FileUploadPreview = ({
   selectedFiles,
@@ -36,83 +85,56 @@ const FileUploadPreview = ({
     <Box>
       <Grid container spacing={1}>
         {selectedFiles.map((file) => {
-          const type = getExtensionFromFilename(file.name);
+          const fileName = file.name || file.file_name || file.filename;
+          const type = getExtensionFromFilename(fileName);
           let src = find(getSourceImage, { key: type })
           src = src || find(getSourceImage, { key: 'txt' });
           return(
-          <Grid item xs={2} sm={2} md={2} key={file.name}>
+          <Grid item xs={2} sm={2} md={2} key={fileName}>
             <div className="attachment-card visible-on-hover">
-              <IconButton
+              {removeFile && <IconButton
                 className="close-icon-btn invisible"
                 size="small"
-                onClick={() => removeFile(file.name)}
+                onClick={() => removeFile(fileName)}
               >
                 <Close fontSize="small" />
-              </IconButton>
+              </IconButton>}
               <IconButton
                 className="preview-icon-btn invisible"
                 size="small"
-                onClick={() => handlePreviewOpen(file)}
+                  onClick={() => handlePreviewOpen({
+                    ...file, name: fileName, file_url: file.file_url || file.preview?.url, preview: src.value, isImage: src.isImage
+                  })}
               >
                 <Visibility fontSize="small" />
                 </IconButton>
                 {src.isImage ? 
                   <img  
                     src={file.file_url || file.preview?.url}
-                    alt={file.file_name}
+                    alt={fileName}
                     width={60}
                     height={60}
                     style={{ marginTop: 0 }}
                   /> : src.value
                 }
             </div>
-            {uploadProgress[file.name] && <LinearProgress className="mt-2" />}
-
+            {uploadProgress[fileName] && <LinearProgress className="mt-2" />}
             <Typography
               className="mt-2 d-block text-truncate"
               variant="caption"
             >
-              {file.name}
+              {fileName}
             </Typography>
           </Grid>
         )})}
       </Grid>
-
-      {/* Image Preview Modal */}
-      <Dialog open={openPreview} onClose={handlePreviewClose}>
-        <DialogTitle>
-          <Grid container spacing={1}>
-            <Grid item xs>
-              <Typography variant="body2" className="mt-2">
-                {previewImage && previewImage?.name}
-              </Typography>
-            </Grid>
-            <Grid item xs="auto">
-              <IconButton
-                onClick={handlePreviewClose}
-                size="small"
-              >
-                <Close />
-              </IconButton>
-            </Grid>
-          </Grid>
-        </DialogTitle>
-        <DialogContent>
-          {previewImage && previewImage?.type.startsWith("image/") ? (
-            <>
-              <img
-                src={URL.createObjectURL(previewImage)}
-                alt="Preview"
-                style={{ width: "100%", height: "auto" }}
-              />
-            </>
-          ) : (
-            <Typography variant="body2" className="mt-2">
-              Preview not available
-            </Typography>
-          )}
-        </DialogContent>
-      </Dialog>
+      {openPreview && (
+        <PreviewFileDialog
+          openPreview={openPreview}
+          handlePreviewClose={handlePreviewClose}
+          file={previewImage}
+        />
+      )}
     </Box>
   );
 };
