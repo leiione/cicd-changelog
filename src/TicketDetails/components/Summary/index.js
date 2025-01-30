@@ -33,6 +33,8 @@ import Stopwatch from "./components/Stopawtch";
 const Summary = (props) => {
   const dispatch = useDispatch();
   const summaryCard = useSelector((state) => state.summaryCard);
+  const flags = useSelector((state) => state.flags);
+  const enableQueueJobs = flags && flags.enableQueueJobs
   const preferences = summaryCard ? summaryCard.subComponent : {};
 
   const {
@@ -43,7 +45,6 @@ const Summary = (props) => {
     ticketStatuses,
     handleOpenTicket,
     setOpenQueueJobs,
-    enableQueueJobs,
     defaultAttacmentCount,
     requiredCustomFieldsCount,
     isSignatureAdded,

@@ -431,17 +431,18 @@ export const UPLOAD_FILE_MUTATION = gql`
   }
 `
 export const GET_QUEUED_JOBS = gql`
-query queuedJobs($custId: Int!, $radiusMile: Int!) {
-  queuedJobs(cust_id: $custId, radius_mile: $radiusMile) {
-    id
-    ticket_id
-    type
-    summary
-    distance
-    installer_skills
-    priority
+  query queuedJobs($cust_id: Int, $radius_mile: Int!, $location_id: Int, $equipment_id: Int) {
+    queuedJobs(cust_id: $cust_id, radius_mile: $radius_mile, location_id: $location_id, equipment_id: $equipment_id) {
+      id
+      ticket_id
+      type
+      summary
+      distance
+      installer_skills
+      priority
+    }
   }
-}`;
+`;
 
 export const ADD_TICKET_ATTACHMENT = gql`
   mutation addTicketAttachment($input_attachment: TicketAttachmentInput) {
