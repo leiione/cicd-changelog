@@ -54,17 +54,12 @@ const Attachments = (props) => {
     fetchPolicy: "network-only",
   });
 
-
-
   useSubscription(ATTACHMENT_SUBSCRIPTION, {
     variables: { ticket_id: ticket.ticket_id },
     onData: async ({ data: { data }, client }) => {
       refetchAttachment();
     },
   });
-
-
-
   useEffect(() => {
     if (data) {
       setSelectedFiles(data.ticketAttachments);
@@ -180,6 +175,14 @@ const Attachments = (props) => {
     const files = Array.from(event.dataTransfer.files);
     handleFileChange(files);
     setIsDragging(true);
+  };
+
+  const handleMouseEnter = () => {
+    setIsDragging(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
   };
 
   useEffect(() => {
@@ -390,8 +393,10 @@ const Attachments = (props) => {
             >
               <Box
                 className={`upload-image-placeholder ${
-                  isDragging ? "dragging" : ""
+                  isDragging ? "dragging" : "" 
                 }`}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
               >
                 <label
                   htmlFor="upload-file-input"
