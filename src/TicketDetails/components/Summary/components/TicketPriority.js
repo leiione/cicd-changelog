@@ -1,5 +1,5 @@
 import React from "react";
-import { IconButton, MenuItem, Popover } from "@mui/material";
+import { IconButton, MenuItem, Popover, Tooltip } from "@mui/material";
 import { preventEvent } from "../../../../Common/helper";
 import { getPriorityIcon } from "utils/getPriorityIcon";
 
@@ -35,9 +35,11 @@ const TicketPriority = (props) => {
 
   return (
     <>
-      <IconButton color="default" size="small" onClick={handleClick}>
-        {getPriorityIcon(priority)}
-      </IconButton>
+     <Tooltip title={`Priority: ${priority || 'Not Set'}`} placement="top">
+  <IconButton color="default" size="small" onClick={handleClick}>
+    {getPriorityIcon(priority)}
+  </IconButton>
+</Tooltip>
 
       <Popover
         open={openMenu}

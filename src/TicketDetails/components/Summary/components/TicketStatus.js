@@ -149,6 +149,7 @@ const TicketStatus = (props) => {
 
   return (
     <>
+    <Tooltip title={`Status: ${status || 'Not Set'}`} placement="top">
       <Button
         color="default"
         onClick={handleClick}
@@ -156,6 +157,7 @@ const TicketStatus = (props) => {
       >
         <span className="text-dark font-weight-normal">{status}</span>
       </Button>
+      </Tooltip>
       <Menu
         id="basic-menu"
         anchorEl={anchorEl}

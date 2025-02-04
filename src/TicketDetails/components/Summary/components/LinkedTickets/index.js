@@ -298,6 +298,7 @@ const LinkedTickets = (props) => {
         </Grid>
         {preferences.linkedTickets && (
           <Grid item xs="auto">
+            <Tooltip title="Link Tickets">
             <IconButton
               size="small"
               color="primary"
@@ -305,6 +306,7 @@ const LinkedTickets = (props) => {
             >
               <Link style={{ transform: "rotate(135deg)" }} />
             </IconButton>
+            </Tooltip>
           </Grid>
         )}
       </Grid>
