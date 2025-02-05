@@ -49,6 +49,8 @@ const Summary = (props) => {
     requiredCustomFieldsCount,
     isSignatureAdded,
     setIsSignatureAdded,
+    ticketCached,
+    setTicketCached
   } = props;
 
   const showSignature = true; // this should come from ticket type settings
@@ -92,6 +94,7 @@ const Summary = (props) => {
           }
         ],
       });
+      setTicketCached({ ...ticketCached, ...input_ticket });
       dispatch(
         showSnackbar({
           message: "Ticket updated successfully",

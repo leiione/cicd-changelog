@@ -54,15 +54,16 @@ const Assignee = (props) => {
       ticket.assignees &&
       Array.isArray(ticket.assignees) &&
       data &&
-      data.assignees
+      data.assignees && tempAssignees.length === 0
     ) {
-      const initialAssignees = ticket.assignees.map((assigneeId) => ({
+      const initialAssignees = ticket.assignees.filter(x => x !== 0).map((assigneeId) => ({
         appuser_id: assigneeId,
         realname: fetchAssigneeNameCallback(assigneeId),
       }));
       setAssignees(initialAssignees);
       setTempAssignees(initialAssignees); // Initialize tempAssignees
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticket, data, fetchAssigneeNameCallback]);
   
   const handlePopoverClose = async (event) => {
@@ -92,6 +93,7 @@ const Assignee = (props) => {
   
       // Sync the saved state
       setAssignees(tempAssignees);
+      setTempAssignees(tempAssignees);
     } catch (error) {
       console.error("Error updating ticket:", error);
       dispatch(

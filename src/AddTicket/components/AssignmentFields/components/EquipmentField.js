@@ -71,6 +71,8 @@ const EquipmentField = (props) => {
         setValue('ticket_contact_name', '')
         setValue('address', '')
       }
+      setValue('ticket_contact_emails', '')
+      setValue('ticket_contact_numbers', '')
     }
   }
 

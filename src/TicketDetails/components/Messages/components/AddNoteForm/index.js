@@ -18,6 +18,7 @@ import Files from "react-files";
 import FileUploadPreview from "components/FileUploadPreview";
 import { acceptedFormats, maxFileSize } from "Common/constants";
 import { readFileAsBase64 } from "Common/helper";
+import { cloneDeep } from "lodash";
 
 // import Files from "react-files";
 
@@ -51,7 +52,8 @@ const AddNoteFields = (props) => {
   };
 
   const startUpload = async (files) => {
-    files.forEach(async (file) => {
+    const newFiles = cloneDeep(filemapping);
+    for (let file of files) {
       const progressKey = file.name;
       const fileData = await readFileAsBase64(file);
 
@@ -74,18 +76,10 @@ const AddNoteFields = (props) => {
         [progressKey]: false,
       }));
 
-      const values = watch();
-
-      setValue("attachments", [
-        ...(values.attachments || []),
-        data.uploadFile.attachment_id,
-      ]);
-
-      setFileMapping([
-        ...filemapping,
-        { name: file.name, id: data.uploadFile.attachment_id },
-      ]);
-    });
+      newFiles.push({ name: file.name, id: data.uploadFile.attachment_id });
+    }
+    setValue("attachments", [...values.attachments, ...newFiles.map((file) => file.id)]);
+    setFileMapping(newFiles);
   };
 
   const removeFile = (fileName) => {

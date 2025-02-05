@@ -215,6 +215,8 @@ const TicketDetails = (props) => {
             setOpenQueueJobs={setOpenQueueJobs}
             isSignatureAdded={isSignatureAdded}
             setIsSignatureAdded={setIsSignatureAdded}
+            ticketCached={ticketCached}
+            setTicketCached={setTicketCached}
           />
 
           {!hideInprogress &&

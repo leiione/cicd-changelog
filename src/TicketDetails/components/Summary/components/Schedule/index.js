@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { Button, Collapse, Grid, Typography } from "@mui/material";
 import DueDate from "./components/DueDate";
@@ -29,6 +29,10 @@ const Schedule = (props) => {
       })
     );
   };
+
+  useEffect(() => {
+    setHasDueDate(moment(ticket.due_by_date).isValid());
+  }, [ticket.due_by_date]);
 
   return (
     <Grid container spacing={0} alignItems="center">

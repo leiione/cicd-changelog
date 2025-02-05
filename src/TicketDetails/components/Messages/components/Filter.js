@@ -3,43 +3,25 @@ import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 
 const Filter = ({ setFilter }) => {
   // Default filter selection includes all three
-  const [filters, setFilters] = useState(["all", "notes", "message"]);
+  const [filters, setFilters] = useState(["all"]);
 
   const handleFilter = (event, newFilters) => {
-    // console.log("New Filters Selected:", newFilters);
-
-    // If only "All" is selected, select "all", "notes", and "message"
-    if (newFilters.includes("all") && newFilters.length === 1) {
-      const updatedFilters = ["all", "notes", "message"];
-      setFilters(updatedFilters);
-      setFilter(updatedFilters);
-    }
-    // If "All" is selected along with other filters, remove "All" and keep only the specific filters
-    else if (newFilters.includes("all") && newFilters.length > 1) {
+    if (newFilters.includes("all") && !filters.includes("all")) {
+      // If "All" is clicked while other filters are active, reset to "All"
+      setFilters(["all"]);
+      setFilter(["all"]);
+    } else if (newFilters.includes("all") && newFilters.length === 1) {
+      // If "All" is clicked by itself, keep "All" selected
+      setFilters(["all"]);
+      setFilter(["all"]);
+    } else if (newFilters.length === 0) {
+      setFilters(["all"]);
+      setFilter(["all"]);
+    } else {
+      // If any other filter is clicked, deselect "All"
       const updatedFilters = newFilters.filter((filter) => filter !== "all");
       setFilters(updatedFilters);
       setFilter(updatedFilters);
-    }
-    // If both "Notes" and "Messages" are selected, automatically select "All"
-    else if (newFilters.includes("notes") && newFilters.includes("message")) {
-      const updatedFilters = ["all", "notes", "message"];
-      setFilters(updatedFilters);
-      setFilter(updatedFilters);
-    }
-    // If only "notes" or "message" is selected, deselect "All"
-    else if (newFilters.length === 1 && (newFilters.includes("notes") || newFilters.includes("message"))) {
-      setFilters(newFilters);
-      setFilter(newFilters);
-    }
-    // If no filters are selected, default to showing nothing
-    else if (newFilters.length === 0) {
-      setFilters([]);
-      setFilter([]);
-    }
-    // Normal selection behavior, update with the current filters
-    else {
-      setFilters(newFilters);
-      setFilter(newFilters);
     }
   };
 
