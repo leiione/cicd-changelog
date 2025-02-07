@@ -131,8 +131,8 @@ jobs:
       - run:
           name: Microfrontend MS URL Verification
           command: |
-            BRANCH_NAME=${CIRCLE_BRANCH}
-            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
+            source $BASH_ENV
+            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$S3_BUCKET"
             echo "Microfrontend is accessible at: $DEPLOY_URL"
             
       - run:
