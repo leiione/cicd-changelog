@@ -40,6 +40,35 @@ const EditorContainer = (props) => {
           /<a\s[^>]*href="(?!https?:\/\/)([^"]+)"/g,
           '<a href="https://$1"'
         );
+        
+        // If content contains a blockquote, add a line break after it
+        if (e.content.includes('quote-block')) {
+          e.content = e.content + '<p></p>';
+        }
+      }
+    });
+
+    editor.on("SetContent", (e) => {
+      if (e.content && e.content.includes('quote-block')) {
+        // Move cursor to the end of content
+        const body = editor.getBody();
+        const lastNode = body.lastChild;
+        editor.selection.setCursorLocation(lastNode, 0);
+      }
+    });
+
+    editor.on("NodeChange", (e) => {
+      const node = e.element;
+      if (node.closest('.quote-block')) {
+        // If cursor is inside a quote-block, move it outside
+        const quoteBlock = node.closest('.quote-block');
+        const nextElement = quoteBlock.nextElementSibling || editor.dom.create('p', {}, '&nbsp;');
+        
+        if (!quoteBlock.nextElementSibling) {
+          editor.dom.insertAfter(nextElement, quoteBlock);
+        }
+        
+        editor.selection.setCursorLocation(nextElement, 0);
       }
     });
 
@@ -83,8 +112,10 @@ const EditorContainer = (props) => {
         setup: handleEditorSetup,
         content_css: "default",
         content_style: `body { font-family:Helvetica,Arial,sans-serif; font-size:12px; background-color: ${background}; }
-                        .quote-block { background-color: #f7f7f7; border: 1px solid #ccc; margin : 0 !important; padding :1rem; font-size: 12px;}
-                        `,
+                        .quote-block { background-color: #f7f7f7; border: 1px solid #ccc; margin:0; padding:8px; font-size: 12px;}
+                        .quote-block p { margin:0; padding:0; }
+                        .quote-block .quote-sender { display:block; margin-bottom:4px; }
+                        .quote-block .quote-content { margin:0; }`,
         readonly: false,
         extended_valid_elements: "div[contenteditable|class]",
         placeholder: "Write Something here...",
