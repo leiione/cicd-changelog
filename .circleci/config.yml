@@ -4,13 +4,22 @@ executors:
   node-executor:
     docker:
       - image: node:18
+    environment:
+      AWS_REGION: us-east-1
+    steps:
+      - run:
+          name: Install AWS CLI
+          command: |
+            apt-get update && apt-get install -y awscli
 
 jobs:
   build:
     executor: node-executor
     steps:
       - checkout
-
+      - run:
+          name: Check AWS CLI Installation
+          command: aws --version
       - run:
           name: Download .env file from S3
           command: |
@@ -34,6 +43,22 @@ jobs:
       - image: node:18
     steps:
       - checkout
+      - run:
+          name: Install AWS CLI
+          command: |
+            apt-get update && apt-get install -y awscli
+      - run:
+          name: Check AWS CLI Installation
+          command: aws --version
+      - run:
+          name: Configure AWS CLI
+          command: |
+            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+            aws configure set region $AWS_REGION
+      - run:
+          name: Debug AWS Credentials
+          command: aws sts get-caller-identity
       - attach_workspace:
           at: /workspace
       - run:
