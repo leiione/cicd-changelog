@@ -111,7 +111,7 @@ jobs:
             aws s3 sync /workspace/dist/ s3://microfrontend-crm-ms/$S3_BUCKET/ --acl public-read
             echo "Uploaded files to s3://microfrontend-crm-ms/$S3_BUCKET/"
 
-     - run:
+      - run:
           name: Invalidate CloudFront Cache
           command: |
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
