@@ -141,7 +141,7 @@ jobs:
           command: |
             source $BASH_ENV
             DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$S3_BUCKET"
-            COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+            COMMIT_AUTHOR="$(git log -1 --pretty=format:'%an')"
             
             curl -X POST -H 'Content-type: application/json' --data "{
               \"attachments\": [
