@@ -139,6 +139,9 @@ jobs:
       - run:
           name: Send Slack Notification
           command: |
+            source $BASH_ENV
+            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$S3_BUCKET"
+            
             curl -X POST -H 'Content-type: application/json' --data "{
               \"attachments\": [
                 {
@@ -151,7 +154,7 @@ jobs:
                     { \"title\": \"Build Number\", \"value\": \"${CIRCLE_BUILD_NUM}\", \"short\": true },
                     { \"title\": \"Status\", \"value\": \"${CIRCLE_JOB}\", \"short\": true },
                     { \"title\": \"Build URL\", \"value\": \"<${CIRCLE_BUILD_URL}|View Build>\", \"short\": false },
-                    { \"title\": \"Deploy URL\", \"value\": \"${DEPLOY_URL:-N/A}\", \"short\": false }
+                    { \"title\": \"Deploy URL\", \"value\": \"${DEPLOY_URL}\", \"short\": false }
                   ]
                 }
               ]
