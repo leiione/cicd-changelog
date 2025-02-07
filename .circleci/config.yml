@@ -97,6 +97,7 @@ jobs:
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
             source $BASH_ENV
             aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
+            aws cloudfront list-invalidations --distribution-id $CLOUDFRONT_DIST_ID
             DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$S3_BUCKET"
             echo "Microfrontend is accessible at: $DEPLOY_URL"
       
