@@ -36,9 +36,29 @@ jobs:
             mkdir dist && cp -r build/* dist/
             zip -r build.zip dist
 
+      - run:
+          name: Install AWS CLI and Less
+          command: |
+            apt-get update && apt-get install -y awscli less
+      - run:
+          name: Download .env from S3
+          command: |
+            BRANCH_NAME=${CIRCLE_BRANCH}
+            if [ "$BRANCH_NAME" == "develop" ]; then
+              ENV_FILE=".env.staging.txt"
+            elif [ "$BRANCH_NAME" == "master" ]; then
+              ENV_FILE=".env.production.txt"
+            else
+              echo "No Environment file needed for this branch" && exit 0
+            fi
+            aws s3 cp s3://crm-art/crm-envs-fe/$ENV_FILE .env
+            echo "Using Environment file: $ENV_FILE"
+
+
       - persist_to_workspace:
           root: .
           paths:
+            - .env
             - dist
 
   deploy:
