@@ -13,6 +13,14 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install dependencies
+          command: |
+            npm install
+      - run:
+          name: Build the application
+          command: |
+            npm run build  # This should generate the `dist` folder
+      - run:
           name: Install AWS CLI and less
           command: |
             apt-get update && apt-get install -y awscli less
@@ -36,7 +44,7 @@ jobs:
           root: .
           paths:
             - .env
-            - dist
+            - dist  # Make sure the dist folder is persisted
 
   deploy:
     executor: node-executor
@@ -59,7 +67,9 @@ jobs:
           name: Disable AWS CLI pager
           command: |
             export AWS_PAGER=""
-      
+      - run:
+          name: Debug AWS Credentials
+          command: aws sts get-caller-identity
       - attach_workspace:
           at: /workspace
       - run:
