@@ -138,26 +138,26 @@ jobs:
       - run:
           name: Send Slack Notification
           command: |
-            - run:
-    name: Send Slack Notification
-    command: |
-      curl -X POST -H 'Content-type: application/json' --data "{
-        \"attachments\": [
-          {
-            \"color\": \"#36a64f\",
-            \"title\": \"CircleCI Build Notification\",
-            \"fields\": [
-              { \"title\": \"Job\", \"value\": \"${CIRCLE_JOB}\", \"short\": true },
-              { \"title\": \"Branch\", \"value\": \"${CIRCLE_BRANCH}\", \"short\": true },
-              { \"title\": \"Commit\", \"value\": \"${CIRCLE_SHA1:0:7}\", \"short\": true },
-              { \"title\": \"Build Number\", \"value\": \"${CIRCLE_BUILD_NUM}\", \"short\": true },
-              { \"title\": \"Status\", \"value\": \"${CIRCLE_JOB}\", \"short\": true },
-              { \"title\": \"Build URL\", \"value\": \"<${CIRCLE_BUILD_URL}|View Build>\", \"short\": false },
-              { \"title\": \"Deploy URL\", \"value\": \"${DEPLOY_URL:-N/A}\", \"short\": false }
+      - run:
+          name: Send Slack Notification
+          command: |
+          curl -X POST -H 'Content-type: application/json' --data "{
+            \"attachments\": [
+              {
+                \"color\": \"#36a64f\",
+                \"title\": \"CircleCI Build Notification\",
+                \"fields\": [
+                  { \"title\": \"Job\", \"value\": \"${CIRCLE_JOB}\", \"short\": true },
+                  { \"title\": \"Branch\", \"value\": \"${CIRCLE_BRANCH}\", \"short\": true },
+                  { \"title\": \"Commit\", \"value\": \"${CIRCLE_SHA1:0:7}\", \"short\": true },
+                  { \"title\": \"Build Number\", \"value\": \"${CIRCLE_BUILD_NUM}\", \"short\": true },
+                  { \"title\": \"Status\", \"value\": \"${CIRCLE_JOB}\", \"short\": true },
+                  { \"title\": \"Build URL\", \"value\": \"<${CIRCLE_BUILD_URL}|View Build>\", \"short\": false },
+                  { \"title\": \"Deploy URL\", \"value\": \"${DEPLOY_URL:-N/A}\", \"short\": false }
+                ]
+              }
             ]
-          }
-        ]
-      }" https://hooks.slack.com/services/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
+          }" https://hooks.slack.com/services/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
 
 
 workflows:
