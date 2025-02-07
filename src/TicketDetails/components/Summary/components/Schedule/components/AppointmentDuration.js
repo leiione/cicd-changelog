@@ -110,6 +110,7 @@ const AppointmentDuration = (props) => {
           horizontal: "left",
         }}
       >
+      
         <div style={{ padding: "10px 20px" }}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DesktopTimePicker
