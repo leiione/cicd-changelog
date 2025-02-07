@@ -133,7 +133,7 @@ jobs:
           command: |
             BRANCH_NAME=${CIRCLE_BRANCH}
             DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
-            echo "Microfrontend is accessible at: $DEPLOY_URL
+            echo "Microfrontend is accessible at: $DEPLOY_URL"
             
       - run:
           name: Send Notification to Slack
