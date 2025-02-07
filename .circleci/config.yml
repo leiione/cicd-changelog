@@ -136,12 +136,12 @@ jobs:
             echo "Microfrontend is accessible at: $DEPLOY_URL"
             
       - run:
-          name: Send Notification to Slack
+          name: Send Slack Notification
           command: |
-            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
-            curl -X POST -H 'Content-type: application/json' --data '{
-              "text": "CircleCI Build Status: ${CIRCLE_JOB} - ${CIRCLE_BRANCH} - ${CIRCLE_BUILD_URL} - ${DEPLOY_URL"
-            }' https://hooks.slack.com/services/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
+            curl -X POST -H 'Content-type: application/json' --data "{
+              \"text\": \"CircleCI Build Status: ${CIRCLE_JOB} - ${CIRCLE_BRANCH} - ${CIRCLE_BUILD_URL} - ${DEPLOY_URL}\"
+            }" $https://hooks.slack.com/services/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
+
 
 workflows:
   build_and_deploy:
