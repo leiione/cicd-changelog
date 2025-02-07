@@ -141,6 +141,7 @@ jobs:
           command: |
             source $BASH_ENV
             DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$S3_BUCKET"
+            COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
             
             curl -X POST -H 'Content-type: application/json' --data "{
               \"attachments\": [
@@ -150,7 +151,7 @@ jobs:
                   \"fields\": [
                     { \"title\": \"Job\", \"value\": \"${CIRCLE_JOB}\", \"short\": true },
                     { \"title\": \"Branch\", \"value\": \"${CIRCLE_BRANCH}\", \"short\": true },
-                    { \"title\": \"User\", \"value\": \"${USERNAME}\", \"short\": true },
+                    { \"title\": \"Commit Author\", \"value\": \"${COMMIT_AUTHOR}\", \"short\": true },
                     { \"title\": \"Commit\", \"value\": \"${CIRCLE_SHA1:0:7}\", \"short\": true },
                     { \"title\": \"Build Number\", \"value\": \"${CIRCLE_BUILD_NUM}\", \"short\": true },
                     { \"title\": \"Status\", \"value\": \"${CIRCLE_JOB}\", \"short\": true },
