@@ -128,9 +128,7 @@ jobs:
               sleep 10  # Wait for 10 seconds before checking again
             done
        
-            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$S3_BUCKET"
-            echo "Microfrontend is accessible at: $DEPLOY_URL"
-      
+                 
       - run:
           name: Send Notification to RingCentral
           command: |
