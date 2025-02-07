@@ -67,9 +67,7 @@ jobs:
           name: Disable AWS CLI pager
           command: |
             export AWS_PAGER=""
-      - run:
-          name: Debug AWS Credentials
-          command: aws sts get-caller-identity
+      
       - attach_workspace:
           at: /workspace
       - run:
