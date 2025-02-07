@@ -51,16 +51,25 @@ jobs:
             - dist  # Ensure the dist folder is persisted
 
   deploy:
-    executor: node-executor
+    docker:
+      - image: node: 18
     steps:
       - checkout
+      - attach_workspace:
+          at: /workspace
+      - run:
+          name: Install Prerequisites
+          command: |
+            apt-get update
+            apt-get install -y unzip less
       - run:
           name: Install AWS CLI
           command: |
-            apt-get update && apt-get install -y awscli
-      - run:
-          name: Check AWS CLI Installation
-          command: aws --version
+            apt-get update
+            apt-get install -y unzip
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" 
+            unzip awscliv2.zip
+            ./aws/install
       - run:
           name: Configure AWS CLI
           command: |
@@ -68,18 +77,7 @@ jobs:
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
             aws configure set region $AWS_REGION
       - run:
-          name: Disable AWS CLI pager
-          command: |
-            export AWS_PAGER=""
-      
-      - attach_workspace:
-          at: /workspace
-      - run:
-          name: List files in the workspace (debugging)
-          command: |
-            ls -alh /workspace  # Verify the dist folder is present
-      - run:
-          name: Deploy Application
+          name: Determine Target S3 Bucket
           command: |
             BRANCH_NAME=${CIRCLE_BRANCH}
             if [ "$BRANCH_NAME" == "develop" ]; then
@@ -89,8 +87,14 @@ jobs:
             else
               S3_BUCKET="$BRANCH_NAME"
             fi
+            echo "S3_BUCKET=$S3_BUCKET" >> $BASH_ENV
+            echo "Deploying to S3 bucket: $S3_BUCKET"
+      - run:
+          name: Upload to S3 Bucket
+          command: |
+            source $BASH_ENV
             aws s3 sync /workspace/dist/ s3://microfrontend-crm-ms/$S3_BUCKET/ --acl public-read
-            echo "Application deployed to s3://microfrontend-crm-ms/$S3_BUCKET/"
+            echo "Uploaded files to s3://microfrontend-crm-ms/$S3_BUCKET/"
       - run:
           name: Invalidate CloudFront Cache
           command: |
