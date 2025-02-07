@@ -21,6 +21,10 @@ jobs:
           command: |
             npm run build  # This should generate the `dist` folder
       - run:
+          name: List files after build
+          command: |
+            ls -alh  # Debugging to confirm dist folder exists
+      - run:
           name: Install AWS CLI and less
           command: |
             apt-get update && apt-get install -y awscli less
@@ -44,7 +48,7 @@ jobs:
           root: .
           paths:
             - .env
-            - dist  # Make sure the dist folder is persisted
+            - dist  # Ensure the dist folder is persisted
 
   deploy:
     executor: node-executor
@@ -70,6 +74,10 @@ jobs:
       
       - attach_workspace:
           at: /workspace
+      - run:
+          name: List files in the workspace (debugging)
+          command: |
+            ls -alh /workspace  # Verify the dist folder is present
       - run:
           name: Deploy Application
           command: |
