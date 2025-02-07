@@ -5,12 +5,7 @@ executors:
     docker:
       - image: node:18
     environment:
-      AWS_REGION: us-west-2
-    steps:
-      - run:
-          name: Install AWS CLI and less
-          command: |
-            apt-get update && apt-get install -y awscli less
+      AWS_REGION: us-east-1
 
 jobs:
   build:
@@ -43,8 +38,7 @@ jobs:
             - .env
 
   deploy:
-    docker:
-      - image: node:18
+    executor: node-executor
     steps:
       - checkout
       - run:
