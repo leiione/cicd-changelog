@@ -6,6 +6,11 @@ executors:
       - image: node:18
     environment:
       AWS_REGION: us-west-2
+    steps:
+      - run:
+          name: Install AWS CLI and less
+          command: |
+            apt-get update && apt-get install -y awscli less
 
 jobs:
   build:
@@ -13,9 +18,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install AWS CLI
+          name: Install AWS CLI and less
           command: |
-            apt-get update && apt-get install -y awscli
+            apt-get update && apt-get install -y awscli less
       - run:
           name: Check AWS CLI Installation
           command: aws --version
@@ -55,6 +60,10 @@ jobs:
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
             aws configure set region $AWS_REGION
+      - run:
+          name: Disable AWS CLI pager
+          command: |
+            export AWS_PAGER=""
       - run:
           name: Debug AWS Credentials
           command: aws sts get-caller-identity
