@@ -4,55 +4,46 @@ executors:
   node-executor:
     docker:
       - image: node:18
-    environment:
-      AWS_REGION: us-east-1
 
 jobs:
   build:
     executor: node-executor
     steps:
       - checkout
+
       - run:
           name: Install dependencies
-          command: |
-            npm install --legacy-peer-deps
+          command: npm install --legacy-peer-deps
+      
       - run:
           name: Build the application
-          command: |
-            npm run build  # This should generate the `dist` folder
+          command: CI=false npm run build
+
       - run:
-          name: List files after build
+          name: Create Dist folder and copy build artifact
           command: |
-            ls -alh  # Debugging to confirm dist folder exists
+            mkdir dist && cp -r build/* dist/
+
       - run:
-          name: Install AWS CLI and less
+          name: Install zip utility
           command: |
-            apt-get update && apt-get install -y awscli less
+            apt-get update
+            apt-get install -y zip
+
       - run:
-          name: Check AWS CLI Installation
-          command: aws --version
-      - run:
-          name: Download .env file from S3
+          name: Zip the build artifacts
           command: |
-            BRANCH_NAME=${CIRCLE_BRANCH}
-            if [ "$BRANCH_NAME" == "develop" ]; then
-              ENV_FILE=".env.staging.txt"
-            elif [ "$BRANCH_NAME" == "master" ]; then
-              ENV_FILE=".env.production.txt"
-            else
-              echo "No Environment file needed for this branch" && exit 0
-            fi
-            aws s3 cp s3://crm-art/crm-envs-fe/$ENV_FILE .env
-            echo "Using Environment file: $ENV_FILE"
+            mkdir dist && cp -r build/* dist/
+            zip -r build.zip dist
+
       - persist_to_workspace:
           root: .
           paths:
-            - .env
-            - dist  # Ensure the dist folder is persisted
+            - dist
 
   deploy:
     docker:
-      - image: node:18
+      - image: node:18  # For AWS CLI
     steps:
       - checkout
       - attach_workspace:
@@ -62,20 +53,23 @@ jobs:
           command: |
             apt-get update
             apt-get install -y unzip less
+
       - run:
           name: Install AWS CLI
           command: |
             apt-get update
             apt-get install -y unzip
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" 
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             ./aws/install
+
       - run:
           name: Configure AWS CLI
           command: |
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
             aws configure set region $AWS_REGION
+
       - run:
           name: Determine Target S3 Bucket
           command: |
@@ -89,28 +83,36 @@ jobs:
             fi
             echo "S3_BUCKET=$S3_BUCKET" >> $BASH_ENV
             echo "Deploying to S3 bucket: $S3_BUCKET"
+
       - run:
-          name: Upload to S3 Bucket
+          name: Upload to S3
           command: |
             source $BASH_ENV
             aws s3 sync /workspace/dist/ s3://microfrontend-crm-ms/$S3_BUCKET/ --acl public-read
             echo "Uploaded files to s3://microfrontend-crm-ms/$S3_BUCKET/"
+
       - run:
           name: Invalidate CloudFront Cache
           command: |
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
-            INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*" --query "Invalidation.Id" --output text --no-cli-pager)
-
-            echo "Waiting for CloudFront Invalidation ID: $INVALIDATION_ID"
-            while true; do
-              STATUS=$(aws cloudfront get-invalidation --distribution-id $CLOUDFRONT_DIST_ID --id $INVALIDATION_ID --query "Invalidation.Status" --output text --no-cli-pager)
-              echo "Invalidation Status: $STATUS"
-              if [ "$STATUS" == "Completed" ]; then
-                echo "Invalidation Completed!"
-                break
-              fi
-              sleep 10  # Wait for 10 seconds before checking again
-            done
+            source $BASH_ENV
+            aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
+            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$S3_BUCKET"
+            echo "Microfrontend is accessible at: $DEPLOY_URL"
+      
+      - run:
+          name: Send Notification to RingCentral
+          command: |
+            source $BASH_ENV
+            BUILD_NUM=$CIRCLE_BUILD_NUM
+            BUILD_URL=$CIRCLE_BUILD_URL
+            VCS_URL=$CIRCLE_REPOSITORY_URL
+            REPO_NAME=$CIRCLE_PROJECT_REPONAME
+            USERNAME=$CIRCLE_USERNAME
+            STATUS="success"
+            PAYLOAD="{\"payload\": {\"activity\": \"Deployment Completed\", \"title\": \"Deployment Notification\", \"body\": \"Deployment to $S3_BUCKET completed.\nDeploy URL: $DEPLOY_URL\", \"build_num\": $BUILD_NUM, \"build_url\": \"$BUILD_URL\", \"branch\": \"$BRANCH_NAME\", \"vcs_url\": \"$VCS_URL\", \"reponame\": \"$REPO_NAME\", \"username\": \"$USERNAME\", \"status\": \"$STATUS\"}}"
+            echo "Payload: $PAYLOAD"
+            curl -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" $RINGCENTRAL
 
 workflows:
   build_and_deploy:
