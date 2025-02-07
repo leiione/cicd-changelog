@@ -36,6 +36,7 @@ jobs:
           root: .
           paths:
             - .env
+            - dist
 
   deploy:
     executor: node-executor
