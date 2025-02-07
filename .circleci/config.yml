@@ -135,9 +135,7 @@ jobs:
             DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$S3_BUCKET"
             echo "Microfrontend is accessible at: $DEPLOY_URL"
             
-      - run:
-          name: Send Slack Notification
-          command: |
+      
       - run:
           name: Send Slack Notification
           command: |
