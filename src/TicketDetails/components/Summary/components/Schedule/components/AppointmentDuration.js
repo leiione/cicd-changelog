@@ -104,14 +104,15 @@ const AppointmentDuration = (props) => {
     }
     const startDate = new Date(ticket.start) || new Date(ticket.due_by_date)
     const formattedDate = `${startDate.getFullYear()}-${padLeft(startDate.getMonth() + 1)}-${padLeft(startDate.getDate())}`
-    let earliestArrivalDate = moment.utc(`${formattedDate} ${ticket.earliest_arrival_time}`, "YYYY-MM-DD HH:mm").format(DateFormat_DATETIME)
+    const timeArrival = ticket.latest_arrival_time ? ticket.latest_arrival_time : ticket.earliest_arrival_time || "08:00:00"
+    let earliestArrivalDate = moment.utc(`${formattedDate} ${timeArrival}`, "YYYY-MM-DD HH:mm").format(DateFormat_DATETIME)
     let endTime = moment.utc(earliestArrivalDate).add(tempMaxDuration, "m").format("hh:mm A")
     return (
       <Tooltip title={`Complete by ${endTime}`} placement="bottom-end">
           <InfoOutlined fontSize="large" sx={{ marginBottom: '6px' }} />
       </Tooltip>
     )
-  }, [tempMaxDuration, ticket.start, ticket.due_by_date, ticket.earliest_arrival_time])
+  }, [tempMaxDuration, ticket.start, ticket.due_by_date, ticket.earliest_arrival_time, ticket.latest_arrival_time])
 
   const durationLabel = getDurationLabel(tempMaxDuration)
   return (
