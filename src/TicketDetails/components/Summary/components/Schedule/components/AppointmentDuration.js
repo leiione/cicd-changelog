@@ -56,7 +56,7 @@ const AppointmentDuration = (props) => {
     if (ticket.max_duration !== undefined) {
       const convertedTime = convertMinutesToTime(ticket.max_duration);
       setDisplayDuration(convertedTime); // Update both displayed and temp durations
-      setTempMaxDuration(ticket.max_duration);
+      setTempMaxDuration(ticket.max_duration || 60);
     }
   }, [ticket.max_duration]);
 
