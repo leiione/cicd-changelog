@@ -57,6 +57,49 @@ const useStyles = makeStyles({
   }
 });
 
+const processDomNode = (domNode, senderText = '', contentHtml = '') => {
+    // Iterate through all children of the current node
+  domNode.children.forEach(child => {
+    if (child.attribs && child.attribs.class === 'quote-sender') {
+      // If the child has class 'quote-sender', extract sender text
+      senderText = child.children[0].data || '';
+    } else if (child.name) {
+      // Preserve paragraphs in quote content
+      let paragraphContent = child.children
+        .map(c => c.data || '')
+        .join(' ')
+        .trim();
+        
+      if (paragraphContent) {
+        // Add the paragraph content inside a tag
+        if (child.type === 'tag') {
+          if (child.name !== child.parent.name) {
+            contentHtml += `
+              <${child.parent.name}>
+                <${child.name}>${paragraphContent}</${child.name}>
+              </${child.parent.name}>
+            `;
+          } else {
+          contentHtml += `<${child.name}>${paragraphContent}</${child.name}>`;
+          }
+        }
+        if(child.type === 'text') {
+          contentHtml += `<p>${paragraphContent}</p>`;
+        }
+      }
+    }
+
+    // Recursively process any nested children
+    if (child.children && child.children.length > 0) {
+      const result = processDomNode(child, senderText, contentHtml);
+      senderText = result.senderText;
+      contentHtml = result.contentHtml;
+    }
+  });
+
+  return { senderText, contentHtml };
+}
+
 const Note = (props) => {
   const classes = useStyles();
   const { message, onDeleteNote, handleQouteNote } = props;
@@ -189,27 +232,10 @@ const Note = (props) => {
                   replace: (domNode) => {
                     if (domNode.attribs && domNode.attribs.class === 'quote-block') {
                       // Handle quote blocks - always show in full
-                      let senderText = '';
-                      let contentHtml = '';
-
-                      domNode.children.forEach(child => {
-                        if (child.attribs && child.attribs.class === 'quote-sender') {
-                          senderText = child.children[0].data || '';
-                        } else if (child.name === 'p') {
-                          // Preserve paragraphs in quote content
-                          const paragraphContent = child.children
-                            .map(c => c.data || '')
-                            .join(' ')
-                            .trim();
-                          if (paragraphContent) {
-                            contentHtml += `<p class="quote-content">${paragraphContent}</p>`;
-                          }
-                        }
-                      });
-
+                      const result = processDomNode(domNode);
                       const quoteHtml = `
-                        <span class="quote-sender">${senderText.trim()}</span>
-                        ${contentHtml}
+                        <span class="quote-sender">${result.senderText.trim()}</span>
+                        ${result.contentHtml}
                       `.trim();
 
                       return React.createElement('div', {
