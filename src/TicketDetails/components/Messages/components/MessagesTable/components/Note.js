@@ -25,6 +25,7 @@ import DialogAlert from "components/DialogAlert";
 import { NO_RIGHTS_MSG } from "utils/messages";
 import usePermission from "config/usePermission";
 import FileUploadPreview from "components/FileUploadPreview";
+import LinesEllipsis from "react-lines-ellipsis";
 
 const useStyles = makeStyles({
   quoteBlock: {
@@ -72,20 +73,7 @@ const processDomNode = (domNode, senderText = '', contentHtml = '') => {
         
       if (paragraphContent) {
         // Add the paragraph content inside a tag
-        if (child.type === 'tag') {
-          if (child.name !== child.parent.name) {
-            contentHtml += `
-              <${child.parent.name}>
-                <${child.name}>${paragraphContent}</${child.name}>
-              </${child.parent.name}>
-            `;
-          } else {
-          contentHtml += `<${child.name}>${paragraphContent}</${child.name}>`;
-          }
-        }
-        if(child.type === 'text') {
-          contentHtml += `<p>${paragraphContent}</p>`;
-        }
+        contentHtml += `<p>${paragraphContent}</p>`;
       }
     }
 
@@ -227,36 +215,45 @@ const Note = (props) => {
           }
           secondary={
             <>
-              <div className={!more && shouldShowMore ? classes.truncateContainer : undefined}>
-                {parse(cleanContent, {
-                  replace: (domNode) => {
-                    if (domNode.attribs && domNode.attribs.class === 'quote-block') {
-                      // Handle quote blocks - always show in full
-                      const result = processDomNode(domNode);
-                      const quoteHtml = `
-                        <span class="quote-sender">${result.senderText.trim()}</span>
-                        ${result.contentHtml}
-                      `.trim();
+              {more || cleanContent.includes('quote-block') ? (
+                <div className={!more && shouldShowMore ? classes.truncateContainer : undefined}>
+                  {parse(cleanContent, {
+                    replace: (domNode) => {
+                      if (domNode.attribs && domNode.attribs.class === 'quote-block') {
+                        // Handle quote blocks - always show in full
+                        const result = processDomNode(domNode);
+                        const quoteHtml = `
+                          <span class="quote-sender">${result.senderText.trim()}</span>
+                          ${result.contentHtml}
+                        `.trim();
 
-                      return React.createElement('div', {
-                        className: `quote-block ${classes.quoteBlock}`,
-                        dangerouslySetInnerHTML: { __html: quoteHtml }
-                      });
+                        return React.createElement('div', {
+                          className: `quote-block ${classes.quoteBlock}`,
+                          dangerouslySetInnerHTML: { __html: quoteHtml }
+                        });
+                      }
+                      // For non-quote content, apply truncation based on more/simplify state
+                      if (domNode.type === 'tag' && domNode.name === 'p') {
+                        const content = domNode.children.map(child => child.data || '').join(' ').trim();
+                        if (!content) return null;
+                        
+                        // Only apply truncation to non-quote content
+                        return React.createElement('div', {
+                          className: !more && shouldShowMore ? classes.truncateContainer : undefined
+                        }, content);
+                      }
+                      return domNode;
                     }
-                    // For non-quote content, apply truncation based on more/simplify state
-                    if (domNode.type === 'tag' && domNode.name === 'p') {
-                      const content = domNode.children.map(child => child.data || '').join(' ').trim();
-                      if (!content) return null;
-                      
-                      // Only apply truncation to non-quote content
-                      return React.createElement('div', {
-                        className: !more && shouldShowMore ? classes.truncateContainer : undefined
-                      }, content);
-                    }
-                    return domNode;
-                  }
-                })}
-              </div>
+                  })}
+                </div>
+              ) : (
+                <LinesEllipsis
+                  text={h2p(cleanContent)}
+                  maxLine={4}
+                  ellipsis=""
+                  className="text-pre-line"
+                />
+              )}
               
               {/* Only show More/Simplify if there's non-quote content that's long enough */}
               {shouldShowMore && cleanContent.includes('<p>') && !cleanContent.includes('quote-block') && (
