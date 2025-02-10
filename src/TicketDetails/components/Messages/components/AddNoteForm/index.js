@@ -227,9 +227,9 @@ const AddNoteForm = (props) => {
     } else if (qoutedContent.from === "note") {
       return `<div class="quote-block"><div class="quote-sender">${replaceWhitespace(
         qoutedContent.content.appuser_name
-      )} wrote:</div><div class="quote-content">${replaceWhitespace(
+      )} wrote:</div><div class="quote-content">${
         qoutedContent.content.content
-      )}</div></div>`;
+      }</div></div>`;
     }
   };
 
