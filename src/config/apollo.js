@@ -8,7 +8,8 @@ const token = localStorage.getItem("Visp.token");
 const vispDB = localStorage.getItem("Visp.database") // SANDBOX || LIVE
 
 let CRM_URI = process.env.CRM_MS_URI_LIVE || process.env.REACT_APP_CRM_MS_URI_LIVE
-let CRM_URI_WS = process.env.CRM_MS_URI_LIVE_WS || process.env.REACT_APP_CRM_MS_URI_LIVE_WS
+let CRM_URI_WS = process.env.CRM_MS_URI_LIVE_WS || process.env.REACT_APP_CRM_MS_URI_LIVE
+
 if (vispDB === "SANDBOX") {
   CRM_URI = process.env.CRM_MS_URI_MIRROR || process.env.REACT_APP_CRM_MS_URI_MIRROR
   CRM_URI_WS = process.env.CRM_MS_URI_MIRROR_WS || process.env.REACT_APP_CRM_MS_URI_MIRROR_WS

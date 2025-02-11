@@ -7,19 +7,15 @@ import {
   ListItemAvatar,
   ListItemText,
   Typography,
-  Dialog,
-  DialogContent,
-  DialogTitle,
   Tooltip,
 } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMessagePlus,
   faNote,
   faTrash,
 } from "@awesome.me/kit-bf5f144381/icons/sharp/regular";
-import GetAppIcon from "@mui/icons-material/GetApp";
-import { Close } from "@mui/icons-material";
 
 import moment from "moment-timezone";
 import h2p from "html2plaintext";
@@ -28,49 +24,146 @@ import PropTypes from "prop-types";
 import DialogAlert from "components/DialogAlert";
 import { NO_RIGHTS_MSG } from "utils/messages";
 import usePermission from "config/usePermission";
-import { Visibility } from "@mui/icons-material";
-import { getExtensionFromFilename } from "Common/helper";
-import { IMAGE_EXTENSION_LIST } from "Common/constants";
-import { faFilePdf, faFileZip } from "@fortawesome/pro-regular-svg-icons";
-import { includes } from "lodash";
+import FileUploadPreview from "components/FileUploadPreview";
+import LinesEllipsis from "react-lines-ellipsis";
 
+const useStyles = makeStyles({
+  quoteBlock: {
+    backgroundColor: '#f7f7f7 !important',
+    border: '1px solid #ccc !important',
+    margin: '0 0 8px 0 !important',
+    padding: '8px !important',
+    fontSize: '12px !important',
+    '& p': {
+      margin: '0 !important',
+      padding: '0 !important',
+      '&:empty': {
+        display: 'none !important'
+      }
+    },
+    '& .quote-sender': {
+      display: 'block !important',
+      marginBottom: '8px !important',
+      fontWeight: '500 !important'
+    },
+    '& .quote-content': {
+      margin: '0 !important',
+      display: 'block !important'
+    }
+  },
+  truncateContainer: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  }
+});
+
+const processDomNode = (domNode, senderText = '', contentHtml = '') => {
+    // Iterate through all children of the current node
+  domNode.children.forEach(child => {
+    if (child.attribs && child.attribs.class === 'quote-sender') {
+      // If the child has class 'quote-sender', extract sender text
+      senderText = child.children[0].data || '';
+    } else if (child.name) {
+      // Preserve paragraphs in quote content
+      let paragraphContent = child.children
+        .map(c => c.data || '')
+        .join(' ')
+        .trim();
+        
+      if (paragraphContent) {
+        // Add the paragraph content inside a tag
+        contentHtml += `<p>${paragraphContent}</p>`;
+      }
+    }
+
+    // Recursively process any nested children
+    if (child.children && child.children.length > 0) {
+      const result = processDomNode(child, senderText, contentHtml);
+      senderText = result.senderText;
+      contentHtml = result.contentHtml;
+    }
+  });
+
+  return { senderText, contentHtml };
+}
 
 const Note = (props) => {
+  const classes = useStyles();
   const { message, onDeleteNote, handleQouteNote } = props;
   const [more, setMore] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [openPreview, setOpenPreview] = useState(false);
-  const [previewImage, setPreviewImage] = useState("");
   const permitDelete = usePermission(
     "ticket_note_message",
     "flag_delete",
     "notes"
   );
 
-  const isHtml = /<\/?[a-z][\s\S]*>/i.test(message.content);
-  const lineLen = message.content
-    ? isHtml
-      ? h2p(message.content).split(/\r|\r\n|\n/g).length +
-          (message.content.match(/<div|<p|<br/g) || []).length
-      : message.content.split(/\r|\r\n|\n/g).length
-    : 1;
+  // Clean content by removing extra &nbsp; and empty paragraphs
+  const cleanContent = React.useMemo(() => {
+    if (!message.content) return '';
+    
+    // First clean the basic content
+    let content = message.content
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // Clean up quote blocks specifically
+    content = content.replace(
+      /<div class="quote-block">([\s\S]*?)<\/div>/g,
+      (match, inner) => {
+        // Clean up the quote block content while preserving paragraphs
+        const cleanedInner = inner
+          .replace(/<p>\s*&nbsp;\s*<\/p>/g, '')  // Remove empty paragraphs
+          .replace(/\s+/g, ' ')  // Clean up spaces
+          .trim();
+        return `<div class="quote-block">${cleanedInner}</div>`;
+      }
+    );
+
+    // Wrap non-quote content in a single paragraph
+    if (!content.includes('quote-block')) {
+      content = `<p>${content}</p>`;
+    }
+
+    return content;
+  }, [message.content]);
+
+  // Improved content length detection with better HTML handling
+  const contentLength = React.useMemo(() => {
+    // Convert HTML to plain text first
+    const textContent = h2p(cleanContent)
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // Calculate actual content length
+    const contentWithoutSpaces = textContent.replace(/\s+/g, '');
+    
+    // If content is very short, don't show More button
+    if (contentWithoutSpaces.length < 100) {
+      return 0;
+    }
+
+    // Count actual lines considering line breaks and word wrapping
+    const lines = textContent.split(/\r|\r\n|\n/g);
+    const totalLength = lines.reduce((acc, line) => {
+      // Calculate how many lines this text would take up at 80 chars per line
+      return acc + Math.ceil(line.length / 80);
+    }, 0);
+
+    return totalLength;
+  }, [cleanContent]);
+
+  // Only show More button if content is actually long
+  const shouldShowMore = contentLength > 3;
 
   const handleOnDelete = async () => {
     setSubmitting(true);
     await onDeleteNote(message.note_id);
     setOpenDialog(false);
     setSubmitting(false);
-  };
-
-  const handlePreviewOpen = (imageSrc) => {
-    setPreviewImage(imageSrc);
-    setOpenPreview(true);
-  };
-
-  const handlePreviewClose = () => {
-    setOpenPreview(false);
-    setPreviewImage("");
   };
 
   return (
@@ -122,69 +215,65 @@ const Note = (props) => {
           }
           secondary={
             <>
-              {more || lineLen < 6 ? (
-                <Typography variant="caption" className="text-pre-line">
-                  {parse(message.content)}
-                </Typography>
+              {more || cleanContent.includes('quote-block') ? (
+                <div className={!more && shouldShowMore ? classes.truncateContainer : undefined}>
+                  {parse(cleanContent, {
+                    replace: (domNode) => {
+                      if (domNode.attribs && domNode.attribs.class === 'quote-block') {
+                        // Handle quote blocks - always show in full
+                        const result = processDomNode(domNode);
+                        const quoteHtml = `
+                          <span class="quote-sender">${result.senderText.trim()}</span>
+                          ${result.contentHtml}
+                        `.trim();
+
+                        return React.createElement('div', {
+                          className: `quote-block ${classes.quoteBlock}`,
+                          dangerouslySetInnerHTML: { __html: quoteHtml }
+                        });
+                      }
+                      // For non-quote content, apply truncation based on more/simplify state
+                      if (domNode.type === 'tag' && domNode.name === 'p') {
+                        const content = domNode.children.map(child => child.data || '').join(' ').trim();
+                        if (!content) return null;
+                        
+                        // Only apply truncation to non-quote content
+                        return React.createElement('div', {
+                          className: !more && shouldShowMore ? classes.truncateContainer : undefined
+                        }, content);
+                      }
+                      return domNode;
+                    }
+                  })}
+                </div>
               ) : (
-               
-                <Typography
-                variant="caption"
-                className="text-pre-line"
-                //need to apply eclippise through CSS
-                >
-                {parse(message.content)}
-               </Typography>
+                <LinesEllipsis
+                  text={h2p(cleanContent)}
+                  maxLine={4}
+                  ellipsis=""
+                  className="text-pre-line"
+                />
               )}
-              {lineLen > 6 && (
+              
+              {/* Only show More/Simplify if there's non-quote content that's long enough */}
+              {shouldShowMore && cleanContent.includes('<p>') && !cleanContent.includes('quote-block') && (
                 <div className="mt-1">
-                  <Link variant="caption" onClick={() => setMore(!more)}>
+                  <Link 
+                    variant="caption" 
+                    component="button"
+                    onClick={() => setMore(!more)}
+                    className="text-decoration-none"
+                  >
                     {more ? "Simplify..." : "More..."}
                   </Link>
                 </div>
               )}
 
+              {/* Display attachments if present - always visible */}
               {message.attachments && message.attachments.length > 0 && (
-                <>
-                  <Typography variant="subtitle1" className="mt-3">
-                    Attachments
-                  </Typography>
-                  <Grid container spacing={1}>
-                    {message.attachments.map((file, index) =>{
-                      const type = getExtensionFromFilename(file.filename);
-
-                      return(
-                      <Grid item xs={2} sm={2} md={2} key={index}>
-                        <div className="attachment-card visible-on-hover">
-                          <IconButton
-                            className="preview-icon-btn invisible"
-                            size="small"
-                            onClick={() => handlePreviewOpen(file)}
-                          >
-                            <Visibility fontSize="small" />
-                          </IconButton>
-                          {includes(IMAGE_EXTENSION_LIST, type) && (
-                              <img
-                                src={file.file_url || file.preview?.url}
-                                alt={file.filename || file.name}
-                              />
-                            )}
-
-                            {(file.type?.includes("pdf") ||
-                              file.attachment_type?.includes("pdf")) && (
-                              <FontAwesomeIcon icon={faFilePdf} size="2xl" />
-                            )}
-
-                            {(file.type?.includes("zip") ||
-                              file.attachment_type?.includes("zip")) && (
-                              <FontAwesomeIcon icon={faFileZip} size="2xl" />
-                            )}
-
-                        </div>
-                      </Grid>)
-          })}
-                  </Grid>
-                </>
+                <div className="mt-2">
+                  <FileUploadPreview selectedFiles={message.attachments} />
+                </div>
               )}
             </>
           }
@@ -211,57 +300,6 @@ const Note = (props) => {
           },
         ]}
       />
-    
-     {/* Image Preview Modal */}
-     <Dialog open={openPreview} onClose={handlePreviewClose}>
-            <DialogTitle id="alert-dialog-title">
-              <Grid container spacing={1} alignItems="center">
-                <Grid item xs="auto">
-                  {previewImage.filename || previewImage.name}
-                </Grid>
-                <Grid item xs>
-                  {previewImage.file_url && (
-                    <IconButton
-                      component="a"
-                      href={previewImage.file_url}
-                      download={previewImage.filename || previewImage.name}
-                      aria-label="download"
-                      size="small"
-                      className="ml-2"
-                    >
-                      <GetAppIcon />
-                    </IconButton>
-                  )}
-                </Grid>
-                <Grid item xs="auto">
-                  <IconButton
-                    onClick={handlePreviewClose}
-                    size="small"
-                  >
-                    <Close />
-                  </IconButton>
-                </Grid>
-              </Grid>
-            </DialogTitle>
-            <DialogContent>
-              {previewImage &&
-                (previewImage.type?.startsWith("image/") ||
-                previewImage.attachment_type?.startsWith("image/") ? (
-                  <img
-                   className="img-fluid"
-                    src={
-                      previewImage.file_url || URL.createObjectURL(previewImage)
-                    }
-                    alt="Preview"
-                  />
-                ) : (
-                  <Typography variant="body2" className="mt-2">
-                    Preview not available
-                  </Typography>
-                ))}
-            </DialogContent>
-          </Dialog>
-          {/* EOF Image Preview Modal */}
     </>
   );
 };

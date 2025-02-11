@@ -18,6 +18,7 @@ import Files from "react-files";
 import FileUploadPreview from "components/FileUploadPreview";
 import { acceptedFormats, maxFileSize } from "Common/constants";
 import { readFileAsBase64 } from "Common/helper";
+import { cloneDeep } from "lodash";
 
 // import Files from "react-files";
 
@@ -51,7 +52,8 @@ const AddNoteFields = (props) => {
   };
 
   const startUpload = async (files) => {
-    files.forEach(async (file) => {
+    const newFiles = cloneDeep(filemapping);
+    for (let file of files) {
       const progressKey = file.name;
       const fileData = await readFileAsBase64(file);
 
@@ -74,18 +76,10 @@ const AddNoteFields = (props) => {
         [progressKey]: false,
       }));
 
-      const values = watch();
-
-      setValue("attachments", [
-        ...(values.attachments || []),
-        data.uploadFile.attachment_id,
-      ]);
-
-      setFileMapping([
-        ...filemapping,
-        { name: file.name, id: data.uploadFile.attachment_id },
-      ]);
-    });
+      newFiles.push({ name: file.name, id: data.uploadFile.attachment_id });
+    }
+    setValue("attachments", [...values.attachments, ...newFiles.map((file) => file.id)]);
+    setFileMapping(newFiles);
   };
 
   const removeFile = (fileName) => {
@@ -217,41 +211,25 @@ const AddNoteForm = (props) => {
 
   const foramteQoutedContent = (qoutedContent) => {
     if (qoutedContent.from === "email") {
-      return `
-      <div class="quote-block">
-          <span class="quote-sender"> ${replaceWhitespace(
-            qoutedContent.content.to_email
-          )} wrote: </span>
-          <p class="quote-subject"> ${replaceWhitespace(
-            qoutedContent.content.subject
-          )}</p>
-          <p class="quote-content">${replaceWhitespace(
-            qoutedContent.content.message
-          )}</p><p>&nbsp</p>
-      </div>
-        `;
+      return `<div class="quote-block"><div class="quote-sender">${replaceWhitespace(
+        qoutedContent.content.to_email
+      )} wrote:</div><div class="quote-subject">${replaceWhitespace(
+        qoutedContent.content.subject
+      )}</div><div class="quote-content">${replaceWhitespace(
+        qoutedContent.content.message
+      )}</div></div><p></p>`;
     } else if (qoutedContent.from === "sms") {
-      return `
-        <div class="quote-block">
-        <span class="quote-sender">${replaceWhitespace(
-          qoutedContent.content.to_email
-        )} wrote: </span>
-        <p class="quote-content"> ${replaceWhitespace(
-          qoutedContent.content.message
-        )}</p><p>&nbsp</p>
-        </div>;
-        `;
+      return `<div class="quote-block"><div class="quote-sender">${replaceWhitespace(
+        qoutedContent.content.to_email
+      )} wrote:</div><div class="quote-content">${replaceWhitespace(
+        qoutedContent.content.message
+      )}</div></div><p></p>`;
     } else if (qoutedContent.from === "note") {
-      return `
-       <div class="quote-block">
-      <span class="quote-sender"> ${replaceWhitespace(
+      return `<div class="quote-block"><div class="quote-sender">${replaceWhitespace(
         qoutedContent.content.appuser_name
-      )} wrote: </span>
-      <p class="quote-content"> ${replaceWhitespace(
+      )} wrote:</div><div class="quote-content">${
         qoutedContent.content.content
-      )} </p><p>&nbsp</p>
-       </div>
-      `;
+      }</div></div>`;
     }
   };
 

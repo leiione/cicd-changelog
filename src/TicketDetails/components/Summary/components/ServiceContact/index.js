@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setCardPreferences } from "config/store";
 import EditServiceContact from "./components/EditServiceContact";
 import { checkIfCacheExists } from "config/apollo";
-import { ContactSkeletonLoader } from "../SkeletonLoader";
+import { toUpper } from "lodash";
 
 const ServiceContact = (props) => {
   const dispatch = useDispatch();
@@ -26,17 +26,17 @@ const ServiceContact = (props) => {
 
   const { ticket, updateTicket } = props;
   const [onEditMode, setEditMode] = useState(false);
-  const isSubscriber = ticket.category_type === "SUBSCRIBER";
+  const isSubscriber = toUpper(ticket.category_type) === "SUBSCRIBER";
 
   const variables =
-    ticket.category_type === "INFRASTRUCTURE"
+    toUpper(ticket.category_type) === "INFRASTRUCTURE"
       ? { location_id: ticket.location_id }
       : { equipment_id: ticket.equipment_id };
 
   const { loading, error, data, client } = useQuery(GET_SITE_CONTACTS, {
     variables,
     fetchPolicy: "network-only",
-    skip: isSubscriber || (ticket.category_type === "INFRASTRUCTURE"
+    skip: isSubscriber || (toUpper(ticket.category_type) === "INFRASTRUCTURE"
         ? !ticket.location_id
         : !ticket.equipment_id),
   });
@@ -84,9 +84,6 @@ const ServiceContact = (props) => {
     );
   };
 
-  if (loading && !cacheExists) {
-    return <ContactSkeletonLoader />
-  }
 
   return (
     <Grid container spacing={0} alignItems="center">

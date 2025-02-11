@@ -30,13 +30,19 @@ const DueDate = (props) => {
   const [openPrompt, togglePrompt] = React.useState(false);
 
   useEffect(() => {
-    if ((ticket.due_by_date && !tempDueDate) || (ticket.due_by_date !== dueDateDisplay)) {
+   if ((ticket.due_by_date && !tempDueDate) || (dueDateDisplay && ticket.due_by_date !== dueDateDisplay)) {
       setTempDueDate(ticket.due_by_date);
       setDueDateDisplay(ticket.due_by_date);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticket.due_by_date, tempDueDate]);
+ }, [ticket.due_by_date, tempDueDate]); 
 
+  useEffect(() => {
+    if (ticket.due_by_date) {
+     setTempDueDate(ticket.due_by_date);
+   }
+  }, [ticket.due_by_date])
+  
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };

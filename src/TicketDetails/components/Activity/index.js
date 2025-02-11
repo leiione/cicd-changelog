@@ -1,7 +1,6 @@
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useCallback, useRef } from "react";
 import AccordionCard from "../../../Common/AccordionCard";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
-import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
 import { useQuery, useSubscription } from "@apollo/client";
 import {
   GET_ACTIVITIES,
@@ -17,14 +16,15 @@ import Filter from "./components/Filter";
 import Loader from "components/Loader";
 import ErrorPage from "components/ErrorPage";
 import { makeStyles } from "@mui/styles";
+import DataGridTable from "Common/DataGridTable";
 
 const useStyles = makeStyles({
   tableHeightWrapper: {
-    maxHeight: 500,
+    height: 500,
   },
 });
 const Activity = (props) => {
-  const apiRef = useGridApiRef();
+  const ref = useRef(null);
   const { appuser_id, customer } = props;
   const classes = useStyles();
   const [detailDialog, setDetailDialog] = useState({
@@ -90,10 +90,9 @@ const Activity = (props) => {
     setSearchText(event.target.value);
   }, []);
 
-  const handleCellClick = (params, event) => {
+  const handleCellClick = (event, params) => {
     event.stopPropagation();
     preventEvent(event);
-    apiRef.current.setRowSelectionModel([params.id]);
     setDetailDialog({ open: true, history: params.row });
   };
 
@@ -140,17 +139,17 @@ const Activity = (props) => {
           <Loader loaderStyle={{ textAlign: "center" }} />
         ) : error ? (
           <ErrorPage error={error} />
-        ) : (
-          <DataGrid
-            apiRef={apiRef}
-            rows={rows}
-            columns={columns}
-            pageSize={5}
-            rowsPerPageOptions={[5, 10, 20]}
-            disableColumnMenu
-            autoHeight
-            onCellClick={handleCellClick}
-          />
+          ) : (
+            <React.Suspense fallback={<Loader />}>
+            <DataGridTable
+              containerHeight={ref.current ? ref.current.clientHeight : 300}
+              rows={rows}
+              columns={columns}
+              loading={loading}
+              handleRowClick={handleCellClick}
+              selectedRow={detailDialog.history.id}
+            />
+            </React.Suspense>
         )}
       </div>
       {detailDialog.open && (
@@ -158,7 +157,6 @@ const Activity = (props) => {
           open={detailDialog.open}
           handleClose={() => {
             setDetailDialog({ open: false, history: {} });
-            apiRef.current.setRowSelectionModel([]);
           }}
           timestamp={detailDialog.history.date}
         >

@@ -17,7 +17,7 @@ import ProgressButton from "Common/ProgressButton";
 import { makeStyles } from "@mui/styles";
 import { MoreVert, ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import { preventEvent } from "Common/helper";
-import { includes } from "lodash";
+import { includes, omit } from "lodash";
 import DialogAlert from "components/DialogAlert";
 import { useMutation } from "@apollo/client";
 import { DELETE_TICKET } from "TicketDetails/TicketGraphQL";
@@ -55,6 +55,7 @@ const Header = (props) => {
   const dispatch = useDispatch();
   const {
     ticket,
+    setTicketCached,
     category,
     setopen1,
     hideContentDrawer,
@@ -158,7 +159,7 @@ const Header = (props) => {
       values.ticket_id = ticket.ticket_id
       await updateTicket({
         variables: {
-          input_ticket: values,
+          input_ticket: omit(values, ['payment_status', 'subscriber']),
         },
         refetchQueries: [
           { query: GET_TICKET, variables: { id: ticket.ticket_id }
@@ -171,6 +172,7 @@ const Header = (props) => {
       });
       dispatch(showSnackbar({ message: "Ticket updated successfully", severity: "success" }))
       handleAssignedNamePopoverClose()
+      setTicketCached({ ...ticket, ...values })
     } catch (error) {
       const msg = error.message.replace("GraphQL error: ", "")
       dispatch(showSnackbar({ message: msg, severity: "error" }))

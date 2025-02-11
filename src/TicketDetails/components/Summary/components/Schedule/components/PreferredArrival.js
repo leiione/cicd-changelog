@@ -37,9 +37,7 @@ const PreferredArrival = (props) => {
   const [preferred, setPreferred] = useState(
     moment(earliestArrivalTime).isSame(latestArrivalTime) ? "exact" : "window"
   );
-  const [startTime, setStartTime] = useState(
-    ticket.earliest_arrival_time || "8:00:00"
-  );
+  const [startTime, setStartTime] = useState(ticket.earliest_arrival_time);
   const [endTime, setEndTime] = useState(ticket.latest_arrival_time);
   const [err, setErr] = useState({ start: "", end: "" });
   const [arrivalTime, setArrivalTime] = useState("");
@@ -50,7 +48,7 @@ const PreferredArrival = (props) => {
       setArrivalTime(arrivalTimeTemp)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [earliestArrivalTime, latestArrivalTime, ticket.earliest_arrival_time, ticket.latest_arrival_time])
+  }, [earliestArrivalTime, latestArrivalTime])
 
   React.useEffect(() => {
     if (preferred === "window") {

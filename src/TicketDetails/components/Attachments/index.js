@@ -10,13 +10,9 @@ import {
   Grid,
   Chip,
   Tooltip,
-  Dialog,
-  DialogContent,
-  DialogTitle,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
-import { faFilePdf, faFileZip } from "@fortawesome/pro-duotone-svg-icons";
 import Files from "react-files";
 import { acceptedFormats } from "Common/constants";
 import { useDispatch } from "react-redux";
@@ -29,10 +25,12 @@ import {
   ATTACHMENT_SUBSCRIPTION,
 } from "TicketDetails/TicketGraphQL";
 import { useMutation, useQuery, useSubscription } from "@apollo/client";
-import { readFileAsBase64 } from "Common/helper";
-import GetAppIcon from "@mui/icons-material/GetApp";
+import { getExtensionFromFilename, readFileAsBase64 } from "Common/helper";
 import DialogAlert from "components/DialogAlert";
 import { Close, Visibility } from "@mui/icons-material";
+import { getSourceImage } from "utils/sourceImage";
+import { find } from "lodash";
+import { PreviewFileDialog } from "components/FileUploadPreview";
 
 const Attachments = (props) => {
   const { ticket, setDefaultAttacmentCount } = props;
@@ -56,17 +54,12 @@ const Attachments = (props) => {
     fetchPolicy: "network-only",
   });
 
-
-
   useSubscription(ATTACHMENT_SUBSCRIPTION, {
     variables: { ticket_id: ticket.ticket_id },
     onData: async ({ data: { data }, client }) => {
       refetchAttachment();
     },
   });
-
-
-
   useEffect(() => {
     if (data) {
       setSelectedFiles(data.ticketAttachments);
@@ -182,6 +175,14 @@ const Attachments = (props) => {
     const files = Array.from(event.dataTransfer.files);
     handleFileChange(files);
     setIsDragging(true);
+  };
+
+  const handleMouseEnter = () => {
+    setIsDragging(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
   };
 
   useEffect(() => {
@@ -392,8 +393,10 @@ const Attachments = (props) => {
             >
               <Box
                 className={`upload-image-placeholder ${
-                  isDragging ? "dragging" : ""
+                  isDragging ? "dragging" : "" 
                 }`}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
               >
                 <label
                   htmlFor="upload-file-input"
@@ -412,7 +415,12 @@ const Attachments = (props) => {
           </Tooltip>
           <Grid container spacing={1}>
             {selectedFiles.length > 0 &&
-              selectedFiles.map((file, index) => (
+              selectedFiles.map((file, index) => {
+                const fileName = file.name || file.filename;
+                const type = getExtensionFromFilename(fileName);
+                let src = find(getSourceImage, { key: type })
+                src = src || find(getSourceImage, { key: 'txt' });
+                return (
                 <>
                   {file.id === 0 && (
                     <Grid item xs={2} sm={2} md={2} key={index}>
@@ -478,31 +486,25 @@ const Attachments = (props) => {
                         <IconButton
                           className="preview-icon-btn invisible "
                           size="small"
-                          onClick={() => handlePreviewOpen(file)}
+                          onClick={() => handlePreviewOpen({
+                            ...file, name: fileName, file_url: file.file_url || file.preview?.url, preview: src.value, isImage: src.isImage
+                          })}
                         >
                           <Visibility fontSize="small" />
                         </IconButton>
-                        {(file.type?.startsWith("image/") ||
-                          file.attachment_type?.startsWith("image/")) && (
-                          <img
+                        {src.isImage ? 
+                          <img  
                             src={file.file_url || file.preview?.url}
-                            alt={file.filename || file.name}
-                          />
-                        )}
-
-                        {(file.type?.includes("pdf") ||
-                          file.attachment_type?.includes("pdf")) && (
-                          <FontAwesomeIcon icon={faFilePdf} size="2xl" />
-                        )}
-
-                        {(file.type?.includes("zip") ||
-                          file.attachment_type?.includes("zip")) && (
-                          <FontAwesomeIcon icon={faFileZip} size="2xl" />
-                        )}
+                            alt={fileName}
+                            width={60}
+                            height={60}
+                            style={{ marginTop: 0 }}
+                          /> : src.value
+                        }
                       </div>
 
                       {(!file.file_url || file?.lodingStatus) &&
-                        uploadProgress[file.name] && (
+                        uploadProgress[fileName] && (
                           <LinearProgress className="mt-2" />
                         )}
 
@@ -510,12 +512,12 @@ const Attachments = (props) => {
                         className="mt-2 d-block text-truncate"
                         variant="caption"
                       >
-                        {file.filename ? file.filename : file.name}
+                        {fileName}
                       </Typography>
                     </Grid>
                   )}
                 </>
-              ))}
+              )})}
 
             {selectedFiles.length > 0 && selectedFiles.length < 4 && (
               <Grid item xs={2} sm={2} md={2}>
@@ -543,57 +545,13 @@ const Attachments = (props) => {
               </Grid>
             )}
           </Grid>
-
-          {/* Image Preview Modal */}
-          <Dialog open={openPreview} onClose={handlePreviewClose}>
-            <DialogTitle id="alert-dialog-title">
-              <Grid container spacing={1} alignItems="center">
-                <Grid item xs="auto">
-                  {previewImage.filename || previewImage.name}
-                </Grid>
-                <Grid item xs>
-                  {previewImage.file_url && (
-                    <IconButton
-                      component="a"
-                      href={previewImage.file_url}
-                      download={previewImage.filename || previewImage.name}
-                      aria-label="download"
-                      size="small"
-                      className="ml-2"
-                    >
-                      <GetAppIcon />
-                    </IconButton>
-                  )}
-                </Grid>
-                <Grid item xs="auto">
-                  <IconButton
-                    onClick={handlePreviewClose}
-                    size="small"
-                  >
-                    <Close />
-                  </IconButton>
-                </Grid>
-              </Grid>
-            </DialogTitle>
-            <DialogContent>
-              {previewImage &&
-                (previewImage.type?.startsWith("image/") ||
-                previewImage.attachment_type?.startsWith("image/") ? (
-                  <img
-                   className="img-fluid"
-                    src={
-                      previewImage.file_url || URL.createObjectURL(previewImage)
-                    }
-                    alt="Preview"
-                  />
-                ) : (
-                  <Typography variant="body2" className="mt-2">
-                    Preview not available
-                  </Typography>
-                ))}
-            </DialogContent>
-          </Dialog>
-          {/* EOF Image Preview Modal */}
+          {openPreview && (
+            <PreviewFileDialog
+              openPreview={openPreview}
+              handlePreviewClose={handlePreviewClose}
+              file={previewImage}
+            />
+          )}
         </Box>
       </AccordionCard>
 

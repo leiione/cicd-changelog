@@ -71,6 +71,7 @@ const AddEmailFields = (props) => {
     setSelectedFiles((prevFiles) =>
       prevFiles.filter((file) => file.name !== fileName)
     );
+    setValue("attachments", values.attachments.filter((file) => file.filename !== fileName));
   };
 
   const handleError = (error, file) => {

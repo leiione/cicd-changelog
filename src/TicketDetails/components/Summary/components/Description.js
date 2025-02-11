@@ -74,6 +74,7 @@ const Description = (props) => {
             variant="standard"
             className="mb-0"
             fullWidth
+            placeholder="Click to add description"
             value={description}
             onChange={handleChange}
             disabled={loading}

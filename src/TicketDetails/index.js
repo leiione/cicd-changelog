@@ -89,20 +89,19 @@ const TicketDetails = (props) => {
   const [isSignatureAdded, setIsSignatureAdded] = useState(false);
   const {
     lablesVisible,
-    ticket: ticketData,
+    ticket: ticketData = {},
     category,
     hideContentDrawer,
     toggleOffCRMDrawer,
     handleOpenTicket,
     appuser_id,
-    enableQueueJobs,
   } = props;
   const snackbar = useSelector((state) => state.snackbar);
   const permitMessageView = usePermission("ticket_note_message", "flag_read") 
 
   const { ticket_id } = ticketData;
-
   const [open1, setopen1] = useState(null);
+  const [ticketCached, setTicketCached] = useState({});
 
   const { loading, error, data, refetch } = useQuery(GET_TICKET, {
     variables: { id: ticket_id },
@@ -110,9 +109,14 @@ const TicketDetails = (props) => {
     skip: !ticket_id,
   });
 
-  const ticket = useMemo(() => (!loading && data?.ticket ? data.ticket : { ...ticketData, assigned_name: ticketData?.subscriber_name ? `${ticketData.subscriber_name} (${ticketData.customer_id})` : ticketData?.assigned_name }),
+  const ticket = useMemo(() => (!loading && data?.ticket ? data.ticket : { ...ticketData }),
     [loading, data, ticketData]
   );
+
+  useEffect(() => {
+    setTicketCached({ ...ticketCached, ...ticket });
+    // eslint-disable-next-line
+  }, [ticket])
 
   const ticketTypes = !loading && data && data.ticketTypes ? data.ticketTypes : [];
   const ticketStatuses = !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
@@ -187,7 +191,8 @@ const TicketDetails = (props) => {
     <div>
       {snackbar && snackbar.open && <GlobalSnackbar {...snackbar} />}
       <Header
-        ticket={ticket}
+        ticket={ticketCached}
+        setTicketCached={setTicketCached}
         category={category}
         setopen1={setopen1}
         hideContentDrawer={hideContentDrawer}
@@ -200,7 +205,7 @@ const TicketDetails = (props) => {
             loading={loading}
             appuser_id={appuser_id}
             handleIconButton={handleIconButton}
-            customer={ticket}
+            customer={ticketCached}
             ticketTypes={ticketTypes}
             ticketStatuses={ticketStatuses}
             requiredCustomFieldsCount={requiredCustomFieldsCount}
@@ -208,16 +213,17 @@ const TicketDetails = (props) => {
             lablesVisible={lablesVisible}
             handleOpenTicket={handleOpenTicket}
             setOpenQueueJobs={setOpenQueueJobs}
-            enableQueueJobs={enableQueueJobs}
             isSignatureAdded={isSignatureAdded}
             setIsSignatureAdded={setIsSignatureAdded}
+            ticketCached={ticketCached}
+            setTicketCached={setTicketCached}
           />
 
           {!hideInprogress &&
             <>
               <CustomFields
                 loading={loading}
-                ticket={ticket}
+                ticket={ticketCached}
                 appuser_id={appuser_id}
                 lablesVisible={lablesVisible}
                 handleOpenTicket={handleOpenTicket}
@@ -225,7 +231,7 @@ const TicketDetails = (props) => {
               />
               <Tasks
                 loading={loading}
-                ticket={ticket}
+                ticket={ticketCached}
                 appuser_id={appuser_id}
                 lablesVisible={lablesVisible}
                 handleOpenTicket={handleOpenTicket}
@@ -233,14 +239,14 @@ const TicketDetails = (props) => {
               {permitMessageView &&
                 <Messages
                   handleIconButton={handleIconButton}
-                  ticket={ticket}
+                  ticket={ticketCached}
                   lablesVisible={lablesVisible}
                   appuser_id={appuser_id}
                 />
               }
               <Attachments
                 handleIconButton={handleIconButton}
-                ticket={ticket}
+                ticket={ticketCached}
                 lablesVisible={lablesVisible}
                 appuser_id={appuser_id}
                 setDefaultAttacmentCount={setDefaultAttacmentCount}
@@ -253,7 +259,7 @@ const TicketDetails = (props) => {
               /> */}
               <Activity
                 handleIconButton={handleIconButton}
-                customer={ticket}
+                customer={ticketCached}
                 lablesVisible={lablesVisible}
                 appuser_id={appuser_id}
               />
@@ -296,7 +302,13 @@ const TicketDetails = (props) => {
         />
       )}
       {openQueueJobs &&
-        <QueueJobs openQueueJobs={openQueueJobs} setOpenQueueJobs={setOpenQueueJobs} selectedAddress={ticket.address} />
+        <QueueJobs
+          openQueueJobs={openQueueJobs}
+          setOpenQueueJobs={setOpenQueueJobs}
+          selectedAddress={ticketCached.address}
+          ticket={ticketCached}
+          handleOpenTicket={handleOpenTicket}
+        />
       }
     </div>
   );
@@ -305,7 +317,7 @@ const TicketDetails = (props) => {
 const TicketContainer = props => {
   const dispatch = useDispatch()
   const ispId = localStorage.getItem("Visp.ispId")
-  const { isSigningOut, timeZone, settingsPreferences, user } = props
+  const { isSigningOut, timeZone, settingsPreferences, user, flags } = props
   const userPreferencesTimeStamp = useSelector(state => state.userPreferencesTimeStamp)
   const summaryCard = useSelector(state => state.summaryCard)
   const tasksCard = useSelector(state => state.tasksCard)
@@ -346,11 +358,11 @@ const TicketContainer = props => {
 
   useEffect(() => {
     if (ispId && timeZone) {
-      dispatch(populateISPUserSettings({ ispId, timeZone, settingsPreferences, user }))
+      dispatch(populateISPUserSettings({ ispId, timeZone, settingsPreferences, user, flags }))
     } else {
       // app was rendered outside main app so fetch separately
     }
-  }, [dispatch, timeZone, settingsPreferences, user, ispId])
+  }, [dispatch, timeZone, settingsPreferences, user, ispId, flags])
 
 
   return (
@@ -372,13 +384,15 @@ TicketDetails.propTypes = {
   toggleOffCRMDrawer: PropTypes.func,
   handleOpenTicket: PropTypes.func,
   appuser_id: PropTypes.string,
-  enableQueueJobs: PropTypes.bool,
   lablesVisible: PropTypes.bool,
 };
 
 TicketContainer.propTypes = {
   isSigningOut: PropTypes.bool,
   timeZone: PropTypes.string,
+  settingsPreferences: PropTypes.object,
+  user: PropTypes.object,
+  flags: PropTypes.object,
 };
 
 export default TicketContainer;

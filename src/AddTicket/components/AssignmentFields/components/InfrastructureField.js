@@ -4,7 +4,7 @@ import { SEARCH_INFRASTRUCTURE } from "AddTicket/AddTicketGraphQL";
 import HookAutoCompleteField from "Common/hookFields/HookAutoCompleteField";
 import ErrorPage from "components/ErrorPage";
 import { debounce, find, isEmpty } from "lodash";
-import { getFormattedPGAddress } from "utils/formatter";
+import { formatPhoneNumber, getFormattedPGAddress } from "utils/formatter";
 
 const InfrastructureField = (props) => {
   const { control, setValue, values } = props;
@@ -64,12 +64,29 @@ const InfrastructureField = (props) => {
       const selected = find(infrastructureOptions, { value })
       if (selected) {
         setValue('assigned_name', `${selected.name}`)
-        setValue('ticket_contact_name', `${selected.name}`)
         setValue('address', getFormattedPGAddress(selected.address))
+        const siteContact = selected.site_contacts && selected.site_contacts.length > 0 ? selected.site_contacts[0] : null
+        if (siteContact) {
+          let numbers = [];
+          if (siteContact.phone_numbers && siteContact.phone_numbers.length > 0) {
+            siteContact.phone_numbers.forEach(phone => {
+              numbers.push(formatPhoneNumber(phone.number))
+            })
+          }
+          setValue('ticket_contact_name', `${siteContact.first} ${siteContact.last}`)
+          setValue('ticket_contact_emails', siteContact.email_addresses && siteContact.email_addresses.length > 0 ? siteContact.email_addresses[0].email : '')
+          setValue('ticket_contact_numbers', numbers.join(','))
+        } else {
+          setValue('ticket_contact_name', `${selected.name}`)
+          setValue('ticket_contact_emails', '')
+          setValue('ticket_contact_numbers', '')
+        }
       } else {
         setValue('assigned_name', '')
         setValue('ticket_contact_name', '')
         setValue('address', '')
+        setValue('ticket_contact_emails', '')
+        setValue('ticket_contact_numbers', '')
       }
     }
   }

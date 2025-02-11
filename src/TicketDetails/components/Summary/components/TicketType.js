@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Popover, List, ListItem, TextField } from "@mui/material";
+import { Button, Popover, List, ListItem, TextField, Tooltip } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import DialogAlert from "components/DialogAlert";
@@ -64,6 +64,7 @@ const TicketType = (props) => {
 
   return (
     <>
+    <Tooltip title={`Type: ${type || 'Not Set'}`} placement="top">
       <Button
         color="default"
         onClick={handleClick}
@@ -71,7 +72,7 @@ const TicketType = (props) => {
       >
         <span className="text-dark font-weight-normal">{type}</span>
       </Button>
-
+</Tooltip>
       <Popover
         open={openPopover}
         anchorEl={anchorEl}

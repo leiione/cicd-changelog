@@ -44,9 +44,8 @@ const ContactNumberField = props => {
     let displayNumbers = []
     phoneArr.forEach((phone, index) => {
       const phoneIndex = findIndex(contactNumbers, (o) => o.phone === phone);
-      if (phoneIndex > -1) {
-        displayNumbers.push({ label: isSubscriber ? phoneLabel[phoneIndex] : contactNumbers[phoneIndex].label, phone })
-      }
+      const label = phoneIndex > -1 ? (isSubscriber ? phoneLabel[phoneIndex] : contactNumbers[phoneIndex].label) : 'Phone';
+      displayNumbers.push({ label, phone })
     })
     return displayNumbers;
   }, [values.ticket_contact_numbers, contactNumbers, isSubscriber])
