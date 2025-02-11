@@ -47,7 +47,7 @@ jobs:
             if [ "$BRANCH_NAME" == "develop" ]; then
               ENV_FILE=".env.staging.txt"
             elif [ "$BRANCH_NAME" == "master" ]; then
-              ENV_FILE=".env.production.txt"
+              ENV_FILE=".env.live.txt"
             else
               echo "No Environment file needed for this branch" && exit 0
             fi
