@@ -100,12 +100,13 @@ const SMS = (props) => {
   const [more, toggleMore] = React.useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
   const toEmail = message.to_email ? message.to_email.split(",") : [];
-  const replySMS =
-    message.traffic === "INBOUND"
-      ? [message.from_email]
-      : message.to_email
-      ? message.to_email.split(",")
-      : [];
+  const replySMS = toEmail;
+  // const replySMS =
+  //   message.traffic === "INBOUND"
+  //     ? [message.from_email]
+  //     : message.to_email
+  //     ? message.to_email.split(",")
+  //     : [];
 
   // Remove the specific text from the message
   const text = message.message.replace(
