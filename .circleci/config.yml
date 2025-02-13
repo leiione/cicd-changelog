@@ -100,7 +100,7 @@ jobs:
             if [ "$BRANCH_NAME" == "develop" ]; then
               S3_BUCKET="staging"
             elif [ "$BRANCH_NAME" == "master" ]; then
-              S3_BUCKET="production"
+              S3_BUCKET="prod"
             else
               S3_BUCKET="$BRANCH_NAME"
             fi
