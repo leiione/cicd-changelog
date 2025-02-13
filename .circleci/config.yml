@@ -114,9 +114,7 @@ jobs:
             aws s3 sync /workspace/dist/ s3://microfrontend-crm-ms/$S3_BUCKET/ --acl public-read
             echo "Uploaded files to s3://microfrontend-crm-ms/$S3_BUCKET/"
 
-      - run:
-          name: Verify S3 Upload
-          command: aws s3 ls s3://$S3_BUCKET/$BRANCH_NAME/
+    
       - run:
           name: Invalidate CloudFront Cache
           command: |
