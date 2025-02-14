@@ -38,6 +38,7 @@ const EmailPopover = (props) => {
         vertical: "bottom",
         horizontal: "left",
       }}
+      sx={{ pointerEvents: "none" }}
       disableRestoreFocus
     >
       <Grid container spacing={1} className="break-word" style={{ maxWidth: "270px" }}>
