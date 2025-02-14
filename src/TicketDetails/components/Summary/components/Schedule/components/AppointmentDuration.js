@@ -64,9 +64,12 @@ const AppointmentDuration = (props) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleClose = (reset = true) => {
     setAnchorEl(null);
     setError(""); // Reset the error when closing the popover
+    if (reset) {
+      setTempMaxDuration(ticket.max_duration || 60);
+    }
   };
 
   const onSaveDuration = () => {
@@ -80,7 +83,7 @@ const AppointmentDuration = (props) => {
 
     const convertedTime = convertMinutesToTime(tempMaxDuration);
     setDisplayDuration(convertedTime); // Only update the displayed duration when saved
-    handleClose();
+    handleClose(false);
   };
 
   const handleSliderChange = (event, newTime) => {
