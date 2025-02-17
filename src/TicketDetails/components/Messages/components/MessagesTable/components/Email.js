@@ -38,12 +38,10 @@ const EmailPopover = (props) => {
         vertical: "bottom",
         horizontal: "left",
       }}
-      slotProps={{
-        paper: { style: { minWidth: "210px", width: "auto" } },
-      }}
       sx={{ pointerEvents: "none" }}
+      disableRestoreFocus
     >
-      <Grid container spacing={1}>
+      <Grid container spacing={1} className="break-word" style={{ maxWidth: "270px" }}>
         <Grid item xs={3}>
           <Typography variant="subtitle1" className="text-right">
             From:
@@ -124,6 +122,10 @@ const Email = (props) => {
     setSubmitting(false);
   };
 
+  const handleClose = () => {
+    setAnchorEl(null);
+  }
+
   return (
     <>
       <ListItem
@@ -133,15 +135,15 @@ const Email = (props) => {
       >
         <ListItemAvatar
           sx={{ width: 24, height: 24, minWidth: 24 }}
-          onClick={(e) => setAnchorEl(e.currentTarget)}
-          onClose={() => setAnchorEl(null)}
+          onMouseOver={(e) => setAnchorEl(e.currentTarget)}
+          onMouseLeave={handleClose}
         >
           <EmailOutlined className="text-danger" />
           {anchorEl && (
             <EmailPopover
               anchorEl={anchorEl}
               message={message}
-              handleClose={() => setAnchorEl(null)}
+              handleClose={handleClose}
               toEmail={toEmail}
             />
           )}

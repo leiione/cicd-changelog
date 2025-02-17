@@ -1,3 +1,4 @@
+#Test Commit-v65456464646546465
 version: 2.1
 
 executors:
@@ -47,7 +48,7 @@ jobs:
             if [ "$BRANCH_NAME" == "develop" ]; then
               ENV_FILE=".env.staging.txt"
             elif [ "$BRANCH_NAME" == "master" ]; then
-              ENV_FILE=".env.production.txt"
+              ENV_FILE=".env.live.txt"
             else
               echo "No Environment file needed for this branch" && exit 0
             fi
@@ -100,7 +101,7 @@ jobs:
             if [ "$BRANCH_NAME" == "develop" ]; then
               S3_BUCKET="staging"
             elif [ "$BRANCH_NAME" == "master" ]; then
-              S3_BUCKET="production"
+              S3_BUCKET="prod"
             else
               S3_BUCKET="$BRANCH_NAME"
             fi
@@ -114,9 +115,6 @@ jobs:
             aws s3 sync /workspace/dist/ s3://microfrontend-crm-ms/$S3_BUCKET/ --acl public-read
             echo "Uploaded files to s3://microfrontend-crm-ms/$S3_BUCKET/"
 
-      - run:
-          name: Verify S3 Upload
-          command: aws s3 ls s3://$S3_BUCKET/$BRANCH_NAME/
       - run:
           name: Invalidate CloudFront Cache
           command: |
