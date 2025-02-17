@@ -101,7 +101,7 @@ const MessagesTable = (props) => {
               return null // via FB, etc.
           }
         })
-          : <Typography variant="caption">No message available.</Typography>
+          : <Typography variant="body2" className="text-muted">No message available.</Typography>
         }
       </List>
       <TablePagination

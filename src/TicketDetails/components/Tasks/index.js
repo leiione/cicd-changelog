@@ -423,7 +423,7 @@ const Tasks = (props) => {
           </Droppable>
         </DragDropContext>
       ) : (
-        <Typography className="text-muted">No Task Added.</Typography>
+        <Typography className="text-muted" variant="body2">No Task Added.</Typography>
       )}
     </AccordionCard>
   );
