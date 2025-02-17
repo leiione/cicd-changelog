@@ -49,7 +49,7 @@ const Attachments = (props) => {
   const [attachmentCount, setAttachmentCount] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
-  const { data,    refetch: refetchAttachment} = useQuery(GET_TICKET_ATTACHMENTS, {
+  const { data, refetch: refetchAttachment } = useQuery(GET_TICKET_ATTACHMENTS, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: "network-only",
   });
@@ -97,9 +97,8 @@ const Attachments = (props) => {
       if (filteredNewFiles.length === newFiles.length) {
         dispatch(
           showSnackbar({
-            message: `Successfully added ${filteredNewFiles.length} file${
-              filteredNewFiles.length === 1 ? "" : "s"
-            }`,
+            message: `Successfully added ${filteredNewFiles.length} file${filteredNewFiles.length === 1 ? "" : "s"
+              }`,
             severity: "success",
           })
         );
@@ -362,9 +361,8 @@ const Attachments = (props) => {
     console.log(error);
     let errorMessage = error.message;
 
-    if (error.code === "file-invalid-type" && error.code === 1) {
-      errorMessage =
-        "Invalid file format. We support only image, PDFs, and ZIP files.";
+    if (error.code === "file-invalid-type" || error.code === 1) {
+      errorMessage = `${error.message}. We support only image, PDFs, and ZIP files.`;
     }
     if (error.code === "file-too-large") {
       errorMessage = "File is too large. Maximum file size is 12MB.";
@@ -420,9 +418,8 @@ const Attachments = (props) => {
               onDragLeave={handleDragLeave}
             >
               <Box
-                className={`upload-image-placeholder ${
-                  isDragging ? "dragging" : "" 
-                }`}
+                className={`upload-image-placeholder ${isDragging ? "dragging" : ""
+                  }`}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
@@ -449,103 +446,102 @@ const Attachments = (props) => {
                 let src = find(getSourceImage, { key: type })
                 src = src || find(getSourceImage, { key: 'txt' });
                 return (
-                <>
-                  {file.id === 0 && (
-                    <Grid item xs={2} sm={2} md={2} key={index}>
-                      <Typography
-                        className={`mt-2 d-block text-truncate ${
-                          !file.attachment_label ? "invisible" : ""
-                        }`}
-                        variant="caption"
-                      >
-                        {file.attachment_label
-                          ? file.attachment_label
-                          : "Empty"}
-                      </Typography>
-                      <Tooltip title="Attach File">
-                        <Files
-                          className="files-dropzone"
-                          onError={handleError}
-                          onChange={(uploadedFile) =>
-                            handelDefaultFileChange(
-                              uploadedFile,
-                              file.attachment_label
-                            )
-                          } // Pass file and atta_label
-                          accepts={
-                            ["image/*", "application/pdf", "application/zip", "application/x-zip-compressed"]
-                          } // Make it
-                          clickable
-                          multiple={false} // Disable multi-select
+                  <>
+                    {file.id === 0 && (
+                      <Grid item xs={2} sm={2} md={2} key={index}>
+                        <Typography
+                          className={`mt-2 d-block text-truncate ${!file.attachment_label ? "invisible" : ""
+                            }`}
+                          variant="caption"
                         >
-                          <div className="attachment-card">
-                            <Typography variant="body2" color="textSecondary">
-                              <FontAwesomeIcon icon={faPlusCircle} size="lg" />
-                            </Typography>
-                          </div>
-                        </Files>
-                      </Tooltip>
-                    </Grid>
-                  )}
-                  {(file.default_attachment === undefined ||
-                    file.default_attachment === "N") && (
-                    <Grid item xs={2} sm={2} md={2} key={index}>
-                      <Typography
-                        className={`mt-2 d-block text-truncate ${
-                          !file.attachment_label ? "invisible" : ""
-                        }`}
-                        variant="caption"
-                      >
-                        {file.attachment_label
-                          ? file.attachment_label
-                          : "Empty"}
-                      </Typography>
-
-                      <div className="attachment-card visible-on-hover">
-                        {file.file_url && (
-                          <IconButton
-                            className="close-icon-btn invisible"
-                            size="small"
-                            onClick={() => removeFile(file.id)}
+                          {file.attachment_label
+                            ? file.attachment_label
+                            : "Empty"}
+                        </Typography>
+                        <Tooltip title="Attach File">
+                          <Files
+                            className="files-dropzone"
+                            onError={handleError}
+                            onChange={(uploadedFile) =>
+                              handelDefaultFileChange(
+                                uploadedFile,
+                                file.attachment_label
+                              )
+                            } // Pass file and atta_label
+                            accepts={
+                              ["image/*", "application/pdf", "application/zip", "application/x-zip-compressed"]
+                            } // Make it
+                            clickable
+                            multiple={false} // Disable multi-select
                           >
-                            <Close fontSize="small" />
-                          </IconButton>
-                        )}
-                        <IconButton
-                          className="preview-icon-btn invisible "
-                          size="small"
-                          onClick={() => handlePreviewOpen({
-                            ...file, name: fileName, file_url: file.file_url || file.preview?.url, preview: src.value, isImage: src.isImage
-                          })}
-                        >
-                          <Visibility fontSize="small" />
-                        </IconButton>
-                        {src.isImage ? 
-                          <img  
-                            src={file.file_url || file.preview?.url}
-                            alt={fileName}
-                            width={60}
-                            height={60}
-                            style={{ marginTop: 0 }}
-                          /> : src.value
-                        }
-                      </div>
+                            <div className="attachment-card">
+                              <Typography variant="body2" color="textSecondary">
+                                <FontAwesomeIcon icon={faPlusCircle} size="lg" />
+                              </Typography>
+                            </div>
+                          </Files>
+                        </Tooltip>
+                      </Grid>
+                    )}
+                    {(file.default_attachment === undefined ||
+                      file.default_attachment === "N") && (
+                        <Grid item xs={2} sm={2} md={2} key={index}>
+                          <Typography
+                            className={`mt-2 d-block text-truncate ${!file.attachment_label ? "invisible" : ""
+                              }`}
+                            variant="caption"
+                          >
+                            {file.attachment_label
+                              ? file.attachment_label
+                              : "Empty"}
+                          </Typography>
 
-                      {(!file.file_url || file?.lodingStatus) &&
-                        uploadProgress[fileName] && (
-                          <LinearProgress className="mt-2" />
-                        )}
+                          <div className="attachment-card visible-on-hover">
+                            {file.file_url && (
+                              <IconButton
+                                className="close-icon-btn invisible"
+                                size="small"
+                                onClick={() => removeFile(file.id)}
+                              >
+                                <Close fontSize="small" />
+                              </IconButton>
+                            )}
+                            <IconButton
+                              className="preview-icon-btn invisible "
+                              size="small"
+                              onClick={() => handlePreviewOpen({
+                                ...file, name: fileName, file_url: file.file_url || file.preview?.url, preview: src.value, isImage: src.isImage
+                              })}
+                            >
+                              <Visibility fontSize="small" />
+                            </IconButton>
+                            {src.isImage ?
+                              <img
+                                src={file.file_url || file.preview?.url}
+                                alt={fileName}
+                                width={60}
+                                height={60}
+                                style={{ marginTop: 0 }}
+                              /> : src.value
+                            }
+                          </div>
 
-                      <Typography
-                        className="mt-2 d-block text-truncate"
-                        variant="caption"
-                      >
-                        {fileName}
-                      </Typography>
-                    </Grid>
-                  )}
-                </>
-              )})}
+                          {(!file.file_url || file?.lodingStatus) &&
+                            uploadProgress[fileName] && (
+                              <LinearProgress className="mt-2" />
+                            )}
+
+                          <Typography
+                            className="mt-2 d-block text-truncate"
+                            variant="caption"
+                          >
+                            {fileName}
+                          </Typography>
+                        </Grid>
+                      )}
+                  </>
+                )
+              })}
 
             {selectedFiles.length > 0 && selectedFiles.length < 4 && (
               <Grid item xs={2} sm={2} md={2}>
