@@ -81,6 +81,7 @@ const Attachments = (props) => {
   }, [selectedFiles, setDefaultAttacmentCount]);
 
   const handleFileChange = async (files) => {
+    if (files.length === 0) return;
     const newFiles = Array.from(files);
     const existingFileNames = new Set(selectedFiles.map((file) => file.name));
 
@@ -88,11 +89,23 @@ const Attachments = (props) => {
       (file) => !existingFileNames.has(file.name)
     );
 
-    const updatedFiles = [...selectedFiles, ...filteredNewFiles];
-    setSelectedFiles(updatedFiles);
-    await startUpload(filteredNewFiles);
-    dispatch(showSnackbar({ message: "Attachment added successfully" }));
-  };
+    if (filteredNewFiles.length > 0) {
+      const updatedFiles = [...selectedFiles, ...filteredNewFiles];
+      setSelectedFiles(updatedFiles);
+      await startUpload(filteredNewFiles);
+      // Only show success message if all files were valid
+      if (filteredNewFiles.length === newFiles.length) {
+        dispatch(
+          showSnackbar({
+            message: `Successfully added ${filteredNewFiles.length} file${
+              filteredNewFiles.length === 1 ? "" : "s"
+            }`,
+            severity: "success",
+          })
+        );
+      }
+    }
+  }
 
   const startUpload = async (files) => {
     const uploadPromises = files.map(async (file) => {
@@ -331,12 +344,27 @@ const Attachments = (props) => {
     );
   };
 
+  // const validateFileType = (file) => {
+  //   const supportedTypes = [
+  //     "image/jpeg",
+  //     "image/png",
+  //     "image/gif",
+  //     "image/bmp",
+  //     "image/webp",
+  //     "application/pdf",
+  //     "application/zip",
+  //     "application/x-zip-compressed",
+  //   ];
+  //   return supportedTypes.includes(file.type);
+  // };
+
   const handleError = (error) => {
+    console.log(error);
     let errorMessage = error.message;
 
-    if (error.code === "file-invalid-type") {
+    if (error.code === "file-invalid-type" && error.code === 1) {
       errorMessage =
-        "Invalid file format. We support only image files, PDFs, and ZIP files.";
+        "Invalid file format. We support only image, PDFs, and ZIP files.";
     }
     if (error.code === "file-too-large") {
       errorMessage = "File is too large. Maximum file size is 12MB.";
