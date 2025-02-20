@@ -72,16 +72,6 @@ const SMSPopover = (props) => {
               ))}
             </Grid>
           </Grid>
-          <Grid item xs={3} style={{ textAlign: "end" }}>
-            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>
-              Subject:
-            </Typography>
-          </Grid>
-          <Grid item xs={9}>
-            <Typography variant="subtitle1" style={{ wordWrap: "break-word" }}>
-              {message.subject}
-            </Typography>
-          </Grid>
         </Grid>
       </Grid>
     </Popover>
