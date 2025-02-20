@@ -32,61 +32,9 @@ const useStyles = makeStyles({
     backgroundColor: '#f7f7f7 !important',
     border: '1px solid #ccc !important',
     margin: '0 0 8px 0 !important',
-    padding: '8px !important',
-    fontSize: '12px !important',
-    '& p': {
-      margin: '0 !important',
-      padding: '0 !important',
-      '&:empty': {
-        display: 'none !important'
-      }
-    },
-    '& .quote-sender': {
-      display: 'block !important',
-      marginBottom: '8px !important',
-      fontWeight: '500 !important'
-    },
-    '& .quote-content': {
-      margin: '0 !important',
-      display: 'block !important'
-    }
-  },
-  truncateContainer: {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
+    padding: '8px !important'
   }
 });
-
-const processDomNode = (domNode, senderText = '', contentHtml = '') => {
-    // Iterate through all children of the current node
-  domNode.children.forEach(child => {
-    if (child.attribs && child.attribs.class === 'quote-sender') {
-      // If the child has class 'quote-sender', extract sender text
-      senderText = child.children[0].data || '';
-    } else if (child.name) {
-      // Preserve paragraphs in quote content
-      let paragraphContent = child.children
-        .map(c => c.data || '')
-        .join(' ')
-        .trim();
-        
-      if (paragraphContent) {
-        // Add the paragraph content inside a tag
-        contentHtml += `<p>${paragraphContent}</p>`;
-      }
-    }
-
-    // Recursively process any nested children
-    if (child.children && child.children.length > 0) {
-      const result = processDomNode(child, senderText, contentHtml);
-      senderText = result.senderText;
-      contentHtml = result.contentHtml;
-    }
-  });
-
-  return { senderText, contentHtml };
-}
 
 const Note = (props) => {
   const classes = useStyles();
@@ -100,64 +48,26 @@ const Note = (props) => {
     "notes"
   );
 
-  // Clean content by removing extra &nbsp; and empty paragraphs
   const cleanContent = React.useMemo(() => {
     if (!message.content) return '';
     
     // First clean the basic content
     let content = message.content
       .replace(/&nbsp;/g, ' ')
-      .replace(/\s+/g, ' ')
       .trim();
-
-    // Clean up quote blocks specifically
-    content = content.replace(
-      /<div class="quote-block">([\s\S]*?)<\/div>/g,
-      (match, inner) => {
-        // Clean up the quote block content while preserving paragraphs
-        const cleanedInner = inner
-          .replace(/<p>\s*&nbsp;\s*<\/p>/g, '')  // Remove empty paragraphs
-          .replace(/\s+/g, ' ')  // Clean up spaces
-          .trim();
-        return `<div class="quote-block">${cleanedInner}</div>`;
-      }
-    );
-
-    // Wrap non-quote content in a single paragraph
-    if (!content.includes('quote-block')) {
-      content = `<p>${content}</p>`;
-    }
 
     return content;
   }, [message.content]);
 
-  // Improved content length detection with better HTML handling
-  const contentLength = React.useMemo(() => {
-    // Convert HTML to plain text first
-    const textContent = h2p(cleanContent)
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    // Calculate actual content length
-    const contentWithoutSpaces = textContent.replace(/\s+/g, '');
+  // Calculate if content should be truncated
+  const shouldTruncate = React.useMemo(() => {
+    // Get non-quote content
+    const nonQuoteContent = cleanContent.replace(/<div class="quote-block">[\s\S]*?<\/div>/g, '');
     
-    // If content is very short, don't show More button
-    if (contentWithoutSpaces.length < 100) {
-      return 0;
-    }
-
-    // Count actual lines considering line breaks and word wrapping
-    const lines = textContent.split(/\r|\r\n|\n/g);
-    const totalLength = lines.reduce((acc, line) => {
-      // Calculate how many lines this text would take up at 80 chars per line
-      return acc + Math.ceil(line.length / 80);
-    }, 0);
-
-    return totalLength;
+    // Count lines in non-quote content
+    const lines = h2p(nonQuoteContent).split(/\r|\r\n|\n/g);
+    return lines.length > 4;
   }, [cleanContent]);
-
-  // Only show More button if content is actually long
-  const shouldShowMore = contentLength > 3;
 
   const handleOnDelete = async () => {
     setSubmitting(true);
@@ -215,48 +125,32 @@ const Note = (props) => {
           }
           secondary={
             <>
-              {more || cleanContent.includes('quote-block') ? (
-                <div className={!more && shouldShowMore ? classes.truncateContainer : undefined}>
-                  {parse(cleanContent, {
-                    replace: (domNode) => {
-                      if (domNode.attribs && domNode.attribs.class === 'quote-block') {
-                        // Handle quote blocks - always show in full
-                        const result = processDomNode(domNode);
-                        const quoteHtml = `
-                          <span class="quote-sender">${result.senderText.trim()}</span>
-                          ${result.contentHtml}
-                        `.trim();
-
-                        return React.createElement('div', {
-                          className: `quote-block ${classes.quoteBlock}`,
-                          dangerouslySetInnerHTML: { __html: quoteHtml }
-                        });
-                      }
-                      // For non-quote content, apply truncation based on more/simplify state
-                      if (domNode.type === 'tag' && domNode.name === 'p') {
-                        const content = domNode.children.map(child => child.data || '').join(' ').trim();
-                        if (!content) return null;
-                        
-                        // Only apply truncation to non-quote content
-                        return React.createElement('div', {
-                          className: !more && shouldShowMore ? classes.truncateContainer : undefined
-                        }, content);
-                      }
+              {more || !shouldTruncate ? (
+                // Show full content
+                parse(cleanContent, {
+                  replace: (domNode) => {
+                    if (domNode.attribs && domNode.attribs.class === 'quote-block') {
+                      // Add our style class to the original quote-block class
+                      domNode.attribs.class = `quote-block ${classes.quoteBlock}`;
                       return domNode;
                     }
-                  })}
-                </div>
+                    // Return all other nodes as is
+                    return domNode;
+                  }
+                })
               ) : (
-                <LinesEllipsis
-                  text={h2p(cleanContent)}
-                  maxLine={4}
-                  ellipsis=""
-                  className="text-pre-line"
-                />
+                // Show truncated content
+                <>
+                  <LinesEllipsis
+                    text={h2p(cleanContent)}
+                    maxLine={4}
+                    ellipsis=""
+                    className="text-pre-line"
+                  />
+                </>
               )}
               
-              {/* Only show More/Simplify if there's non-quote content that's long enough */}
-              {shouldShowMore && cleanContent.includes('<p>') && !cleanContent.includes('quote-block') && (
+              {shouldTruncate && (
                 <div className="mt-1">
                   <Link 
                     variant="caption" 
@@ -269,7 +163,7 @@ const Note = (props) => {
                 </div>
               )}
 
-              {/* Display attachments if present - always visible */}
+              {/* Display attachments if present */}
               {message.attachments && message.attachments.length > 0 && (
                 <div className="mt-2">
                   <FileUploadPreview selectedFiles={message.attachments} />
