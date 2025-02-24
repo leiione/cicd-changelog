@@ -28,6 +28,7 @@ const DataGridTable = ({
   currency = '$',
   customEmptyMsg,
   handleRowClick,
+  containerHeight
 }) => {
   const apiRef = useGridApiRef();
   const dgColumn = React.useMemo(() => getDataGridColumns({
@@ -55,9 +56,7 @@ const DataGridTable = ({
   let { dataGridProps } = React.useMemo(() => getDataGridCustomProps({ handleRowClick, handleCellClick }), [
     handleRowClick, handleCellClick
   ])
-  const loadingRows = React.useMemo(() => getSkeletonLoaderRows({
-    columns, loading, fullWidth, enableInlineEditing, handleUpdateCell, ispTimeZone, currency
-  }), [columns, currency, enableInlineEditing, fullWidth, handleUpdateCell, ispTimeZone, loading])
+  const loadingRows = React.useMemo(() => getSkeletonLoaderRows({ containerHeight }), [containerHeight])
 
   return (
     <div className='h-100 w-100'>
