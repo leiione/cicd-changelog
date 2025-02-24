@@ -246,11 +246,11 @@ const LinkedTickets = (props) => {
   }, [loading, data]);
 
   useEffect(() => {
-    if (linkedTickets.length !== ticket.linked_count) {
-      setTicketCached({ ...ticket, linked_count: linkedTickets.length });
+    if (!loading && data && data.linkedTickets.length !== ticket.linked_count) {
+      setTicketCached({ ...ticket, linked_count: data.linkedTickets.length });
     }
     // eslint-disable-next-line
-  }, [linkedTickets.length]);
+  }, [loading, data]);
 
   useSubscription(LINKED_TICKETS_SUBSCRIPTION, {
     variables: { ticket_id: ticket.ticket_id },
