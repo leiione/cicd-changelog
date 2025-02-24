@@ -343,6 +343,32 @@ const Attachments = (props) => {
     );
   };
 
+  const getMatchingMimeTypes = (mimeType) => {
+    const allowedTypes = ["image/*", "application/pdf", "application/zip", "application/x-zip-compressed"];
+    
+    if (!mimeType) return [];
+  
+    // For image types
+    if (mimeType.startsWith('image/')) {
+      return allowedTypes.filter(type => type === 'image/*');
+    }
+  
+    // For specific types like PDF, ZIP
+    if (mimeType === 'application/zip') {
+      return allowedTypes.filter(type => 
+        type === 'application/zip' || type === 'application/x-zip-compressed'
+      );
+    }
+  
+    // For PDF
+    if (mimeType === 'application/pdf') {
+      return allowedTypes.filter(type => type === 'application/pdf');
+    }
+  
+    return [];
+  };
+  
+
   // const validateFileType = (file) => {
   //   const supportedTypes = [
   //     "image/jpeg",
@@ -357,12 +383,21 @@ const Attachments = (props) => {
   //   return supportedTypes.includes(file.type);
   // };
 
-  const handleError = (error) => {
-    console.log(error);
+  const handleError = (error, attachment_type = "") => {
     let errorMessage = error.message;
 
     if (error.code === "file-invalid-type" || error.code === 1) {
-      errorMessage = `${error.message}. We support only image, PDFs, and ZIP files.`;
+      if (attachment_type) {
+        if (attachment_type.startsWith('image/')) {
+          errorMessage = "Please upload image file only.";
+        } else if (attachment_type === 'application/pdf') {
+          errorMessage = "Please upload PDF file only.";
+        } else if (attachment_type === 'application/zip') {
+          errorMessage = "Please upload ZIP file only.";
+        }
+      } else {
+        errorMessage = `${error.message}. We support only image, PDFs, and ZIP files.`;
+      }
     }
     if (error.code === "file-too-large") {
       errorMessage = "File is too large. Maximum file size is 12MB.";
@@ -410,7 +445,7 @@ const Attachments = (props) => {
             <Files
               onError={handleError}
               onChange={handleFileChange}
-              accepts={["image/*", "application/pdf", "application/zip", "application/x-zip-compressed"]}
+              accepts={acceptedFormats}
               multiple
               clickable
               onDragOver={handleDragOver}
@@ -461,7 +496,7 @@ const Attachments = (props) => {
                         <Tooltip title="Attach File">
                           <Files
                             className="files-dropzone"
-                            onError={handleError}
+                            onError={(error)=>handleError(error,file.attachment_type)}
                             onChange={(uploadedFile) =>
                               handelDefaultFileChange(
                                 uploadedFile,
@@ -469,7 +504,7 @@ const Attachments = (props) => {
                               )
                             } // Pass file and atta_label
                             accepts={
-                              ["image/*", "application/pdf", "application/zip", "application/x-zip-compressed"]
+                              getMatchingMimeTypes(file.attachment_type)
                             } // Make it
                             clickable
                             multiple={false} // Disable multi-select
