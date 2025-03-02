@@ -4,7 +4,6 @@ import { MoreVert } from "@mui/icons-material";
 import { preventEvent } from "../Common/helper";
 import CSAT from "Common/CSAT";
 
-
 const HeaderMenuOptions = (props) => {
   const { appuser_id, category, setOpenQueueJobs, enableQueueJobs } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -22,7 +21,7 @@ const HeaderMenuOptions = (props) => {
     setAnchorEl(null);
     event.stopPropagation();
     setOpenQueueJobs(true);
-  }
+  };
 
   return (
     <>
@@ -40,12 +39,14 @@ const HeaderMenuOptions = (props) => {
           horizontal: "left",
         }}
       >
-        {enableQueueJobs && category === "Summary Card" ? 
+        {enableQueueJobs && category === "Summary Card" ? (
           <>
-            <MenuItem onClick={(event) => handleOpenQueueJobs(event)}>Queue Jobs</MenuItem>
-            <MenuItem onClick={(event) => preventEvent(event)}> Delete Ticket</MenuItem>
-          </>           
-        : null }
+            <MenuItem onClick={(event) => handleOpenQueueJobs(event)}>
+              Queue Jobs
+            </MenuItem>
+            {/* <MenuItem onClick={(event) => preventEvent(event)}> Delete Ticket</MenuItem> */}
+          </>
+        ) : null}
         <MenuItem color="default" onClick={(event) => preventEvent(event)}>
           <CSAT
             appuser_id={appuser_id}
