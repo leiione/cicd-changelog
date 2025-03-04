@@ -87,23 +87,54 @@ const MessagesTable = (props) => {
 
   return (
     <div>
-      <List className="overflow-y-auto paper-height-500 messages-list-wrapper" style={messageList.length === 0 ? { textAlign: "center" } : {}}>
-        {messageList.length > 0 ? messageList.map((message) => {
-          if (message.note_id > 0) {
-            return <Note message={message} onDeleteNote={onDeleteNote} handleQouteNote={handleQouteNote} />
-          }
-          switch (message.integration_id) {
-            case 1:
-              return <Email permitDelete={permitDelete} message={message} onDeleteMessage={onDeleteMessage} handleQouteNote={handleQouteNote} handleReplyEmail={handleReplyEmail} />
-            case 3:
-              return <SMS permitDelete={permitDelete} message={message} handleQouteNote={handleQouteNote} onDeleteMessage={() => onDeleteMessage(message.id, message.ticket_id) } handleReplySMS={handleReplySMS} />
-            default:
-              return null // via FB, etc.
-          }
-        })
-          : <Typography variant="body2" className="text-muted">No message available.</Typography>
-        }
-      </List>
+      <List 
+  className={`messages-list-wrapper paper-height-500 ${messageList.length > 0 ? "overflow-y-auto" : ""}`} 
+  style={messageList.length === 0 ? { textAlign: "center", overflow: "hidden" } : {}}
+>
+  {messageList.length > 0 ? (
+    messageList.map((message) => {
+      if (message.note_id > 0) {
+        return (
+          <Note 
+            key={message.note_id} 
+            message={message} 
+            onDeleteNote={onDeleteNote} 
+            handleQouteNote={handleQouteNote} 
+          />
+        );
+      }
+      switch (message.integration_id) {
+        case 1:
+          return (
+            <Email 
+              key={message.id} 
+              permitDelete={permitDelete} 
+              message={message} 
+              onDeleteMessage={onDeleteMessage} 
+              handleQouteNote={handleQouteNote} 
+              handleReplyEmail={handleReplyEmail} 
+            />
+          );
+        case 3:
+          return (
+            <SMS 
+              key={message.id} 
+              permitDelete={permitDelete} 
+              message={message} 
+              handleQouteNote={handleQouteNote} 
+              onDeleteMessage={() => onDeleteMessage(message.id, message.ticket_id)} 
+              handleReplySMS={handleReplySMS} 
+            />
+          );
+        default:
+          return null; // via FB, etc.
+      }
+    })
+  ) : (
+    <Typography variant="body2" className="text-muted">No message available.</Typography>
+  )}
+</List>
+
       <TablePagination
         component="div"
         count={messages.length}

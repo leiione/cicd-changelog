@@ -298,7 +298,7 @@ const LinkedTickets = (props) => {
         <Grid item xs="auto">
           <Chip
             label={ticket.linked_count || 0}
-            sx={{ height: 20, width: 20 }}
+            sx={{ height: 20, width: 20, lineHeight: "20px" }}
             classes={{ label: "p-0" }}
             className="bg-light text-white"
           />
