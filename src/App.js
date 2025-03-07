@@ -26,13 +26,15 @@ const App = ({ theme, container, category, ...rest }) => {
       onINP(({ value, event }) => {
         window.newrelic.addPageAction('CRM Microservice (INP)', {
           inp: value,
+          isp_id,
           interactionType: event.type,
           targetElement: event.target.tagName, 
           targetId: event.target.id || 'no-id'
         });
       });
     }
-  }, [isp_id])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const getMSContent = () => {
     switch (category) {
