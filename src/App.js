@@ -24,8 +24,7 @@ const App = ({ theme, container, category, ...rest }) => {
   useEffect(() => {
     if (window && window.newrelic) {
       onINP(({ value, event }) => {
-        window.newrelic.addPageAction('INP_metric', {
-          isp_id,
+        window.newrelic.addPageAction('CRM Microservice (INP)', {
           inp: value,
           interactionType: event.type,
           targetElement: event.target.tagName, 
