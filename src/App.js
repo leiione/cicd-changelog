@@ -7,6 +7,8 @@ import store from "config/store";
 import { ApolloProvider } from "@apollo/client";
 import { client } from "config/apollo";
 import AddTicket from "AddTicket";
+import { useEffect } from "react";
+import { onINP } from "web-vitals";
 
 const App = ({ theme, container, category, ...rest }) => {
   LicenseInfo.setLicenseKey(
@@ -16,6 +18,14 @@ const App = ({ theme, container, category, ...rest }) => {
   const generateClassName = createGenerateClassName({
     productionPrefix: "crmMF-",
   });
+
+   useEffect(() => {
+    if (window && window.newrelic) {
+      onINP(({ value }) => {
+        window.newrelic.addPageAction('CRM Microservice (INP)', { inp: value });
+      });
+    }
+  }, [])
 
   const getMSContent = () => {
     switch (category) {
