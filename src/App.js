@@ -23,14 +23,21 @@ const App = ({ theme, container, category, ...rest }) => {
 
   useEffect(() => {
     if (window && window.newrelic) {
-      onINP(({ value, event }) => {
-        window.newrelic.addPageAction('CRM Microservice (INP)', {
-          inp: value,
-          isp_id,
-          interactionType: event.type,
-          targetElement: event.target.tagName, 
-          targetId: event.target.id || 'no-id'
-        });
+      onINP((event) => {
+        if (event) {
+          const worstEntry = event.entries.reduce((max, entry) => (entry.value > max.value ? entry : max), event.entries[0]);
+          const target = worstEntry.target || {};
+          window.newrelic.addPageAction('CRM Microservice (INP)', {
+            inp: worstEntry.duration,
+            isp_id,
+            rating: event.rating,
+            interactionType: worstEntry.name,    // 'click', 'keydown', etc.
+            targetElement: target.tagName || 'no-element',
+            targetText: target.innerText?.trim().substring(0, 30) || 'no-text',
+            targetClass: target.className || 'no-class',
+            targetId: target.id || 'no-id'
+          });
+        }
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
