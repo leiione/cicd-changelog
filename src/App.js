@@ -15,6 +15,8 @@ const App = ({ theme, container, category, ...rest }) => {
     "fd66ab9dddde526bc16fd7b6b658b42eTz03MTIyNCxFPTE3MjE2MjQ2OTkwMDAsUz1wcmVtaXVtLExNPXN1YnNjcmlwdGlvbixLVj0y"
   );
 
+  const isp_id = localStorage.getItem("Visp.ispId")
+
   const generateClassName = createGenerateClassName({
     productionPrefix: "crmMF-",
   });
@@ -22,10 +24,10 @@ const App = ({ theme, container, category, ...rest }) => {
   useEffect(() => {
     if (window && window.newrelic) {
       onINP(({ value }) => {
-        window.newrelic.addPageAction('CRM Microservice (INP)', { inp: value });
+        window.newrelic.addPageAction('CRM Microservice (INP)', { inp: value, isp_id });
       });
     }
-  }, [])
+  }, [isp_id])
 
   const getMSContent = () => {
     switch (category) {
