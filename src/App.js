@@ -23,8 +23,14 @@ const App = ({ theme, container, category, ...rest }) => {
 
   useEffect(() => {
     if (window && window.newrelic) {
-      onINP(({ value }) => {
-        window.newrelic.addPageAction('CRM Microservice (INP)', { inp: value, isp_id });
+      onINP(({ value, event }) => {
+        window.newrelic.addPageAction('INP_metric', {
+          isp_id,
+          inp: value,
+          interactionType: event.type,
+          targetElement: event.target.tagName, 
+          targetId: event.target.id || 'no-id'
+        });
       });
     }
   }, [isp_id])
