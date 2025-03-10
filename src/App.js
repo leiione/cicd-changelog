@@ -16,6 +16,7 @@ const App = ({ theme, container, category, ...rest }) => {
   );
 
   const isp_id = localStorage.getItem("Visp.ispId")
+  const isp_domain = localStorage.getItem("Visp.domain")
 
   const generateClassName = createGenerateClassName({
     productionPrefix: "crmMF-",
@@ -30,6 +31,7 @@ const App = ({ theme, container, category, ...rest }) => {
           window.newrelic.addPageAction('CRM Microservice (INP)', {
             inp: worstEntry.duration,
             isp_id,
+            isp_domain,
             rating: event.rating,
             interactionType: worstEntry.name,    // 'click', 'keydown', etc.
             targetElement: target.tagName || 'no-element',
