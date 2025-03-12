@@ -15,16 +15,34 @@ const App = ({ theme, container, category, ...rest }) => {
     "fd66ab9dddde526bc16fd7b6b658b42eTz03MTIyNCxFPTE3MjE2MjQ2OTkwMDAsUz1wcmVtaXVtLExNPXN1YnNjcmlwdGlvbixLVj0y"
   );
 
+  const isp_id = localStorage.getItem("Visp.ispId")
+  const isp_domain = localStorage.getItem("Visp.domain")
+
   const generateClassName = createGenerateClassName({
     productionPrefix: "crmMF-",
   });
 
-   useEffect(() => {
+  useEffect(() => {
     if (window && window.newrelic) {
-      onINP(({ value }) => {
-        window.newrelic.addPageAction('CRM Microservice (INP)', { inp: value });
+      onINP((event) => {
+        if (event) {
+          const worstEntry = event.entries.reduce((max, entry) => (entry.value > max.value ? entry : max), event.entries[0]);
+          const target = worstEntry.target || {};
+          window.newrelic.addPageAction('CRM Microservice (INP)', {
+            inp: worstEntry.duration,
+            isp_id,
+            isp_domain,
+            rating: event.rating,
+            interactionType: worstEntry.name,    // 'click', 'keydown', etc.
+            targetElement: target.tagName || 'no-element',
+            targetText: target.innerText?.trim().substring(0, 30) || 'no-text',
+            targetClass: target.className || 'no-class',
+            targetId: target.id || 'no-id'
+          });
+        }
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const getMSContent = () => {
