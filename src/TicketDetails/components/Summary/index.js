@@ -160,7 +160,8 @@ const Summary = (props) => {
                 />
                 <LinkedTickets
                   ticket={customer}
-                  handleOpenTicket={handleOpenTicket}
+                    handleOpenTicket={handleOpenTicket}
+                    setTicketCached={setTicketCached}
                 />
               </div>
             </div>

@@ -206,7 +206,7 @@ const CustomFields = (props) => {
       ) : (
         !loading &&
         !error && (
-          <Typography align="center" style={{ marginTop: "16px" }}>
+          <Typography variant="body2" align="center" className="mt-2 text-muted">
             No custom fields available for this ticket.
           </Typography>
         )

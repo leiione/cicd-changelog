@@ -274,7 +274,7 @@ const Tasks = (props) => {
                               ...getItemStyle(
                                 snapshot.isDragging,
                                 provided.draggableProps.style
-                              )
+                              ),
                             }}
                             className={
                               task.converted_ticket_id > 0 &&
@@ -331,7 +331,7 @@ const Tasks = (props) => {
                                   className="position-relative"
                                   style={
                                     task.task_id === 0
-                                      ? { margin: "0px 20px 0px 53px" }
+                                      ? { margin: "0px 20px 20px 53px" }
                                       : { marginRight: "20px" }
                                   }
                                 >
@@ -423,7 +423,9 @@ const Tasks = (props) => {
           </Droppable>
         </DragDropContext>
       ) : (
-        <Typography className="text-muted">No Task Added.</Typography>
+        <Typography className="text-muted" variant="body2">
+          No Task Added.
+        </Typography>
       )}
     </AccordionCard>
   );

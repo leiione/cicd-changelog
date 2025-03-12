@@ -66,7 +66,7 @@ const ContactNumberField = props => {
       <Grid item xs={12} className="d-inline-flex">
         <FontAwesomeIcon icon={faPhone} className="fa-fw text-muted f-16 mr-2" />
         <Grid item xs={12} className="d-inline-flex">
-          <Grid container spacing={1} style={{ width: "42%" }}>
+          <Grid container spacing={1} xs={12}>
             {selectedNumbers.length > 0 ? (
               selectedNumbers.map((item, index) => (
                 <Grid item xs={6} key={item.phone}>
@@ -119,7 +119,7 @@ const ContactNumberField = props => {
           }
         </Grid>
       </Grid>
-      {onEditMode && <Divider style={{ width: "42%", marginLeft: "5%" }} />}
+      {onEditMode && <Divider style={{ width: "95%", marginLeft: "5%" }} />}
     </>
   )
 }

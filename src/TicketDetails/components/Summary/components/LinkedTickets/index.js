@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ExpandLess,
   ExpandMore,
@@ -216,7 +216,7 @@ const LinkedTicketContent = (props) => {
 
 const LinkedTickets = (props) => {
   const dispatch = useDispatch();
-  const { ticket, handleOpenTicket } = props;
+  const { ticket, handleOpenTicket, setTicketCached } = props;
   const summaryCard = useSelector((state) => state.summaryCard);
   const preferences = summaryCard ? summaryCard.subComponent : {};
 
@@ -244,7 +244,14 @@ const LinkedTickets = (props) => {
     }
     return tickets;
   }, [loading, data]);
-  
+
+  useEffect(() => {
+    if (!loading && data && data.linkedTickets.length !== ticket.linked_count) {
+      setTicketCached({ ...ticket, linked_count: data.linkedTickets.length });
+    }
+    // eslint-disable-next-line
+  }, [loading, data]);
+
   useSubscription(LINKED_TICKETS_SUBSCRIPTION, {
     variables: { ticket_id: ticket.ticket_id },
     onData: async ({ data: { data }, client }) => {
@@ -291,7 +298,7 @@ const LinkedTickets = (props) => {
         <Grid item xs="auto">
           <Chip
             label={ticket.linked_count || 0}
-            sx={{ height: 20, width: 20 }}
+            sx={{ height: 20, width: 20, lineHeight: "20px" }}
             classes={{ label: "p-0" }}
             className="bg-light text-white"
           />

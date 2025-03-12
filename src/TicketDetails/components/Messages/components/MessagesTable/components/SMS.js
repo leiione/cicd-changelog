@@ -72,16 +72,6 @@ const SMSPopover = (props) => {
               ))}
             </Grid>
           </Grid>
-          <Grid item xs={3} style={{ textAlign: "end" }}>
-            <Typography variant="subtitle1" style={{ paddingRight: 5 }}>
-              Subject:
-            </Typography>
-          </Grid>
-          <Grid item xs={9}>
-            <Typography variant="subtitle1" style={{ wordWrap: "break-word" }}>
-              {message.subject}
-            </Typography>
-          </Grid>
         </Grid>
       </Grid>
     </Popover>
@@ -100,12 +90,13 @@ const SMS = (props) => {
   const [more, toggleMore] = React.useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
   const toEmail = message.to_email ? message.to_email.split(",") : [];
-  const replySMS =
-    message.traffic === "INBOUND"
-      ? [message.from_email]
-      : message.to_email
-      ? message.to_email.split(",")
-      : [];
+  const replySMS = toEmail;
+  // const replySMS =
+  //   message.traffic === "INBOUND"
+  //     ? [message.from_email]
+  //     : message.to_email
+  //     ? message.to_email.split(",")
+  //     : [];
 
   // Remove the specific text from the message
   const text = message.message.replace(

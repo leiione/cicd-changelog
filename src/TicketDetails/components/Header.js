@@ -180,7 +180,6 @@ const Header = (props) => {
   }
 
   const assigned_name = !ticket.assigned_name && ticket.subscriber && ticket.subscriber.first_name ? `${ticket.subscriber.first_name} ${ticket.subscriber.last_name} (${ticket.subscriber.customer_id})` : ticket.assigned_name
-
   return (
     <>
       <div

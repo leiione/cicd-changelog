@@ -31,7 +31,7 @@ const TicketQueueTable = (props) => {
   }
   const { loading, error, data, client } = useQuery(GET_QUEUED_JOBS, {
     variables,
-    fetchPolicy: "cache-and-network"
+    fetchPolicy: "network-only"
   });
   const cacheExists = checkIfCacheExists(client, {
     query: GET_QUEUED_JOBS,
