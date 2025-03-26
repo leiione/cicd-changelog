@@ -16,19 +16,22 @@ import {
 } from "@mui/material";
 import TaskMenuOptions from "./components/TaskMenuOptions";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import { cloneDeep, find, get, isEmpty, omit, sortBy, trim } from "lodash";
+import { cloneDeep, get, isEmpty, omit, sortBy, trim } from "lodash";
 import { preventEvent } from "Common/helper";
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import {
-  GET_TICKET,
   SAVE_TICKET_TASKS,
   GET_ACTIVITIES,
+  GET_TICKET_TASKS,
+  TASK_SUBSCRIPTION,
 } from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
 import { setCardPreferences, showSnackbar } from "config/store";
 import ProgressButton from "Common/ProgressButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
+import { useSelector } from "react-redux";
+import { checkIfCacheExists } from "config/apollo";
 
 const getItemStyle = (isDragging, draggableStyle) => ({
   userSelect: "none",
@@ -46,40 +49,26 @@ const taskData = {
 
 const Tasks = (props) => {
   const dispatch = useDispatch();
-  const { ticket, appuser_id, lablesVisible, loading, handleOpenTicket } =
+  const { ticket, tasks, appuser_id, lablesVisible, loading, handleOpenTicket } =
     props;
-  const [ticketTasks, setTicketTasks] = useState(ticket.tasks || []);
+  const [ticketTasks, setTicketTasks] = useState(tasks || []);
   const [isHovered, setHover] = useState(-1);
   const [onEditMode, setOnEditMode] = useState({ index: -1, value: "" });
   const [isSubmitting, setSubmitting] = useState(false);
   const [saveTicketTasks] = useMutation(SAVE_TICKET_TASKS);
 
   useEffect(() => {
-    if (!loading && ticket.tasks !== ticketTasks) {
-      const tasks = sortBy(ticket.tasks, "rank");
-      setTicketTasks(tasks);
+    if (!loading && tasks !== ticketTasks) {
+      const sortedTasks = sortBy(tasks, "rank");
+      setTicketTasks(sortedTasks);
       setOnEditMode({ index: -1, value: "" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, ticket.ticket_id, ticket.ticket_type_id, ticket.tasks]);
+  }, [loading, ticket.ticket_id, ticket.ticket_type_id, tasks]);
 
   const completed = ticketTasks.filter((x) => x.is_completed).length;
   const taskCount = ticketTasks.filter((x) => x.task_id !== 0).length;
   const error = onEditMode.index > -1 && isEmpty(trim(onEditMode.value));
-  const isTaskRequired = React.useMemo(() => {
-    let required = false;
-    if (
-      ticket &&
-      ticket.update_requirements &&
-      ticket.update_requirements.length > 0
-    ) {
-      const taskReq = find(ticket.update_requirements, {
-        requirement_option: "TASKS",
-      });
-      required = taskReq && taskReq.flag_enabled === "Y";
-    }
-    return required;
-  }, [ticket]);
 
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
@@ -159,7 +148,7 @@ const Tasks = (props) => {
     try {
       setSubmitting(true);
       const tasks = newTasks.map((x, index) => ({
-        ...omit(x, ["is_default", "__typename", "flag_ticket_deleted"]),
+        ...omit(x, ["is_default", "__typename", "flag_ticket_deleted", "default_required"]),
         rank: index + 1,
       }));
 
@@ -175,7 +164,7 @@ const Tasks = (props) => {
           }
         },
         refetchQueries: [
-          { query: GET_TICKET, variables: { id: ticket.ticket_id } },
+          { query: GET_TICKET_TASKS, variables: { ticket_id: ticket.ticket_id } },
           { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id } },
         ],
       });
@@ -401,13 +390,7 @@ const Tasks = (props) => {
                                       >
                                         {`${task.task}${" *"}`}
                                       </span>
-                                    ) : (
-                                      `${task.task}${
-                                        isTaskRequired && task.is_default
-                                          ? " *"
-                                          : ""
-                                      }`
-                                    )}
+                                    ) : (`${task.task}${task.default_required ? " *" : ""}`)}
                                   </Typography>
                                 }
                               />
@@ -430,4 +413,36 @@ const Tasks = (props) => {
     </AccordionCard>
   );
 };
-export default Tasks;
+
+const TicketTaskContainer = props => {
+  const online = useSelector(state => state.networkStatus.online);
+  const { ticket } = props;
+
+  const { data, error, loading, client, refetch } = useQuery(GET_TICKET_TASKS, {
+    variables: { ticket_id: ticket.ticket_id },
+    fetchPolicy: online ? "cache-and-network" : "cache-only",
+  });
+
+  const cacheExists = checkIfCacheExists(client, { query: GET_TICKET_TASKS, variables: { ticket_id: ticket.ticket_id } })
+
+  const tasks = (!loading || cacheExists) && data && data.ticketTasks ? data.ticketTasks : [];
+
+  useSubscription(TASK_SUBSCRIPTION, {
+    variables: { ticket_id: ticket.ticket_id },
+    onData: async () => {
+      refetch();
+    },
+  });
+
+  return (
+    <Tasks
+      {...props}
+      ticket={ticket}
+      loading={loading && !cacheExists}
+      tasks={tasks}
+      taskError={error}
+    />
+  )
+};
+
+export default TicketTaskContainer;

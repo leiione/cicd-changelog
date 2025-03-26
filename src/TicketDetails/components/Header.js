@@ -31,7 +31,6 @@ import { useForm } from "react-hook-form";
 import {
   GET_TICKET,
   GET_ACTIVITIES,
-  GET_TICKET_ATTACHMENTS,
   UPDATE_TICKET_MUTATION,
 } from "TicketDetails/TicketGraphQL";
 
@@ -163,8 +162,6 @@ const Header = (props) => {
         },
         refetchQueries: [
           { query: GET_TICKET, variables: { id: ticket.ticket_id }
-          },
-          { query: GET_TICKET_ATTACHMENTS, variables: { ticket_id: ticket.ticket_id }
           },
           { query: GET_ACTIVITIES, variables: { ticket_id: ticket.ticket_id }
           },

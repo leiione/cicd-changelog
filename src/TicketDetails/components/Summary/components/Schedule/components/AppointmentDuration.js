@@ -133,6 +133,7 @@ const AppointmentDuration = (props) => {
           Appointment Duration:
           <Typography
             variant="subtitle1"
+            component="span"
             className={`primary-on-hover d-inline-block ml-2`}
           >
             {durationDisplay}

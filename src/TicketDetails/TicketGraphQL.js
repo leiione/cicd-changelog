@@ -33,15 +33,6 @@ export const GET_TICKET = gql`
       equipment_id
       site_contact_id
       infrastructure_address
-      tasks {
-        task_id
-        task
-        is_completed
-        is_default
-        rank
-        converted_ticket_id
-        flag_ticket_deleted
-      }
       infrastructure {
         id
         first_name
@@ -69,17 +60,40 @@ export const GET_TICKET = gql`
       linked_count
       update_requirements
       attachments
-      
-    }
-    ticketTypes {
+    }     
+  }
+`;
+
+export const GET_TICKET_TYPES = gql`
+  query ticketTypes($isp_id: Int) {
+    ticketTypes(isp_id: $isp_id) {
       ticket_type_id
       ticket_type_desc
-    }
-    ticketStatuses {
+  }
+}
+`;
+
+export const GET_TICKET_STATUS = gql`
+  query ticketStatuses($isp_id: Int) {
+    ticketStatuses(isp_id: $isp_id) {
       id
       name
     }
-     
+  }
+`;
+
+export const GET_TICKET_TASKS = gql`
+  query ticketTasks($ticket_id: Int!) {
+    ticketTasks(ticket_id: $ticket_id) {
+      task_id
+        task
+        is_completed
+        is_default
+        rank
+        converted_ticket_id
+        flag_ticket_deleted
+        default_required
+    }
   }
 `;
 

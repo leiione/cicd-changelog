@@ -71,15 +71,12 @@ const Followers = (props) => {
 
     const followerEmails = tempFollowers.map((follower) => follower.email);
 
-    console.log("Updating ticket with followers:", followerEmails);
-
     try {
       await updateTicket({
         ticket_id: ticket.ticket_id,
         followers: followerEmails.join(","),
       });
       setFollowers(tempFollowers); // Sync saved state
-      console.log("Ticket updated successfully.");
     } catch (error) {
       console.error("Error updating ticket:", error);
     }
@@ -130,11 +127,11 @@ const Followers = (props) => {
         </Grid>
         <Grid item xs="auto" onClick={handleClick}>
           {selectedFollowers.length > 0 ? (
-            selectedFollowers.map((follower) => (
+            selectedFollowers.map((follower, index) => (
               <Typography
                 variant="subtitle1"
                 className="d-flex align-items-center mb-1"
-                key={follower.email}
+                key={follower.email ? follower.email : `empty-email-${index}`}
               >
                 {follower.realname && (
                   <AvatarText
@@ -179,11 +176,11 @@ const Followers = (props) => {
             />
             <List className="paper-height-300 overflow-y-auto">
               {filteredFollowers &&
-                filteredFollowers.map((follower) => {
+                filteredFollowers.map((follower, index) => {
                   const isDisabled = !follower.email;
                   return (
                     <Tooltip
-                      key={follower.email}
+                      key={follower.email ? follower.email : `empty-email-list-${index}`}
                       title={
                         isDisabled
                           ? "This appuser does not have an associated email account."
@@ -192,7 +189,6 @@ const Followers = (props) => {
                       placement="top"
                     >
                       <ListItemButton
-                        disablePadding
                         disabled={isDisabled}
                         selected={tempFollowers.some(
                           (a) => a.email === follower.email

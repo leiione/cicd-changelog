@@ -50,12 +50,14 @@ const Attachments = (props) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const { data, refetch: refetchAttachment } = useQuery(GET_TICKET_ATTACHMENTS, {
-    variables: { ticket_id: ticket.ticket_id },
+    variables: { ticket_id: ticket?.ticket_id },
     fetchPolicy: "network-only",
+    skip: !ticket?.ticket_id,
   });
 
   useSubscription(ATTACHMENT_SUBSCRIPTION, {
-    variables: { ticket_id: ticket.ticket_id },
+    variables: { ticket_id: ticket?.ticket_id },
+    skip: !ticket?.ticket_id,
     onData: async ({ data: { data }, client }) => {
       refetchAttachment();
     },
@@ -442,58 +444,56 @@ const Attachments = (props) => {
       >
         <Box>
           <Tooltip title="Attach File">
-            <Files
-              onError={handleError}
-              onChange={handleFileChange}
-              accepts={acceptedFormats}
-              multiple
-              clickable
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onDragLeave={handleDragLeave}
-            >
-              <Box
-                className={`upload-image-placeholder ${isDragging ? "dragging" : ""
-                  }`}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
+            <div>
+              <Files
+                onError={handleError}
+                onChange={handleFileChange}
+                accepts={acceptedFormats}
+                multiple
+                clickable
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                onDragLeave={handleDragLeave}
               >
-                <label
-                  htmlFor="upload-file-input"
-                  className="upload-file-input"
+                <Box
+                  className={`upload-image-placeholder ${isDragging ? "dragging" : ""
+                    }`}
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
                 >
-                  <Typography variant="body2" className="mt-2">
-                    Drag and drop files or
-                    <span className="text-primary"> Browse</span>
-                  </Typography>
-                  <Typography variant="text-muted mb-2 mt-2">
-                    Supported formats: JPEG, PNG, GIF, PDF, ZIP
-                  </Typography>
-                </label>
-              </Box>
-            </Files>
+                  <label
+                    htmlFor="upload-file-input"
+                    className="upload-file-input"
+                  >
+                    <Typography variant="body2" className="mt-2">
+                      Drag and drop files or
+                      <span className="text-primary"> Browse</span>
+                    </Typography>
+                    <Typography variant="text-muted mb-2 mt-2">
+                      Supported formats: JPEG, PNG, GIF, PDF, ZIP
+                    </Typography>
+                  </label>
+                </Box>
+              </Files>
+            </div>
           </Tooltip>
           <Grid container spacing={1}>
             {selectedFiles.length > 0 &&
-              selectedFiles.map((file, index) => {
-                const fileName = file.name || file.filename;
-                const type = getExtensionFromFilename(fileName);
-                let src = find(getSourceImage, { key: type })
-                src = src || find(getSourceImage, { key: 'txt' });
-                return (
-                  <>
-                    {file.id === 0 && (
-                      <Grid item xs={2} sm={2} md={2} key={index}>
-                        <Typography
-                          className={`mt-2 d-block text-truncate ${!file.attachment_label ? "invisible" : ""
-                            }`}
-                          variant="caption"
-                        >
-                          {file.attachment_label
-                            ? file.attachment_label
-                            : "Empty"}
-                        </Typography>
-                        <Tooltip title="Attach File">
+              selectedFiles.map((file, index) => (
+                <React.Fragment key={`attachment-${index}`}>
+                  {file.id === 0 && (
+                    <Grid item xs={2} sm={2} md={2}>
+                      <Typography
+                        className={`mt-2 d-block text-truncate ${!file.attachment_label ? "invisible" : ""
+                          }`}
+                        variant="caption"
+                      >
+                        {file.attachment_label
+                          ? file.attachment_label
+                          : "Empty"}
+                      </Typography>
+                      <Tooltip title="Attach File">
+                        <div>
                           <Files
                             className="files-dropzone"
                             onError={(error)=>handleError(error,file.attachment_type)}
@@ -515,68 +515,68 @@ const Attachments = (props) => {
                               </Typography>
                             </div>
                           </Files>
-                        </Tooltip>
+                        </div>
+                      </Tooltip>
+                    </Grid>
+                  )}
+                  {(file.default_attachment === undefined ||
+                    file.default_attachment === "N") && (
+                      <Grid item xs={2} sm={2} md={2}>
+                        <Typography
+                          className={`mt-2 d-block text-truncate ${!file.attachment_label ? "invisible" : ""
+                            }`}
+                          variant="caption"
+                        >
+                          {file.attachment_label
+                            ? file.attachment_label
+                            : "Empty"}
+                        </Typography>
+
+                        <div className="attachment-card visible-on-hover">
+                          {file.file_url && (
+                            <IconButton
+                              className="close-icon-btn invisible"
+                              size="small"
+                              onClick={() => removeFile(file.id)}
+                            >
+                              <Close fontSize="small" />
+                            </IconButton>
+                          )}
+                          <IconButton
+                            className="preview-icon-btn invisible "
+                            size="small"
+                            onClick={() => handlePreviewOpen({
+                              ...file, name: file.name || file.filename, file_url: file.file_url || file.preview?.url, preview: find(getSourceImage, { key: getExtensionFromFilename(file.name || file.filename) })?.value, isImage: find(getSourceImage, { key: getExtensionFromFilename(file.name || file.filename) })?.isImage
+                            })}
+                          >
+                            <Visibility fontSize="small" />
+                          </IconButton>
+                          {find(getSourceImage, { key: getExtensionFromFilename(file.name || file.filename) })?.isImage ?
+                            <img
+                              src={file.file_url || file.preview?.url}
+                              alt={file.name || file.filename}
+                              width={60}
+                              height={60}
+                              style={{ marginTop: 0 }}
+                            /> : find(getSourceImage, { key: getExtensionFromFilename(file.name || file.filename) })?.value
+                          }
+                        </div>
+
+                        {(!file.file_url || file?.lodingStatus) &&
+                          uploadProgress[file.name || file.filename] && (
+                            <LinearProgress className="mt-2" />
+                          )}
+
+                        <Typography
+                          className="mt-2 d-block text-truncate"
+                          variant="caption"
+                        >
+                          {file.name || file.filename}
+                        </Typography>
                       </Grid>
                     )}
-                    {(file.default_attachment === undefined ||
-                      file.default_attachment === "N") && (
-                        <Grid item xs={2} sm={2} md={2} key={index}>
-                          <Typography
-                            className={`mt-2 d-block text-truncate ${!file.attachment_label ? "invisible" : ""
-                              }`}
-                            variant="caption"
-                          >
-                            {file.attachment_label
-                              ? file.attachment_label
-                              : "Empty"}
-                          </Typography>
-
-                          <div className="attachment-card visible-on-hover">
-                            {file.file_url && (
-                              <IconButton
-                                className="close-icon-btn invisible"
-                                size="small"
-                                onClick={() => removeFile(file.id)}
-                              >
-                                <Close fontSize="small" />
-                              </IconButton>
-                            )}
-                            <IconButton
-                              className="preview-icon-btn invisible "
-                              size="small"
-                              onClick={() => handlePreviewOpen({
-                                ...file, name: fileName, file_url: file.file_url || file.preview?.url, preview: src.value, isImage: src.isImage
-                              })}
-                            >
-                              <Visibility fontSize="small" />
-                            </IconButton>
-                            {src.isImage ?
-                              <img
-                                src={file.file_url || file.preview?.url}
-                                alt={fileName}
-                                width={60}
-                                height={60}
-                                style={{ marginTop: 0 }}
-                              /> : src.value
-                            }
-                          </div>
-
-                          {(!file.file_url || file?.lodingStatus) &&
-                            uploadProgress[fileName] && (
-                              <LinearProgress className="mt-2" />
-                            )}
-
-                          <Typography
-                            className="mt-2 d-block text-truncate"
-                            variant="caption"
-                          >
-                            {fileName}
-                          </Typography>
-                        </Grid>
-                      )}
-                  </>
-                )
-              })}
+                </React.Fragment>
+              ))}
 
             {selectedFiles.length > 0 && selectedFiles.length < 4 && (
               <Grid item xs={2} sm={2} md={2}>
@@ -587,19 +587,21 @@ const Attachments = (props) => {
                   Not visible
                 </Typography>
                 <Tooltip title="Attache File">
-                  <Files
-                    className="files-dropzone"
-                    onError={handleError}
-                    onChange={handleFileChange}
-                    accepts={acceptedFormats}
-                    clickable
-                  >
-                    <div className="attachment-card">
-                      <Typography variant="body2" color="primary">
-                        <FontAwesomeIcon icon={faPlusCircle} size="lg" />
-                      </Typography>
-                    </div>
-                  </Files>
+                  <div>
+                    <Files
+                      className="files-dropzone"
+                      onError={handleError}
+                      onChange={handleFileChange}
+                      accepts={acceptedFormats}
+                      clickable
+                    >
+                      <div className="attachment-card">
+                        <Typography variant="body2" color="primary">
+                          <FontAwesomeIcon icon={faPlusCircle} size="lg" />
+                        </Typography>
+                      </div>
+                    </Files>
+                  </div>
                 </Tooltip>
               </Grid>
             )}
@@ -638,10 +640,10 @@ const Attachments = (props) => {
 };
 Attachments.propTypes = {
   ticket: PropTypes.shape({
-    ticket_id: PropTypes.string.isRequired,
+    ticket_id: PropTypes.number,
   }).isRequired,
   setDefaultAttacmentCount: PropTypes.func.isRequired,
-  appuser_id: PropTypes.string.isRequired,
+  appuser_id: PropTypes.number.isRequired,
 };
 
 export default Attachments;

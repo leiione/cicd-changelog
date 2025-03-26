@@ -171,7 +171,7 @@ EditServiceContact.propTypes = {
   setValue: PropTypes.func,
   cLoading: PropTypes.bool,
   cError: PropTypes.string,
-  cData: PropTypes.array,
+  cData: PropTypes.object,
   contact: PropTypes.shape({
     main_company: PropTypes.string,
     first_name: PropTypes.string,
@@ -180,11 +180,11 @@ EditServiceContact.propTypes = {
   ticket: PropTypes.shape({
     ticket_contact_name: PropTypes.string,
     address: PropTypes.string,
-    ticket_contact_numbers: PropTypes.array,
-    ticket_contact_email: PropTypes.array,
-    payment_status: PropTypes.string,
+    ticket_contact_numbers: PropTypes.string,
+    ticket_contact_email: PropTypes.string,
+    payment_status: PropTypes.number,
     infrastructure_address: PropTypes.string,
-    ticket_id: PropTypes.string,
+    ticket_id: PropTypes.number,
   }).isRequired
 };
 
@@ -192,10 +192,10 @@ EditServiceContactForm.propTypes = {
   ticket: PropTypes.shape({
     ticket_contact_name: PropTypes.string,
     address: PropTypes.string,
-    ticket_contact_numbers: PropTypes.array,
-    ticket_contact_email: PropTypes.array,
-    payment_status: PropTypes.string,
-    ticket_id: PropTypes.string,
+    ticket_contact_numbers: PropTypes.string,
+    ticket_contact_email: PropTypes.string,
+    payment_status: PropTypes.number,
+    ticket_id: PropTypes.number,
     infrastructure_address: PropTypes.string,
   }).isRequired,
   contact: PropTypes.shape({

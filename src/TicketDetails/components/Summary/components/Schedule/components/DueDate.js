@@ -90,6 +90,7 @@ const DueDate = (props) => {
         Due Date:
         <Typography
           variant="subtitle1"
+          component="span"
           className={`primary-on-hover d-inline-block ml-2`}
         >
           {dueDate}

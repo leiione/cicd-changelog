@@ -5,43 +5,52 @@ import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import { makeStyles } from "@mui/styles";
 import { getUserAction } from "utils/getUserAction";
 import { find } from "lodash";
+import { GET_TICKET_STATUS } from "TicketDetails/TicketGraphQL";
+import { useQuery } from "@apollo/client";
+import { useSelector } from "react-redux";
+import { checkIfCacheExists } from "config/apollo";
+import { ListSkeletonLoader } from "./SkeletonLoader";
+import ErrorPage from "components/ErrorPage";
 
 const useStyles = makeStyles((theme) => ({
   paperHeight: {
     maxHeight: 300,
+    minWidth: 150,
   },
+  skeletonLoader: {
+    padding: "5px 10px"
+  }
 }));
 
-const TicketStatus = (props) => {
-  const classes = useStyles();
-  const { ticket, ticketStatuses, handleUpdate, defaultAttacmentCount, requiredCustomFieldsCount, isSignatureAdded } = props;
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [status, setStatus] = React.useState();
-  const [searchQuery, setSearchQuery] = useState("");
 
-  React.useEffect(() => {
-    if (ticket && ticket.priority) {
-      setStatus(ticket.status ? ticket.status : "Task");
-    }
-  }, [ticket]);
+const StatusMenu = props => {
+  const isp_id = useSelector(state => state.ispId)
+  const online = useSelector(state => state.networkStatus.online);
+  const {
+    classes,
+    ticket,
+    searchQuery,
+    setSearchQuery,
+    defaultAttacmentCount,
+    requiredCustomFieldsCount,
+    isSignatureAdded,
+    handlePopoverClose
+  } = props;
 
-  const openMenu = Boolean(anchorEl);
-  const handleClick = (event) => {
-    preventEvent(event);
-    setAnchorEl(event.currentTarget);
-  };
-  const handlePopoverClose = (event, status) => {
-    if (status !== "backdropClick" && status !== "escapeKeyDown" && status !== "tabKeyDown") {
-      setStatus(status);
-      handleUpdate({
-        ticket_id: ticket.ticket_id,
-        status: status,
-      });
-    }
-    preventEvent(event);
-    setSearchQuery("");
-    setAnchorEl(null);
-  };
+  const { loading, error, data, client } = useQuery(GET_TICKET_STATUS, {
+    variables: { isp_id: isp_id },
+    fetchPolicy: online ? "cache-and-network" : "cache-only",
+  });
+  
+  const cacheExists = checkIfCacheExists(client, { query: GET_TICKET_STATUS, variables: { isp_id } })
+  
+  const ticketStatuses = useMemo(() => {
+    return (!loading || cacheExists) && data && data.ticketStatuses ? data.ticketStatuses : [];
+  }, [loading, cacheExists, data]);
+
+  const filteredStatuses = ticketStatuses.filter((status) =>
+    status.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const tooltipMsgs = useMemo(() => {
     let resolvingTooltipMsgs = [];
@@ -138,15 +147,91 @@ const TicketStatus = (props) => {
     return null;
   };
 
-  const filteredStatuses = ticketStatuses.filter((status) =>
-    status.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
     event.stopPropagation();
   };
+  
+  if (loading && !cacheExists) return <ListSkeletonLoader classes={classes} />;
+  if (error) return <ErrorPage error={error} />;
 
+  return (
+    <>
+      <TextField
+        placeholder="Search..."
+        className="p-3"
+        value={searchQuery}
+        onChange={handleSearchChange}
+        fullWidth
+        autoFocus
+        autoComplete="off"
+        variant="standard"
+        onClick={(event) => preventEvent(event)}
+      />
+      {filteredStatuses &&
+        filteredStatuses.map((taskStatus) => {
+          return (
+            <Tooltip title={resolvingClosingMessage(taskStatus.name)} key={taskStatus.id}>
+              <span
+                onClick={(event) => {
+                  if (Boolean(resolvingClosingMessage(taskStatus.name))) {
+                    preventEvent(event); // Stop propagation explicitly for disabled items
+                  }
+                }}
+              >
+                <MenuItem
+                  onClick={(event) => {
+                    if (Boolean(resolvingClosingMessage(taskStatus.name))) {
+                      preventEvent(event); // Prevent action on disabled items
+                    } else {
+                      handlePopoverClose(event, taskStatus.name);
+                    }
+                  }}
+                  color="default"
+                  disabled={Boolean(resolvingClosingMessage(taskStatus.name))}
+                >
+                  {taskStatus.name}
+                </MenuItem>
+              </span>
+            </Tooltip>
+          );
+        })
+      }
+    </>
+  )
+}
+
+const TicketStatus = (props) => {
+  const classes = useStyles();
+  const { ticket, handleUpdate } = props;
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [status, setStatus] = React.useState();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  React.useEffect(() => {
+    if (ticket && ticket.priority) {
+      setStatus(ticket.status ? ticket.status : "Task");
+    }
+  }, [ticket]);
+
+  const openMenu = Boolean(anchorEl);
+  const handleClick = (event) => {
+    preventEvent(event);
+    setAnchorEl(event.currentTarget);
+  };
+  const handlePopoverClose = (event, status) => {
+    if (status !== "backdropClick" && status !== "escapeKeyDown" && status !== "tabKeyDown") {
+      setStatus(status);
+      handleUpdate({
+        ticket_id: ticket.ticket_id,
+        status: status,
+      });
+    }
+    preventEvent(event);
+    setSearchQuery("");
+    setAnchorEl(null);
+  };
+  
   return (
     <>
     <Tooltip title={`Status: ${status || 'Not Set'}`} placement="top">
@@ -168,46 +253,13 @@ const TicketStatus = (props) => {
           "aria-labelledby": "basic-button",
         }}
       >
-        <TextField
-          placeholder="Search..."
-          className="p-3"
-          value={searchQuery}
-          onChange={handleSearchChange}
-          fullWidth
-          autoFocus
-          autoComplete="off"
-          variant="standard"
-          onClick={(event) => preventEvent(event)}
+        <StatusMenu
+          {...props}
+          classes={classes}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          handlePopoverClose={handlePopoverClose}
         />
-        {filteredStatuses &&
-          filteredStatuses.map((taskStatus) => {
-            return (
-              <Tooltip title={resolvingClosingMessage(taskStatus.name)} key={taskStatus.id}>
-                <span
-                  onClick={(event) => {
-                    if (Boolean(resolvingClosingMessage(taskStatus.name))) {
-                      preventEvent(event); // Stop propagation explicitly for disabled items
-                    }
-                  }}
-                >
-                  <MenuItem
-                    onClick={(event) => {
-                      if (Boolean(resolvingClosingMessage(taskStatus.name))) {
-                        preventEvent(event); // Prevent action on disabled items
-                      } else {
-                        handlePopoverClose(event, taskStatus.name);
-                      }
-                    }}
-                    color="default"
-                    disabled={Boolean(resolvingClosingMessage(taskStatus.name))}
-                  >
-                    {taskStatus.name}
-                  </MenuItem>
-                </span>
-              </Tooltip>
-            );
-          })
-        }
       </Menu>
     </>
   );

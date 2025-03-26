@@ -177,19 +177,21 @@ const AddEmailFields = (props) => {
       <Grid item xs={12} style={{ textAlign: "end", margin: "-10px 0px" }}>
         <div style={{ position: "absolute", right: "24px", zIndex: 99, padding: "17px 3px" }}>
           <Tooltip title="Attach File">
-            <Files
-              className="files-dropzone"
-              onError={handleError}
-              onChange={handleFileChange}
-              accepts={acceptedFormats}
-              multiple
-              clickable
-              maxFileSize={maxFileSize}
-            >
-              <IconButton aria-label="attachment" className="primary-on-hover">
-                <AttachFile className="primary-on-hover" />
-              </IconButton>
-            </Files>
+            <div>
+              <Files
+                className="files-dropzone"
+                onError={handleError}
+                onChange={handleFileChange}
+                accepts={acceptedFormats}
+                multiple
+                clickable
+                maxFileSize={maxFileSize}
+              >
+                <IconButton aria-label="attachment" className="primary-on-hover">
+                  <AttachFile className="primary-on-hover" />
+                </IconButton>
+              </Files>
+            </div>
           </Tooltip>
         </div>
       </Grid>

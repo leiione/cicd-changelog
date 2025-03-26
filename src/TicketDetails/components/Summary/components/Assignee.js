@@ -81,15 +81,12 @@ const Assignee = (props) => {
       appuser_id: assignee.appuser_id,
       realname: assignee.realname,
     }));
-  
-    console.log("Updating ticket with:", assignees);
-  
+    
     try {
       await updateTicket({
         ticket_id: ticket.ticket_id,
         assignees: assignees,
       });
-      console.log("Ticket updated successfully.");
   
       // Sync the saved state
       setAssignees(tempAssignees);
@@ -214,7 +211,6 @@ const Assignee = (props) => {
                       placement="top"
                     >
                       <ListItemButton
-                        disablePadding
                         selected={tempAssignees.some(
                           (a) => a.appuser_id === assignee.appuser_id
                         )}

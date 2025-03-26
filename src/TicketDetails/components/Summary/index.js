@@ -19,6 +19,7 @@ import {
   GET_TICKET_ATTACHMENTS,
   UPDATE_TICKET_MUTATION,
   GET_TICKET_CUSTOM_FIELDS,
+  GET_TICKET_TASKS,
 } from "TicketDetails/TicketGraphQL";
 import { useMutation } from "@apollo/client";
 import { useDispatch, useSelector } from "react-redux";
@@ -41,8 +42,6 @@ const Summary = (props) => {
     loading,
     appuser_id,
     customer,
-    ticketTypes,
-    ticketStatuses,
     handleOpenTicket,
     setOpenQueueJobs,
     defaultAttacmentCount,
@@ -78,21 +77,27 @@ const Summary = (props) => {
   const handleUpdate = async (input_ticket) => {
     setSubmitting(true);
     try {
+
+      // Define base refetch queries that always run
+      const baseRefetchQueries = [
+        { query: GET_TICKET, variables: { id: customer.ticket_id } },
+        { query: GET_ACTIVITIES, variables: { ticket_id: customer.ticket_id } }
+      ];
+
+      const refetchQueries = [...baseRefetchQueries];
+      if (input_ticket.type) {
+        refetchQueries.push(
+          { query: GET_TICKET_ATTACHMENTS, variables: { ticket_id: customer.ticket_id } },
+          { query: GET_TICKET_CUSTOM_FIELDS, variables: { ticketId: customer.ticket_id } },
+          { query: GET_TICKET_TASKS, variables: { ticket_id: customer.ticket_id } }
+        );
+      }
+
       await updateTicket({
         variables: {
           input_ticket: input_ticket,
         },
-        refetchQueries: [
-          { query: GET_TICKET, variables: { id: customer.ticket_id }
-          },
-          { query: GET_TICKET_ATTACHMENTS, variables: { ticket_id: customer.ticket_id }
-          },
-          { query: GET_ACTIVITIES, variables: { ticket_id: customer.ticket_id }
-          },
-          {
-            query: GET_TICKET_CUSTOM_FIELDS, variables: { ticketId: customer.ticket_id }
-          }
-        ],
+        refetchQueries: refetchQueries, 
       });
       setTicketCached({ ...ticketCached, ...input_ticket });
       dispatch(
@@ -121,13 +126,11 @@ const Summary = (props) => {
           <>
             <TicketPriority customer={customer} handleUpdate={handleUpdate} />
             <TicketType
-              customer={customer}
-              ticketTypes={ticketTypes}
+              ticket={customer}
               handleUpdate={handleUpdate}
             />
             <TicketStatus
               ticket={customer}
-              ticketStatuses={ticketStatuses}
               defaultAttacmentCount={defaultAttacmentCount}
               requiredCustomFieldsCount={requiredCustomFieldsCount}
               isSignatureAdded={isSignatureAdded}

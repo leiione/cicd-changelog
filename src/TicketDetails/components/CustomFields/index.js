@@ -20,19 +20,23 @@ import {
 import ProgressButton from "Common/ProgressButton";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
+import { checkIfCacheExists } from "config/apollo";
+import { useSelector } from "react-redux";
 
 const CustomFields = (props) => {
+  const online = useSelector(state => state.networkStatus.online);
   const { appuser_id, ticket,setRequiredCustomFieldsCount } = props;
   const [isSubmitting, setisSubmitting] = useState(false);
   const dispatch = useDispatch();
 
   const [saveTicketCustomFields] = useMutation(SAVE_TICKET_CUSTOM_FIELDS);
-  const { data, loading, error, refetch } = useQuery(GET_TICKET_CUSTOM_FIELDS, {
+  const { data, loading, error, refetch, client } = useQuery(GET_TICKET_CUSTOM_FIELDS, {
     variables: { ticketId: ticket.ticket_id },
-    fetchPolicy: "network-only",
+    fetchPolicy: online ? "cache-and-network" : "cache-only",
     skip: !ticket.ticket_id,
   });
 
+  const cacheExists = checkIfCacheExists(client, { query: GET_TICKET_CUSTOM_FIELDS, variables: { ticketId: ticket.ticket_id } })
 
   useSubscription(CUSTOM_FIELD_SUBSCRIPTION, {
     variables: { ticket_id: ticket.ticket_id },
@@ -148,7 +152,7 @@ const CustomFields = (props) => {
         />
       }
     >
-      {loading && (
+      {(loading && !cacheExists) && (
         <Grid container justifyContent="center" style={{ marginTop: "16px" }}>
           <CircularProgress />
         </Grid>
@@ -158,7 +162,7 @@ const CustomFields = (props) => {
           Failed to load custom fields. Please try again.
         </Typography>
       )}
-      {!loading && data && data.ticketCustomFields?.length > 0 ? (
+      {(!loading || cacheExists) && data && data.ticketCustomFields?.length > 0 ? (
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Grid container spacing={2}>
             {data.ticketCustomFields.map((field) => {
@@ -204,7 +208,7 @@ const CustomFields = (props) => {
           </Box>
         </form>
       ) : (
-        !loading &&
+        (!loading || cacheExists) &&
         !error && (
           <Typography variant="body2" align="center" className="mt-2 text-muted">
             No custom fields available for this ticket.

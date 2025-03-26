@@ -34,6 +34,7 @@ import { setCardPreferences, showSnackbar } from "config/store";
 import { preventEvent } from "Common/helper";
 import AvatarText from "Common/AvatarText";
 import LinkedTicketNew from "./components/LinkedTicketNew";
+import { checkIfCacheExists } from "config/apollo";
 
 const LinkedTicketContent = (props) => {
   const dispatch = useDispatch();
@@ -216,6 +217,7 @@ const LinkedTicketContent = (props) => {
 
 const LinkedTickets = (props) => {
   const dispatch = useDispatch();
+  const online = useSelector(state => state.networkStatus.online);
   const { ticket, handleOpenTicket, setTicketCached } = props;
   const summaryCard = useSelector((state) => state.summaryCard);
   const preferences = summaryCard ? summaryCard.subComponent : {};
@@ -223,15 +225,17 @@ const LinkedTickets = (props) => {
   const [isLinkedTicketDrawerOpen, setIsLinkedTicketDrawerOpen] =
     useState(false);
 
-  const { loading, error, data, refetch } = useQuery(GET_LINKED_TICKETS, {
+  const { loading, error, data, refetch, client } = useQuery(GET_LINKED_TICKETS, {
     variables: { ticket_id: ticket.ticket_id },
-    fetchPolicy: "network-only",
+    fetchPolicy: online ? "cache-and-network" : "cache-only",
     skip: !ticket.ticket_id || !preferences.linkedTickets, // fetch only when expanded
   });
 
+  const cacheExists = checkIfCacheExists(client, { query: GET_LINKED_TICKETS, variables: { ticket_id: ticket.ticket_id } })
+
   const linkedTickets = useMemo(() => {
     let tickets = [];
-    if (!loading && data && data.linkedTickets) {
+    if ((!loading || cacheExists) && data && data.linkedTickets) {
       const linkTypes = uniq(data.linkedTickets.map((link) => link.type_id)); // group by link type
       for (let type of linkTypes) {
         tickets.push({
@@ -243,14 +247,14 @@ const LinkedTickets = (props) => {
       }
     }
     return tickets;
-  }, [loading, data]);
+  }, [loading, data, cacheExists]);
 
   useEffect(() => {
-    if (!loading && data && data.linkedTickets.length !== ticket.linked_count) {
+    if ((!loading || cacheExists) && data && data.linkedTickets.length !== ticket.linked_count) {
       setTicketCached({ ...ticket, linked_count: data.linkedTickets.length });
     }
     // eslint-disable-next-line
-  }, [loading, data]);
+  }, [loading, data, cacheExists]);
 
   useSubscription(LINKED_TICKETS_SUBSCRIPTION, {
     variables: { ticket_id: ticket.ticket_id },
@@ -329,7 +333,7 @@ const LinkedTickets = (props) => {
         )}
         <LinkedTicketContent
           ticket_id={ticket.ticket_id}
-          loading={loading}
+          loading={loading && !cacheExists}
           error={error}
           linkedTickets={linkedTickets}
           handleOpenTicket={handleOpenTicket}

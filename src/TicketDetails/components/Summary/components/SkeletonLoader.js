@@ -37,3 +37,12 @@ export const ContactSkeletonLoader = () => (
     </Grid>
   </Grid>
 )
+export const ListSkeletonLoader = ({ classes }) => {
+  return (
+    <div className={classes.skeletonLoader}>
+      <Skeleton animation="wave" style={{ height: 25, backgroundColor: "##dfdede", width: "90%" }} />
+      <Skeleton animation="wave" style={{ height: 25, backgroundColor: "##dfdede", width: "80%" }} />
+      <Skeleton animation="wave" style={{ height: 25, backgroundColor: "##dfdede", width: "95%" }} />
+    </div>
+  );
+};

@@ -133,7 +133,7 @@ const Signature = (props) => {
               color="primary"
               size="small"
               onClick={() => toggleSignature(true)}
-              disable
+              disabled={false}
             >
               <FontAwesomeIcon icon={faPlusCircle} />
             </IconButton>

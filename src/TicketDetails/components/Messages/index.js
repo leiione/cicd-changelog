@@ -18,8 +18,10 @@ import AddEmailForm from "./components/AddEmailForm";
 import AddNoteButton from "./components/AddNoteButton";
 import AddNoteForm from "./components/AddNoteForm";
 import AddSMSForm from "./components/AddSMSForm";
+import { useSelector } from "react-redux";
 
 const Messages = (props) => {
+  const online = useSelector(state => state.networkStatus.online);
   const { appuser_id, ticket, lablesVisible } = props;
   const [filter, setFilter] = React.useState(["all"]); // Default to "all"
   const [addNew, setAddNew] = React.useState(null);
@@ -35,7 +37,7 @@ const Messages = (props) => {
     refetch: refetchMessages
   } = useQuery(GET_TICKET_MESSAGES, {
     variables: { ticket_id: ticket.ticket_id },
-    fetchPolicy: "cache-and-network",
+    fetchPolicy: online ? "cache-and-network" : "cache-only",
     skip:
       !ticket.ticket_id || (filter.length === 1 && filter.includes("notes")),
   });
@@ -53,7 +55,7 @@ const Messages = (props) => {
     refetch: refetchNotes,
   } = useQuery(GET_TICKET_NOTES, {
     variables: { ticket_id: ticket.ticket_id },
-    fetchPolicy: "cache-and-network",
+    fetchPolicy: online ? "cache-and-network" : "cache-only",
     skip: !ticket.ticket_id,
   });
   

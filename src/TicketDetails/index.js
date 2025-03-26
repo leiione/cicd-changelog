@@ -7,7 +7,7 @@ import Summary from "./components/Summary";
 import WorkOrder from "./components/Summary/components/WorkOrder";
 import Tasks from "./components/Tasks";
 // import BillsOfMaterial from "./components/BillsOfMaterial";
-import { GET_TICKET, TICKET_SUBSCRIPTION, TASK_SUBSCRIPTION } from "./TicketGraphQL";
+import { GET_TICKET, TICKET_SUBSCRIPTION } from "./TicketGraphQL";
 import { useMutation, useQuery, useSubscription } from "@apollo/client";
 import ErrorPage from "components/ErrorPage";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,6 +28,7 @@ import QueueJobs from "./components/Summary/components/QueueJobs";
 import CustomFields from "./components/CustomFields";
 import PropTypes from 'prop-types';
 import usePermission from "config/usePermission";
+import { checkIfCacheExists } from "config/apollo";
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -97,20 +98,24 @@ const TicketDetails = (props) => {
     appuser_id,
   } = props;
   const snackbar = useSelector((state) => state.snackbar);
+  const online = useSelector(state => state.networkStatus.online);
+
   const permitMessageView = usePermission("ticket_note_message", "flag_read") 
 
   const { ticket_id } = ticketData;
   const [open1, setopen1] = useState(null);
   const [ticketCached, setTicketCached] = useState({});
 
-  const { loading, error, data, refetch } = useQuery(GET_TICKET, {
+  const { loading, error, data, refetch, client } = useQuery(GET_TICKET, {
     variables: { id: ticket_id },
-    fetchPolicy: "network-only",
+    fetchPolicy: online ? "cache-and-network" : "cache-only",
     skip: !ticket_id,
   });
 
-  const ticket = useMemo(() => (!loading && data?.ticket ? data.ticket : { ...ticketData }),
-    [loading, data, ticketData]
+  const cacheExists = checkIfCacheExists(client, { query: GET_TICKET, variables: { id: ticket_id } })
+
+  const ticket = useMemo(() => (!loading || cacheExists) && data?.ticket ? data.ticket : { ...ticketData },
+    [loading, cacheExists, data, ticketData]
   );
 
   useEffect(() => {
@@ -118,17 +123,7 @@ const TicketDetails = (props) => {
     // eslint-disable-next-line
   }, [ticket])
 
-  const ticketTypes = !loading && data && data.ticketTypes ? data.ticketTypes : [];
-  const ticketStatuses = !loading && data && data.ticketStatuses ? data.ticketStatuses : [];
-
   useSubscription(TICKET_SUBSCRIPTION, {
-    variables: { ticket_id: ticket.ticket_id },
-    onData: async ({ data: { data }, client }) => {
-      refetch();
-    },
-  });
-
-  useSubscription(TASK_SUBSCRIPTION, {
     variables: { ticket_id: ticket.ticket_id },
     onData: async ({ data: { data }, client }) => {
       refetch();
@@ -202,12 +197,10 @@ const TicketDetails = (props) => {
       {error ? <ErrorPage error={error} />
         : <div className="drawer-wrapper-full p-3" hidden={error}>
           <Summary
-            loading={loading}
+            loading={loading && !cacheExists}
             appuser_id={appuser_id}
             handleIconButton={handleIconButton}
             customer={ticketCached}
-            ticketTypes={ticketTypes}
-            ticketStatuses={ticketStatuses}
             requiredCustomFieldsCount={requiredCustomFieldsCount}
             defaultAttacmentCount={defaultAttacmentCount}
             lablesVisible={lablesVisible}
@@ -222,7 +215,7 @@ const TicketDetails = (props) => {
           {!hideInprogress &&
             <>
               <CustomFields
-                loading={loading}
+                loading={loading && !cacheExists}
                 ticket={ticketCached}
                 appuser_id={appuser_id}
                 lablesVisible={lablesVisible}
@@ -230,7 +223,6 @@ const TicketDetails = (props) => {
                 setRequiredCustomFieldsCount={setRequiredCustomFieldsCount}
               />
               <Tasks
-                loading={loading}
                 ticket={ticketCached}
                 appuser_id={appuser_id}
                 lablesVisible={lablesVisible}
@@ -317,7 +309,7 @@ const TicketDetails = (props) => {
 const TicketContainer = props => {
   const dispatch = useDispatch()
   const ispId = localStorage.getItem("Visp.ispId")
-  const { isSigningOut, timeZone, settingsPreferences, user, flags } = props
+  const { isSigningOut, timeZone, settingsPreferences, user, flags, networkStatus } = props
   const userPreferencesTimeStamp = useSelector(state => state.userPreferencesTimeStamp)
   const summaryCard = useSelector(state => state.summaryCard)
   const tasksCard = useSelector(state => state.tasksCard)
@@ -358,11 +350,11 @@ const TicketContainer = props => {
 
   useEffect(() => {
     if (ispId && timeZone) {
-      dispatch(populateISPUserSettings({ ispId, timeZone, settingsPreferences, user, flags }))
+      dispatch(populateISPUserSettings({ ispId: Number(ispId), timeZone, settingsPreferences, user, flags, networkStatus }))
     } else {
       // app was rendered outside main app so fetch separately
     }
-  }, [dispatch, timeZone, settingsPreferences, user, ispId, flags])
+  }, [dispatch, timeZone, settingsPreferences, user, ispId, flags, networkStatus])
 
 
   return (
@@ -376,14 +368,14 @@ const TicketContainer = props => {
 TicketDetails.propTypes = {
   ticket: PropTypes.shape({
     subscriber_name: PropTypes.string,
-    customer_id: PropTypes.string,
+    customer_id: PropTypes.number,
     assigned_name: PropTypes.string,
   }).isRequired,
   category: PropTypes.string,
-  hideContentDrawer: PropTypes.bool,
+  hideContentDrawer: PropTypes.func,
   toggleOffCRMDrawer: PropTypes.func,
   handleOpenTicket: PropTypes.func,
-  appuser_id: PropTypes.string,
+  appuser_id: PropTypes.number,
   lablesVisible: PropTypes.bool,
 };
 

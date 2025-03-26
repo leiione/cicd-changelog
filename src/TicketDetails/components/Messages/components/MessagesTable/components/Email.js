@@ -217,7 +217,7 @@ const Email = (props) => {
           secondary={
             <>
               {more || lineLen < 4 ? (
-                <Typography variant="caption" className="text-pre-line">
+                <Typography component="span" variant="caption" className="text-pre-line">
                   {parse(text)}
                 </Typography>
               ) : (
@@ -237,7 +237,7 @@ const Email = (props) => {
               )}
               {message.attachments && message.attachments.length > 0 && (
                 <>
-                  <Typography variant="subtitle1" className="mt-3">
+                  <Typography component="span" variant="subtitle1" className="mt-3">
                     Attachments
                   </Typography>
                   <FileUploadPreview

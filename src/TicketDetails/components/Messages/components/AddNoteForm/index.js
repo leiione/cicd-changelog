@@ -144,19 +144,21 @@ const AddNoteFields = (props) => {
         }}
       >
         <Tooltip title="Attach File">
-          <Files
-            className="files-dropzone"
-            onError={handleError}
-            onChange={handleFileChange}
-            accepts={acceptedFormats}
-            multiple
-            clickable
-            maxFileSize={maxFileSize}
-          >
-            <IconButton aria-label="attachment" className="primary-on-hover">
-              <AttachFileIcon className="primary-on-hover" />
-            </IconButton>
-          </Files>
+          <div>
+            <Files
+              className="files-dropzone"
+              onError={handleError}
+              onChange={handleFileChange}
+              accepts={acceptedFormats}
+              multiple
+              clickable
+              maxFileSize={maxFileSize}
+            >
+              <IconButton aria-label="attachment" className="primary-on-hover">
+                <AttachFileIcon className="primary-on-hover" />
+              </IconButton>
+            </Files>
+          </div>
         </Tooltip>
         {/* <HookCheckbox
           control={control}

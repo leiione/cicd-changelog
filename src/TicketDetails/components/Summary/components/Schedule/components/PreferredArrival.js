@@ -148,6 +148,7 @@ const PreferredArrival = (props) => {
         >
           <Typography
             variant="subtitle1"
+            component="span"
             className={`${
               hasDueDate ? "primary-on-hover cursor-pointer" : ""
             } d-inline-block ml-2`}

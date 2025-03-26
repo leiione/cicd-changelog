@@ -66,10 +66,10 @@ const ContactNumberField = props => {
       <Grid item xs={12} className="d-inline-flex">
         <FontAwesomeIcon icon={faPhone} className="fa-fw text-muted f-16 mr-2" />
         <Grid item xs={12} className="d-inline-flex">
-          <Grid container spacing={1} xs={12}>
+          <Grid container spacing={1}>
             {selectedNumbers.length > 0 ? (
               selectedNumbers.map((item, index) => (
-                <Grid item xs={6} key={item.phone}>
+                <Grid item xs={6} key={`selected-${item.phone}-${index}`}>
                   <Typography variant="subtitle1">
                     <span>{item.label} &nbsp; {item.phone}</span>
                   </Typography>
@@ -103,7 +103,7 @@ const ContactNumberField = props => {
                 <MenuList>
                   {contactNumbers && contactNumbers.length > 0 ?
                     contactNumbers.map((option, index) => (
-                      <MenuItem key={option.phone} >
+                      <MenuItem key={`option-${option.phone}-${index}`} >
                         <FormControlLabel
                           control={<Checkbox
                             checked={findIndex(selectedNumbers, (o) => o.phone === option.phone) > -1}
@@ -126,7 +126,7 @@ const ContactNumberField = props => {
 
 ContactNumberField.propTypes = {
   values: PropTypes.shape({
-    ticket_contact_numbers: PropTypes.string.isRequired,
+    ticket_contact_numbers: PropTypes.string,
   }).isRequired,
   onEditMode: PropTypes.bool.isRequired,
   contact: PropTypes.shape({

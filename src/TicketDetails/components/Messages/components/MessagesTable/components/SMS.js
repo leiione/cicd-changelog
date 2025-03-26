@@ -177,11 +177,10 @@ const SMS = (props) => {
                 </Grid>
               )}
               <Grid item xs="auto">
-                <IconButton size="small">
+                <IconButton size="small" onClick={() => handleQouteNote("sms", message)}>
                   <FontAwesomeIcon
                     className="primary-on-hover"
                     icon={faMessagePlus}
-                    onClick={() => handleQouteNote("sms", message)}
                   />
                 </IconButton>
               </Grid>
