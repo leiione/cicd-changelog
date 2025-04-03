@@ -188,7 +188,7 @@ const Header = (props) => {
             <Tooltip title={assignmnetId ? `Open ${startCase(toLower(ticket.category_type))} Drawer` : ""} placement="top">
               <Typography
                 variant="h6"
-                onClick={["Resolved", "Closed"].includes(ticket.status) ? null : handleAssignedNameClick}
+                onClick={handleAssignedNameClick}
                 style={{ cursor: ["Resolved", "Closed"].includes(ticket.status) ? "default" : "pointer" }}
                 disabled={!assignmnetId}
               >
