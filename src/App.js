@@ -9,10 +9,11 @@ import { client } from "config/apollo";
 import AddTicket from "AddTicket";
 import { useEffect } from "react";
 import { onINP } from "web-vitals";
+import { Monitoring } from "react-scan/monitoring"; // Import this first before React
 
 const App = ({ theme, container, category, ...rest }) => {
   LicenseInfo.setLicenseKey(
-    "fd66ab9dddde526bc16fd7b6b658b42eTz03MTIyNCxFPTE3MjE2MjQ2OTkwMDAsUz1wcmVtaXVtLExNPXN1YnNjcmlwdGlvbixLVj0y"
+    "fd66ab9dddde526bc16fd7b6b658b42eTz03MTIyNCxFPTE3MjE2MjQ2OTkwMDAsUz1wcmVtaXVtLExNPXN1YnNjcmlwdGlvbixKVj0y"
   );
 
   const isp_id = localStorage.getItem("Visp.ispId")
@@ -60,6 +61,10 @@ const App = ({ theme, container, category, ...rest }) => {
         <StyledEngineProvider injectFirst>
           <StylesProvider generateClassName={generateClassName}>
             <ThemeProvider theme={theme}>
+              <Monitoring
+                apiKey={process.env.REACT_APP_REACT_SCAN_API_KEY} // Moved to .env file for better configuration management
+                url="https://monitoring.react-scan.com/api/v1/ingest"
+              />
               {getMSContent()}
             </ThemeProvider>
           </StylesProvider>

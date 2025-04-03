@@ -96,6 +96,7 @@ const TicketDetails = (props) => {
     toggleOffCRMDrawer,
     handleOpenTicket,
     appuser_id,
+    handleOpenTicketAssignment
   } = props;
   const snackbar = useSelector((state) => state.snackbar);
   const online = useSelector(state => state.networkStatus.online);
@@ -193,6 +194,7 @@ const TicketDetails = (props) => {
         hideContentDrawer={hideContentDrawer}
         appuser_id={appuser_id}
         toggleOffCRMDrawer={toggleOffCRMDrawer}
+        handleOpenTicketAssignment={handleOpenTicketAssignment}
       />
       {error ? <ErrorPage error={error} />
         : <div className="drawer-wrapper-full p-3" hidden={error}>

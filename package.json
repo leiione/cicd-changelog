@@ -65,6 +65,7 @@
     "react-input-mask": "^2.0.4",
     "react-lines-ellipsis": "^0.15.4",
     "react-redux": "^8.1.0",
+    "react-scan": "^0.3.2",
     "react-scripts": "5.0.1",
     "react-signature-canvas": "^1.0.6",
     "use-debounce": "^10.0.1",
@@ -75,7 +76,8 @@
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
-    "test:performance": "react-scan --ci"
+    "test:performance": "react-scan --ci",
+    "scan": "npx react-scan@latest localhost:2300"
   },
   "eslintConfig": {
     "extends": [
