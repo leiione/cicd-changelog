@@ -189,7 +189,7 @@ const Header = (props) => {
               <Typography
                 variant="h6"
                 onClick={handleAssignedNameClick}
-                style={{ cursor: ["Resolved", "Closed"].includes(ticket.status) ? "default" : "pointer" }}
+                style={{ cursor: "pointer" }}
                 disabled={!assignmnetId}
               >
                 {assigned_name}
