@@ -1,8 +1,7 @@
-import React, { useEffect } from "react";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import React, { useEffect, useState } from "react";
 import { Typography, Popover, Button, Divider } from "@mui/material";
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
 import moment from "moment-timezone";
 import dayjs from "dayjs";
 import DialogAlert from "components/DialogAlert";
@@ -15,33 +14,45 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+// Styles to match MUI's look and feel
+const dayPickerStyles = {
+  caption: { color: '#1976d2' },
+  day_selected: { backgroundColor: '#1976d2' },
+  day_today: { color: '#1976d2', fontWeight: 'bold' }
+};
+
+// Helper function to parse date string to Date object
+const parseToDate = (dateStr) => {
+  if (!dateStr) return new Date();
+  try {
+    return new Date(dateStr);
+  } catch (e) {
+    console.error("Error parsing date:", e);
+    return new Date();
+  }
+};
+
 const DueDate = (props) => {
   const { ticket, updateTicket, hasDueDate, setHasDueDate } = props;
   const ispTimezone = useSelector((state) => state.timeZone);
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [tempDueDate, setTempDueDate] = React.useState(
-    ticket.due_by_date || moment().format("YYYY-MM-DD")
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [tempDate, setTempDate] = useState(null);
+  const [dueDateDisplay, setDueDateDisplay] = useState(ticket.due_by_date);
+  const [openPrompt, togglePrompt] = useState(false);
+  
+  // Convert to a Date object for react-day-picker
+  const [selectedDay, setSelectedDay] = useState(() => 
+    parseToDate(ticket.due_by_date)
   );
-  const [tempDate, setTempDate] = React.useState(ticket.due_by_date);
-  const [dueDateDisplay, setDueDateDisplay] = React.useState(
-    ticket.due_by_date
-  );
-  const [openPrompt, togglePrompt] = React.useState(false);
 
+  // Sync state when ticket changes
   useEffect(() => {
-   if ((ticket.due_by_date && !tempDueDate) || (dueDateDisplay && ticket.due_by_date !== dueDateDisplay)) {
-      setTempDueDate(ticket.due_by_date);
+    if (ticket && ticket.due_by_date) {
       setDueDateDisplay(ticket.due_by_date);
+      setSelectedDay(parseToDate(ticket.due_by_date));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [ticket.due_by_date, tempDueDate]); 
-
-  useEffect(() => {
-    if (ticket.due_by_date) {
-     setTempDueDate(ticket.due_by_date);
-   }
-  }, [ticket.due_by_date])
+  }, [ticket, ticket.due_by_date]);
   
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -51,93 +62,112 @@ const DueDate = (props) => {
     setAnchorEl(null);
   };
 
-  const onSaveDueDate = () => {
-    setDueDateDisplay(moment(tempDueDate.$d).format("YYYY-MM-DD"));
+  // Handle saving the date to the ticket
+  const saveDate = (date) => {
+    if (!date || !ticket || !ticket.ticket_id) return;
+    
+    // Format date as YYYY-MM-DD
+    const formattedDate = moment(date).format("YYYY-MM-DD");
+    
+    // Update UI
+    setDueDateDisplay(formattedDate);
+    setSelectedDay(date);
+    
+    // Send update to server
     updateTicket({
       ticket_id: ticket.ticket_id,
-      due_by_date: moment(tempDueDate.$d).format("YYYY-MM-DD"),
+      due_by_date: formattedDate,
     });
+    
     if (!hasDueDate) setHasDueDate(true);
     handleClose();
+  };
+
+  // When a day is selected in the calendar
+  const handleDaySelect = (day) => {
+    if (!day) return;
+    
+    // Check if selected date is in the past
+    const isBeforeDate = moment(day).isBefore(new Date(), "day");
+    
+    if (isBeforeDate) {
+      // For past dates, show confirmation
+      togglePrompt(true);
+      setTempDate(day);
+    } else {
+      // For future dates, save directly
+      saveDate(day);
+    }
   };
 
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
-  const dueDate =
-    !ticket.due_by_date && !dueDateDisplay
-      ? "Select a date"
-      : moment(dueDateDisplay || ticket.due_by_date, "YYYY-MM-DD").format(
-          "MMM DD, YYYY"
-        );
-
-  const handleChange = (newDate) => {
-    const isBeforeDate = moment(newDate.$d).isBefore(new Date(), "day");
-    if (isBeforeDate) {
-      togglePrompt(true);
-      setTempDate(newDate);
-    } else {
-      setTempDueDate(newDate);
-    }
-  };
+  // Format displayed date
+  const dueDate = !dueDateDisplay
+    ? "Select a date"
+    : moment(dueDateDisplay, "YYYY-MM-DD").format("MMM DD, YYYY");
+  
   return (
     <>
       <Typography variant="subtitle1" onClick={handleClick} className="pointer">
         <FontAwesomeIcon
           icon={faCalendarDay}
-          className=" fa-fw text-muted f-16 mr-2"
+          className="fa-fw text-muted f-16 mr-2"
         />
         Due Date:
         <Typography
           variant="subtitle1"
           component="span"
-          className={`primary-on-hover d-inline-block ml-2`}
+          className="primary-on-hover d-inline-block ml-2"
         >
           {dueDate}
         </Typography>
       </Typography>
-      <Popover
-        id={id}
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-      >
-        <div style={{ margin: "-10px" }}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateCalendar
-              value={dayjs.tz(tempDueDate, ispTimezone)}
-              onChange={handleChange}
+      
+      {open && (
+        <Popover
+          id={id}
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+        >
+          <div style={{ padding: '8px' }}>
+            <DayPicker
+              mode="single"
+              selected={selectedDay}
+              onSelect={handleDaySelect}
+              // modifiersStyles={dayPickerStyles}
+              showOutsideDays
+              fixedWeeks
             />
-          </LocalizationProvider>
-        </div>
-        <Divider />
-        <div className="text-right">
-          <Button color="primary" onClick={onSaveDueDate}>
-            Save
-          </Button>
-          <Button color="default" onClick={handleClose}>
-            Cancel
-          </Button>
-        </div>
-      </Popover>
+          </div>
+          <Divider />
+          <div className="text-right p-2">
+            <Button color="default" onClick={handleClose}>
+              Cancel
+            </Button>
+          </div>
+        </Popover>
+      )}
+      
       {openPrompt && (
         <DialogAlert
           open={openPrompt}
-          message={
-            <span>Are you sure you want to set this in the past date?</span>
-          }
+          message={<span>Are you sure you want to set this in the past date?</span>}
           buttonsList={[
             {
               label: "Yes",
               size: "medium",
               color: "primary",
               onClick: () => {
-                setTempDueDate(tempDate);
+                saveDate(tempDate);
                 togglePrompt(false);
+                setTempDate(null);
               },
             },
             {
@@ -155,4 +185,5 @@ const DueDate = (props) => {
     </>
   );
 };
+
 export default React.memo(DueDate);

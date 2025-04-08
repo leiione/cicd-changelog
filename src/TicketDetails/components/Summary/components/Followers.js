@@ -47,8 +47,7 @@ const Followers = (props) => {
 
   useEffect(() => {
     if (ticket && ticket.followers && data && data.followers) {
-      const initialFollowers = ticket.followers
-        .split(",")
+      const initialFollowers = (typeof ticket.followers === 'string' ? ticket.followers.split(",") : Array.isArray(ticket.followers) ? ticket.followers : [])
         .map((followerEmail) => {
           const follower = data.followers.find(
             (f) => f.email === followerEmail
