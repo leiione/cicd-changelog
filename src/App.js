@@ -11,10 +11,11 @@ import { useEffect } from "react";
 import { onINP } from "web-vitals";
 import { Monitoring } from "react-scan/monitoring"; // Import this first before React
 
+LicenseInfo.setLicenseKey(
+  process.env.REACT_APP_MUI_X_PREMIUM_KEY
+);
+
 const App = ({ theme, container, category, ...rest }) => {
-  LicenseInfo.setLicenseKey(
-    "fd66ab9dddde526bc16fd7b6b658b42eTz03MTIyNCxFPTE3MjE2MjQ2OTkwMDAsUz1wcmVtaXVtLExNPXN1YnNjcmlwdGlvbixKVj0y"
-  );
 
   const isp_id = localStorage.getItem("Visp.ispId")
   const isp_domain = localStorage.getItem("Visp.domain")
