@@ -7,19 +7,11 @@ import dayjs from "dayjs";
 import DialogAlert from "components/DialogAlert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDay } from "@fortawesome/pro-regular-svg-icons";
-import { useSelector } from "react-redux";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
-// Styles to match MUI's look and feel
-const dayPickerStyles = {
-  caption: { color: '#1976d2' },
-  day_selected: { backgroundColor: '#1976d2' },
-  day_today: { color: '#1976d2', fontWeight: 'bold' }
-};
 
 // Helper function to parse date string to Date object
 const parseToDate = (dateStr) => {
@@ -34,7 +26,6 @@ const parseToDate = (dateStr) => {
 
 const DueDate = (props) => {
   const { ticket, updateTicket, hasDueDate, setHasDueDate } = props;
-  const ispTimezone = useSelector((state) => state.timeZone);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [tempDate, setTempDate] = useState(null);
