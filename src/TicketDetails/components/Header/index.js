@@ -45,14 +45,16 @@ const Header = (props) => {
     hideContentDrawer,
     appuser_id,
     toggleOffCRMDrawer,
-    handleOpenTicketAssignment
+    handleOpenTicketAssignment,
+    ticketData
   } = props;
+
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [openDelete, toggleDelete] = useState(null);
   const [loading, setLoading] = useState(false);
   const [copyTicket, setCopyTicket] = useState(false);
-  
+
   const [editAssignment, setEditAssignment] = useState(null);
 
   const [deleteTicket] = useMutation(DELETE_TICKET);
@@ -134,19 +136,24 @@ const Header = (props) => {
             horizontal: "left",
           }}
         >
-          <MenuItem>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={true}
-                  name="newCardView"
-                  onChange={onToggleDrawer}
-                  size="small"
-                />
-              }
-              label="New (beta)"
-            />
-          </MenuItem>
+          {(ticketData && !ticketData.disableCRMDrawertoggleButton) &&
+            <MenuItem>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={true}
+                    name="newCardView"
+                    onChange={onToggleDrawer}
+                    size="small"
+                  />
+                }
+                label="New (beta)"
+              />
+            </MenuItem>
+
+
+          }
+
           {ticket.ticket_id > 0 && (
             <>
               <MenuItem onClick={handleAssignmentChange}>
@@ -189,7 +196,7 @@ const Header = (props) => {
               <Typography
                 variant="h6"
                 onClick={handleAssignedNameClick}
-                style={{ cursor: "pointer" }}
+                style={{ cursor: ["Resolved", "Closed"].includes(ticket.status) ? "default" : "pointer" }}
                 disabled={!assignmnetId}
               >
                 {assigned_name}

@@ -24,7 +24,7 @@ import { checkIfCacheExists } from "config/apollo";
 import { useSelector } from "react-redux";
 
 const CustomFields = (props) => {
-  const online = useSelector(state => state.networkStatus.online);
+  const online = useSelector(state => state.networkStatus?.online || false);
   const { appuser_id, ticket,setRequiredCustomFieldsCount } = props;
   const [isSubmitting, setisSubmitting] = useState(false);
   const dispatch = useDispatch();

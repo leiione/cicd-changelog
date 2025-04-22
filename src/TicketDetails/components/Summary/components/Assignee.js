@@ -126,10 +126,7 @@ const Assignee = (props) => {
         );
         return;
       }
-    }
-  
-    console.log("Updating tempAssignees:", updatedTempAssignees);
-  
+    }  
     // Update both tempAssignees and selectedAssignees for immediate UI reflection
     setTempAssignees(updatedTempAssignees);
     setAssignees(updatedTempAssignees);

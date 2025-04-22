@@ -99,7 +99,7 @@ const TicketDetails = (props) => {
     handleOpenTicketAssignment
   } = props;
   const snackbar = useSelector((state) => state.snackbar);
-  const online = useSelector(state => state.networkStatus.online);
+  const online = useSelector(state => state.networkStatus?.online || false);
 
   const permitMessageView = usePermission("ticket_note_message", "flag_read") 
 
@@ -187,6 +187,7 @@ const TicketDetails = (props) => {
     <div>
       {snackbar && snackbar.open && <GlobalSnackbar {...snackbar} />}
       <Header
+        ticketData={ticketData}
         ticket={ticketCached}
         setTicketCached={setTicketCached}
         category={category}

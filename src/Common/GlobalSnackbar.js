@@ -1,11 +1,12 @@
 import React from 'react';
 import { Snackbar, Alert } from "@mui/material"
 import { hideSnackbar } from 'config/store';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const GlobalSnackbar = (props) => {
   const dispatch = useDispatch()
-  const { open, severity, message, duration } = props
+  const snackbar = useSelector((state) => state.snackbar);
+  const { open, severity, message, duration } = snackbar
 
   return (
     <Snackbar

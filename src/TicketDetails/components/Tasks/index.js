@@ -415,7 +415,7 @@ const Tasks = (props) => {
 };
 
 const TicketTaskContainer = props => {
-  const online = useSelector(state => state.networkStatus.online);
+  const online = useSelector(state => state.networkStatus?.online || false);
   const { ticket } = props;
 
   const { data, error, loading, client, refetch } = useQuery(GET_TICKET_TASKS, {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Typography, Popover, Button, Divider } from "@mui/material";
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
@@ -13,15 +13,21 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-// Helper function to parse date string to Date object
-const parseToDate = (dateStr) => {
-  if (!dateStr) return new Date();
-  try {
-    return new Date(dateStr);
-  } catch (e) {
-    console.error("Error parsing date:", e);
-    return new Date();
-  }
+// Styles to match MUI's look and feel
+const dayPickerStyles = {
+  caption: { color: '#1976d2' },
+  day_selected: { backgroundColor: '#1976d2' },
+  day_today: { color: '#1976d2', fontWeight: 'bold' }
+};
+
+// Helper function to check if a date is in the past
+const isDateInPast = (date) => {
+  if (!date) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const compareDate = new Date(date);
+  compareDate.setHours(0, 0, 0, 0);
+  return compareDate < today;
 };
 
 const DueDate = (props) => {
@@ -29,39 +35,43 @@ const DueDate = (props) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [tempDate, setTempDate] = useState(null);
-  const [dueDateDisplay, setDueDateDisplay] = useState(ticket.due_by_date);
   const [openPrompt, togglePrompt] = useState(false);
   
-  // Convert to a Date object for react-day-picker
-  const [selectedDay, setSelectedDay] = useState(() => 
-    parseToDate(ticket.due_by_date)
+  // State for immediate UI feedback before server response
+  const [localDueDate, setLocalDueDate] = useState(ticket?.due_by_date);
+  
+  // Initialize selected day state
+  const [selectedDay, setSelectedDay] = useState(
+    ticket?.due_by_date ? new Date(ticket.due_by_date) : undefined
   );
 
-  // Sync state when ticket changes
+  // Synchronize states with ticket changes from server
   useEffect(() => {
-    if (ticket && ticket.due_by_date) {
-      setDueDateDisplay(ticket.due_by_date);
-      setSelectedDay(parseToDate(ticket.due_by_date));
+    if (ticket) {
+      setLocalDueDate(ticket.due_by_date);
+      setSelectedDay(ticket.due_by_date ? new Date(ticket.due_by_date) : undefined);
     }
-  }, [ticket, ticket.due_by_date]);
+  }, [ticket, ticket?.due_by_date]);
   
-  const handleClick = (event) => {
+  // Handle opening the date picker
+  const handleClick = useCallback((event) => {
     setAnchorEl(event.currentTarget);
-  };
+  }, []);
 
-  const handleClose = () => {
+  // Handle closing the date picker
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
   // Handle saving the date to the ticket
-  const saveDate = (date) => {
+  const saveDate = useCallback((date) => {
     if (!date || !ticket || !ticket.ticket_id) return;
     
     // Format date as YYYY-MM-DD
     const formattedDate = moment(date).format("YYYY-MM-DD");
     
-    // Update UI
-    setDueDateDisplay(formattedDate);
+    // Update local UI state immediately for instant feedback
+    setLocalDueDate(formattedDate);
     setSelectedDay(date);
     
     // Send update to server
@@ -72,32 +82,43 @@ const DueDate = (props) => {
     
     if (!hasDueDate) setHasDueDate(true);
     handleClose();
-  };
+  }, [ticket, updateTicket, hasDueDate, setHasDueDate, handleClose, setLocalDueDate, setSelectedDay]);
 
   // When a day is selected in the calendar
-  const handleDaySelect = (day) => {
+  const handleDaySelect = useCallback((day) => {
     if (!day) return;
     
-    // Check if selected date is in the past
-    const isBeforeDate = moment(day).isBefore(new Date(), "day");
-    
-    if (isBeforeDate) {
-      // For past dates, show confirmation
+    // Check if date is in past (strictly before today)
+    if (isDateInPast(day)) {
+      // For past dates, show confirmation dialog
       togglePrompt(true);
       setTempDate(day);
     } else {
-      // For future dates, save directly
+      // For today and future dates, save directly
       saveDate(day);
     }
-  };
+  }, [saveDate]);
+
+  // Handle confirming past date selection
+  const handleConfirmPastDate = useCallback(() => {
+    saveDate(tempDate);
+    togglePrompt(false);
+    setTempDate(null);
+  }, [tempDate, saveDate, togglePrompt]);
+
+  // Handle rejecting past date selection
+  const handleRejectPastDate = useCallback(() => {
+    setTempDate(null);
+    togglePrompt(false);
+  }, [togglePrompt]);
 
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
-  // Format displayed date
-  const dueDate = !dueDateDisplay
+  // Format displayed date - using local state for immediate UI updates
+  const dueDate = !localDueDate
     ? "Select a date"
-    : moment(dueDateDisplay, "YYYY-MM-DD").format("MMM DD, YYYY");
+    : moment(localDueDate, "YYYY-MM-DD").format("MMM DD, YYYY");
   
   return (
     <>
@@ -132,9 +153,10 @@ const DueDate = (props) => {
               mode="single"
               selected={selectedDay}
               onSelect={handleDaySelect}
-              // modifiersStyles={dayPickerStyles}
+              modifiersStyles={dayPickerStyles}
               showOutsideDays
               fixedWeeks
+              defaultMonth={new Date()}
             />
           </div>
           <Divider />
@@ -155,20 +177,13 @@ const DueDate = (props) => {
               label: "Yes",
               size: "medium",
               color: "primary",
-              onClick: () => {
-                saveDate(tempDate);
-                togglePrompt(false);
-                setTempDate(null);
-              },
+              onClick: handleConfirmPastDate,
             },
             {
               label: "No",
               size: "medium",
               color: "default",
-              onClick: () => {
-                setTempDate(null);
-                togglePrompt(false);
-              },
+              onClick: handleRejectPastDate,
             },
           ]}
         />

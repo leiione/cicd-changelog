@@ -1,6 +1,6 @@
 import { Skeleton, Typography } from "@mui/material";
 import { dateFormat, formatDateTime } from "Common/utils/formatter";
-import { get, includes } from "lodash";
+import { find, get, includes } from "lodash";
 import html2plaintext from "html2plaintext";
 
 const renderSelectEditCell = (props, handleUpdateCell) => {
@@ -15,10 +15,24 @@ export const getDataGridColumns = ({
   handleUpdateCell,
   ispTimeZone,
   currency = '$',
+  tableOptions
 }) => {
   let dataGridColumns = [];
   let orderColumns = columns
-  // if columns can be reoreded
+  if (tableOptions?.columnOrder && tableOptions.columnOrder.length > 0) {
+    orderColumns = []
+    columns.forEach((col) => {
+      if (col.field.includes("Actions")) {
+        orderColumns.push(col)
+      }
+    })
+    tableOptions.columnOrder.forEach((key) => {
+      const col = find(columns, { field: key })
+      if (col) {
+        orderColumns.push(col)
+      }
+    });
+  }
 
   orderColumns.forEach((col) => {
     const dgColumn = {
@@ -78,28 +92,35 @@ export const getDataGridColumns = ({
         }
       }
 
-      dgColumn.renderCell = (params) => {
-          const { value } = params;
-          let cellStyles = {
-            cursor: col.editable && enableInlineEditing ? "text" : "pointer",
-          }
-          if (params.row.disabled) {
-            cellStyles.color = "gray"
-            cellStyles.cursor = "default"
-          }
-          switch (col.render) {
-            case "dates":
-              return 'ToDo term dates'
-            default:
-              let text = "";
-              if (typeof value !== "undefined" && value !== null) {
-                text = value.toString()
-              }
-              return (
-                <Typography className={`w-100 text-truncate`} style={cellStyles}>{text}</Typography>
-              );
-          }
-        };
+      // Skip overriding renderCell for rowActions column to preserve custom actions rendering
+      if (["rowActions", "check", 'scheduledOff'].includes(col.field)) {
+        console.log("in if")
+        dgColumn.renderCell = col.renderCell;
+
+      } else {
+        dgColumn.renderCell = (params) => {
+            const { value } = params;
+            let cellStyles = {
+              cursor: col.editable && enableInlineEditing ? "text" : "pointer",
+            }
+            if (params.row.disabled) {
+              cellStyles.color = "gray"
+              cellStyles.cursor = "default"
+            }
+            switch (col.render) {
+              case "dates":
+                return 'ToDo term dates'
+              default:
+                let text = "";
+                if (typeof value !== "undefined" && value !== null) {
+                  text = value.toString()
+                }
+                return (
+                  <Typography className={`w-100 text-truncate`} style={cellStyles}>{text}</Typography>
+                );
+            }
+          };
+      }
     }
 
     dataGridColumns.push(dgColumn);

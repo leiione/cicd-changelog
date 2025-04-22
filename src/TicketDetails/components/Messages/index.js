@@ -21,7 +21,7 @@ import AddSMSForm from "./components/AddSMSForm";
 import { useSelector } from "react-redux";
 
 const Messages = (props) => {
-  const online = useSelector(state => state.networkStatus.online);
+  const online = useSelector(state => state.networkStatus?.online || false);
   const { appuser_id, ticket, lablesVisible } = props;
   const [filter, setFilter] = React.useState(["all"]); // Default to "all"
   const [addNew, setAddNew] = React.useState(null);

@@ -7,9 +7,12 @@ import store from "config/store";
 import { ApolloProvider } from "@apollo/client";
 import { client } from "config/apollo";
 import AddTicket from "AddTicket";
+import Dashboard from "Dashboard";
 import { useEffect } from "react";
 import { onINP } from "web-vitals";
 import { Monitoring } from "react-scan/monitoring"; // Import this first before React
+import InstallerAvailbility from "InstallerAvailbility";
+import GlobalSnackbar from "Common/GlobalSnackbar";
 
 LicenseInfo.setLicenseKey(
   process.env.REACT_APP_MUI_X_PREMIUM_KEY
@@ -21,7 +24,7 @@ const App = ({ theme, container, category, ...rest }) => {
   const isp_domain = localStorage.getItem("Visp.domain")
 
   const generateClassName = createGenerateClassName({
-    productionPrefix: "crmMF-",
+    productionPrefix: `crm-${Math.random()}`,
   });
 
   useEffect(() => {
@@ -51,6 +54,10 @@ const App = ({ theme, container, category, ...rest }) => {
     switch (category) {
       case 'Add Ticket':
         return <AddTicket {...rest} />
+      case 'CRMDashboard':
+        return <Dashboard {...rest} />
+      case "Technician Availability":
+        return <InstallerAvailbility {...rest} /> 
       default:
         return <TicketDetails category={category} {...rest} />
     }
@@ -67,6 +74,7 @@ const App = ({ theme, container, category, ...rest }) => {
                 url="https://monitoring.react-scan.com/api/v1/ingest"
               />
               {getMSContent()}
+              <GlobalSnackbar />
             </ThemeProvider>
           </StylesProvider>
         </StyledEngineProvider>

@@ -97,6 +97,20 @@ export const GET_TICKET_TASKS = gql`
   }
 `;
 
+export const GET_TICKET_TYPE_STATUS = gql`
+  query TicketTypes {
+  ticketTypes {
+    ticket_type_id
+    ticket_type_desc
+  }
+  ticketStatuses {
+    id
+    name
+  }
+}
+`;
+
+
 export const DELETE_TICKET = gql`
   mutation deleteTicket($id: Int!) {
     deleteTicket(id: $id) {

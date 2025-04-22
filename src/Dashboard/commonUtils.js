@@ -1,0 +1,91 @@
+import moment from "moment-timezone";
+
+// Filter options
+export const filterTypeOptions = [
+    { label: "Assignee", value: "assignee" },
+    { label: "Status", value: "status" },
+    { label: "Ticket Type", value: "type" },
+    { label: "Due Date", value: "date" }
+];
+
+export const getDueDateMessage = (dateValue) => {
+  let date = dateValue;
+  const dateFormat = "YYYY-MM-DD"
+  if (Array.isArray(date)) {
+    date = date[0];
+  }
+    
+  const dateRange = getDateRange(date.operator, date.frequency, date.period);
+  const startDate = moment(dateRange.startDate).format(dateFormat);
+  const endDate = dateRange.endDate ? moment(dateRange.endDate).format(dateFormat) : 'Open-ended';
+  const range = moment(startDate).isSame(moment(endDate)) ? startDate : `${startDate} - ${endDate}`;
+  
+  return range;
+}
+
+export const getDateRange = (operator, frequency, period) => {
+  const today = new Date();
+  let startDate, endDate;
+  let freq = Number(frequency);
+  switch (period) {
+    case 'weeks':
+      freq *= 7;
+      break;
+    case 'months':
+      freq *= 30; // Approximate month as 30 days
+      break;
+    default:
+      break;
+  }
+    
+  if (operator === '<') {
+    startDate = new Date(today);
+    endDate = new Date(today.setDate(today.getDate() + freq - 1));
+  } else if (operator === '>') {
+    startDate = new Date(today.setDate(today.getDate() + freq + 1));
+    endDate = null; // Open-ended future range
+  } else if (operator === '=') {
+    startDate = new Date(today.setDate(today.getDate() + freq));
+    endDate = startDate;
+  }
+    
+  return { startDate: moment(startDate).format('YYYY-MM-DD'), endDate: endDate ? moment(endDate).format('YYYY-MM-DD') : null };
+}
+
+export const getFilterTableVariables = (variables, filters) => {
+  let fStart = null;
+  let fEnd = null;
+  filters.forEach(filter => {
+    switch (filter.filterType) {
+      case 'assignee':
+        variables.technicianId = variables.technicianId && variables.technicianId.length > 0 ? variables.technicianId : []
+        filter.value.forEach(item => variables.technicianId.push(item.value));
+        break;
+      case 'status':
+        variables.status = variables.status && variables.status.length > 0 ? variables.status : []
+        filter.value.forEach(item => variables.status.push(item.label));
+        break;
+      case 'type':
+        variables.ticketType = variables.ticketType && variables.ticketType.length > 0 ? variables.ticketType : []
+        filter.value.forEach(item => variables.ticketType.push(item.value));
+        break;
+      case 'date':
+        filter.value.forEach(item => {
+          const { startDate, endDate } = getDateRange(item.operator, item.frequency, item.period);
+          fStart = fStart && moment(fStart).isBefore(startDate) ? fStart : startDate;
+          fEnd = fEnd && moment(fEnd).isAfter(endDate) ? fEnd : endDate;
+        });
+        // Format dates as strings in YYYY-MM-DD HH:MM:SS format
+        const startDate = new Date(fStart);
+        const endDate = new Date(fEnd);
+        variables.dueDateRange = { 
+          startDate: moment(startDate).format('YYYY-MM-DD HH:mm:ss'), 
+          endDate: moment(endDate).format('YYYY-MM-DD HH:mm:ss') 
+        };
+        break;
+      default:
+        break;
+    }
+  });
+  return variables;
+}

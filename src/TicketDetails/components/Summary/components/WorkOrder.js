@@ -11,6 +11,7 @@ import { Button } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { showSnackbar } from "config/store";
 import Loader from "components/Loader";
+import ProgressButton from "Common/ProgressButton";
 
 const WorkOrder = ({
   ticket_id,
@@ -26,6 +27,7 @@ const WorkOrder = ({
   const [detail_id, setDetailID] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
   const [isChanged, setIsChanged] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const normalizeContent = (content) => {
     return content.replace(/<\/?(html|head|body)[^>]*>/g, "").trim();
@@ -59,6 +61,7 @@ const WorkOrder = ({
 
   const handleSave = useCallback(async () => {
     try {
+      setIsSubmitting(true);
       const { data } = await updateDetailText({
         variables: {
           input_ticket: {
@@ -83,7 +86,9 @@ const WorkOrder = ({
         setInitialDetailText(detailText);
         setIsChanged(false);
         setEditorContentChanged(false); // Update parent state
+        setIsSubmitting(false);
       } else {
+        setIsSubmitting(false);
         dispatch(
           showSnackbar({
             message: "Failed to save work order.",
@@ -93,6 +98,7 @@ const WorkOrder = ({
       }
     } catch (error) {
       console.error("There was an error updating the detail text!", error);
+      setIsSubmitting(false);
       dispatch(
         showSnackbar({
           message: "Failed to save work order.",
@@ -203,14 +209,15 @@ const WorkOrder = ({
         />
       </div>
       <div className="drawer-footer">
-        <Button
+        <ProgressButton
           color="primary"
           variant="outlined"
           onClick={handleSave}
           disabled={!isLoaded || !isChanged}
+          isSubmitting={isSubmitting}
         >
           Save
-        </Button>
+        </ProgressButton>
         <Button
           variant="outlined"
           color="default"

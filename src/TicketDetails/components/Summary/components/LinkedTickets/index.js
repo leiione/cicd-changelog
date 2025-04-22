@@ -217,7 +217,7 @@ const LinkedTicketContent = (props) => {
 
 const LinkedTickets = (props) => {
   const dispatch = useDispatch();
-  const online = useSelector(state => state.networkStatus.online);
+  const online = useSelector(state => state.networkStatus?.online || false);
   const { ticket, handleOpenTicket, setTicketCached } = props;
   const summaryCard = useSelector((state) => state.summaryCard);
   const preferences = summaryCard ? summaryCard.subComponent : {};

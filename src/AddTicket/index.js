@@ -93,8 +93,6 @@ const AddTicket = (props) => {
   const dispatch = useDispatch()
   const { ticket, handleOpenTicket } = props;
 
-  // console.log("From microfrontend" ,ticket)
-
   let initialValues = {
     category_type: ticket && ticket.category_type !== undefined ? ticket.category_type.charAt(0) + ticket.category_type.slice(1).toLowerCase() : "",
     priority: "Normal",

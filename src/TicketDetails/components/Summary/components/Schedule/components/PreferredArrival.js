@@ -34,11 +34,20 @@ const PreferredArrival = (props) => {
   );
 
   const [anchorEl, setAnchorEl] = useState(null);
+  // Original values from ticket
+  const [originalPreferred, setOriginalPreferred] = useState(
+    moment(earliestArrivalTime).isSame(latestArrivalTime) ? "exact" : "window"
+  );
+  const [originalStartTime, setOriginalStartTime] = useState(ticket.earliest_arrival_time);
+  const [originalEndTime, setOriginalEndTime] = useState(ticket.latest_arrival_time);
+  
+  // Temporary values for editing
   const [preferred, setPreferred] = useState(
     moment(earliestArrivalTime).isSame(latestArrivalTime) ? "exact" : "window"
   );
   const [startTime, setStartTime] = useState(ticket.earliest_arrival_time);
   const [endTime, setEndTime] = useState(ticket.latest_arrival_time);
+  
   const [err, setErr] = useState({ start: "", end: "" });
   const [arrivalTime, setArrivalTime] = useState("");
 
@@ -73,34 +82,51 @@ const PreferredArrival = (props) => {
   useEffect(() => {
     if (
       ticket.earliest_arrival_time &&
-      ticket.latest_arrival_time &&
-      !startTime &&
-      !endTime
+      ticket.latest_arrival_time
     ) {
-      setStartTime(String(ticket.earliest_arrival_time));
-      setEndTime(String(ticket.latest_arrival_time));
-      setPreferred(
+      // Update both original and temporary values when ticket changes
+      setOriginalStartTime(String(ticket.earliest_arrival_time));
+      setOriginalEndTime(String(ticket.latest_arrival_time));
+      setOriginalPreferred(
         moment(earliestArrivalTime).isSame(latestArrivalTime)
           ? "exact"
           : "window"
       );
+      
+      // Also update the editing values if they haven't been changed
+      if (!anchorEl) {
+        setStartTime(String(ticket.earliest_arrival_time));
+        setEndTime(String(ticket.latest_arrival_time));
+        setPreferred(
+          moment(earliestArrivalTime).isSame(latestArrivalTime)
+            ? "exact"
+            : "window"
+        );
+      }
     }
   }, [
     ticket.earliest_arrival_time,
     ticket.latest_arrival_time,
-    startTime,
-    endTime,
     earliestArrivalTime,
     latestArrivalTime,
+    anchorEl
   ]);
 
   const handleClick = (event) => {
     if (hasDueDate) {
+      // When opening the popover, initialize the temporary values with current values
+      setPreferred(originalPreferred);
+      setStartTime(originalStartTime);
+      setEndTime(originalEndTime);
       setAnchorEl(event.currentTarget);
     }
   };
 
   const handleClose = () => {
+    // Reset temporary values to original when closing without saving
+    setPreferred(originalPreferred);
+    setStartTime(originalStartTime);
+    setEndTime(originalEndTime);
     setAnchorEl(null);
   };
 
@@ -116,7 +142,11 @@ const PreferredArrival = (props) => {
       latest_arrival_time: preferred === "window" ? endTime : startTime,
     });
     if (!isSubmitting) {
-      handleClose();
+      // Update original values after successful save
+      setOriginalPreferred(preferred);
+      setOriginalStartTime(startTime);
+      setOriginalEndTime(preferred === "window" ? endTime : startTime);
+      
       setArrivalTime(
         preferred === "exact"
           ? moment(startTime, [moment.ISO_8601, "HH:mm"]).format("LT")
@@ -124,6 +154,7 @@ const PreferredArrival = (props) => {
               "LT"
             )} - ${moment(endTime, [moment.ISO_8601, "HH:mm"]).format("LT")}`
       );
+      setAnchorEl(null);
     }
   };
 

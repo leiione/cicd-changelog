@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
 
 const TypesPopover = props => {
   const isp_id = useSelector(state => state.ispId)
-  const online = useSelector(state => state.networkStatus.online);
+  const online = useSelector(state => state.networkStatus?.online || false);
 
   const {
     classes,
