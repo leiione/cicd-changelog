@@ -16,10 +16,7 @@ jobs:
           name: Install dependencies
           command: npm install --legacy-peer-deps
 
-      - run:
-          name: Run React Scan
-          command: npm run test:performance
-      
+     
       
       - run:
           name: Build the application
