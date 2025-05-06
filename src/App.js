@@ -13,6 +13,7 @@ import { onINP } from "web-vitals";
 import { Monitoring } from "react-scan/monitoring"; // Import this first before React
 import InstallerAvailbility from "InstallerAvailbility";
 import GlobalSnackbar from "Common/GlobalSnackbar";
+import TicketLists from "TicketLists";
 
 LicenseInfo.setLicenseKey(
   process.env.REACT_APP_MUI_X_PREMIUM_KEY
@@ -58,6 +59,8 @@ const App = ({ theme, container, category, ...rest }) => {
         return <Dashboard {...rest} />
       case "Technician Availability":
         return <InstallerAvailbility {...rest} /> 
+      case 'TicketsList':
+        return <TicketLists {...rest} />  
       default:
         return <TicketDetails category={category} {...rest} />
     }

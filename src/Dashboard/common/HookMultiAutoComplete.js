@@ -1,6 +1,7 @@
 import React from "react";
 import { Controller } from "react-hook-form";
 import { Autocomplete, Chip, TextField } from "@mui/material";
+import { uniqBy } from "lodash";
 
 const HookMultiAutoComplete = ({ control, name, options, label }) => {
   return (
@@ -17,8 +18,7 @@ const HookMultiAutoComplete = ({ control, name, options, label }) => {
           getOptionLabel={(option) => option.label}
           value={value || []}
           onChange={(_, newValue) => {
-            // Allow removal of any option, including the last one
-            onChange(newValue);
+            onChange(uniqBy(newValue, 'value'));
           }}
           renderTags={(value, getTagProps) =>
             value.map((option, index) => (

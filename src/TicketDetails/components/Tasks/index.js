@@ -58,7 +58,7 @@ const Tasks = (props) => {
   const [saveTicketTasks] = useMutation(SAVE_TICKET_TASKS);
 
   useEffect(() => {
-    if (!loading && tasks !== ticketTasks) {
+    if (!loading && tasks !== ticketTasks && onEditMode.index < 0) {
       const sortedTasks = sortBy(tasks, "rank");
       setTicketTasks(sortedTasks);
       setOnEditMode({ index: -1, value: "" });

@@ -78,7 +78,7 @@ const TaskMenuOptions = (props) => {
           }}
         >
           <MenuItem onClick={onConvertTask} disabled={disabled}> Convert to ticket</MenuItem>
-          {!task.is_default &&
+          {!task.default_required &&
             <>
               <MenuItem onClick={handleEdit}> Edit</MenuItem>
               <MenuItem onClick={() => onOpenAlert("delete")}> Delete</MenuItem>

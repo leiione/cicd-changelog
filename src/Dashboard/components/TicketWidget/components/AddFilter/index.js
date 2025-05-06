@@ -32,6 +32,26 @@ const AddFilter = ({ item, items, index, nextId}) => {
     handleClose()
   };
 
+  const filterCount = () => {
+    let filledFilterCount = 0;
+
+    item.filters.forEach(filter => {
+      if (filter.filterType === 'date') {
+        // For date filters, check if all fields are filled
+        if (filter.value?.length > 0 && ((filter.value[0].operator && filter.value[0].frequency && filter.value[0].period) || filter.value[0].operator === "=")) {
+          filledFilterCount++;
+        }
+      } else {
+        // For other filters, check if the filter has a value
+        if (Array.isArray(filter.value) ? filter.value.length > 0 : !!filter.value) {
+          filledFilterCount++;
+        }
+      }
+    });
+
+    return filledFilterCount;
+  };
+
   return (
     <>
       <Box
@@ -48,7 +68,7 @@ const AddFilter = ({ item, items, index, nextId}) => {
           size="small"
           color="primary"
         >
-          <Badge badgeContent={item.filters?.length} color="primary">
+          <Badge badgeContent={filterCount()} color="primary">
             <FilterList fontSize="small" />
           </Badge>
         </IconButton>

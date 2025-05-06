@@ -1,12 +1,6 @@
 import moment from "moment-timezone";
 
-// Filter options
-export const filterTypeOptions = [
-    { label: "Assignee", value: "assignee" },
-    { label: "Status", value: "status" },
-    { label: "Ticket Type", value: "type" },
-    { label: "Due Date", value: "date" }
-];
+export const filterTypes = ["assignee", "status", "type", "date"]
 
 export const getDueDateMessage = (dateValue) => {
   let date = dateValue;
@@ -70,18 +64,16 @@ export const getFilterTableVariables = (variables, filters) => {
         filter.value.forEach(item => variables.ticketType.push(item.value));
         break;
       case 'date':
-        filter.value.forEach(item => {
-          const { startDate, endDate } = getDateRange(item.operator, item.frequency, item.period);
+        if (filter.value?.length > 0 && filter.value[0].operator && filter.value[0].frequency && filter.value[0].period) {
+          const { startDate, endDate } = getDateRange(filter.value[0].operator, filter.value[0].frequency, filter.value[0].period);
           fStart = fStart && moment(fStart).isBefore(startDate) ? fStart : startDate;
           fEnd = fEnd && moment(fEnd).isAfter(endDate) ? fEnd : endDate;
-        });
-        // Format dates as strings in YYYY-MM-DD HH:MM:SS format
-        const startDate = new Date(fStart);
-        const endDate = new Date(fEnd);
-        variables.dueDateRange = { 
-          startDate: moment(startDate).format('YYYY-MM-DD HH:mm:ss'), 
-          endDate: moment(endDate).format('YYYY-MM-DD HH:mm:ss') 
-        };
+          // Format dates as strings in YYYY-MM-DD HH:MM:SS format
+          variables.dueDateRange = {
+            startDate: moment(fStart).format('YYYY-MM-DD HH:mm:ss'),
+            endDate: fEnd ? moment(fEnd).format('YYYY-MM-DD HH:mm:ss') : null
+          };
+        }
         break;
       default:
         break;

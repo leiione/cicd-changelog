@@ -38,7 +38,7 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
   const [isSelectingRange, setIsSelectingRange] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [savingOffTime, setSavingOffTime] = useState(false);
-  
+
   const { loading, error, data } = useQuery(INSTALLER_AVAILABILITY_QUERY, {
     skip: !open,
     fetchPolicy: 'network-only' // Always fetch fresh data when drawer opens
@@ -55,7 +55,7 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
       reason: "",
       isPartialDay: false
     });
-    
+
     // Reset state variables
     setDateRange([null, null]);
     setIsPartialDay(false);
@@ -101,10 +101,10 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
     return time && dayjs.isDayjs(time) && time.isValid() && !isNaN(time.hour()) && !isNaN(time.minute());
   };
 
-  const isSaveDisabled = !technicians?.length || 
-    savingOffTime || 
-    !dateRange[0] || 
-    !dateRange[1] || 
+  const isSaveDisabled = !technicians?.length ||
+    savingOffTime ||
+    !dateRange[0] ||
+    !dateRange[1] ||
     !reason?.trim() ||
     (isPartialDay && (!isValidTime(startTime) || !isValidTime(endTime)));
 
@@ -192,7 +192,7 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
         if (startDate.isValid() && endDate.isValid()) {
           let currentDate = startDate;
           const endDateTime = endDate.endOf('day');
-          
+
           while (currentDate.isBefore(endDateTime) || currentDate.isSame(endDateTime, 'day')) {
             dates.push({
               date: currentDate,
@@ -226,20 +226,20 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
   // Function to check if a date has scheduled off
   const isScheduledOff = (date) => {
     if (!data?.installerAvailability) return false;
-    
+
     const checkDate = dayjs(date);
     if (!checkDate.isValid()) {
       console.error('Invalid check date:', date);
       return false;
     }
-    
+
     return data.installerAvailability.some(tech => {
       if (!tech.Scheduled_off) return false;
 
       const dateEntries = tech.Scheduled_off.split('|').map(entry => entry.trim());
       const allDates = dateEntries.flatMap(entry => parseDateEntry(entry));
 
-      return allDates.some(({ date: parsedDate }) => 
+      return allDates.some(({ date: parsedDate }) =>
         checkDate.startOf('day').isSame(parsedDate.startOf('day'))
       );
     });
@@ -286,7 +286,7 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
       .forEach(tech => {
         try {
           const dateEntries = tech.Scheduled_off.split('|').map(entry => entry.trim());
-          
+
           dateEntries.forEach(entry => {
             const parsedDates = parseDateEntry(entry);
             const selectedStart = dayjs(dateRange[0]).startOf('day');
@@ -306,7 +306,7 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
                 techGroup.dates.push({
                   date: dateStart,
                   timeRange,
-                  displayText: timeRange 
+                  displayText: timeRange
                     ? `${dateStart.format('MMM D, YYYY')} (${timeRange})`
                     : dateStart.format('MMM D, YYYY')
                 });
@@ -322,7 +322,7 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
       const dateDisplay = dateRange[0].isSame(dateRange[1], 'day')
         ? dateRange[0].format('MMM D, YYYY')
         : `${dateRange[0].format('MMM D')} - ${dateRange[1].format('MMM D, YYYY')}`;
-      
+
       return (
         <Typography variant="body2" color="text.secondary">
           No technicians scheduled off for {dateDisplay}
@@ -367,6 +367,16 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
     return dateRange[0].startOf('day').isBefore(today);
   }, [dateRange]);
 
+  // // Show warning snackbar when past date is selected
+  // useEffect(() => {
+  //   if (isDateRangeInPast) {
+  //     dispatch(showSnackbar({
+  //       message: "Cannot schedule off time for past dates",
+  //       severity: "warning"
+  //     }));
+  //   }
+  // }, [isDateRangeInPast, dispatch]);
+
   return (
     <>
       <InnerDrawer
@@ -379,7 +389,7 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
             {/* First Row */}
             <Grid container spacing={2}>
               <Grid item xs={7}>
-                <Box sx={{ 
+                <Box sx={{
                   border: '1px solid rgba(0, 0, 0, 0.12)',
                   borderRadius: 1,
                   '& .MuiPickersDay-root': {
@@ -422,12 +432,12 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
                       slotProps={{
                         day: (props) => {
                           const date = dayjs(props.day);
-                          const isInRange = dateRange[0] && dateRange[1] && 
-                            date.isAfter(dateRange[0], 'day') && 
+                          const isInRange = dateRange[0] && dateRange[1] &&
+                            date.isAfter(dateRange[0], 'day') &&
                             date.isBefore(dateRange[1], 'day');
-                          const isSelected = dateRange[0] && dateRange[1] && 
-                            (date.isSame(dateRange[0], 'day') || 
-                             date.isSame(dateRange[1], 'day'));
+                          const isSelected = dateRange[0] && dateRange[1] &&
+                            (date.isSame(dateRange[0], 'day') ||
+                              date.isSame(dateRange[1], 'day'));
                           return {
                             ...props,
                             className: `${props.className} ${isInRange ? 'in-range' : ''} ${isSelected ? 'Mui-selected' : ''}`,
@@ -436,15 +446,29 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
                         }
                       }}
                     />
+
                   </LocalizationProvider>
+                  {isDateRangeInPast && (
+                      <Typography
+                        variant="body2"
+                        color="error"
+                        sx={{
+                          mt: 1,
+                          textAlign: 'center',
+                          fontWeight: 'small'
+                        }}
+                      >
+                        Please select future dates for scheduling off time
+                      </Typography>
+                    )}
                 </Box>
               </Grid>
               <Grid item xs={5}>
                 <Typography variant="subtitle1" gutterBottom>
                   Technicians Scheduled Off
                 </Typography>
-                <Box 
-                  sx={{ 
+                <Box
+                  sx={{
                     height: '320px', // Matches approximate calendar height
                     overflowY: 'auto',
                     // Custom scrollbar styling
@@ -513,14 +537,14 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
                           placeholder={value?.length > 0 ? "" : "Select Technicians"}
                           error={!!assigneesError || (!technicians?.length && methods.formState.isSubmitted)}
                           helperText={
-                            assigneesError 
-                              ? "Error loading technicians" 
+                            assigneesError
+                              ? "Error loading technicians"
                               : (!technicians?.length && methods.formState.isSubmitted)
                                 ? "Please select at least one technician"
                                 : null
                           }
-                          sx={{ 
-                            '& .MuiInput-root': { 
+                          sx={{
+                            '& .MuiInput-root': {
                               padding: '0 0 4px 0',
                               '&::before': {
                                 borderBottom: '1px solid rgba(0, 0, 0, 0.12)'
@@ -538,8 +562,8 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
                       )}
                       disabled={isDateRangeInPast}
                       loading={assigneesLoading}
-                      sx={{ 
-                        '& .MuiInput-root': { 
+                      sx={{
+                        '& .MuiInput-root': {
                           padding: '0 0 4px 0',
                           '&::before': {
                             borderBottom: '1px solid rgba(0, 0, 0, 0.12)'
@@ -558,7 +582,7 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
                 <Box sx={{ mt: 2 }}>
                   <FormControlLabel
                     control={
-                      <Checkbox 
+                      <Checkbox
                         checked={isPartialDay}
                         onChange={handlePartialDayChange}
                         name="isPartialDay"
@@ -584,11 +608,11 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
                       onChange={(newValue) => setStartTime(newValue)}
                       sx={{
                         width: '100%',
-                        '& .MuiOutlinedInput-notchedOutline': { 
+                        '& .MuiOutlinedInput-notchedOutline': {
                           borderWidth: '0 0 1px 0',
                           borderColor: 'rgba(0, 0, 0, 0.12)'
                         },
-                        '& .MuiOutlinedInput-root': { 
+                        '& .MuiOutlinedInput-root': {
                           padding: '0 0 4px 0',
                           '&:hover .MuiOutlinedInput-notchedOutline': {
                             borderColor: 'rgba(0, 0, 0, 0.12)'
@@ -609,11 +633,11 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
                       onChange={(newValue) => setEndTime(newValue)}
                       sx={{
                         width: '100%',
-                        '& .MuiOutlinedInput-notchedOutline': { 
+                        '& .MuiOutlinedInput-notchedOutline': {
                           borderWidth: '0 0 1px 0',
                           borderColor: 'rgba(0, 0, 0, 0.12)'
                         },
-                        '& .MuiOutlinedInput-root': { 
+                        '& .MuiOutlinedInput-root': {
                           padding: '0 0 4px 0',
                           '&:hover .MuiOutlinedInput-notchedOutline': {
                             borderColor: 'rgba(0, 0, 0, 0.12)'
@@ -640,12 +664,12 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
                   placeholder="Add Text Here"
                   fullWidth
                   rules={{ required: "Reason is required" }}
-                  sx={{ 
-                    '& .MuiOutlinedInput-notchedOutline': { 
+                  sx={{
+                    '& .MuiOutlinedInput-notchedOutline': {
                       borderWidth: '0 0 1px 0',
                       borderColor: 'rgba(0, 0, 0, 0.12)'
                     },
-                    '& .MuiOutlinedInput-root': { 
+                    '& .MuiOutlinedInput-root': {
                       padding: '0 0 4px 0',
                       '&:hover .MuiOutlinedInput-notchedOutline': {
                         borderColor: 'rgba(0, 0, 0, 0.12)'
@@ -678,9 +702,9 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
                     <Button variant="outlined" onClick={handleClose}>
                       Cancel
                     </Button>
-                    <Button 
-                      variant="contained" 
-                      color="primary" 
+                    <Button
+                      variant="contained"
+                      color="primary"
                       onClick={handleSave}
                       disabled={isSaveDisabled || isDateRangeInPast}
                     >
@@ -693,14 +717,9 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
           </Box>
         </FormProvider>
       </InnerDrawer>
-      {isDateRangeInPast && (
-        <Alert severity="warning" sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, p: 2 }}>
-          Cannot schedule off time for past dates
-        </Alert>
-      )}
-      <Snackbar 
-        open={showSuccess} 
-        autoHideDuration={1500} 
+      <Snackbar
+        open={showSuccess}
+        autoHideDuration={1500}
         onClose={() => setShowSuccess(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >

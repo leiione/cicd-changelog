@@ -133,7 +133,7 @@ const LinkedTicketField = (props) => {
                     variant="subtitle1"
                     className="text-dark break-word text-truncate"
                   >
-                    {option.description}
+                    {option.summary}
                   </Typography>
                 </Grid>
                 <Grid item xs={4}>

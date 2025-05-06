@@ -178,6 +178,12 @@ const counterSlice = createSlice({
       state.ticketTablePreferences.priorityFilter = [];
       state.ticketTablePreferences.schedulingFilter = [];
       state.ticketTablePreferences.dateRange = { startDate: null, endDate: null };
+    },
+    setContentDrawer: (state, action) => {
+      return {
+        ...state,
+        contentDrawer: action.payload
+      }
     }
   }
 })

@@ -1,29 +1,24 @@
 import React, { useEffect, useMemo } from "react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import {
   Grid,
-  IconButton,
   Button,
-  MenuItem,
-  Select,
   FormControl,
-  InputLabel,
   Box,
   Typography,
   Modal,
 } from "@mui/material";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import HookTextField from "../../../Common/hookFields/HookTextField";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { filterTypeOptions } from "Dashboard/commonUtils";
+import { filterTypes } from "Dashboard/commonUtils";
 import DueDateField from "../TicketWidget/components/AddFilter/components/DueDateField";
 import AssigneeField from "../TicketWidget/components/AddFilter/components/AssigneeField";
 import StatusField from "../TicketWidget/components/AddFilter/components/StatusField";
 import ProgressButton from "Common/ProgressButton";
 import TicketTypeField from "../TicketWidget/components/AddFilter/components/TicketTypeField";
-import { HighlightOffOutlined } from "@mui/icons-material";
+import { findIndex } from "lodash";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -33,7 +28,7 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: '45%',
+  width: '25%',
   bgcolor: 'background.paper',
   borderRadius: "5px",
   padding: "16px 0px 0px 16px"
@@ -42,6 +37,10 @@ const style = {
 const FilterOptions = ({ filterType, control, index, filters, setValue }) => {
   const handleDateChange = (value, field, index) => {
     const curValue = filters[index].value && filters[index].value.length > 0 ? filters[index].value[0] : {};
+    if (field === "operator" && value === "=") {
+      curValue.frequency = 0
+      curValue.period = ""
+    }
     setValue(`filters.${index}.value`, [{ ...curValue, [field]: value }]);
   };
 
@@ -65,7 +64,18 @@ const AddWidget = ({ open, onClose, onSave, item }) => {
     const initFilter = item && item.filters && item.filters.length > 0 ?
       { title: item.title, filters: item.filters } :
       { title: "", filters: [{ filterType: "", value: [] }] };
-    return initFilter;
+
+    const filterFields = []
+    filterTypes.forEach(type => {
+      const fIdx = findIndex(initFilter.filters, { filterType: type })
+      if (fIdx > -1) {
+        filterFields.push(initFilter.filters[fIdx])
+      } else {
+        filterFields.push({ filterType: type, value: [] })
+      }
+    })
+    
+    return { ...initFilter, filters: filterFields };
   }, [item]);
 
   const form = useForm({
@@ -88,45 +98,37 @@ const AddWidget = ({ open, onClose, onSave, item }) => {
     onClose();
   };
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "filters",
+  const { fields } = useFieldArray({
+    control, name: "filters",
   });
 
   const values = watch();
   const filters = values.filters || [];
-
-  const handleFilterTypeChange = (index, value) => {
-    setValue(`filters.${index}.filterType`, value);
-    setValue(`filters.${index}.value`, value === "date" ? new Date() : []); // Initialize with current date for date type
-  };
 
   const onSubmit = (data) => {
     onSave(data);
     handleClose();
   };
 
-  const handleAddFilter = () => {
-    append({ filterType: "", value: [] }); // Initialize with empty array
-  };
-
-  const isFormValid = values.title && values.title.trim() !== "" && filters.every((filter) => {
-    // Every filter must have both a type and a valid value
-    if (!filter.filterType) return false;
-
+  const isFormValid = values.title && values.title.trim() !== "" && filters.some((filter) => {
     // For date type, ensure the value is valid
     if (filter.filterType === 'date') {
-      return filter.value?.length > 0 && filter.value[0].operator && filter.value[0].frequency && filter.value[0].period;
+      return filter.value?.length > 0 && ((filter.value[0].operator && Number(filter.value[0].frequency) > 0 && filter.value[0].period) || filter.value[0].operator === "=");
     }
-
-    // For other filter types, ensure there's at least one value selected
     return Array.isArray(filter.value) ? filter.value.length > 0 : !!filter.value;
   });
 
-  const canAddFilter = filters[filters.length - 1]?.filterType &&
-    (Array.isArray(filters[filters.length - 1]?.value)
-      ? filters[filters.length - 1]?.value.length > 0
-      : filters[filters.length - 1]?.value);
+  const isDatePartiallyFilled = () => {
+  const dateFilter = filters.find(filter => filter.filterType === 'date'); // Find the date filter
+  if (!dateFilter || !dateFilter.value?.length) return false; // No date filter or empty value
+
+  const { operator, frequency, period } = dateFilter.value[0];
+  const filledCount = [operator, frequency, period].filter(Boolean).length;
+  // Return true if 1 or 2 fields are filled (invalid case)
+  return filledCount > 0 && filledCount < 3 && operator !== "=";
+};
+  
+  const isSaveButtonDisabled = !isFormValid || isDatePartiallyFilled();
 
   return (
     <Modal open={open}>
@@ -136,7 +138,7 @@ const AddWidget = ({ open, onClose, onSave, item }) => {
             <Typography variant="h6" className="text-dark">{item ? "Edit Widget Filter" : "Add Widget"}</Typography>
           </Grid>
           <Grid container spacing={3} style={{ padding: "10px" }}>
-            <Grid item xs={4}>
+            <Grid item xs={12}>
               <HookTextField
                 name="title"
                 label="Title"
@@ -147,42 +149,11 @@ const AddWidget = ({ open, onClose, onSave, item }) => {
             </Grid>
             {fields.map((field, index) => {
               const filterType = filters[index]?.filterType;
-              const disabledTypes = values.filters.filter((_, i) => i !== index).map(item => item.filterType).flat()
-
               return (
                 <Grid item xs={12} key={field.id}>
                   <Grid container spacing={1} alignItems="center">
-                    <Grid item xs={4}>
+                    <Grid item xs={12}>
                       <FormControl fullWidth variant="standard">
-                        <InputLabel>Filter Type*</InputLabel>
-                        <Controller
-                          name={`filters.${index}.filterType`}
-                          control={control}
-                          render={({ field }) => (
-                            <Select
-                              {...field}
-                              onChange={(e) => handleFilterTypeChange(index, e.target.value)}
-                              label="Filter Type"
-                              placeholder="Select filter type"
-                              displayEmpty
-                              required
-                            >
-                              {filterTypeOptions.map((option) => {
-                                return (
-                                  <MenuItem key={option.value} value={option.value} disabled={disabledTypes.includes(option.value)}>
-                                    {option.label}
-                                  </MenuItem>
-                                  )
-                                }
-                              )}
-                            </Select>
-                          )}
-                        />
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={6}>
-                      {filterType ? (
-                        <FormControl fullWidth variant="standard">
                           <FilterOptions
                             filters={filters}
                             setValue={setValue}
@@ -190,27 +161,7 @@ const AddWidget = ({ open, onClose, onSave, item }) => {
                             control={control}
                             index={index}
                           />
-                        </FormControl>
-                      ) : (
-                        <Typography variant="body2" color="textSecondary" sx={{ pt: 2 }}>
-                          Select Filter Type
-                        </Typography>
-                      )}
-                    </Grid>
-                    <Grid item xs={"auto"} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                      {fields.length > 1 && (
-                        <IconButton size="small" onClick={() => remove(index)} color="error">
-                          <HighlightOffOutlined fontSize="small" />
-                        </IconButton>
-                      )}
-                      <IconButton
-                        size="small"
-                        onClick={handleAddFilter}
-                        color="primary"
-                        disabled={!canAddFilter}
-                      >
-                        <AddCircleOutlineIcon fontSize="small" />
-                      </IconButton>
+                      </FormControl>
                     </Grid>
                   </Grid>
                 </Grid>
@@ -224,7 +175,7 @@ const AddWidget = ({ open, onClose, onSave, item }) => {
                   size="small"
                   style={{ padding: "5px" }}
                   onClick={handleSubmit(onSubmit)}
-                  disabled={!isFormValid}
+                  disabled={isSaveButtonDisabled}
                 >
                   Save
                 </ProgressButton>

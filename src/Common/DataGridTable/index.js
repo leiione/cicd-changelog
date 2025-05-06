@@ -35,6 +35,13 @@ const DataGridTable = ({
   onCellClick,
   disableRowSelectionOnClick = false
 }) => {
+
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 25, // Default page size
+  });
+
+
   const apiRef = useGridApiRef();
   const [forceLoading, setForceLoading] = useState(false); // result from table built-in function wont show
 
@@ -103,17 +110,18 @@ const handleCellClick = debounce((params, event) => {
         hideFooterSelectedRowCount
         disableRowSelectionOnClick={disableRowSelectionOnClick}
         onCellClick={onCellClick} // Add this prop
-        initialState={{
-          pagination: {
-            paginationModel: { pageSize: 25 },
-          },
-        }}
+        paginationModel={paginationModel}
+        onPaginationModelChange={setPaginationModel}
         slots={{
           pagination: TablePagination,
           noRowsOverlay: NoData,
         }}
         slotProps={{
-          pagination: { count: rows.length },
+          pagination: { 
+            count: rows.length, 
+            paginationModel, 
+            onPaginationModelChange: setPaginationModel 
+          },
           noRowsOverlay: { customEmptyMsg },
         }}
         onSortModelChange={onSortModelChange}

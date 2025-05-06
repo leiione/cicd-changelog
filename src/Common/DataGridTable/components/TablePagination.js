@@ -45,43 +45,46 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const TablePagination = ({ count }) => {
-  const [page, setPage] = React.useState({ offset: 0, limit: 25 });
+const TablePagination = ({ count, paginationModel, onPaginationModelChange }) => {
   const classes = useStyles()
-  const [currentPage, setCurrentPage] = React.useState(0)
-
-  React.useEffect(() => {
-    setCurrentPage(Math.ceil(page.offset / page.limit))
-  }, [page.offset, page.limit])
+  
+  // Get current page and page size from paginationModel
+  const currentPage = paginationModel.page;
+  const pageSize = paginationModel.pageSize;
 
   const [currentNumber, currentLastNumber] = React.useMemo(() => {
-    let firstNumber = page.offset + 1
-    let lastNumber = page.offset + page.limit
+    let firstNumber = currentPage * pageSize + 1
+    let lastNumber = (currentPage + 1) * pageSize
     if (lastNumber > count) {
       lastNumber = count
     }
-    let numPages = Math.ceil(count / page.limit)
+    let numPages = Math.ceil(count / pageSize)
     if (count === 0) {
       firstNumber = 0
       numPages = 1
     }
     return [firstNumber, lastNumber, numPages]
-  }, [count, page.offset, page.limit])
+  }, [count, currentPage, pageSize])
 
   const handleChangePage = React.useCallback(
     newPage => {
-      const offset = newPage * page.limit
-      setPage({ offset, limit: page.limit })
+      onPaginationModelChange({
+        ...paginationModel,
+        page: newPage
+      })
     },
-    [page, setPage]
+    [paginationModel, onPaginationModelChange]
   )
 
   const handleChangeRowsPerPage = React.useCallback(
     event => {
-      const limit = Number(event.target.value)
-      setPage({ offset: 0, limit })
+      const newPageSize = Number(event.target.value)
+      onPaginationModelChange({
+        pageSize: newPageSize,
+        page: 0 // Reset to first page when changing page size
+      })
     },
-    [setPage]
+    [onPaginationModelChange]
   )
 
   const handleBackButtonClick = React.useCallback(() => {
@@ -92,7 +95,7 @@ const TablePagination = ({ count }) => {
     handleChangePage(currentPage + 1)
   }, [currentPage, handleChangePage])
 
-  const pageLimit = includes(rowsPerPageOptions, page.limit) ? page.limit : 25
+  const pageLimit = includes(rowsPerPageOptions, pageSize) ? pageSize : 25
 
   return (
     <Grid
@@ -140,7 +143,7 @@ const TablePagination = ({ count }) => {
       <Grid item xs="auto">
         <IconButton
           onClick={handleNextButtonClick}
-          disabled={currentPage >= Math.ceil(count / page.limit) - 1}
+          disabled={currentPage >= Math.ceil(count / pageSize) - 1}
           aria-label="next page"
           size="small"
         >
@@ -152,6 +155,11 @@ const TablePagination = ({ count }) => {
 }
 TablePagination.propTypes = {
   count: PropTypes.number,
+  paginationModel: PropTypes.shape({
+    page: PropTypes.number.isRequired,
+    pageSize: PropTypes.number.isRequired
+  }).isRequired,
+  onPaginationModelChange: PropTypes.func.isRequired
 };
 
 export default TablePagination

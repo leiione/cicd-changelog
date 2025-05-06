@@ -70,6 +70,50 @@ export const GET_ISP_TICKETS = gql`
   }
 `;
 
+export const GET_TICKET = gql`
+  query GetISPTicket(
+    $ticket_id: Int
+  ) {
+    getISPTickets(
+     ticket_id: $ticket_id
+    ) {
+      tickets {
+        id: ticket_id
+        ticket_id
+        type
+        priority
+        summary
+        address
+        technician_name
+        start
+        end
+        date_added
+        phone
+        subscriber_name
+        subscriber_username
+        subscriber_main_company
+        last_modified
+        status
+        flag_serverplus
+        category_type
+        assigned_name
+        customer_id
+        technician_id
+        ticket_type_id
+        followers
+        flag_print_include_notes
+        scheduled_type
+        max_duration
+        technicians
+        isClosedBlocked
+        isResolveBlocked
+      }
+     
+    }
+  }
+`;
+
+
 export const GET_FILTERED_TICKETS = gql`
   query GetISPTickets(
     $page: Int, 

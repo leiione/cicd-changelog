@@ -6,6 +6,10 @@ import ServerSidePagination from 'Common/DataGridTable/components/ServerSidePagi
 import { HeaderCheckbox, RowCheckbox } from './components/TableActionRenderer';
 import { getTicketsColumns, MenuHeaderIcon } from 'Dashboard/components/TicketsTable/ticketsColumns';
 import RowActions from 'Dashboard/components/TicketsTable/components/RowActions';
+import ErrorPage from 'components/ErrorPage';
+import { useDispatch } from 'react-redux';
+import { setContentDrawer } from 'config/store';
+import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles({
   tableContainer: {
@@ -17,7 +21,9 @@ const useStyles = makeStyles({
 const FilteredTable = (props) => {
   const ref = useRef(null);
   const classes = useStyles();
+  const dispatch = useDispatch();
   const {
+    error,
     page,
     setPage,
     setSort,
@@ -36,6 +42,11 @@ const FilteredTable = (props) => {
     widgetIncludeDeleted,
     handleOpenTicket
   } = props;
+
+  const contentDrawer = useSelector(state => state.contentDrawer);
+  const selectedRow = React.useMemo(() => (contentDrawer.id ? contentDrawer.id : []), [
+    contentDrawer
+  ]);
 
   const getActionColumn = () => ([
     {
@@ -95,13 +106,20 @@ const FilteredTable = (props) => {
   // Handle when a row is clicked
   const handleRowClick = (event, params) => {
     handleOpenTicket({...params.row, disableCRMDrawertoggleButton: true});
-
+    dispatch(setContentDrawer({
+      open: true,
+      component: 'ticket',
+      description: params.row.description,
+      id: params.row.id,
+      ticket_id: params.row.id,
+    }));
   };
-
   
   let ticketsColumns = useMemo(() => getTicketsColumns(2), []);
   ticketsColumns = ticketsColumns.filter(col => col.field !== 'rowActions')
   
+  if (error) return <ErrorPage error={error} />;
+
   return (
     <>
       <div
@@ -119,7 +137,7 @@ const FilteredTable = (props) => {
             setSort={setSort}
             tableOptions={tableOptions}
             handleRowClick={handleRowClick}
-            selectedRow={[]}
+            selectedRow={selectedRow}
           />
         </React.Suspense>
       </div>

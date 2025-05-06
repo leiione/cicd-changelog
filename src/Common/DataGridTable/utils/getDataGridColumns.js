@@ -94,7 +94,6 @@ export const getDataGridColumns = ({
 
       // Skip overriding renderCell for rowActions column to preserve custom actions rendering
       if (["rowActions", "check", 'scheduledOff'].includes(col.field)) {
-        console.log("in if")
         dgColumn.renderCell = col.renderCell;
 
       } else {

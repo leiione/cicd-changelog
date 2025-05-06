@@ -8,10 +8,12 @@ import { setDashboardCards } from 'config/store';
 import RemoveWidgetDialog from './components/RemoveWidgetDialog';
 import FilteredTable from './components/FilteredTable';
 import BulkActionButton from './components/BulkActionButton';
-import { useQuery } from '@apollo/client';
-import { GET_FILTERED_TICKETS } from 'Dashboard/DashboardGraphQL';
+import { useQuery,useLazyQuery, useSubscription } from '@apollo/client';
+import { GET_FILTERED_TICKETS, GET_TICKET } from 'Dashboard/DashboardGraphQL';
 import { checkIfCacheExists } from 'config/apollo';
-import ErrorPage from 'components/ErrorPage';
+import { useSelector } from 'react-redux';
+import { TICKET_LIST_SUBSCRIPTION } from 'TicketDetails/TicketGraphQL';
+
 
 const TicketWidget = (props) => {
   const dispatch = useDispatch();
@@ -20,6 +22,8 @@ const TicketWidget = (props) => {
   const [editingItemId, setEditingItemId] = useState(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [openPrompt, setOpenPrompt] = useState(false);
+  const isp_id = useSelector(state => state.ispId)
+  
 
   const [page, setPage] = useState({ offset: 0, page: 0, limit: 25 });
   const [sort, setSort] = useState({ order: 'desc', field: 'ticket_id' });
@@ -41,15 +45,84 @@ const TicketWidget = (props) => {
     getFilterTableVariables(variables, item.filters);
   }
 
-  const { loading, error, data, client} = useQuery(GET_FILTERED_TICKETS, {
+  const { loading, error, data, client, refetch} = useQuery(GET_FILTERED_TICKETS, {
     variables,
     fetchPolicy: 'cache-and-network'
   });
+
+   const [getTicketDetails] = useLazyQuery(GET_TICKET, {
+      fetchPolicy: 'network-only',
+      onError: (error) => {
+        console.error('Error fetching updated ticket details:', error);
+      }
+    });
   
-  const cacheExists = checkIfCacheExists(client, { query: GET_FILTERED_TICKETS, variables })
+    const cacheExists = checkIfCacheExists(client, { query: GET_FILTERED_TICKETS, variables })
 
-  const tickets = (!loading || cacheExists) && data ? data.getISPTickets?.tickets : [];
 
+    const tickets = data?.getISPTickets?.tickets || [];
+  
+    useSubscription(TICKET_LIST_SUBSCRIPTION, {
+      variables: { isp_id: isp_id },
+      onData: async ({ data: { data }, client }) => {
+        if (data?.ticketList?.ticket_id) {
+          const ticket_id = data.ticketList.ticket_id;
+          
+          // Check if the updated ticket is currently in our table
+          const currentTickets = tickets || [];
+          const isTicketInTable = currentTickets.some(ticket => ticket.ticket_id === ticket_id);
+          
+          if (isTicketInTable) {
+            console.log(`TicketWidget: Ticket ${ticket_id} updated, fetching latest details`);
+            
+            // Fetch the updated ticket details
+            const result = await getTicketDetails({
+              variables: { ticket_id: ticket_id }
+            });
+  
+            
+            if (result?.data?.getISPTickets?.tickets?.[0]) {
+              // Update the Apollo cache with the new ticket data
+              const updatedTicket = result.data.getISPTickets.tickets[0];
+              
+              // Update the specific ticket in the cache
+              const currentData = client.readQuery({
+                query: GET_FILTERED_TICKETS,
+                variables: variables
+              });
+              
+              if (currentData?.getISPTickets?.tickets) {
+                const updatedTickets = currentData.getISPTickets.tickets.map(ticket => 
+                  ticket.ticket_id === ticket_id ? { ...ticket, ...updatedTicket } : ticket
+                );
+                
+                client.writeQuery({
+                  query: GET_FILTERED_TICKETS,
+                  variables: variables,
+                  data: {
+                    getISPTickets: {
+                      ...currentData.getISPTickets,
+                      tickets: updatedTickets
+                    }
+                  }
+                });
+                } else {
+                // If we can't update the cache directly, refetch the data
+                refetch();
+              }
+            } else {
+              // If we couldn't get the updated ticket, refetch all data
+              refetch();
+            }
+          } 
+        }
+      },
+    });
+
+
+  
+  
+ 
    useEffect(() => {
      if ((!loading || cacheExists) && data) {
        if (data.getISPTickets && data.getISPTickets.totalCount !== totalRecords) {
@@ -59,8 +132,6 @@ const TicketWidget = (props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [data, loading])
   
-  if (error) return <ErrorPage error={error} />;
-
   const onSaveTitle = () => {
     if (editingTitle.trim()) {
       dispatch(setDashboardCards({
@@ -221,7 +292,7 @@ const TicketWidget = (props) => {
           widgetItems={items}
           widgetId={item.i}
           widgetVariables={variables}
-          
+          error={error}          
         />
       </Grid>
     </Grid>

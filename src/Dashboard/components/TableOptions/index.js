@@ -3,7 +3,6 @@ import { Grid, Toolbar } from "@mui/material"
 import TechnicianButton from "./components/TechnicianButton"
 import StatusButtons from "./components/StatusButtons"
 import PriorityButtons from "./components/PriorityButtons"
-import CalendarRangePicker from "./components/CalendarRangePicker"
 import SchedulingButtons from "./components/SchedulingButtons"
 
 const Options = props => (
@@ -34,9 +33,6 @@ const Options = props => (
       </Grid>
       <Grid item>
         <SchedulingButtons {...props}/>
-      </Grid>
-      <Grid item sx={{ marginLeft: 'auto', paddingRight: '8px' }}>
-        <CalendarRangePicker />
       </Grid>
     </Grid>
   </Toolbar>

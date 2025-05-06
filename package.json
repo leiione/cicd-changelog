@@ -66,6 +66,7 @@
     "react-grid-layout": "^1.5.0",
     "react-highlight-words": "^0.20.0",
     "react-hook-form": "^7.45.1",
+    "react-infinite-scroll-component": "^6.1.0",
     "react-input-mask": "^2.0.4",
     "react-lines-ellipsis": "^0.15.4",
     "react-redux": "^8.1.0",

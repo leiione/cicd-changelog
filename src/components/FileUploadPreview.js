@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Grid,
@@ -17,6 +17,7 @@ import GetAppIcon from "@mui/icons-material/GetApp";
 
 export const PreviewFileDialog = (props) => {
   const { openPreview, handlePreviewClose, file } = props;
+  
   return (
     <Dialog open={openPreview} onClose={handlePreviewClose}>
       <DialogTitle id="alert-dialog-title">
@@ -71,6 +72,37 @@ const FileUploadPreview = ({
 }) => {
   const [previewImage, setPreviewImage] = useState("");
   const [openPreview, setOpenPreview] = useState(false);
+  const [previews, setPreviews] = useState([]);
+
+  useEffect(() => {
+    // Create previews
+    const newPreviews = selectedFiles.map((file) => {
+      if (file instanceof File || file instanceof Blob) {
+        return {
+          name: file.name || file.file_name || file.filename,
+          src: URL.createObjectURL(file),
+          isBlob: true,
+        };
+      } else {
+        return {
+          name: file.name || file.file_name || file.filename,
+          src: file.file_url || file.preview?.url,
+          isBlob: false,
+        };
+      }
+    });
+
+    setPreviews(newPreviews);
+
+    // Cleanup function: revoke blob URLs
+    return () => {
+      newPreviews.forEach((preview) => {
+        if (preview.isBlob) {
+          URL.revokeObjectURL(preview.src);
+        }
+      });
+    };
+  }, [selectedFiles]);
 
   const handlePreviewOpen = (imageSrc) => {
     setPreviewImage(imageSrc);
@@ -81,21 +113,22 @@ const FileUploadPreview = ({
     setOpenPreview(false);
     setPreviewImage("");
   };
+  console.log("previews", previews);
+
   return (
     <Box>
       <Grid container spacing={1}>
-        {selectedFiles.map((file) => {
-          const fileName = file.name || file.file_name || file.filename;
-          const type = getExtensionFromFilename(fileName);
+        {previews.map((file) => {
+          const type = getExtensionFromFilename(file.name);
           let src = find(getSourceImage, { key: type })
           src = src || find(getSourceImage, { key: 'txt' });
           return(
-          <Grid item xs={2} sm={2} md={2} key={fileName}>
+          <Grid item xs={2} sm={2} md={2} key={file.name}>
             <div className="attachment-card visible-on-hover">
               {removeFile && <IconButton
                 className="close-icon-btn invisible"
                 size="small"
-                onClick={() => removeFile(fileName)}
+                onClick={() => removeFile(file.name)}
               >
                 <Close fontSize="small" />
               </IconButton>}
@@ -103,27 +136,27 @@ const FileUploadPreview = ({
                 className="preview-icon-btn invisible"
                 size="small"
                   onClick={() => handlePreviewOpen({
-                    ...file, name: fileName, file_url: file.file_url || file.preview?.url, preview: src.value, isImage: src.isImage
+                    ...file, file_url: file.src, preview: src.value, isImage: src.isImage
                   })}
               >
                 <Visibility fontSize="small" />
                 </IconButton>
                 {src.isImage ? 
                   <img  
-                    src={file.file_url || file.preview?.url}
-                    alt={fileName}
+                    src={file.src}
+                    alt={file.name}
                     width={60}
                     height={60}
                     style={{ marginTop: 0 }}
                   /> : src.value
                 }
             </div>
-            {uploadProgress[fileName] && <LinearProgress className="mt-2" />}
+            {uploadProgress[file.name] && <LinearProgress className="mt-2" />}
             <Typography
               className="mt-2 d-block text-truncate"
               variant="caption"
             >
-              {fileName}
+              {file.name}
             </Typography>
           </Grid>
         )})}

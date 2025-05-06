@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Typography, Popover, Button, Divider } from "@mui/material";
+import { Typography, Popover, Button, Divider, Box } from "@mui/material";
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import moment from "moment-timezone";
@@ -13,11 +13,59 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-// Styles to match MUI's look and feel
-const dayPickerStyles = {
-  caption: { color: '#1976d2' },
-  day_selected: { backgroundColor: '#1976d2' },
-  day_today: { color: '#1976d2', fontWeight: 'bold' }
+// Custom CSS to ensure the calendar displays correctly
+const calendarStyles = {
+  '& .rdp': {
+    margin: '0',
+  },
+  '& .rdp-months': {
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  '& .rdp-month': {
+    margin: '0',
+  },
+  '& .rdp-caption': {
+    position: 'relative',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    color: '#1976d2',
+    padding: '0 0 8px 0',
+    textAlign: 'center',
+  },
+  '& .rdp-nav': {
+    position: 'absolute',
+    display: 'flex',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  '& .rdp-head': {
+    marginTop: '8px',
+  },
+  '& .rdp-cell': {
+    width: '36px',
+    height: '36px',
+    padding: '0',
+  },
+  '& .rdp-button': {
+    width: '36px',
+    height: '36px',
+    borderRadius: '18px',
+    margin: '0',
+    padding: '0',
+  },
+  '& .rdp-day_selected': {
+    backgroundColor: '#1976d2',
+    color: 'white',
+  },
+  '& .rdp-day_today': {
+    color: '#1976d2',
+    fontWeight: 'bold',
+  },
+  '& .rdp-day:hover:not(.rdp-day_selected)': {
+    backgroundColor: 'rgba(25, 118, 210, 0.1)',
+  },
 };
 
 // Helper function to check if a date is in the past
@@ -148,17 +196,16 @@ const DueDate = (props) => {
             horizontal: "left",
           }}
         >
-          <div style={{ padding: '8px' }}>
+          <Box sx={calendarStyles} style={{ padding: '8px' }}>
             <DayPicker
               mode="single"
               selected={selectedDay}
               onSelect={handleDaySelect}
-              modifiersStyles={dayPickerStyles}
               showOutsideDays
               fixedWeeks
               defaultMonth={new Date()}
             />
-          </div>
+          </Box>
           <Divider />
           <div className="text-right p-2">
             <Button color="default" onClick={handleClose}>

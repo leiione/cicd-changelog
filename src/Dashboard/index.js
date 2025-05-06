@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Box, Typography, Card, CardContent, Button } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Responsive, WidthProvider } from 'react-grid-layout';
@@ -17,7 +17,6 @@ const Dashboard = (props) => {
   const {handleOpenTicket, userPreferences } =  props;
   const dispatch = useDispatch();
   const { items = [], nextId = 1 } = useSelector(state => state.ticketDashboardWidget || {});
-  
   const lastChanges = useSelector(state => state.userPreferencesTimeStamp);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
@@ -247,8 +246,16 @@ const DashboardPreferences = props => {
   const { timeZone, settingsPreferences, user, flags, networkStatus, handleOpenTicket} = props
   
   const { data, loading } = useQuery(GET_USER_PREFERENCES, {
-    fetchPolicy: "cache-and-network",
+    fetchPolicy: "cache-first",
+    nextFetchPolicy: "cache-only",
+    variables: {
+      ispId: Number(ispId),
+    },
   });
+
+  const memoizedUserPreferences = useMemo(() => 
+    loading ? null : data?.getCRMUserPreferences
+  , [loading, data]);
 
   useEffect(() => {
     // initialize redux based on saved user preferences
@@ -267,7 +274,7 @@ const DashboardPreferences = props => {
   }, [dispatch, timeZone, settingsPreferences, user, ispId, flags, networkStatus])
 
   return (
-    <Dashboard handleOpenTicket={handleOpenTicket} {...props} userPreferences={loading ? null : data.getCRMUserPreferences} />
+    <Dashboard handleOpenTicket={handleOpenTicket} {...props} userPreferences={memoizedUserPreferences} />
   )
 
 }

@@ -258,7 +258,7 @@ export const GET_TICKETS_QUERY = gql`
     ) {
       tickets {
         ticket_id
-        description
+        summary
         status
         priority
         type
@@ -624,3 +624,11 @@ mutation AddTicketCustomField($ticketId: Int!, $inputCustomField: [TicketCustomF
   }
 }
 `
+
+export const TICKET_LIST_SUBSCRIPTION = gql`
+  subscription Subscription($isp_id: Int!) {
+    ticketList(isp_id: $isp_id){
+    ticket_id
+    } }
+`
+

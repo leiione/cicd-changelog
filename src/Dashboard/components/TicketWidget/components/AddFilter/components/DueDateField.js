@@ -1,12 +1,17 @@
-import { FormControl, Grid, MenuItem, Select, TextField, Typography } from "@mui/material";
-import { getDueDateMessage } from "Dashboard/commonUtils";
-import { startCase } from "lodash";
+import { RestartAlt } from "@mui/icons-material";
+import { FormControl, Grid, IconButton, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { isEmpty, startCase } from "lodash";
 
 const OPERATORS = [{label: "< Less Than", value: "<"}, {label: "> Greater Than", value: ">"}, {label: "= Due Today", value: "="}];
 
 const DueDateField = ({ handleDateChange, value, index }) => {
+  const resetDate = () => {
+    handleDateChange("", "operator", index);
+    handleDateChange("", "frequency", index);
+    handleDateChange("", "period", index);
+  };
   return (
-    <Grid container spacing={2} style={index > -1 ? { margin: "-3px 0px 0px 10px" } : {}}>
+    <Grid container spacing={2} style={{ padding: "15px" }}>
       <Grid item xs={12} style={index > -1 ? { padding: "0px" } : {}}>
         <Typography variant={"caption"}>
           Due Date
@@ -30,7 +35,7 @@ const DueDateField = ({ handleDateChange, value, index }) => {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <TextField
             fullWidth
             variant="standard"
@@ -38,6 +43,7 @@ const DueDateField = ({ handleDateChange, value, index }) => {
             inputProps={{ min: 0 }}
             value={value?.frequency || 0}
             onChange={event => handleDateChange(event.target.value, "frequency", index)}
+            disabled={value && value.operator === "="}
           />
         </Grid>
         <Grid item xs={4}>
@@ -48,6 +54,7 @@ const DueDateField = ({ handleDateChange, value, index }) => {
               variant="standard"
               value={value && value.period ? value.period : ""}
               onChange={event => handleDateChange(event.target.value, "period", index)}
+              disabled={value && value.operator === "="}
             >
               {["days", "weeks", "months"].map((period) => (
                 <MenuItem key={period} value={period} >
@@ -57,12 +64,17 @@ const DueDateField = ({ handleDateChange, value, index }) => {
             </Select>
           </FormControl>
         </Grid>
+        {value && (value.operator || value.frequency || !isEmpty(value.period)) ?
+          <Grid item xs={"auto"} style={{ padding: "15px 0px 0px 10px" }}>
+            <IconButton
+              size="small"
+              onClick={resetDate}
+            >
+              <RestartAlt fontSize="small" />
+            </IconButton>
+          </Grid> : null
+        }
       </Grid>
-      {value && value.operator && value.frequency && value.period && (
-        <Grid item xs={12} style={{ padding: "0px", marginBottom: "-10%" }}>
-          <Typography variant={"caption"}>{getDueDateMessage(value)}</Typography>
-        </Grid>
-      )}
     </Grid>
   )
 };

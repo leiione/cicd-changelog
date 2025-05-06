@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useQuery } from '@apollo/client';
-import { GET_ASSIGNEES } from 'TicketDetails/TicketGraphQL';
+import { useQuery,useSubscription ,useLazyQuery} from '@apollo/client';
+import { GET_ASSIGNEES, TICKET_LIST_SUBSCRIPTION } from 'TicketDetails/TicketGraphQL';
 import DataGridTable from 'Common/DataGridTable';
 import { makeStyles } from '@mui/styles';
 import Loader from '../../../Common/Loader';
@@ -9,10 +9,10 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import TableOptions from '../TableOptions';
 import { useSelector, useDispatch } from 'react-redux';
-import { setPageNumber, setPageSize } from '../../../config/store';
+import { setContentDrawer, setPageNumber, setPageSize } from '../../../config/store';
 import { getTicketsColumns, getVisibleColumns } from './ticketsColumns';
 import { processTicketDates, clearDateFormatCache } from './utils/dateUtils';
-import { GET_ISP_TICKETS } from 'Dashboard/DashboardGraphQL';
+import { GET_ISP_TICKETS,GET_TICKET } from 'Dashboard/DashboardGraphQL';
 
 // Styling with optimized containers
 const useStyles = makeStyles({
@@ -89,6 +89,7 @@ const TicketsTable = (props) => {
   const {handleOpenTicket} =props
   const classes = useStyles();
   const dispatch = useDispatch();
+  
   //const [selectedRow, setSelectedRow] = useState([]);
   const [expectedLastPage, setExpectedLastPage] = useState(null);
   const [visibleColumns, setVisibleColumns] = useState([]);
@@ -111,7 +112,12 @@ const TicketsTable = (props) => {
   const priorityFilter = useSelector(state => state.ticketTablePreferences.priorityFilter || []);
   const schedulingFilter = useSelector(state => state.ticketTablePreferences.schedulingFilter || []);
   const dateRange = useSelector(state => state.ticketTablePreferences.dateRange || { startDate: null, endDate: null });
-  
+  const isp_id = useSelector(state => state.ispId)
+  const contentDrawer = useSelector(state => state.contentDrawer);
+  const selectedRow = React.useMemo(() => (contentDrawer.id ? contentDrawer.id : []), [
+    contentDrawer
+  ]);
+
   // Fetch technicians from GraphQL
   const { data: technicianData } = useQuery(GET_ASSIGNEES);
   const technicians = technicianData?.assignees || [];
@@ -175,14 +181,76 @@ const TicketsTable = (props) => {
     }
   });
 
-  // Ensure query refetches when pagination, filters, or sorting change
-  useEffect(() => {
-    if (refetch) {
-      refetch(queryVariables).catch(err => {
-        console.error('Refetch error:', err);
-      });
+  const [getTicketDetails] = useLazyQuery(GET_TICKET, {
+    fetchPolicy: 'network-only',
+    onError: (error) => {
+      console.error('Error fetching updated ticket details:', error);
     }
-  }, [queryVariables, refetch]);
+  });
+
+
+  useSubscription(TICKET_LIST_SUBSCRIPTION, {
+    variables: { isp_id: isp_id },
+    onData: async ({ data: { data }, client }) => {
+      if (data?.ticketList?.ticket_id) {
+        const ticket_id = data.ticketList.ticket_id;
+        
+        // Check if the updated ticket is currently in our table
+        const currentTickets = tickets || [];
+        const isTicketInTable = currentTickets.some(ticket => ticket.ticket_id === ticket_id);
+        
+        if (isTicketInTable) {
+          // Fetch the updated ticket details
+          const result = await getTicketDetails({
+            variables: { ticket_id: ticket_id }
+          });
+
+          
+          if (result?.data?.getISPTickets?.tickets?.[0]) {
+            // Update the Apollo cache with the new ticket data
+            const updatedTicket = result.data.getISPTickets.tickets[0];
+            
+            // Option 1: Update the specific ticket in the cache
+            const currentData = client.readQuery({
+              query: GET_ISP_TICKETS,
+              variables: queryVariables
+            });
+            
+            if (currentData?.getISPTickets?.tickets) {
+              const updatedTickets = currentData.getISPTickets.tickets.map(ticket => 
+                ticket.ticket_id === ticket_id ? { ...ticket, ...updatedTicket } : ticket
+              );
+              
+              client.writeQuery({
+                query: GET_ISP_TICKETS,
+                variables: queryVariables,
+                data: {
+                  getISPTickets: {
+                    ...currentData.getISPTickets,
+                    tickets: updatedTickets
+                  }
+                }
+              });
+              
+             
+            } else {
+              // If we can't update the cache directly, refetch the data
+              refetch();
+            }
+          } else {
+            // If we couldn't get the updated ticket, refetch all data
+            refetch();
+          }
+        } 
+      }
+    },
+  });
+
+
+
+
+  // Apollo's useQuery hook automatically refetches when variables change
+  // No manual refetch needed here - the fetchPolicy and notifyOnNetworkStatusChange settings handle this
 
   // Clean up the date format cache when component unmounts
   useEffect(() => {
@@ -256,7 +324,13 @@ const TicketsTable = (props) => {
   // Handle when a row is clicked
   const handleRowClick = (event, params) => {
     handleOpenTicket({...params.row, disableCRMDrawertoggleButton: true});
-
+    dispatch(setContentDrawer({
+      open: true,
+      component: 'ticket',
+      description: params.row.description,
+      id: params.row.id,
+      ticket_id: params.row.id,
+    }));
   };
 
   // Handle page change
@@ -439,7 +513,7 @@ const TicketsTable = (props) => {
                 columns={filteredColumns}
                 loading={loading}
                 handleRowClick={handleRowClick}
-                //selectedRow={selectedRow}
+                selectedRow={selectedRow}
                 pageSize={pageSize}
                 page={page}
                 rowsPerPageOptions={[5, 10, 25, 50]}
