@@ -155,7 +155,7 @@ const Dashboard = (props) => {
           startIcon={<AddCircleIcon />}
           onClick={() => setIsModalOpen(true)}
         >
-          Add Widget
+          Add Widgett
         </Button>
       </Box>
 
