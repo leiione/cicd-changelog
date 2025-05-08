@@ -38,8 +38,7 @@ const Messages = (props) => {
   } = useQuery(GET_TICKET_MESSAGES, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: online ? "cache-and-network" : "cache-only",
-    skip:
-      !ticket.ticket_id || (filter.length === 1 && filter.includes("notes")),
+    skip: !ticket.ticket_id
   });
   const cacheExists = checkIfCacheExists(client, {
     query: GET_TICKET_MESSAGES,
@@ -56,7 +55,7 @@ const Messages = (props) => {
   } = useQuery(GET_TICKET_NOTES, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: online ? "cache-and-network" : "cache-only",
-    skip: !ticket.ticket_id,
+    skip: !ticket.ticket_id
   });
   
   const cacheExistsNotes = checkIfCacheExists(clientNotes, {
