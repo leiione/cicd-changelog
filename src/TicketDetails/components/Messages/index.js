@@ -91,22 +91,23 @@ const Messages = (props) => {
   let messages = [];
 
   // Handle merging of data based on selected filters
-  if (
-    filter.includes("all") &&
-    data &&
-    data.ticketMessages &&
-    dataNotes &&
-    dataNotes.ticketNotes
-  ) {
-    messages = [...data.ticketMessages, ...dataNotes.ticketNotes];
+  const hasMessages = Array.isArray(data?.ticketMessages);
+  const hasNotes = Array.isArray(dataNotes?.ticketNotes);
+
+  if (filter.includes("all")) {
+    messages = [
+      ...(hasMessages ? data.ticketMessages : []),
+      ...(hasNotes ? dataNotes.ticketNotes : [])
+    ];
   } else {
-    // Combine notes and messages based on filter selection
-    if (filter.includes("notes") && dataNotes && dataNotes.ticketNotes) {
-      messages = [...dataNotes.ticketNotes]; // Start with notes
+    messages = [];
+
+    if (filter.includes("notes") && hasNotes) {
+      messages.push(...dataNotes.ticketNotes);
     }
 
-    if (filter.includes("message") && data && data.ticketMessages) {
-      messages = [...messages, ...data.ticketMessages]; // Append messages to the existing notes
+    if (filter.includes("message") && hasMessages) {
+      messages.push(...data.ticketMessages);
     }
   }
 

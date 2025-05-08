@@ -24,6 +24,7 @@ import parse from "html-react-parser";
 import DialogAlert from "components/DialogAlert";
 import { NO_RIGHTS_MSG } from "utils/messages";
 import FileUploadPreview from "components/FileUploadPreview";
+import { LINE_LIMIT } from "../../helper";
 
 const EmailPopover = (props) => {
   const { anchorEl, message, handleClose, toEmail } = props;
@@ -216,19 +217,19 @@ const Email = (props) => {
           }
           secondary={
             <>
-              {more || lineLen < 4 ? (
+              {more || lineLen < LINE_LIMIT ? (
                 <Typography component="span" variant="caption" className="text-pre-line">
                   {parse(text)}
                 </Typography>
               ) : (
                 <LinesEllipsis
                   text={isHtml ? h2p(text) : text}
-                  maxLine={4}
+                  maxLine={LINE_LIMIT}
                   ellipsis=""
                   className="text-pre-line"
                 />
               )}
-              {lineLen > 4 && (
+              {lineLen > LINE_LIMIT && (
                 <div className="mt-1">
                   <Link variant="caption" onClick={() => toggleMore(!more)}>
                     {more ? "Simplify..." : "More..."}

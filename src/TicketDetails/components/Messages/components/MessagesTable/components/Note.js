@@ -26,6 +26,7 @@ import { NO_RIGHTS_MSG } from "utils/messages";
 import usePermission from "config/usePermission";
 import FileUploadPreview from "components/FileUploadPreview";
 import LinesEllipsis from "react-lines-ellipsis";
+import { LINE_LIMIT } from "../../helper";
 
 const useStyles = makeStyles({
   quoteBlock: {
@@ -54,8 +55,10 @@ const Note = (props) => {
     // First clean the basic content
     let content = message.content
       .replace(/&nbsp;/g, ' ')
+      .replace(/<([^>\s@]+@[^>\s]+)>/g, '&lt;$1&gt;')
+      .replace(/\n/g, '<br />')
       .trim();
-
+    
     return content;
   }, [message.content]);
 
@@ -66,7 +69,7 @@ const Note = (props) => {
     
     // Count lines in non-quote content
     const lines = h2p(nonQuoteContent).split(/\r|\r\n|\n/g);
-    return lines.length > 4;
+    return lines.length > LINE_LIMIT;
   }, [cleanContent]);
 
   const handleOnDelete = async () => {
@@ -143,7 +146,7 @@ const Note = (props) => {
                 <>
                   <LinesEllipsis
                     text={h2p(cleanContent)}
-                    maxLine={4}
+                    maxLine={LINE_LIMIT}
                     ellipsis=""
                     className="text-pre-line"
                   />

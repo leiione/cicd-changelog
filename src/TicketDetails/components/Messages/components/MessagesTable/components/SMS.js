@@ -23,6 +23,7 @@ import moment from "moment-timezone";
 import LinesEllipsis from "react-lines-ellipsis";
 import DialogAlert from "components/DialogAlert";
 import { NO_RIGHTS_MSG } from "utils/messages";
+import { LINE_LIMIT } from "../../helper";
 
 const SMSPopover = (props) => {
   const { anchorEl, message, handleClose, toEmail } = props;
@@ -204,7 +205,7 @@ const SMS = (props) => {
           }
           secondary={
             <>
-              {more || lineLen < 6 ? (
+              {more || lineLen < LINE_LIMIT ? (
                 <Typography variant="caption" className="text-preline">
                   {parse(text)}
                 </Typography>
@@ -216,7 +217,7 @@ const SMS = (props) => {
                   className="text-preline"
                 />
               )}
-              {lineLen > 6 && (
+              {lineLen > LINE_LIMIT && (
                 <div className="mt-1">
                   <Link variant="caption" onClick={() => toggleMore(!more)}>
                     {more ? "Simplify..." : "More..."}

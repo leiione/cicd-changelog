@@ -83,7 +83,7 @@ const MessagesTable = (props) => {
 
   // sort messages by date
   let messageList = messages.length > 0 ? [...messages].sort((a, b) => new Date(b.date_added) - new Date(a.date_added)) : []
-  messageList = messages.length > 0 ? messageList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage):[]
+  messageList = messages.length > 0 ? messageList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : []
 
   return (
     <div>

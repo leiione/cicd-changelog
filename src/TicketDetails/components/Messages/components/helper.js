@@ -1,3 +1,5 @@
+export const LINE_LIMIT = 10
+
 export const data = [
   {
     sender: "Carl Smith",
