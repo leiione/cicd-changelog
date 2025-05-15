@@ -64,7 +64,7 @@ export const getFilterTableVariables = (variables, filters) => {
         filter.value.forEach(item => variables.ticketType.push(item.value));
         break;
       case 'date':
-        if (filter.value?.length > 0 && filter.value[0].operator && filter.value[0].frequency && filter.value[0].period) {
+        if (filter.value?.length > 0 && (filter.value[0].operator === "=" || (filter.value[0].operator && filter.value[0].frequency && filter.value[0].period))) {
           const { startDate, endDate } = getDateRange(filter.value[0].operator, filter.value[0].frequency, filter.value[0].period);
           fStart = fStart && moment(fStart).isBefore(startDate) ? fStart : startDate;
           fEnd = fEnd && moment(fEnd).isAfter(endDate) ? fEnd : endDate;

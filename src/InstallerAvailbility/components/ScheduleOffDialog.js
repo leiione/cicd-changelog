@@ -13,7 +13,7 @@ import { useQuery } from '@apollo/client';
 import { GET_INSTALLER_SCHEDULE_OFF } from '../InstallerGraphQL';
 import DataGridTable from "Common/DataGridTable";
 
-const ScheduledOffDialog = ({ open, onClose, scheduledOffData }) => {
+const ScheduledOffDialog = ({ open, onClose, scheduledOffData ,handleRowClick}) => {
 
   const ref = useRef(null);
 
@@ -39,7 +39,7 @@ const ScheduledOffDialog = ({ open, onClose, scheduledOffData }) => {
   ];
 
   const rows = data?.getInstallerScheduleOff?.map((item, index) => ({
-    id: index, // Using index as id since user_id is same for all rows
+    id: item.id, // Using index as id since user_id is same for all rows
     date: item.date,
     time: item.time || 'All Day',
     reason: item.reason || 'None'
@@ -66,7 +66,7 @@ const ScheduledOffDialog = ({ open, onClose, scheduledOffData }) => {
             rows={rows}
             columns={columns}
             loading={loading}
-            disableRowSelectionOnClick={true}
+            handleRowClick={handleRowClick}
             fullWidth={true}
           />
         </Box>

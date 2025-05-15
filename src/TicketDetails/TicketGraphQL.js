@@ -1,8 +1,8 @@
 import gql from "graphql-tag";
 
 export const GET_TICKET = gql`
-  query ticket($id: Int!) {
-    ticket(id: $id) {
+  query ticket($id: Int!, $time_zone: String) {
+    ticket(id: $id, time_zone: $time_zone) {
       ticket_id
       description
       priority
@@ -58,8 +58,6 @@ export const GET_TICKET = gql`
         }
       }
       linked_count
-      update_requirements
-      attachments
     }     
   }
 `;
@@ -69,8 +67,26 @@ export const GET_TICKET_TYPES = gql`
     ticketTypes(isp_id: $isp_id) {
       ticket_type_id
       ticket_type_desc
+    }
   }
-}
+`;
+
+export const GET_RECENT_LOGS = gql`
+  query ticketRecentLogs($id: Int!, $time_zone: String) {
+    ticketRecentLogs(id: $id, time_zone: $time_zone) {
+      ticket_id
+      created_by_time
+      created_by
+      last_updated_by_time
+      last_updated_by
+    }
+  }
+`;
+
+export const GET_UPDATE_REQUIREMENTS = gql`
+  query ticketUpdateRequirements($ticket_type_id: Int, $ticket_type_desc: String) {
+    ticketUpdateRequirements(ticket_type_id: $ticket_type_id, ticket_type_desc: $ticket_type_desc)
+  }
 `;
 
 export const GET_TICKET_STATUS = gql`
@@ -627,8 +643,7 @@ mutation AddTicketCustomField($ticketId: Int!, $inputCustomField: [TicketCustomF
 
 export const TICKET_LIST_SUBSCRIPTION = gql`
   subscription Subscription($isp_id: Int!) {
-    ticketList(isp_id: $isp_id){
-    ticket_id
-    } }
+    ticketList(isp_id: $isp_id) 
+    }
 `
 

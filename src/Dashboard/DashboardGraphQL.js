@@ -43,6 +43,7 @@ export const GET_ISP_TICKETS = gql`
         phone
         subscriber_name
         subscriber_username
+        subscriber_status
         subscriber_main_company
         last_modified
         status
@@ -128,6 +129,7 @@ export const GET_FILTERED_TICKETS = gql`
     $dueDateRange: DateRangeInput,
     $sortField: String,
     $sortOrder: String
+    $ticket_id: Int
   ) {
     getISPTickets(
       page: $page, 
@@ -142,6 +144,7 @@ export const GET_FILTERED_TICKETS = gql`
       dueDateRange: $dueDateRange,
       sortField: $sortField,
       sortOrder: $sortOrder
+      ticket_id: $ticket_id
     ) {
       tickets {
         id: ticket_id
@@ -157,6 +160,7 @@ export const GET_FILTERED_TICKETS = gql`
         phone
         subscriber_name
         subscriber_username
+        subscriber_status
         subscriber_main_company
         last_modified
         status

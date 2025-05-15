@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import InnerDrawer from "Common/InnerDrawer";
 import {
   Box,
@@ -23,13 +23,14 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from "dayjs";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { useQuery, useMutation } from '@apollo/client';
-import { INSTALLER_AVAILABILITY_QUERY, SCHEDULE_OFF_TIME } from '../InstallerGraphQL';
+import { INSTALLER_AVAILABILITY_QUERY, SCHEDULE_OFF_TIME, GET_INSTALLER_SCHEDULE_OFF_DETAIL, DELETE_SCHEDULE_OFF_TIME } from '../InstallerGraphQL';
 import { GET_ASSIGNEES } from '../../TicketDetails/TicketGraphQL';
 import HookTextField from "Common/hookFields/HookTextField";
 import { useDispatch } from 'react-redux';
 import { showSnackbar } from 'config/store';
+import DialogAlert from "components/DialogAlert";
 
-const ScheduleOffTimeDrawer = ({ open, onClose }) => {
+const ScheduleOffTimeDrawer = ({ open, onClose, editUserScheduleOffID, seteditUserScheduledOffID }) => {
   const dispatch = useDispatch();
   const [dateRange, setDateRange] = useState([null, null]);
   const [isPartialDay, setIsPartialDay] = useState(false);
@@ -38,6 +39,10 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
   const [isSelectingRange, setIsSelectingRange] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [savingOffTime, setSavingOffTime] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
 
   const { loading, error, data } = useQuery(INSTALLER_AVAILABILITY_QUERY, {
     skip: !open,
@@ -46,6 +51,12 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
   const { loading: assigneesLoading, error: assigneesError, data: assigneesData } = useQuery(GET_ASSIGNEES, {
     skip: !open,
     fetchPolicy: 'network-only' // Always fetch fresh data when drawer opens
+  });
+
+  const { data: scheduleOffData } = useQuery(GET_INSTALLER_SCHEDULE_OFF_DETAIL, {
+    variables: { id: editUserScheduleOffID },
+    skip: !editUserScheduleOffID,
+    fetchPolicy: 'network-only'
   });
 
   const resetForm = () => {
@@ -62,16 +73,20 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
     setStartTime(dayjs().set('hour', 8).set('minute', 0));
     setEndTime(dayjs().set('hour', 17).set('minute', 0));
     setIsSelectingRange(false);
+    seteditUserScheduledOffID(null)
+    setIsEditMode(false);
+
   };
 
   const onCompleted = () => {
     resetForm();
     dispatch(showSnackbar({
-      message: "Schedule off time saved successfully",
+      message: isEditMode ? "Schedule off time updated successfully" : "Schedule off time saved successfully",
       severity: "success"
     }));
     onClose();
   };
+
 
   const onError = (error) => {
     dispatch(showSnackbar({
@@ -86,6 +101,13 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
     onError
   });
 
+  const [deleteScheduleOffTime] = useMutation(DELETE_SCHEDULE_OFF_TIME, {
+    refetchQueries: [{ query: INSTALLER_AVAILABILITY_QUERY }],
+    onCompleted,
+    onError
+  });
+
+
   const methods = useForm({
     defaultValues: {
       technicians: [],
@@ -94,6 +116,70 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
     },
     mode: "onChange"
   });
+
+  useEffect(() => {
+    if (editUserScheduleOffID && scheduleOffData?.getInstallerScheduleOffDetail) {
+      setIsEditMode(true);
+      const scheduleOffItem = scheduleOffData.getInstallerScheduleOffDetail;
+
+      if (scheduleOffItem) {
+        // Get flag_all_day status
+        const isPartial = !scheduleOffItem.flag_all_day;
+        setIsPartialDay(isPartial);
+        methods.setValue('isPartialDay', isPartial);
+
+        // Set reason
+        methods.setValue('reason', scheduleOffItem.reason || '');
+
+        if (assigneesData?.assignees) {
+          const techUser = assigneesData.assignees.find(user =>
+            user.appuser_id === scheduleOffItem.user_id
+          );
+
+
+          if (techUser) {
+            const selectedAssigne = {
+              value: techUser.appuser_id,
+              label: techUser.realname
+
+            }
+            methods.setValue('technicians', [selectedAssigne]);
+          }
+        }
+
+        // Parse start and end times
+        try {
+          // Extract only the date part from the timestamps to avoid timezone issues
+          const startDate = scheduleOffItem.start_time.split('T')[0];
+          const endDate = scheduleOffItem.end_time.split('T')[0];
+
+          const startDateTime = dayjs(startDate);
+          const endDateTime = dayjs(endDate);
+
+          if (startDateTime.isValid() && endDateTime.isValid()) {
+            // Set date range using the extracted dates
+            setDateRange([startDateTime, endDateTime]);
+
+            // If it's a partial day, set the time parts
+            if (isPartial) {
+              // Extract time parts from the original timestamps
+              const startTimeParts = scheduleOffItem.start_time.split('T')[1].split(':');
+              const endTimeParts = scheduleOffItem.end_time.split('T')[1].split(':');
+
+              setStartTime(dayjs().set('hour', parseInt(startTimeParts[0])).set('minute', parseInt(startTimeParts[1])));
+              setEndTime(dayjs().set('hour', parseInt(endTimeParts[0])).set('minute', parseInt(endTimeParts[1])));
+            }
+          }
+        } catch (error) {
+          console.error('Error parsing date/time:', error);
+        }
+      }
+    } else {
+      setIsEditMode(false);
+    }
+  }, [editUserScheduleOffID, scheduleOffData, assigneesData, methods]);
+
+
 
   const technicians = methods.watch("technicians");
   const reason = methods.watch("reason");
@@ -144,15 +230,17 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
           startTime: isPartialDay ? `${startDate.format('YYYY-MM-DD')} ${startTime.format('HH:mm:ss')}` : startDate.format('YYYY-MM-DD'),
           endTime: isPartialDay ? `${endDate.format('YYYY-MM-DD')} ${endTime.format('HH:mm:ss')}` : endDate.format('YYYY-MM-DD'),
           flagAllDay: !isPartialDay,
-          reason: values.reason || 'None' // Add reason field
+          reason: values.reason || 'None', // Add reason field
+          id: isEditMode ? editUserScheduleOffID : undefined
 
         }
       });
 
       dispatch(showSnackbar({
-        message: "Schedule off time saved successfully",
+        message: isEditMode ? "Schedule off time updated successfully" : "Schedule off time saved successfully",
         severity: "success"
       }));
+
       onClose();
     } catch (error) {
       dispatch(showSnackbar({
@@ -334,6 +422,8 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
     const sortedTechnicians = Array.from(technicianGroups.values())
       .sort((a, b) => a.user_name.localeCompare(b.user_name));
 
+
+
     return (
       <List>
         {sortedTechnicians.map((tech) => (
@@ -360,6 +450,41 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
     );
   };
 
+
+  const handleDelete = () => {
+    setOpenDialog(true);
+  }
+
+
+  const handleOnDelete = async () => {
+    if (!editUserScheduleOffID) return;
+    setSubmitting(true);
+
+
+    try {
+      await deleteScheduleOffTime({
+        variables: {
+          id: editUserScheduleOffID
+        }
+      });
+
+      dispatch(showSnackbar({
+        message: "Schedule off time deleted successfully",
+        severity: "success"
+      }));
+
+      onClose();
+    } catch (error) {
+      dispatch(showSnackbar({
+        message: error.message,
+        severity: "error"
+      }));
+      console.error('Error deleting schedule off time:', error);
+    }
+    setSubmitting(false);
+    setOpenDialog(false);
+  };
+
   const isDateRangeInPast = useMemo(() => {
     if (!dateRange[0] || !dateRange[1]) return false;
     const today = dayjs().startOf('day');
@@ -380,7 +505,7 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
   return (
     <>
       <InnerDrawer
-        header="Schedule Off Time"
+        header={isEditMode ? "Edit Schedule Off Time" : "Schedule Off Time"}
         open={open}
         onCloseDrawer={handleClose}
       >
@@ -449,18 +574,18 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
 
                   </LocalizationProvider>
                   {isDateRangeInPast && (
-                      <Typography
-                        variant="body2"
-                        color="error"
-                        sx={{
-                          mt: 1,
-                          textAlign: 'center',
-                          fontWeight: 'small'
-                        }}
-                      >
-                        Please select future dates for scheduling off time
-                      </Typography>
-                    )}
+                    <Typography
+                      variant="body2"
+                      color="error"
+                      sx={{
+                        mt: 1,
+                        textAlign: 'center',
+                        fontWeight: 'small'
+                      }}
+                    >
+                      Please select future dates for scheduling off time
+                    </Typography>
+                  )}
                 </Box>
               </Grid>
               <Grid item xs={5}>
@@ -514,7 +639,7 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
                       ]}
                       value={value || []}
                       onChange={(event, newValue) => {
-                        if (!isDateRangeInPast) {
+                        if (!isDateRangeInPast && !isEditMode) {
                           // Check if "All" is selected
                           if (newValue.some(item => item.value === 'all')) {
                             // If "All" is selected, select all technicians except the "All" option
@@ -557,10 +682,10 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
                               cursor: isDateRangeInPast ? 'not-allowed' : 'text'
                             }
                           }}
-                          disabled={isDateRangeInPast}
+                          disabled={isEditMode || isDateRangeInPast}
                         />
                       )}
-                      disabled={isDateRangeInPast}
+                      disabled={isEditMode || isDateRangeInPast}
                       loading={assigneesLoading}
                       sx={{
                         '& .MuiInput-root': {
@@ -698,19 +823,35 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
                       Time: {startTime.format('hh:mm A')} - {endTime.format('hh:mm A')}
                     </Typography>
                   )}
-                  <Box sx={{ mt: 2, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                    <Button variant="outlined" onClick={handleClose}>
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleSave}
-                      disabled={isSaveDisabled || isDateRangeInPast}
-                    >
-                      {savingOffTime ? "Saving..." : "Save"}
-                    </Button>
+                  <Box sx={{ mt: 2, display: 'flex', gap: 2, justifyContent: 'space-between' }}>
+                    <div>
+                      {isEditMode && (
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={handleDelete}
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', gap: 2 }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleSave}
+                        disabled={isSaveDisabled || isDateRangeInPast}
+                      >
+                        {isEditMode ? "Update" : "Save"}
+                      </Button>
+                      <Button variant="outlined" onClick={handleClose}>
+                        Cancel
+                      </Button>
+
+                    </div>
                   </Box>
+
+
                 </Box>
               </Grid>
             </Grid>
@@ -727,6 +868,29 @@ const ScheduleOffTimeDrawer = ({ open, onClose }) => {
           Successfully scheduled off time
         </Alert>
       </Snackbar>
+
+      <DialogAlert
+        open={openDialog}
+        message={<span>Are you sure you want to delete?</span>}
+        buttonsList={[
+          {
+            label: "Yes",
+            size: "medium",
+            color: "primary",
+            onClick: handleOnDelete,
+            isProgress: true,
+            isSubmitting: submitting,
+          },
+          {
+            label: "No",
+            size: "medium",
+            color: "default",
+            onClick: () => setOpenDialog(false),
+            disabled: submitting,
+          },
+        ]}
+      />
+
     </>
   );
 };

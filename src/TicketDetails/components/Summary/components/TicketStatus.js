@@ -5,7 +5,7 @@ import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import { makeStyles } from "@mui/styles";
 import { getUserAction } from "utils/getUserAction";
 import { find } from "lodash";
-import { GET_TICKET_STATUS } from "TicketDetails/TicketGraphQL";
+import { GET_TICKET_STATUS, GET_UPDATE_REQUIREMENTS } from "TicketDetails/TicketGraphQL";
 import { useQuery } from "@apollo/client";
 import { useSelector } from "react-redux";
 import { checkIfCacheExists } from "config/apollo";
@@ -52,6 +52,17 @@ const StatusMenu = props => {
     status.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const { loading: rLoading, data: rData } = useQuery(GET_UPDATE_REQUIREMENTS, {
+    variables: { ticket_type_id: ticket.ticket_type_id, ticket_type_desc: ticket.type },
+    fetchPolicy: online ? "cache-and-network" : "cache-only",
+  });
+  
+  const rCacheExists = checkIfCacheExists(client, { query: GET_UPDATE_REQUIREMENTS, variables: { ticket_type_id: ticket.ticket_type_id, ticket_type_desc: ticket.ticket_type_desc } })
+  
+  const update_requirements = useMemo(() => {
+    return (!rLoading || rCacheExists) && rData && rData.ticketUpdateRequirements ? rData.ticketUpdateRequirements : [];
+  }, [rLoading, rCacheExists, rData]);
+
   const tooltipMsgs = useMemo(() => {
     let resolvingTooltipMsgs = [];
     let closingTooltipMsgs = [];
@@ -65,8 +76,8 @@ const StatusMenu = props => {
     const hasUncompletedAttachments = defaultAttacmentCount > 0;
     const hasRequiredCustomFields = requiredCustomFieldsCount > 0;
     const hasUncompletedSignature = !isSignatureAdded;
-    if (ticket.update_requirements && ticket.update_requirements.length > 0) {
-      ticket.update_requirements.forEach((req) => {
+    if (update_requirements && update_requirements.length > 0) {
+      update_requirements.forEach((req) => {
         if (req.flag_enabled === "Y") {
           const restrictedUserActions = getUserAction(req.restricted_user_action);
           const isResolvingTicketRestricted = find(restrictedUserActions, (restriction) => restriction.label === "resolving");
@@ -126,7 +137,7 @@ const StatusMenu = props => {
       });
     }
     return { resolvingTooltipMsgs, closingTooltipMsgs };
-  }, [ticket.tasks, ticket.update_requirements, defaultAttacmentCount, requiredCustomFieldsCount, isSignatureAdded]);
+  }, [ticket.tasks, update_requirements, defaultAttacmentCount, requiredCustomFieldsCount, isSignatureAdded]);
 
   const resolvingClosingMessage = (action) => {
     if (["Resolved", "Close"].includes(action)) {

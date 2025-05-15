@@ -98,6 +98,7 @@ const TicketDetails = (props) => {
     appuser_id,
     handleOpenTicketAssignment
   } = props;
+  const timeZone = useSelector((state) => state.timeZone);
   const snackbar = useSelector((state) => state.snackbar);
   const online = useSelector(state => state.networkStatus?.online || false);
 
@@ -108,12 +109,12 @@ const TicketDetails = (props) => {
   const [ticketCached, setTicketCached] = useState({});
 
   const { loading, error, data, refetch, client } = useQuery(GET_TICKET, {
-    variables: { id: ticket_id },
+    variables: { id: ticket_id, time_zone: timeZone },
     fetchPolicy: online ? "cache-and-network" : "cache-only",
     skip: !ticket_id,
   });
 
-  const cacheExists = checkIfCacheExists(client, { query: GET_TICKET, variables: { id: ticket_id } })
+  const cacheExists = checkIfCacheExists(client, { query: GET_TICKET, variables: { id: ticket_id, time_zone: timeZone } })
 
   const ticket = useMemo(() => (!loading || cacheExists) && data?.ticket ? data.ticket : { ...ticketData },
     [loading, cacheExists, data, ticketData]

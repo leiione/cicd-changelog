@@ -1,7 +1,7 @@
 import { makeStyles } from '@mui/styles';
 import DataGridTable from 'Common/DataGridTable';
 import Loader from 'components/Loader';
-import React, { useMemo, useRef } from 'react'
+import React, { useMemo, useRef, useEffect } from 'react'
 import ServerSidePagination from 'Common/DataGridTable/components/ServerSidePagination';
 import { HeaderCheckbox, RowCheckbox } from './components/TableActionRenderer';
 import { getTicketsColumns, MenuHeaderIcon } from 'Dashboard/components/TicketsTable/ticketsColumns';
@@ -10,6 +10,7 @@ import ErrorPage from 'components/ErrorPage';
 import { useDispatch } from 'react-redux';
 import { setContentDrawer } from 'config/store';
 import { useSelector } from 'react-redux';
+import { processTicketDates, clearDateFormatCache } from '../../../TicketsTable/utils/dateUtils';
 
 const useStyles = makeStyles({
   tableContainer: {
@@ -117,7 +118,23 @@ const FilteredTable = (props) => {
   
   let ticketsColumns = useMemo(() => getTicketsColumns(2), []);
   ticketsColumns = ticketsColumns.filter(col => col.field !== 'rowActions')
-  
+
+  // Process tickets data with memoization to avoid redundant processing
+  const processedTickets = useMemo(() => {
+    if (!tickets || !Array.isArray(tickets) || tickets.length === 0) {
+      return [];
+    }
+    // Process ticket data with optimized date formatting
+    return processTicketDates(tickets);
+  }, [tickets]);
+
+  // Clean up the date format cache when component unmounts
+  useEffect(() => {
+    return () => {
+      clearDateFormatCache();
+    };
+  }, []);
+
   if (error) return <ErrorPage error={error} />;
 
   return (
@@ -129,7 +146,7 @@ const FilteredTable = (props) => {
         <React.Suspense fallback={<Loader />}>
           <DataGridTable
             containerHeight={ref.current ? ref.current.clientHeight : 300}
-            rows={tickets}
+            rows={processedTickets}
             columns={ticketsColumns}
             loading={loading}
             actionColumn={getActionColumn()}

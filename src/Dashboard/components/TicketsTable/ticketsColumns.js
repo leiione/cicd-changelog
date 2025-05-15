@@ -4,6 +4,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import RowActions from './components/RowActions';
 import MenuIcon from '@mui/icons-material/Menu';
+import PersonIcon from '@mui/icons-material/Person';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { Menu, MenuItem, Checkbox, FormControlLabel, ListItemText, CircularProgress } from '@mui/material';
 import ColumnChooser from './components/ColumnChooser';
 import { useSelector } from 'react-redux';
@@ -489,7 +491,44 @@ export const getTicketsColumns = (size = 1) => [
     minWidth: 130 / size,
     flex: 0.7,
     sortable: true,
-    resizable: true
+    resizable: true,
+    renderCell: (params) => {
+      // Get the status value
+      const statusValue = params.value ? params.value.toString() : '';
+      
+      // Return the appropriate icon based on status with proper CSS class
+      switch (statusValue) {
+        case '1':
+          return <div title="Paid up" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <PersonIcon className="text-success" />
+          </div>
+        case '2':
+          return <div title="Due" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <PersonIcon className="text-warning" />
+          </div>
+        case '4':
+          return <div title="Past Due" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <PersonIcon className="text-danger" />
+          </div>
+        case '8':
+          return <div title="Suspended" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <PersonOutlineIcon className="text-danger" />
+          </div>
+        case '9':
+          return <div title="Hibernated" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <PersonIcon className="text-primary" />
+          </div>
+        case '20':
+          return <div title="Custom Status 20" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <PersonIcon className="text-dark" />
+          </div>
+        case '10':
+        default:
+          return <div title="Prospects/Other" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <PersonIcon className="text-light" />
+          </div>
+      }
+    }
   },
   { 
     field: 'type', 

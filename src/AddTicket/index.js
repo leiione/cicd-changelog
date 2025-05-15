@@ -24,7 +24,7 @@ const style = {
 };
 
 const AddTicketForm = props => {
-  const { form, hideContentDrawer, onSubmit } = props;
+  const { form, hideContentDrawer, onSubmit, category } = props;
   const {
     control,
     watch,
@@ -47,7 +47,7 @@ const AddTicketForm = props => {
       <Box sx={style}>
         <Grid container spacing={2}>
           <Grid item xs={12} className="bg-lighter" style={{ borderRadius: "5px 5px 0px 0px", padding: "7px 15px" }}>
-            <Typography variant="h6" className="text-dark">Create Ticket</Typography>
+            <Typography variant="h6" className="text-dark">{category === 'Convert to Ticket' ? 'Convert Task to a Ticket' : 'Create Ticket'}</Typography>
           </Grid>
           <Grid container spacing={2} style={{ padding: "20px 15px" }}>
             <Grid item xs={5}>
@@ -92,7 +92,6 @@ const AddTicket = (props) => {
   const [addTicket] = useMutation(ADD_TICKET);
   const dispatch = useDispatch()
   const { ticket, handleOpenTicket } = props;
-
   let initialValues = {
     category_type: ticket && ticket.category_type !== undefined ? ticket.category_type.charAt(0) + ticket.category_type.slice(1).toLowerCase() : "",
     priority: "Normal",
@@ -138,7 +137,7 @@ const AddTicket = (props) => {
           },
         },
         update: (cache, { data }) => {
-          handleOpenTicket({ ...data.addTicket })
+          handleOpenTicket({ ...data.addTicket, disableCRMDrawertoggleButton: true }, "docked", { ticket_id: ticket.ticket_id })
         },
       });
       dispatch(showSnackbar({ message: "The ticket was added successfully", severity: "success" }))

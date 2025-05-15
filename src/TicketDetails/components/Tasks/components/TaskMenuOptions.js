@@ -7,7 +7,7 @@ import { cloneDeep } from "lodash";
 import DialogAlert from "components/DialogAlert";
 
 const TaskMenuOptions = (props) => {
-  const { ticket, show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, handleOpenTicket, disabled, setOnEditMode, onEdit } = props;
+  const { ticket, show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, setTaskToConvert, disabled, setOnEditMode, onEdit } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [openAlert, setOpenAlert] = React.useState(null);
   const [isSubmitting] = React.useState(null);
@@ -53,7 +53,19 @@ const TaskMenuOptions = (props) => {
       assigned_id = ticket.location_id;
     }
 
-    handleOpenTicket({ ...task, description: task.task, category_type: ticket.category_type, assigned_name: assigned_name, assigned_id: assigned_id }, "microservice");
+    setTaskToConvert({
+      ticket: {
+        ...task,
+        ticket_id: ticket.ticket_id,
+        description: task.task,
+        category_type: ticket.category_type,
+        assigned_name: assigned_name,
+        assigned_id: assigned_id,
+        summary: ticket.description,
+        type: ticket.type,
+      }
+    })
+    setAnchorEl(null)
   }
 
   const handleEdit = () => {
@@ -119,7 +131,7 @@ TaskMenuOptions.propTypes = {
   ticketTasks: PropTypes.array.isRequired,
   setTicketTasks: PropTypes.func.isRequired,
   onSaveTaskChanges: PropTypes.func.isRequired,
-  handleOpenTicket: PropTypes.func.isRequired,
+  setTaskToConvert: PropTypes.func.isRequired,
   disabled: PropTypes.bool.isRequired,
   setOnEditMode: PropTypes.func.isRequired,
   onEdit: PropTypes.func.isRequired,

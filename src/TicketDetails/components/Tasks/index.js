@@ -32,6 +32,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
 import { useSelector } from "react-redux";
 import { checkIfCacheExists } from "config/apollo";
+import AddTicket from "AddTicket";
 
 const getItemStyle = (isDragging, draggableStyle) => ({
   userSelect: "none",
@@ -49,7 +50,7 @@ const taskData = {
 
 const Tasks = (props) => {
   const dispatch = useDispatch();
-  const { ticket, tasks, appuser_id, lablesVisible, loading, handleOpenTicket } =
+  const { ticket, tasks, appuser_id, lablesVisible, loading, handleOpenTicket, setTaskToConvert } =
     props;
   const [ticketTasks, setTicketTasks] = useState(tasks || []);
   const [isHovered, setHover] = useState(-1);
@@ -200,7 +201,7 @@ const Tasks = (props) => {
       ...ticket,
       ticket_id: ticket.converted_ticket_id,
     };
-    handleOpenTicket(updatedTicket);
+    handleOpenTicket({ ...updatedTicket, disableCRMDrawertoggleButton: true });
   };
 
   return (
@@ -295,7 +296,7 @@ const Tasks = (props) => {
                                   ticketTasks={ticketTasks}
                                   setTicketTasks={setTicketTasks}
                                   onSaveTaskChanges={onSaveTaskChanges}
-                                  handleOpenTicket={handleOpenTicket}
+                                  setTaskToConvert={setTaskToConvert}
                                   setOnEditMode={setOnEditMode}
                                   onEdit={() => onNameClick(index, task)}
                                 />
@@ -416,8 +417,10 @@ const Tasks = (props) => {
 
 const TicketTaskContainer = props => {
   const online = useSelector(state => state.networkStatus?.online || false);
-  const { ticket } = props;
+  const { ticket, handleOpenTicket } = props;
 
+  const [convertTask, setTaskToConvert] = useState(null);
+  
   const { data, error, loading, client, refetch } = useQuery(GET_TICKET_TASKS, {
     variables: { ticket_id: ticket.ticket_id },
     fetchPolicy: online ? "cache-and-network" : "cache-only",
@@ -434,14 +437,30 @@ const TicketTaskContainer = props => {
     },
   });
 
+  const onClose = () => {
+    setTaskToConvert(null);
+  };
+
   return (
-    <Tasks
-      {...props}
-      ticket={ticket}
-      loading={loading && !cacheExists}
-      tasks={tasks}
-      taskError={error}
-    />
+    <>
+      <Tasks
+        {...props}
+        ticket={ticket}
+        loading={loading && !cacheExists}
+        tasks={tasks}
+        taskError={error}
+        handleOpenTicket={handleOpenTicket}
+        setTaskToConvert={setTaskToConvert}
+      />
+      {convertTask && (
+        <AddTicket
+          category={"Convert to Ticket"}
+          ticket={convertTask.ticket}
+          handleOpenTicket={handleOpenTicket}
+          hideContentDrawer={onClose}
+        />
+      )}
+    </>
   )
 };
 

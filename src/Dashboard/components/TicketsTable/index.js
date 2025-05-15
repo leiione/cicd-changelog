@@ -175,9 +175,6 @@ const TicketsTable = (props) => {
     notifyOnNetworkStatusChange: true,
     onError: (error) => {
       console.error('Error in ISP tickets query:', error);
-    },
-    onCompleted: (data) => {
-      console.log('Query completed with flag_subscriber_deleted:', queryVariables.flag_subscriber_deleted);
     }
   });
 
@@ -192,62 +189,204 @@ const TicketsTable = (props) => {
   useSubscription(TICKET_LIST_SUBSCRIPTION, {
     variables: { isp_id: isp_id },
     onData: async ({ data: { data }, client }) => {
-      if (data?.ticketList?.ticket_id) {
+      if (data?.ticketList) {
         const ticket_id = data.ticketList.ticket_id;
+        const isNewTicket = data.ticketList.new_ticket === true;
+        const isDeletedTicket = data.ticketList.flag_deleted === true;
         
-        // Check if the updated ticket is currently in our table
-        const currentTickets = tickets || [];
-        const isTicketInTable = currentTickets.some(ticket => ticket.ticket_id === ticket_id);
-        
-        if (isTicketInTable) {
-          // Fetch the updated ticket details
-          const result = await getTicketDetails({
-            variables: { ticket_id: ticket_id }
-          });
-
+        // For deleted tickets, remove from the list
+        if (isDeletedTicket && ticket_id) {
+          // Check if the deleted ticket is in the current view
+          const currentTickets = tickets || [];
+          const isTicketInTable = currentTickets.some(ticket => ticket.ticket_id === ticket_id);
           
-          if (result?.data?.getISPTickets?.tickets?.[0]) {
-            // Update the Apollo cache with the new ticket data
-            const updatedTicket = result.data.getISPTickets.tickets[0];
-            
-            // Option 1: Update the specific ticket in the cache
+          if (isTicketInTable) {
+            // Update the Apollo cache to remove the deleted ticket
             const currentData = client.readQuery({
               query: GET_ISP_TICKETS,
               variables: queryVariables
             });
             
             if (currentData?.getISPTickets?.tickets) {
-              const updatedTickets = currentData.getISPTickets.tickets.map(ticket => 
-                ticket.ticket_id === ticket_id ? { ...ticket, ...updatedTicket } : ticket
+              // Filter out the deleted ticket
+              const updatedTickets = currentData.getISPTickets.tickets.filter(
+                ticket => ticket.ticket_id !== ticket_id
               );
               
+              // Update the cache with the filtered list
               client.writeQuery({
                 query: GET_ISP_TICKETS,
                 variables: queryVariables,
                 data: {
                   getISPTickets: {
                     ...currentData.getISPTickets,
-                    tickets: updatedTickets
+                    tickets: updatedTickets,
+                    // Update total count if it exists
+                    totalCount: currentData.getISPTickets.totalCount 
+                      ? currentData.getISPTickets.totalCount - 1 
+                      : undefined
                   }
                 }
               });
               
-             
+              // To maintain pagination integrity, fetch an additional ticket to replace the deleted one
+              // This ensures we still have pageSize tickets in the view
+              const lastPage = Math.ceil((currentData.getISPTickets.totalCount - 1) / pageSize) - 1;
+              
+              // Only fetch replacement if we're not on the last page
+              if (page < lastPage) {
+                // Calculate the index to fetch (current page * pageSize + pageSize)
+                // This gets the first item from the next page
+                const fetchIndex = (page + 1) * pageSize;
+                
+                try {
+                  // Fetch one additional ticket to maintain page size
+                  const additionalResult = await client.query({
+                    query: GET_ISP_TICKETS,
+                    variables: {
+                      ...queryVariables,
+                      page: Math.floor(fetchIndex / pageSize),
+                      pageSize: 1,
+                      offset: fetchIndex % pageSize
+                    }
+                  });
+                  
+                  // If we got an additional ticket, add it to the current page
+                  if (additionalResult?.data?.getISPTickets?.tickets?.[0]) {
+                    const additionalTicket = additionalResult.data.getISPTickets.tickets[0];
+                    
+                    // Read the updated cache (after deletion)
+                    const updatedData = client.readQuery({
+                      query: GET_ISP_TICKETS,
+                      variables: queryVariables
+                    });
+                    
+                    if (updatedData?.getISPTickets?.tickets) {
+                      // Add the additional ticket to the end of the current page
+                      const finalTickets = [...updatedData.getISPTickets.tickets, additionalTicket];
+                      
+                      // Write the final list back to cache
+                      client.writeQuery({
+                        query: GET_ISP_TICKETS,
+                        variables: queryVariables,
+                        data: {
+                          getISPTickets: {
+                            ...updatedData.getISPTickets,
+                            tickets: finalTickets
+                          }
+                        }
+                      });
+                    }
+                  }
+                } catch (error) {
+                  console.error('Error fetching replacement ticket:', error);
+                }
+              }
+            } else {
+              // If we can't update the cache directly, refetch the data
+              refetch();
+            }
+          }
+        }
+        // For new tickets, fetch and add to the list regardless of current view
+        else if (isNewTicket && ticket_id) {
+          // Fetch the new ticket details
+          const result = await getTicketDetails({
+            variables: { ticket_id: ticket_id }
+          });
+
+          if (result?.data?.getISPTickets?.tickets?.[0]) {
+            // Get the new ticket data
+            const newTicket = result.data.getISPTickets.tickets[0];
+            
+            // Update the Apollo cache to include the new ticket
+            const currentData = client.readQuery({
+              query: GET_ISP_TICKETS,
+              variables: queryVariables
+            });
+            
+            if (currentData?.getISPTickets?.tickets) {
+              // Add the new ticket to the beginning of the list (assuming newest first)
+              const updatedTickets = [
+                newTicket,
+                ...currentData.getISPTickets.tickets
+              ];
+              
+              // Update the cache with the new list including the new ticket
+              client.writeQuery({
+                query: GET_ISP_TICKETS,
+                variables: queryVariables,
+                data: {
+                  getISPTickets: {
+                    ...currentData.getISPTickets,
+                    tickets: updatedTickets,
+                    // Update total count if it exists
+                    totalCount: currentData.getISPTickets.totalCount 
+                      ? currentData.getISPTickets.totalCount + 1 
+                      : undefined
+                  }
+                }
+              });
             } else {
               // If we can't update the cache directly, refetch the data
               refetch();
             }
           } else {
-            // If we couldn't get the updated ticket, refetch all data
+            // If we couldn't get the new ticket, refetch all data
             refetch();
           }
         } 
+        // Handle updates to existing tickets
+        else if (ticket_id) {
+          // Check if the updated ticket is currently in our table
+          const currentTickets = tickets || [];
+          const isTicketInTable = currentTickets.some(ticket => ticket.ticket_id === ticket_id);
+          
+          if (isTicketInTable) {
+            // Fetch the updated ticket details
+            const result = await getTicketDetails({
+              variables: { ticket_id: ticket_id }
+            });
+
+            
+            if (result?.data?.getISPTickets?.tickets?.[0]) {
+              // Update the Apollo cache with the new ticket data
+              const updatedTicket = result.data.getISPTickets.tickets[0];
+              
+              // Option 1: Update the specific ticket in the cache
+              const currentData = client.readQuery({
+                query: GET_ISP_TICKETS,
+                variables: queryVariables
+              });
+              
+              if (currentData?.getISPTickets?.tickets) {
+                const updatedTickets = currentData.getISPTickets.tickets.map(ticket => 
+                  ticket.ticket_id === ticket_id ? { ...ticket, ...updatedTicket } : ticket
+                );
+                
+                client.writeQuery({
+                  query: GET_ISP_TICKETS,
+                  variables: queryVariables,
+                  data: {
+                    getISPTickets: {
+                      ...currentData.getISPTickets,
+                      tickets: updatedTickets
+                    }
+                  }
+                });
+              } else {
+                // If we can't update the cache directly, refetch the data
+                refetch();
+              }
+            } else {
+              // If we couldn't get the updated ticket, refetch all data
+              refetch();
+            }
+          }
+        }
       }
     },
   });
-
-
-
 
   // Apollo's useQuery hook automatically refetches when variables change
   // No manual refetch needed here - the fetchPolicy and notifyOnNetworkStatusChange settings handle this

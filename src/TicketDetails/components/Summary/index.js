@@ -3,7 +3,7 @@ import AccordionCard from "../../../Common/AccordionCard";
 import TicketPriority from "./components/TicketPriority";
 import TicketType from "./components/TicketType";
 import TicketStatus from "./components/TicketStatus";
-import { Grid, IconButton, Typography } from "@mui/material";
+import { Grid, IconButton } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { preventEvent } from "Common/helper";
 import Followers from "./components/Followers";
@@ -29,7 +29,7 @@ import {
   SummarySkeletonLoader,
 } from "./components/SkeletonLoader";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
-import Stopwatch from "./components/Stopawtch";
+import RecentUpdates from "./components/RecentUpdates";
 
 const Summary = (props) => {
   const dispatch = useDispatch();
@@ -195,18 +195,9 @@ const Summary = (props) => {
                     ticket={customer}
                     setIsSignatureAdded={setIsSignatureAdded}
                   />
-                )}
+                  )}
                 <div className="mt-auto">
-                  <Typography variant="caption" className="d-block mt-2">
-                    Created by: <strong>{customer.created_by}</strong> on{" "}
-                    {customer.created_by_time}
-                  </Typography>
-                  <Typography variant="caption">
-                    Last updated by: <strong>{customer.last_updated_by}</strong>{" "}
-                    on {customer.last_updated_by_time}
-                  </Typography>
-                  {/* Added Stopwatch for Ticket */}
-                  <Stopwatch />
+                  <RecentUpdates ticket_id={customer.ticket_id} />
                 </div>
               </div>
             )}

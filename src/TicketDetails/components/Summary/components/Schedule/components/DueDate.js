@@ -34,11 +34,22 @@ const calendarStyles = {
     padding: '0 0 8px 0',
     textAlign: 'center',
   },
+  '& .rdp-caption_label': {
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    fontWeight: 'bold',
+    zIndex: 1,
+  },
   '& .rdp-nav': {
     position: 'absolute',
     display: 'flex',
     justifyContent: 'space-between',
     width: '100%',
+    zIndex: 0,
+  },
+  '& .rdp-nav_button': {
+    padding: '0 4px',
   },
   '& .rdp-head': {
     marginTop: '8px',

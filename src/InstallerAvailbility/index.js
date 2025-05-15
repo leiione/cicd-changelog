@@ -5,7 +5,8 @@ import {
   Paper,
   IconButton,
   InputBase,
-  Button
+  Button,
+  Badge
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -22,6 +23,7 @@ const InstallerAvailbility = () => {
   const [isScheduleOffDrawerOpen, setIsScheduleOffDrawerOpen] = useState(false);
   const [isScheduledOffDialogOpen, setIsScheduledOffDialogOpen] = useState(false);
   const [selectedScheduledOff, setSelectedScheduledOff] = useState(null);
+  const [editUserScheduleOffID, seteditUserScheduledOffID] = useState(null);
 
 
 
@@ -38,6 +40,7 @@ const InstallerAvailbility = () => {
       workDays: !installer.work_days || installer.work_days === "" ? "None" : installer.work_days,
       workHours: !installer.work_hours || installer.work_hours === "" || installer.work_hours === " - " ? "None" : installer.work_hours,
       scheduledOff: installer.Scheduled_off || "None",
+      timeOffCount: installer.time_off_count || 0
     })) || [],
     [data]
   );
@@ -58,20 +61,32 @@ const InstallerAvailbility = () => {
       field: 'scheduledOff',
       headerName: 'Scheduled Off',
       flex: 2.2,
-      renderCell: (params) => (
-        <Typography 
-          className="w-100 text-truncate"
-          sx={{
-            color: params.value !== 'None' ? '#1976d2' : 'inherit',
-            cursor: params.value !== 'None' ? 'pointer' : 'default',
-            '&:hover': {
-              textDecoration: params.value !== 'None' ? 'underline' : 'none'
-            }
-          }}
-        >
-          {params.value}
-        </Typography>
-      )
+      renderCell: (params) => {
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+            <Typography 
+              className="w-100 text-truncate"
+              sx={{
+                color: params.value !== 'None' ? '#1976d2' : 'inherit',
+                cursor: params.value !== 'None' ? 'pointer' : 'default',
+                '&:hover': {
+                  textDecoration: params.value !== 'None' ? 'underline' : 'none'
+                },
+                flexGrow: 1
+              }}
+            >
+              {params.value}
+            </Typography>
+            {params.value !== 'None' && params.row.timeOffCount > 1 && (
+              <Badge
+                badgeContent={params.row.timeOffCount} 
+                color="primary"
+                sx={{ ml: 1, flexShrink: 0 }}
+              />
+            )}
+          </Box>
+        );
+      }
     }
   ];
 
@@ -81,8 +96,14 @@ const InstallerAvailbility = () => {
       setIsScheduledOffDialogOpen(true);
     }
   };
-  
 
+  const handelEditScheduleOffClick =(event,params)=>{
+    setIsScheduledOffDialogOpen(false);
+    seteditUserScheduledOffID(params.id)
+    setIsScheduleOffDrawerOpen(true)
+    
+  }
+  
   return (
     <>
       <Box sx={{ height: "100%", width: "100%", p: 2 }}>
@@ -140,12 +161,15 @@ const InstallerAvailbility = () => {
         </Paper>
       </Box>
       <ScheduleOffTimeDrawer
+        editUserScheduleOffID ={editUserScheduleOffID}
         open={isScheduleOffDrawerOpen}
+        seteditUserScheduledOffID={seteditUserScheduledOffID}
         onClose={() => setIsScheduleOffDrawerOpen(false)}
       />
       <ScheduledOffDialog
         open={isScheduledOffDialogOpen}
         onClose={() => setIsScheduledOffDialogOpen(false)}
+        handleRowClick={handelEditScheduleOffClick}
         scheduledOffData={selectedScheduledOff}
       />
     </>
