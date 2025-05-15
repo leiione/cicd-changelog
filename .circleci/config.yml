@@ -1,322 +1,195 @@
+#Test Commit-v65456464646546465
 version: 2.1
 
 executors:
   node-executor:
     docker:
-      - image: cimg/node:18.20.2
+      - image: node:18
 
 jobs:
   build:
     executor: node-executor
     steps:
       - checkout
-      - run:
-          name: Install tar utility
-          command: sudo apt-get update && sudo apt-get install -y tar
+
       - run:
           name: Install dependencies
           command: npm install --legacy-peer-deps
+
+     
+      
       - run:
           name: Build the application
           command: CI=false npm run build
+
       - run:
           name: Create Dist folder and copy build artifact
-          command: mkdir dist && cp -r build/* dist/
+          command: |
+            mkdir dist && cp -r build/* dist/
+
       - run:
           name: Install zip utility
-          command: sudo apt-get update && sudo apt-get install -y zip
+          command: |
+            apt-get update
+            apt-get install -y zip
+
       - run:
           name: Zip the build artifacts
-          command: zip -r build.zip dist
-      - run:
-          name: Install AWS CLI v2 and Less
           command: |
-            sudo apt-get update && sudo apt-get install -y unzip less
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
+            mkdir dist && cp -r build/* dist/
+            zip -r build.zip dist
+
+      - run:
+          name: Install AWS CLI and Less
+          command: |
+            apt-get update && apt-get install -y awscli less
       - run:
           name: Download .env from S3
           command: |
             BRANCH_NAME=${CIRCLE_BRANCH}
             if [ "$BRANCH_NAME" == "develop" ]; then
               ENV_FILE=".env.staging.txt"
-            elif [[ "$BRANCH_NAME" == crm-hotfix-* ]]; then
+            elif [ "$BRANCH_NAME" == "master" ]; then
               ENV_FILE=".env.live.txt"
             else
               echo "No Environment file needed for this branch" && exit 0
             fi
             aws s3 cp s3://crm-art/crm-envs-fe/$ENV_FILE .env
             echo "Using Environment file: $ENV_FILE"
+
+
       - persist_to_workspace:
           root: .
           paths:
             - .env
             - dist
 
-  deploy-to-env:
+  deploy:
     docker:
-      - image: cimg/node:18.20.2
+      - image: node:18  # For AWS CLI
     steps:
       - checkout
       - attach_workspace:
-          at: workspace
+          at: /workspace
+      - run:
+          name: Verify Workspace Contents
+          command: ls -la /workspace/dist
+      - run:
+          name: Install Prerequisites
+          command: |
+            apt-get update
+            apt-get install -y unzip less
+
       - run:
           name: Install AWS CLI
           command: |
-            sudo apt-get update && sudo apt-get install -y unzip
+            apt-get update
+            apt-get install -y unzip
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
-            sudo ./aws/install
-            echo "export PATH=/usr/local/bin:$PATH" >> $BASH_ENV
+            ./aws/install
+
       - run:
-          name: Install Core Utilities
+          name: Configure AWS CLI
           command: |
-            sudo apt-get update && sudo apt-get install -y coreutils
-        
+            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+            aws configure set region $AWS_REGION
+
       - run:
-          name: Load Updated PATH
-          command: source $BASH_ENV
-      - run:
-          name: Configure AWS
-          command: |
-            aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
-            aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
-            aws configure set region "$AWS_REGION"
-      - run:
-          name: Deploy to S3
+          name: Determine Target S3 Bucket
           command: |
             BRANCH_NAME=${CIRCLE_BRANCH}
             if [ "$BRANCH_NAME" == "develop" ]; then
-              aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/staging/ --acl public-read
-              aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/tbd-staging/ --acl public-read
-              echo "Deployed to staging and tbd-staging"
+              S3_BUCKET="staging"
+            elif [ "$BRANCH_NAME" == "master" ]; then
+              S3_BUCKET="prod"
             else
-              aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/$BRANCH_NAME/ --acl public-read
-              echo "Deployed to $BRANCH_NAME"
+              S3_BUCKET="$BRANCH_NAME"
             fi
+            echo "S3_BUCKET=$S3_BUCKET" >> $BASH_ENV
+            echo "Deploying to S3 bucket: $S3_BUCKET"
+
+      - run:
+          name: Upload to S3
+          command: |
+            source $BASH_ENV
+            aws s3 sync /workspace/dist/ s3://microfrontend-crm-ms/$S3_BUCKET/ --acl public-read
+            echo "Uploaded files to s3://microfrontend-crm-ms/$S3_BUCKET/"
+
       - run:
           name: Invalidate CloudFront Cache
           command: |
-            BRANCH_NAME=${CIRCLE_BRANCH}
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
+            INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*" --query "Invalidation.Id" --output text --no-cli-pager)
 
-            if [ "$BRANCH_NAME" == "develop" ]; then
-              INVALIDATE_PATHS=("/staging/*" "/tbd-staging/*")
-            else
-              INVALIDATE_PATHS=("/$BRANCH_NAME/*")
-            fi
-
-            for PATH in "${INVALIDATE_PATHS[@]}"; do
-              INVALIDATION_ID=$(/usr/local/bin/aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "$PATH" --query "Invalidation.Id" --output text --no-cli-pager)
-              echo "Waiting for CloudFront Invalidation ID: $INVALIDATION_ID for path $PATH"
-              while true; do
-                STATUS=$(/usr/local/bin/aws cloudfront get-invalidation --distribution-id $CLOUDFRONT_DIST_ID --id $INVALIDATION_ID --query "Invalidation.Status" --output text --no-cli-pager)
-                echo "Invalidation Status for $PATH: $STATUS"
-                if [ "$STATUS" == "Completed" ]; then
-                  echo "Invalidation for $PATH Completed!"
-                  break
-                fi
-                /bin/sleep 10
-              done
-            done
-
-
-      - run:
-          name: Verify Deployed URL(s)
-          command: |
-            BRANCH_NAME=${CIRCLE_BRANCH}
-            if [ "$BRANCH_NAME" == "develop" ]; then
-              URLS=("https://crm-microfrontend.ms-visp.net/tbd-staging" "https://crm-microfrontend.ms-visp.net/staging")
-            else
-              URLS=("https://crm-microfrontend.ms-visp.net/$BRANCH_NAME")
-            fi
-
-            for TEST_URL in "${URLS[@]}"; do
-              echo "Testing URL: $TEST_URL"
-              STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L "$TEST_URL")
-              if [[ "$STATUS" =~ ^2|^3 ]]; then
-                echo "$TEST_URL is reachable (HTTP $STATUS)"
-              else
-                echo "ERROR: $TEST_URL returned HTTP $STATUS"
-                exit 1
+            echo "Waiting for CloudFront Invalidation ID: $INVALIDATION_ID"
+            while true; do
+              STATUS=$(aws cloudfront get-invalidation --distribution-id $CLOUDFRONT_DIST_ID --id $INVALIDATION_ID --query "Invalidation.Status" --output text --no-cli-pager)
+              echo "Invalidation Status: $STATUS"
+              if [ "$STATUS" == "Completed" ]; then
+                echo "Invalidation Completed!"
+                break
               fi
+              sleep 10  # Wait for 10 seconds before checking again
             done
-
-
-
-  promote-to-production:
-    docker:
-      - image: cimg/node:18.20.2
-    steps:
-      - checkout
-      - attach_workspace:
-          at: workspace
+       
       - run:
-          name: Install AWS CLI
+          name: Microfrontend MS URL Verification
           command: |
-            sudo apt-get update && sudo apt-get install -y unzip
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
+            source $BASH_ENV
+            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$S3_BUCKET"
+            echo "Microfrontend is accessible at: $DEPLOY_URL"
+            
+      
       - run:
-          name: Configure AWS
+          name: Send Slack Notification
           command: |
-            aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
-            aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
-            aws configure set region "$AWS_REGION"
-      - run:
-          name: Promote to Production
-          command: |
-            BRANCH_NAME=${CIRCLE_BRANCH}
-            if [ "$BRANCH_NAME" == "develop" ]; then
-              SOURCE="staging"
-            elif [[ "$BRANCH_NAME" == crm-hotfix-* ]]; then
-              SOURCE="$BRANCH_NAME"
-            else
-              echo "Unsupported branch" && exit 1
-            fi
-            aws s3 sync s3://microfrontend-crm-ms/$SOURCE/ s3://microfrontend-crm-ms/production/ --acl public-read --delete
-            echo "$SOURCE" > version.txt
-            aws s3 cp version.txt s3://microfrontend-crm-ms/production/version.txt
-      - run:
-          name: Verify Production URL
-          command: |
-            PROD_URL="https://crm-microfrontend.ms-visp.net/production"
-            echo "Testing URL: $PROD_URL"
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L "$PROD_URL")
-            if [[ "$STATUS" =~ ^2|^3 ]]; then
-              echo "$PROD_URL is reachable (HTTP $STATUS)"
-            else
-              echo "ERROR: $PROD_URL returned HTTP $STATUS"
-              exit 1
-            fi
+            source $BASH_ENV
+            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$S3_BUCKET"
+            COMMIT_AUTHOR="$(git log -1 --pretty=format:'%an')"
+            
+            curl -X POST -H 'Content-type: application/json' --data "{
+              \"attachments\": [
+                {
+                  \"color\": \"#36a64f\",
+                  \"title\": \"CircleCI Build Notification\",
+                  \"fields\": [
+                    { \"title\": \"Job\", \"value\": \"${CIRCLE_JOB}\", \"short\": true },
+                    { \"title\": \"Branch\", \"value\": \"${CIRCLE_BRANCH}\", \"short\": true },
+                    { \"title\": \"Commit Author\", \"value\": \"${COMMIT_AUTHOR}\", \"short\": true },
+                    { \"title\": \"Commit\", \"value\": \"${CIRCLE_SHA1:0:7}\", \"short\": true },
+                    { \"title\": \"Build Number\", \"value\": \"${CIRCLE_BUILD_NUM}\", \"short\": true },
+                    { \"title\": \"Status\", \"value\": \"${CIRCLE_JOB}\", \"short\": true },
+                    { \"title\": \"Build URL\", \"value\": \"<${CIRCLE_BUILD_URL}|View Build>\", \"short\": false },
+                    { \"title\": \"Deploy URL\", \"value\": \"${DEPLOY_URL}\", \"short\": false }
+                  ]
+                }
+              ]
+            }" https://hooks.slack.com/services/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
 
-  notify-ringcentral-production:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
       - run:
-          name: Notify RingCentral (Production)
+          name: Send Notification to RingCentral
           command: |
-            BRANCH_NAME=${CIRCLE_BRANCH}
-            if [ "$BRANCH_NAME" == "develop" ]; then
-              DEPLOY_TYPE="Staging"
-              DEPLOY_URL="https://crm-microfrontend.ms-visp.net/staging"
-            elif [[ "$BRANCH_NAME" == crm-hotfix-* ]]; then
-              DEPLOY_TYPE="Production"
-              DEPLOY_URL="https://crm-microfrontend.ms-visp.net/production"
-            else
-              DEPLOY_TYPE="Feature"
-              DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
-            fi
+            BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
+            BUILD_NUM=$CIRCLE_BUILD_NUM
+            BUILD_URL=$CIRCLE_BUILD_URL
+            VCS_URL=$CIRCLE_REPOSITORY_URL
+            REPO_NAME=$CIRCLE_PROJECT_REPONAME
+            USERNAME=$CIRCLE_USERNAME
+            STATUS="success"
 
-            COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "n/a")
-            COMMIT_MSG=$(git log -1 --pretty=%s 2>/dev/null || echo "n/a")
-            COMMIT_AUTHOR=$(git log -1 --pretty=%an 2>/dev/null || echo "n/a")
-            BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%MZ")
-            EMOJI="🚀"
-            MESSAGE="$EMOJI Deployment *succeeded* to *$DEPLOY_TYPE* for *$BRANCH_NAME*\\n"
-            MESSAGE+="🔗 URL: $DEPLOY_URL\\n\\n"
-            MESSAGE+="*Repo:* $CIRCLE_PROJECT_REPONAME\\n"
-            MESSAGE+="*Branch:* $BRANCH_NAME\\n"
-            MESSAGE+="*Commit:* \`$COMMIT_SHA\` – $COMMIT_MSG\\n"
-            MESSAGE+="*Author:* $COMMIT_AUTHOR\\n"
-            MESSAGE+="*Triggered by:* $CIRCLE_USERNAME\\n"
-            MESSAGE+="*Built at:* $BUILD_TIME"
-            PAYLOAD="{\"payload\": {
-              \"activity\": \"Promotion Result\",
-              \"title\": \"Deploy Notification\",
-              \"body\": \"$MESSAGE\",
-              \"build_num\": ${CIRCLE_BUILD_NUM},
-              \"build_url\": \"$CIRCLE_BUILD_URL\",
-              \"branch\": \"$BRANCH_NAME\",
-              \"vcs_url\": \"$CIRCLE_REPOSITORY_URL\",
-              \"reponame\": \"$CIRCLE_PROJECT_REPONAME\",
-              \"username\": \"$CIRCLE_USERNAME\",
-              \"status\": \"success\"
-            }}"
+            PAYLOAD="{\"payload\": {\"activity\": \"Deployment Completed\", \"title\": \"Deployment Notification\", \"body\": \"Build #$BUILD_NUM for branch: $BRANCH_NAME\\nDeploy URL: $DEPLOY_URL\", \"build_num\": $BUILD_NUM, \"build_url\": \"$BUILD_URL\", \"branch\": \"$BRANCH_NAME\", \"vcs_url\": \"$VCS_URL\", \"reponame\": \"$REPO_NAME\", \"username\": \"$USERNAME\", \"status\": \"$STATUS\"}}"
+
+            echo "Payload: $PAYLOAD"
             curl -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" $RINGCENTRAL
 
+
 workflows:
-  version: 2.1
-
-  deploy-standard:
+  build_and_deploy:
     jobs:
-      - build:
-          filters:
-            branches:
-              only:
-                - /crm-.*/
-                - /feature-.*/
-                - /hotfix-.*/
-                - master
-
-      - deploy-to-env:
+      - build
+      - deploy:
           requires:
             - build
-          filters:
-            branches:
-              only:
-                - /crm-.*/
-                - /feature-.*/
-                - /hotfix-.*/
-                - master
-
-      - notify-ringcentral-production:
-          requires:
-            - deploy-to-env
-          filters:
-            branches:
-              only:
-                - /crm-.*/
-                - /feature-.*/
-                - /hotfix-.*/
-                - master
-
-  deploy-production:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only:
-                - develop
-                - /crm-hotfix-.*/
-
-      - deploy-to-env:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-                - develop
-                - /crm-hotfix-.*/
-
-      - hold-for-approval:
-          type: approval
-          requires:
-            - deploy-to-env
-          filters:
-            branches:
-              only:
-                - develop
-                - /crm-hotfix-.*/
-
-      - promote-to-production:
-          requires:
-            - hold-for-approval
-          filters:
-            branches:
-              only:
-                - develop
-                - /crm-hotfix-.*/
-
-      - notify-ringcentral-production:
-          requires:
-            - promote-to-production
-          filters:
-            branches:
-              only:
-                - develop
-                - /crm-hotfix-.*/
