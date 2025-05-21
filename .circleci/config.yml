@@ -21,7 +21,10 @@ jobs:
           command: CI=false npm run build
       - run:
           name: Create Dist folder and copy build artifact
-          command: mkdir dist && cp -r build/* dist/
+          command: |
+            mkdir dist
+            cp -r build/* dist/
+            echo "Build Timestamp: $(date -u)" > dist/deploy_info.txt
       - run:
           name: Install zip utility
           command: sudo apt-get update && sudo apt-get install -y zip
@@ -41,9 +44,7 @@ jobs:
             BRANCH_NAME=${CIRCLE_BRANCH}
             if [ "$BRANCH_NAME" == "develop" ]; then
               ENV_FILE=".env.staging.txt"
-            elif [[ "$BRANCH_NAME" == crm-hotfix-* ]]; then
-              ENV_FILE=".env.live.txt"
-            elif [[ "$BRANCH_NAME" == "master" ]]; then
+            elif [[ "$BRANCH_NAME" == crm-hotfix-* || "$BRANCH_NAME" == "master" ]]; then
               ENV_FILE=".env.live.txt"
             else
               echo "No Environment file needed for this branch" && exit 0
@@ -82,14 +83,18 @@ jobs:
             BRANCH_NAME=${CIRCLE_BRANCH}
             S3_BUCKET="$BRANCH_NAME"
             echo "S3_BUCKET=$S3_BUCKET" >> $BASH_ENV
-            aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/$S3_BUCKET/ --acl public-read
-            echo "Deployment completed to: $S3_BUCKET"
+            aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/$S3_BUCKET/ \
+              --acl public-read \
+              --cache-control "no-cache, no-store, must-revalidate" \
+              --metadata-directive REPLACE \
+              --delete
+            aws s3 ls s3://microfrontend-crm-ms/$S3_BUCKET/
       - run:
           name: Invalidate CloudFront Cache
           command: |
             source $BASH_ENV
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
-            INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/$S3_BUCKET/*" --query "Invalidation.Id" --output text --no-cli-pager)
+            INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*" --query "Invalidation.Id" --output text --no-cli-pager)
             echo "Waiting for CloudFront Invalidation ID: $INVALIDATION_ID"
             while true; do
               STATUS=$(aws cloudfront get-invalidation --distribution-id $CLOUDFRONT_DIST_ID --id $INVALIDATION_ID --query "Invalidation.Status" --output text --no-cli-pager)
@@ -104,13 +109,7 @@ jobs:
           name: Verify Deployed URL
           command: |
             BRANCH_NAME=${CIRCLE_BRANCH}
-            if [ "$BRANCH_NAME" == "develop" ]; then
-              TEST_URL="https://crm-microfrontend.ms-visp.net/staging"
-            elif [[ "$BRANCH_NAME" == "master" ]]; then
-              TEST_URL="https://crm-microfrontend.ms-visp.net/prod"
-            else
-              TEST_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
-            fi
+            TEST_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
             echo "Testing URL: $TEST_URL"
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L "$TEST_URL")
             if [[ "$STATUS" =~ ^2|^3 ]]; then
@@ -153,7 +152,11 @@ jobs:
             else
               echo "Unsupported branch" && exit 1
             fi
-            aws s3 sync s3://microfrontend-crm-ms/$SOURCE/ s3://microfrontend-crm-ms/prod/ --acl public-read --delete
+            aws s3 sync s3://microfrontend-crm-ms/$SOURCE/ s3://microfrontend-crm-ms/prod/ \
+              --acl public-read \
+              --cache-control "no-cache, no-store, must-revalidate" \
+              --metadata-directive REPLACE \
+              --delete
             echo "$SOURCE" > version.txt
             aws s3 cp version.txt s3://microfrontend-crm-ms/prod/version.txt
       - run:
@@ -169,131 +172,18 @@ jobs:
               exit 1
             fi
 
-  notify-ringcentral-production:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - run:
-          name: Notify RingCentral (Production)
-          command: |
-            BRANCH_NAME=${CIRCLE_BRANCH}
-            if [ "$BRANCH_NAME" == "develop" ]; then
-              DEPLOY_TYPE="Staging"
-              DEPLOY_URL="https://crm-microfrontend.ms-visp.net/staging"
-            elif [[ "$BRANCH_NAME" == crm-hotfix-* ]]; then
-              DEPLOY_TYPE="Production"
-              DEPLOY_URL="https://crm-microfrontend.ms-visp.net/production"
-            else
-              DEPLOY_TYPE="Feature"
-              DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
-            fi
-
-            COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "n/a")
-            COMMIT_MSG=$(git log -1 --pretty=%s 2>/dev/null || echo "n/a")
-            COMMIT_AUTHOR=$(git log -1 --pretty=%an 2>/dev/null || echo "n/a")
-            BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%MZ")
-            EMOJI="🚀"
-            MESSAGE="$EMOJI Deployment *succeeded* to *$DEPLOY_TYPE* for *$BRANCH_NAME*\\n"
-            MESSAGE+="🔗 URL: $DEPLOY_URL\\n\\n"
-            MESSAGE+="*Repo:* $CIRCLE_PROJECT_REPONAME\\n"
-            MESSAGE+="*Branch:* $BRANCH_NAME\\n"
-            MESSAGE+="*Commit:* \`$COMMIT_SHA\` – $COMMIT_MSG\\n"
-            MESSAGE+="*Author:* $COMMIT_AUTHOR\\n"
-            MESSAGE+="*Triggered by:* $CIRCLE_USERNAME\\n"
-            MESSAGE+="*Built at:* $BUILD_TIME"
-            PAYLOAD="{\"payload\": {
-              \"activity\": \"Promotion Result\",
-              \"title\": \"Deploy Notification\",
-              \"body\": \"$MESSAGE\",
-              \"build_num\": ${CIRCLE_BUILD_NUM},
-              \"build_url\": \"$CIRCLE_BUILD_URL\",
-              \"branch\": \"$BRANCH_NAME\",
-              \"vcs_url\": \"$CIRCLE_REPOSITORY_URL\",
-              \"reponame\": \"$CIRCLE_PROJECT_REPONAME\",
-              \"username\": \"$CIRCLE_USERNAME\",
-              \"status\": \"success\"
-            }}"
-            curl -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" $RINGCENTRAL
-
 workflows:
-  version: 2.1
-
-  deploy-standard:
+  version: 2
+  build-deploy-promote:
     jobs:
-      - build:
-          filters:
-            branches:
-              only:
-                - /crm-.*/
-                - /feature-.*/
-                - /hotfix-.*/
-                - master
-
+      - build
       - deploy-to-env:
           requires:
             - build
-          filters:
-            branches:
-              only:
-                - /crm-.*/
-                - /feature-.*/
-                - /hotfix-.*/
-                - master
-
-      - notify-ringcentral-production:
-          requires:
-            - deploy-to-env
-          filters:
-            branches:
-              only:
-                - /crm-.*/
-                - /feature-.*/
-                - /hotfix-.*/
-                - master
-
-  deploy-production:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only:
-                - develop
-                - /crm-hotfix-.*/
-
-      - deploy-to-env:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-                - develop
-                - /crm-hotfix-.*/
-
-      - hold-for-approval:
+      - hold:
           type: approval
           requires:
             - deploy-to-env
-          filters:
-            branches:
-              only:
-                - develop
-                - /crm-hotfix-.*/
-
       - promote-to-production:
           requires:
-            - hold-for-approval
-          filters:
-            branches:
-              only:
-                - develop
-                - /crm-hotfix-.*/
-
-      - notify-ringcentral-production:
-          requires:
-            - promote-to-production
-          filters:
-            branches:
-              only:
-                - develop
-                - /crm-hotfix-.*/
+            - hold
