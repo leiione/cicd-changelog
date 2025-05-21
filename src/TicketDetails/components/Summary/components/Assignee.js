@@ -148,7 +148,7 @@ const Assignee = (props) => {
   return (
     <>
       <Grid container spacing={1} className="mb-2">
-        <Grid item xs="auto">
+        <Grid item xs={3.5}>
           <Typography variant="subtitle1">Assignees: </Typography>
         </Grid>
         <Grid item xs="auto" onClick={handleClick}>

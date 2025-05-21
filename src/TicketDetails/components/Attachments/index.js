@@ -33,7 +33,7 @@ import { find } from "lodash";
 import { PreviewFileDialog } from "components/FileUploadPreview";
 
 const Attachments = (props) => {
-  const { ticket, setDefaultAttacmentCount } = props;
+  const { ticket, setDefaultAttacmentCount, attachmentRef, setTicketCached } = props;
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [defaultAttachment, setDefaultAttachment] = useState([]);
   const [uploadProgress, setUploadProgress] = useState({});
@@ -66,20 +66,25 @@ const Attachments = (props) => {
     if (data) {
       setSelectedFiles(data.ticketAttachments);
       setAttachmentCount(data.ticketAttachments.length);
+      setTicketCached({ ...ticket, attachments_count: data.ticketAttachments.length });
       setDefaultAttachment(
         data.ticketAttachments.filter(
           (file) => file.attachment_label && file.attachment_label.trim() !== ""
         )
       );
     }
+    // eslint-disable-next-line
   }, [data]);
 
   useEffect(() => {
-    setAttachmentCount(selectedFiles.filter((file) => file.file_url).length);
+    const count = selectedFiles.filter((file) => file.file_url).length;
+    setAttachmentCount(count);
+    setTicketCached({ ...ticket, attachments_count: count });
 
     setDefaultAttacmentCount(
       selectedFiles.filter((file) => file.default_attachment === "Y").length
     );
+    // eslint-disable-next-line
   }, [selectedFiles, setDefaultAttacmentCount]);
 
   const handleFileChange = async (files) => {
@@ -269,7 +274,6 @@ const Attachments = (props) => {
       }));
 
       setFileToUpdate({ file, data });
-
       dispatch(showSnackbar({ message: "Attachment added successfully" }));
     } catch {
       dispatch(
@@ -419,19 +423,20 @@ const Attachments = (props) => {
   const { appuser_id } = props;
 
   return (
-    <>
+    <Box ref={attachmentRef} className="pb-3">
       <AccordionCard
         label={
           <div style={{ display: "flex", alignItems: "center" }}>
             <span>Attachments</span>
             <Chip
               label={attachmentCount || 0}
-              sx={{ height: 20, width: 20 }}
-              classes={{ label: "p-0" }}
+              sx={{ height: 18, width: 18 }}
+              classes={{ label: "p-0 mt-1" }}
               className="bg-light text-white ml-3"
             />
           </div>
         }
+        cardLabel="Attachments"
         iconButtons={<></>}
         menuOption={
           <>
@@ -635,7 +640,7 @@ const Attachments = (props) => {
           },
         ]}
       />
-    </>
+    </Box>
   );
 };
 Attachments.propTypes = {

@@ -58,6 +58,7 @@ export const GET_TICKET = gql`
         }
       }
       linked_count
+      attachments_count
     }     
   }
 `;
@@ -642,8 +643,8 @@ mutation AddTicketCustomField($ticketId: Int!, $inputCustomField: [TicketCustomF
 `
 
 export const TICKET_LIST_SUBSCRIPTION = gql`
-  subscription Subscription($isp_id: Int!) {
-    ticketList(isp_id: $isp_id) 
+  subscription Subscription($isp_id: Int!, $widgetId: String!) {
+    ticketListing(isp_id: $isp_id, widgetId: $widgetId) 
     }
 `
 

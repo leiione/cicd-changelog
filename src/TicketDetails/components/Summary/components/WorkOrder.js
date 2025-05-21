@@ -5,7 +5,8 @@ import {
   GET_DETAIL_TEXT,
   UPDATE_DETAIL_TEXT,
   GET_TICKET,
-  GET_ACTIVITIES
+  GET_ACTIVITIES,
+  UPLOAD_FILE_MUTATION
 } from "TicketDetails/TicketGraphQL";
 import { Button } from "@mui/material";
 import { useDispatch } from "react-redux";
@@ -50,6 +51,7 @@ const WorkOrder = ({
   });
 
   const [updateDetailText] = useMutation(UPDATE_DETAIL_TEXT);
+  const [uploadFile] = useMutation(UPLOAD_FILE_MUTATION);
 
   const handleEditorChange = (content) => {
     const normalizedContent = normalizeContent(content);
@@ -142,20 +144,118 @@ const WorkOrder = ({
 
     input.onchange = function () {
       const file = this.files[0];
+      
+      // For non-image files, show a loading placeholder
+      if (meta.filetype !== "image") {
+        callback('#', { text: `Uploading ${file.name}...` });
+      }
+      
+      // For image uploads, add a notification to the dialog
+      if (meta.filetype === "image") {
+        try {
+          // Find the dialog body content
+          const dialogContent = document.querySelector('.tox-dialog__body-content');
+          if (dialogContent) {
+            // Create a notification element
+            const notification = document.createElement('div');
+            notification.id = 'image-upload-notification';
+            notification.style.cssText = 'background-color: #e3f2fd; color: #0d47a1; padding: 8px 16px; margin-top: 10px; border-radius: 4px; font-size: 14px; text-align: center;';
+            notification.textContent = `Uploading ${file.name}...`;
+            
+            // Add it to the dialog
+            dialogContent.appendChild(notification);
+          }
+        } catch (err) {
+          console.error('Error adding notification to dialog:', err);
+        }
+      }
+      
+      // Convert file to base64 for upload
       const reader = new FileReader();
-
-      reader.onload = function () {
-        const id = `blobid${new Date().getTime()}`;
-        const base64 = reader.result.split(",")[1];
-        const blobCache = window.tinymce.activeEditor.editorUpload.blobCache;
-        const blobInfo = blobCache.create(id, file, base64);
-        blobCache.add(blobInfo);
-
-        // Call the callback and populate the appropriate type in the editor
-        if (meta.filetype === "image") {
-          callback(blobInfo.blobUri(), { title: file.name });
-        } else if (meta.filetype === "media" || meta.filetype === "file") {
-          callback(blobInfo.blobUri(), { text: file.name });
+      reader.onload = async function() {
+        try {
+          const base64 = reader.result.split(",")[1];
+          
+          // Upload the file to S3 using the existing mutation
+          const { data } = await uploadFile({
+            variables: {
+              file: base64,
+              filename: file.name,
+              ticket_id: parseInt(ticket_id),
+              attachment_type: file.type,
+            },
+          });
+                    
+          if (data && data.uploadFile && data.uploadFile.file_url) {
+            // Get the returned S3 URL
+            const s3Url = data.uploadFile.file_url;
+            
+            // Remove the upload notification
+            const notification = document.getElementById('image-upload-notification');
+            if (notification) {
+              notification.remove();
+            }
+            
+            if (meta.filetype === "image") {
+              // For images, directly insert the S3 image at the current cursor position
+              // This is more reliable than trying to replace a placeholder
+              callback(s3Url, { alt: file.name, title: file.name });
+            } else {
+              // For other files, replace the placeholder link with the actual S3 link
+              const editor = window.tinymce.activeEditor;
+              const content = editor.getContent();
+              
+              // Find and replace the placeholder link
+              const newContent = content.replace(
+                `<a href="#">Uploading ${file.name}...</a>`,
+                `<a href="${s3Url}" target="_blank">${file.name}</a>`
+              );
+              
+              editor.setContent(newContent);
+              handleEditorChange(newContent);
+            }
+            
+            // Only show success notification for non-image files
+            // For images, we don't need it as they immediately appear in the editor
+            if (meta.filetype !== "image") {
+              dispatch(
+                showSnackbar({
+                  message: `${file.name} uploaded successfully`,
+                  severity: "success",
+                })
+              );
+            }
+          } else {
+            throw new Error("Failed to upload file to S3");
+          }
+        } catch (error) {
+          console.error("Error uploading file:", error);
+          
+          // Remove the upload notification
+          const notification = document.getElementById('image-upload-notification');
+          if (notification) {
+            notification.remove();
+          }
+          
+          if (meta.filetype !== "image") {
+            // For non-image files, remove the placeholder
+            const editor = window.tinymce.activeEditor;
+            const content = editor.getContent();
+            const newContent = content.replace(
+              `<a href="#">Uploading ${file.name}...</a>`,
+              ""
+            );
+            editor.setContent(newContent);
+            handleEditorChange(newContent);
+          }
+          
+          // Show error message
+          dispatch(
+            showSnackbar({
+              message: `Failed to upload ${file.name}. Please try again.`,
+              severity: "error",
+            })
+          );
         }
       };
       reader.readAsDataURL(file);

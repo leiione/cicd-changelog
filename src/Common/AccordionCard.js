@@ -15,8 +15,8 @@ import { faChevronDown } from "@fortawesome/pro-regular-svg-icons";
 
 const AccordionCard = (props) => {
   const dispatch = useDispatch()
-  const { children, label, iconButtons, menuOption, cardFooter, className } = props;
-  const card = includes(label, "Bill") ? "billOfMaterialCard": `${trim(toLower(label))}Card`;
+  const { children, label, cardLabel, iconButtons, menuOption, cardFooter, className } = props;
+  const card = includes(label, "Bill") ? "billOfMaterialCard": `${trim(toLower(cardLabel || label))}Card`;
   const cardPreferences = useSelector(state => state[card]);
   const expanded = cardPreferences ? cardPreferences.expanded : false;
 

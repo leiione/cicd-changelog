@@ -54,32 +54,28 @@ const TicketWidget = (props) => {
 
   const tickets = data?.getISPTickets?.tickets || [];
 
+  // Use React.useMemo to create a stable widget ID that won't change on rerenders
+  const widgetId = React.useMemo(() => {
+    return item.id || `widget_${index}_${item.title?.replace(/\s+/g, '_')}`;
+  }, [item.id, index, item.title]); // Only recalculate if these dependencies change
+
+  
+
   useSubscription(TICKET_LIST_SUBSCRIPTION, {
-    variables: { isp_id: isp_id },
+    variables: { isp_id: isp_id, widgetId: widgetId },
     onData: async ({ data: { data }, client }) => {
 
-      if (data?.ticketList) {
-        const ticket_id = data.ticketList.ticket_id;
-        const isNewTicket = data.ticketList.new_ticket === true;
-        const isDeletedTicket = data.ticketList.flag_deleted === true;
+      if (data?.ticketListing) {
 
-        const eventId = `${ticket_id}-${isNewTicket ? 'new' : ''}-${isDeletedTicket ? 'deleted' : ''}-${Date.now()}`;
 
-        // Use the widget's unique ID to track processed events per widget
-        const widgetId = item.id; // Assuming each widget has a unique ID
-        const storageKey = `processed_ticket_events_${widgetId}`;
-        const processedEvents = JSON.parse(localStorage.getItem(storageKey) || '{}');
-
-        // If this event has already been processed by this widget, skip it
-        if (processedEvents[eventId]) {
-          return;
+       
+        if (data.ticketListing.requestBody && data.ticketListing.requestBody.widgetId !== widgetId) {
+          return; // Skip processing if not for this widget
         }
 
-        // Mark this event as processed for this widget
-        processedEvents[eventId] = true;
-        localStorage.setItem(storageKey, JSON.stringify(processedEvents));
-
-
+        const ticket_id = data.ticketListing.ticket_id;
+        const isNewTicket = data.ticketListing.new_ticket === true;
+        const isDeletedTicket = data.ticketListing.flag_deleted === true;
 
         // Handle deleted tickets
         if (isDeletedTicket && ticket_id) {
@@ -250,7 +246,6 @@ const TicketWidget = (props) => {
           const currentTickets = tickets || [];
           const isTicketInTable = currentTickets.some(ticket => ticket.ticket_id === ticket_id);
 
-          console.log(isTicketInTable);
           // Check if the updated ticket matches our filter criteria with a single query
           try {
             // Create a query with our current filters plus this specific ticket ID
@@ -264,6 +259,8 @@ const TicketWidget = (props) => {
               variables: testVariables,
               fetchPolicy: 'network-only'
             });
+
+         
             // Read current cache data
             const currentData = client.readQuery({
               query: GET_FILTERED_TICKETS,
@@ -300,7 +297,6 @@ const TicketWidget = (props) => {
                 // Add the new ticket at the top
                 updatedTickets = [updatedTicket, ...ticketsToKeep];
               }
-              console.log(updatedTickets);
 
               // Write updated tickets back to cache
               client.writeQuery({
@@ -320,6 +316,8 @@ const TicketWidget = (props) => {
             } else if (isTicketInTable) {
               // If the ticket is in our table but no longer matches filters, remove it
               // Filter out the ticket that no longer matches
+             
+             
               const updatedTickets = currentData.getISPTickets.tickets.filter(
                 ticket => ticket.ticket_id !== ticket_id
               );

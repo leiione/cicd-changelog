@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { preventEvent } from "../Common/helper";
 import Header from "./components/Header";
 import ChildDrawers from "../Common/ChildDrawers";
@@ -101,6 +101,7 @@ const TicketDetails = (props) => {
   const timeZone = useSelector((state) => state.timeZone);
   const snackbar = useSelector((state) => state.snackbar);
   const online = useSelector(state => state.networkStatus?.online || false);
+  const attachmentRef = useRef(null);
 
   const permitMessageView = usePermission("ticket_note_message", "flag_read") 
 
@@ -201,6 +202,7 @@ const TicketDetails = (props) => {
       {error ? <ErrorPage error={error} />
         : <div className="drawer-wrapper-full p-3" hidden={error}>
           <Summary
+            attachmentRef={attachmentRef}
             loading={loading && !cacheExists}
             appuser_id={appuser_id}
             handleIconButton={handleIconButton}
@@ -241,11 +243,13 @@ const TicketDetails = (props) => {
                 />
               }
               <Attachments
+                attachmentRef={attachmentRef}
                 handleIconButton={handleIconButton}
                 ticket={ticketCached}
                 lablesVisible={lablesVisible}
                 appuser_id={appuser_id}
                 setDefaultAttacmentCount={setDefaultAttacmentCount}
+                setTicketCached={setTicketCached}
               />
               {/* <BillsOfMaterial
                 handleIconButton={handleIconButton}

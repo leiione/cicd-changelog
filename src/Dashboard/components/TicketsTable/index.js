@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useQuery,useSubscription ,useLazyQuery} from '@apollo/client';
-import { GET_ASSIGNEES, TICKET_LIST_SUBSCRIPTION } from 'TicketDetails/TicketGraphQL';
+import { useQuery, useLazyQuery, useSubscription} from '@apollo/client';
+import { GET_ASSIGNEES } from 'TicketDetails/TicketGraphQL';
 import DataGridTable from 'Common/DataGridTable';
 import { makeStyles } from '@mui/styles';
 import Loader from '../../../Common/Loader';
@@ -13,6 +13,8 @@ import { setContentDrawer, setPageNumber, setPageSize } from '../../../config/st
 import { getTicketsColumns, getVisibleColumns } from './ticketsColumns';
 import { processTicketDates, clearDateFormatCache } from './utils/dateUtils';
 import { GET_ISP_TICKETS,GET_TICKET } from 'Dashboard/DashboardGraphQL';
+import { TICKET_LIST_SUBSCRIPTION } from 'TicketDetails/TicketGraphQL';
+
 
 // Styling with optimized containers
 const useStyles = makeStyles({
@@ -94,6 +96,8 @@ const TicketsTable = (props) => {
   const [expectedLastPage, setExpectedLastPage] = useState(null);
   const [visibleColumns, setVisibleColumns] = useState([]);
   const [sortModel, setSortModel] = useState({ field: 'ticket_id', order: 'desc' });
+  const isp_id = useSelector(state => state.ispId)
+  
   
   // Initialize includeDeletedSubscribers from localStorage with a default of false
   const [includeDeletedSubscribers, setIncludeDeletedSubscribers] = useState(() => {
@@ -112,7 +116,6 @@ const TicketsTable = (props) => {
   const priorityFilter = useSelector(state => state.ticketTablePreferences.priorityFilter || []);
   const schedulingFilter = useSelector(state => state.ticketTablePreferences.schedulingFilter || []);
   const dateRange = useSelector(state => state.ticketTablePreferences.dateRange || { startDate: null, endDate: null });
-  const isp_id = useSelector(state => state.ispId)
   const contentDrawer = useSelector(state => state.contentDrawer);
   const selectedRow = React.useMemo(() => (contentDrawer.id ? contentDrawer.id : []), [
     contentDrawer
@@ -185,14 +188,16 @@ const TicketsTable = (props) => {
     }
   });
 
+  const widgetID = "mainTable"
 
   useSubscription(TICKET_LIST_SUBSCRIPTION, {
-    variables: { isp_id: isp_id },
+    variables: { isp_id: isp_id, widgetId: widgetID },
     onData: async ({ data: { data }, client }) => {
-      if (data?.ticketList) {
-        const ticket_id = data.ticketList.ticket_id;
-        const isNewTicket = data.ticketList.new_ticket === true;
-        const isDeletedTicket = data.ticketList.flag_deleted === true;
+      if (data?.ticketListing) {
+
+        const ticket_id = data.ticketListing.ticket_id;
+        const isNewTicket = data.ticketListing.new_ticket === true;
+        const isDeletedTicket = data.ticketListing.flag_deleted === true;
         
         // For deleted tickets, remove from the list
         if (isDeletedTicket && ticket_id) {

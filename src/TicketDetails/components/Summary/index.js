@@ -30,6 +30,7 @@ import {
 } from "./components/SkeletonLoader";
 import HeaderMenuOptions from "components/HeaderMenuOptions";
 import RecentUpdates from "./components/RecentUpdates";
+import AttachmentCount from "./components/AttachmentCount";
 
 const Summary = (props) => {
   const dispatch = useDispatch();
@@ -49,7 +50,8 @@ const Summary = (props) => {
     isSignatureAdded,
     setIsSignatureAdded,
     ticketCached,
-    setTicketCached
+    setTicketCached,
+    attachmentRef
   } = props;
 
   const showSignature = true; // this should come from ticket type settings
@@ -190,6 +192,7 @@ const Summary = (props) => {
               <div className="border-left pl-3 py-3 h-100 d-flex flex-column">
                 <Assignee ticket={customer} updateTicket={handleUpdate} />
                 <Followers ticket={customer} updateTicket={handleUpdate} />
+                <AttachmentCount attachmentRef={attachmentRef} ticket={customer} />
                 {showSignature && (
                   <Signature
                     ticket={customer}
