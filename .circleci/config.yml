@@ -43,6 +43,8 @@ jobs:
               ENV_FILE=".env.staging.txt"
             elif [[ "$BRANCH_NAME" == crm-hotfix-* ]]; then
               ENV_FILE=".env.live.txt"
+            elif [[ "$BRANCH_NAME" == "master" ]]; then
+              ENV_FILE=".env.live.txt"
             else
               echo "No Environment file needed for this branch" && exit 0
             fi
@@ -68,15 +70,6 @@ jobs:
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
-            echo "export PATH=/usr/local/bin:$PATH" >> $BASH_ENV
-      - run:
-          name: Install Core Utilities
-          command: |
-            sudo apt-get update && sudo apt-get install -y coreutils
-        
-      - run:
-          name: Load Updated PATH
-          command: source $BASH_ENV
       - run:
           name: Configure AWS
           command: |
@@ -87,63 +80,45 @@ jobs:
           name: Deploy to S3
           command: |
             BRANCH_NAME=${CIRCLE_BRANCH}
-            if [ "$BRANCH_NAME" == "develop" ]; then
-              aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/staging/ --acl public-read
-              aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/tbd-staging/ --acl public-read
-              echo "Deployed to staging and tbd-staging"
-            else
-              aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/$BRANCH_NAME/ --acl public-read
-              echo "Deployed to $BRANCH_NAME"
-            fi
+            S3_BUCKET="$BRANCH_NAME"
+            echo "S3_BUCKET=$S3_BUCKET" >> $BASH_ENV
+            aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/$S3_BUCKET/ --acl public-read
+            echo "Deployment completed to: $S3_BUCKET"
       - run:
           name: Invalidate CloudFront Cache
           command: |
-            BRANCH_NAME=${CIRCLE_BRANCH}
+            source $BASH_ENV
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
-
-            if [ "$BRANCH_NAME" == "develop" ]; then
-              INVALIDATE_PATHS=("/staging/*" "/tbd-staging/*")
-            else
-              INVALIDATE_PATHS=("/$BRANCH_NAME/*")
-            fi
-
-            for PATH in "${INVALIDATE_PATHS[@]}"; do
-              INVALIDATION_ID=$(/usr/local/bin/aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "$PATH" --query "Invalidation.Id" --output text --no-cli-pager)
-              echo "Waiting for CloudFront Invalidation ID: $INVALIDATION_ID for path $PATH"
-              while true; do
-                STATUS=$(/usr/local/bin/aws cloudfront get-invalidation --distribution-id $CLOUDFRONT_DIST_ID --id $INVALIDATION_ID --query "Invalidation.Status" --output text --no-cli-pager)
-                echo "Invalidation Status for $PATH: $STATUS"
-                if [ "$STATUS" == "Completed" ]; then
-                  echo "Invalidation for $PATH Completed!"
-                  break
-                fi
-                /bin/sleep 10
-              done
+            INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/$S3_BUCKET/*" --query "Invalidation.Id" --output text --no-cli-pager)
+            echo "Waiting for CloudFront Invalidation ID: $INVALIDATION_ID"
+            while true; do
+              STATUS=$(aws cloudfront get-invalidation --distribution-id $CLOUDFRONT_DIST_ID --id $INVALIDATION_ID --query "Invalidation.Status" --output text --no-cli-pager)
+              echo "Invalidation Status: $STATUS"
+              if [ "$STATUS" == "Completed" ]; then
+                echo "Invalidation Completed!"
+                break
+              fi
+              sleep 10
             done
-
-
       - run:
-          name: Verify Deployed URL(s)
+          name: Verify Deployed URL
           command: |
             BRANCH_NAME=${CIRCLE_BRANCH}
             if [ "$BRANCH_NAME" == "develop" ]; then
-              URLS=("https://crm-microfrontend.ms-visp.net/tbd-staging" "https://crm-microfrontend.ms-visp.net/staging")
+              TEST_URL="https://crm-microfrontend.ms-visp.net/staging"
+            elif [[ "$BRANCH_NAME" == "master" ]]; then
+              TEST_URL="https://crm-microfrontend.ms-visp.net/prod"
             else
-              URLS=("https://crm-microfrontend.ms-visp.net/$BRANCH_NAME")
+              TEST_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
             fi
-
-            for TEST_URL in "${URLS[@]}"; do
-              echo "Testing URL: $TEST_URL"
-              STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L "$TEST_URL")
-              if [[ "$STATUS" =~ ^2|^3 ]]; then
-                echo "$TEST_URL is reachable (HTTP $STATUS)"
-              else
-                echo "ERROR: $TEST_URL returned HTTP $STATUS"
-                exit 1
-              fi
-            done
-
-
+            echo "Testing URL: $TEST_URL"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L "$TEST_URL")
+            if [[ "$STATUS" =~ ^2|^3 ]]; then
+              echo "$TEST_URL is reachable (HTTP $STATUS)"
+            else
+              echo "ERROR: $TEST_URL returned HTTP $STATUS"
+              exit 1
+            fi
 
   promote-to-production:
     docker:
@@ -173,16 +148,18 @@ jobs:
               SOURCE="staging"
             elif [[ "$BRANCH_NAME" == crm-hotfix-* ]]; then
               SOURCE="$BRANCH_NAME"
+            elif [[ "$BRANCH_NAME" == "master" ]]; then
+              SOURCE="prod"
             else
               echo "Unsupported branch" && exit 1
             fi
-            aws s3 sync s3://microfrontend-crm-ms/$SOURCE/ s3://microfrontend-crm-ms/production/ --acl public-read --delete
+            aws s3 sync s3://microfrontend-crm-ms/$SOURCE/ s3://microfrontend-crm-ms/prod/ --acl public-read --delete
             echo "$SOURCE" > version.txt
-            aws s3 cp version.txt s3://microfrontend-crm-ms/production/version.txt
+            aws s3 cp version.txt s3://microfrontend-crm-ms/prod/version.txt
       - run:
           name: Verify Production URL
           command: |
-            PROD_URL="https://crm-microfrontend.ms-visp.net/production"
+            PROD_URL="https://crm-microfrontend.ms-visp.net/prod"
             echo "Testing URL: $PROD_URL"
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L "$PROD_URL")
             if [[ "$STATUS" =~ ^2|^3 ]]; then
