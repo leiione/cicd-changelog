@@ -12,14 +12,6 @@ jobs:
       - checkout
 
       - run:
-          name: Install dependencies
-          command: npm install --legacy-peer-deps
-
-      - run:
-          name: Build application
-          command: CI=false npm run build
-
-      - run:
           name: Install AWS CLI
           command: |
             sudo apt-get update && sudo apt-get install -y unzip
@@ -32,6 +24,14 @@ jobs:
           command: |
             aws s3 cp s3://crm-art/crm-envs-fe/.env.live.txt .env
             echo "Downloaded .env"
+
+      - run:
+          name: Install dependencies
+          command: npm install --legacy-peer-deps
+
+      - run:
+          name: Build application
+          command: CI=false npm run build
 
       - run:
           name: Deploy to S3 /prod
