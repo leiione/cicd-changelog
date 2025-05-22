@@ -84,12 +84,12 @@ jobs:
             BRANCH_NAME=${CIRCLE_BRANCH}
             S3_BUCKET="$BRANCH_NAME"
             echo "S3_BUCKET=$S3_BUCKET" >> $BASH_ENV
-            aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/$S3_BUCKET/ \
+            aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/prod/ \
               --acl public-read \
               --cache-control "no-cache, no-store, must-revalidate" \
               --metadata-directive REPLACE \
               --delete
-            aws s3 ls s3://microfrontend-crm-ms/$S3_BUCKET/
+            aws s3 ls s3://microfrontend-crm-ms/prod/
       - run:
           name: Invalidate CloudFront Cache
           command: |
@@ -110,7 +110,7 @@ jobs:
           name: Verify Deployed URL
           command: |
             BRANCH_NAME=${CIRCLE_BRANCH}
-            TEST_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
+            TEST_URL="https://crm-microfrontend.ms-visp.net/prod"
             echo "Testing URL: $TEST_URL"
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L "$TEST_URL")
             if [[ "$STATUS" =~ ^2|^3 ]]; then
