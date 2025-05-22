@@ -119,7 +119,7 @@ const Summary = (props) => {
   return (
     <AccordionCard
       defaultExpanded
-      label="Summary (LIVE)"
+      label="Summary (LIVE 2.0)"
       className="py-0"
       iconButtons={
         loading ? (
