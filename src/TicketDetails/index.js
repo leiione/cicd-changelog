@@ -16,10 +16,8 @@ import Messages from "./components/Messages";
 import Attachments from "./components/Attachments";
 import DialogAlert from "components/DialogAlert"; // Import DialogAlert
 import BomDrawer from "./components/BillsOfMaterial/components/BomDrawer";
-
-import * as pdfFonts from "pdfmake/build/vfs_fonts";
 import pdfMake from "pdfmake/build/pdfmake";
-
+import pdfFonts from "pdfmake/build/vfs_fonts";
 import htmlToPdfmake from "html-to-pdfmake";
 import { GET_USER_PREFERENCES, SAVE_USER_PREFERENCES } from "components/UserPreferences/UserPreferencesGraphQL";
 import { saveUserPreferences } from "components/UserPreferences/savePreferencesUtils";
@@ -32,7 +30,16 @@ import PropTypes from 'prop-types';
 import usePermission from "config/usePermission";
 import { checkIfCacheExists } from "config/apollo";
 
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+// Set virtual file system for pdfMake - compatible with pdfmake 0.2.10 on Node 18
+if (pdfFonts && typeof pdfFonts === 'object') {
+  if (pdfFonts.pdfMake && pdfFonts.pdfMake.vfs) {
+    pdfMake.vfs = pdfFonts.pdfMake.vfs;
+  } else if (pdfFonts.vfs) {
+    pdfMake.vfs = pdfFonts.vfs;
+  } else {
+    console.warn('Could not find valid fonts structure for pdfMake');
+  }
+}
 
 const TicketDetails = (props) => {
   const removeDuplicateIds = (htmlContent) => {
