@@ -30,16 +30,7 @@ import PropTypes from 'prop-types';
 import usePermission from "config/usePermission";
 import { checkIfCacheExists } from "config/apollo";
 
-// Set virtual file system for pdfMake - compatible with pdfmake 0.2.10 on Node 18
-if (pdfFonts && typeof pdfFonts === 'object') {
-  if (pdfFonts.pdfMake && pdfFonts.pdfMake.vfs) {
-    pdfMake.vfs = pdfFonts.pdfMake.vfs;
-  } else if (pdfFonts.vfs) {
-    pdfMake.vfs = pdfFonts.vfs;
-  } else {
-    console.warn('Could not find valid fonts structure for pdfMake');
-  }
-}
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 const TicketDetails = (props) => {
   const removeDuplicateIds = (htmlContent) => {
