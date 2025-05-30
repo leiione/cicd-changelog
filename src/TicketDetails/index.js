@@ -17,7 +17,7 @@ import Attachments from "./components/Attachments";
 import DialogAlert from "components/DialogAlert"; // Import DialogAlert
 import BomDrawer from "./components/BillsOfMaterial/components/BomDrawer";
 import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
+// import pdfFonts from "pdfmake/build/vfs_fonts";
 import htmlToPdfmake from "html-to-pdfmake";
 import { GET_USER_PREFERENCES, SAVE_USER_PREFERENCES } from "components/UserPreferences/UserPreferencesGraphQL";
 import { saveUserPreferences } from "components/UserPreferences/savePreferencesUtils";
@@ -31,15 +31,28 @@ import usePermission from "config/usePermission";
 import { checkIfCacheExists } from "config/apollo";
 
 // Set virtual file system for pdfMake - compatible with pdfmake 0.2.10 on Node 18
-if (pdfFonts && typeof pdfFonts === 'object') {
-  if (pdfFonts.pdfMake && pdfFonts.pdfMake.vfs) {
-    pdfMake.vfs = pdfFonts.pdfMake.vfs;
-  } else if (pdfFonts.vfs) {
-    pdfMake.vfs = pdfFonts.vfs;
-  } else {
-    console.warn('Could not find valid fonts structure for pdfMake');
-  }
-}
+// if (pdfFonts && typeof pdfFonts === 'object') {
+//   if (pdfFonts.pdfMake && pdfFonts.pdfMake.vfs) {
+//     pdfMake.vfs = pdfFonts.pdfMake.vfs;
+//   } else if (pdfFonts.vfs) {
+//     pdfMake.vfs = pdfFonts.vfs;
+//   } else {
+//     console.warn('Could not find valid fonts structure for pdfMake');
+//   }
+// }
+
+const pdfFonts = {
+  // download default Roboto font from cdnjs.com
+  Roboto: {
+    normal:
+      "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf",
+    bold: "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Medium.ttf",
+    italics:
+      "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Italic.ttf",
+    bolditalics:
+      "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-MediumItalic.ttf",
+  },
+};
 
 const TicketDetails = (props) => {
   const removeDuplicateIds = (htmlContent) => {
@@ -82,7 +95,7 @@ const TicketDetails = (props) => {
       };
 
       // Open the PDF in a new window
-      pdfMake.createPdf(docDefinition).open();
+      pdfMake.createPdf(docDefinition, null, pdfFonts).open();
     } catch (error) {
       console.error("Failed to create and open PDF:", error);
     }
