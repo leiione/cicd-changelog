@@ -30,7 +30,16 @@ import PropTypes from 'prop-types';
 import usePermission from "config/usePermission";
 import { checkIfCacheExists } from "config/apollo";
 
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+// Set virtual file system for pdfMake - compatible with pdfmake 0.2.10 on Node 18
+if (pdfFonts && typeof pdfFonts === 'object') {
+  if (pdfFonts.pdfMake && pdfFonts.pdfMake.vfs) {
+    pdfMake.vfs = pdfFonts.pdfMake.vfs;
+  } else if (pdfFonts.vfs) {
+    pdfMake.vfs = pdfFonts.vfs;
+  } else {
+    console.warn('Could not find valid fonts structure for pdfMake');
+  }
+}
 
 const TicketDetails = (props) => {
   const removeDuplicateIds = (htmlContent) => {
@@ -96,7 +105,9 @@ const TicketDetails = (props) => {
     toggleOffCRMDrawer,
     handleOpenTicket,
     appuser_id,
-    handleOpenTicketAssignment
+    handleOpenTicketAssignment,
+    fromDashboard,
+    addRecentActionsDrawer
   } = props;
   const timeZone = useSelector((state) => state.timeZone);
   const snackbar = useSelector((state) => state.snackbar);
@@ -198,6 +209,8 @@ const TicketDetails = (props) => {
         appuser_id={appuser_id}
         toggleOffCRMDrawer={toggleOffCRMDrawer}
         handleOpenTicketAssignment={handleOpenTicketAssignment}
+        fromDashboard={fromDashboard}
+        addRecentActionsDrawer={addRecentActionsDrawer}
       />
       {error ? <ErrorPage error={error} />
         : <div className="drawer-wrapper-full p-3" hidden={error}>
@@ -233,6 +246,7 @@ const TicketDetails = (props) => {
                 appuser_id={appuser_id}
                 lablesVisible={lablesVisible}
                 handleOpenTicket={handleOpenTicket}
+                addRecentActionsDrawer={addRecentActionsDrawer}
               />
               {permitMessageView &&
                 <Messages
@@ -317,7 +331,7 @@ const TicketDetails = (props) => {
 const TicketContainer = props => {
   const dispatch = useDispatch()
   const ispId = localStorage.getItem("Visp.ispId")
-  const { isSigningOut, timeZone, settingsPreferences, user, flags, networkStatus } = props
+  const { isSigningOut, timeZone, settingsPreferences, user, flags, networkStatus, fromDashboard = false } = props
   const userPreferencesTimeStamp = useSelector(state => state.userPreferencesTimeStamp)
   const summaryCard = useSelector(state => state.summaryCard)
   const tasksCard = useSelector(state => state.tasksCard)
@@ -325,17 +339,17 @@ const TicketContainer = props => {
   const attachmentsCard = useSelector(state => state.attachmentsCard)
   const billOfMaterialCard = useSelector(state => state.billOfMaterialCard)
   const activityCard = useSelector(state => state.activityCard)
-
+  
   const [saveCRMUserPreferences] = useMutation(SAVE_USER_PREFERENCES)
 
   const { data, loading } = useQuery(GET_USER_PREFERENCES, {
     fetchPolicy: "cache-and-network",
-    skip: isSigningOut
+    skip: isSigningOut || fromDashboard
   });
 
   useEffect(() => {
     // save user preferences when user is about to sign out
-    if (isSigningOut && (userPreferencesTimeStamp !== null && moment().diff(moment(userPreferencesTimeStamp)) < 3000)) {
+    if (!fromDashboard && isSigningOut && (userPreferencesTimeStamp !== null && moment().diff(moment(userPreferencesTimeStamp)) < 3000)) {
       saveUserPreferences(saveCRMUserPreferences, {
         summaryCard,
         tasksCard,
@@ -346,23 +360,23 @@ const TicketContainer = props => {
       })
     }
     // eslint-disable-next-line
-  }, [isSigningOut])
+  }, [isSigningOut, fromDashboard])
 
   useEffect(() => {
     // initialize redux based on saved user preferences
-    if (data && !loading && !isSigningOut) {
+    if (!fromDashboard && data && !loading && !isSigningOut) {
       const userPreferences = data.getCRMUserPreferences;
       dispatch(setInitialUserPreferences(userPreferences));
     }
-  }, [data, loading, dispatch, isSigningOut])
+  }, [data, loading, dispatch, isSigningOut, fromDashboard])
 
   useEffect(() => {
-    if (ispId && timeZone) {
+    if (!fromDashboard && (ispId && timeZone)) {
       dispatch(populateISPUserSettings({ ispId: Number(ispId), timeZone, settingsPreferences, user, flags, networkStatus }))
     } else {
       // app was rendered outside main app so fetch separately
     }
-  }, [dispatch, timeZone, settingsPreferences, user, ispId, flags, networkStatus])
+  }, [dispatch, timeZone, settingsPreferences, user, ispId, flags, networkStatus, fromDashboard])
 
 
   return (
