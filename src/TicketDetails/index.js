@@ -68,104 +68,13 @@ const TicketDetails = (props) => {
     return doc.body.innerHTML;
   };
 
-  // Helper function to convert image URL to data URL
-  const imageUrlToDataUrl = async (url) => {
-    try {
-      // Create an image element
-      const img = new Image();
-      
-      // Create a promise that resolves when the image loads or errors
-      const imageLoaded = new Promise((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
-      });
-      
-      // Set crossOrigin to anonymous to handle CORS
-      img.crossOrigin = 'anonymous';
-      img.src = url;
-      
-      // Wait for the image to load
-      await imageLoaded;
-      
-      // Create a canvas and draw the image
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      
-      // Convert to data URL
-      return canvas.toDataURL('image/png');
-    } catch (error) {
-      console.error(`Error converting image ${url} to data URL:`, error);
-      // Return a small transparent image as fallback
-      return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-    }
-  };
-  
-  const handlePrint = async (detailText) => {
+  const handlePrint = (detailText) => {
     try {
       // Remove duplicate IDs from the HTML content
       const cleanedHtml = removeDuplicateIds(detailText);
-      
-      // Create a temporary div to parse the HTML
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = cleanedHtml;
-      
-      // Find all images
-      const images = tempDiv.querySelectorAll('img');
-      
-      // Process all S3 images
-      const imagePromises = [];
-      for (let i = 0; i < images.length; i++) {
-        const img = images[i];
-        const imgSrc = img.getAttribute('src');
-        
-        // Only process remote URLs (including S3)
-        if (imgSrc && (imgSrc.startsWith('http') || imgSrc.startsWith('https'))) {
-          // Save position in the promises array
-          const promiseIndex = imagePromises.length;
-          
-          // Add the promise to convert this image
-          imagePromises.push(imageUrlToDataUrl(imgSrc));
-          
-          // Tag the image with the promise index for later reference
-          img.setAttribute('data-promise-index', promiseIndex.toString());
-        }
-      }
-      
-      // Wait for all image conversions to complete
-      const dataUrls = await Promise.all(imagePromises);
-      
-      // Create image dictionary for pdfMake
-      const imageDict = {};
-      
-      // Update image sources with unique IDs pointing to the data URLs
-      for (let i = 0; i < images.length; i++) {
-        const img = images[i];
-        const promiseIndexStr = img.getAttribute('data-promise-index');
-        
-        if (promiseIndexStr !== null) {
-          const promiseIndex = parseInt(promiseIndexStr, 10);
-          const imgId = `img_${promiseIndex}`;
-          
-          // Add to image dictionary
-          imageDict[imgId] = dataUrls[promiseIndex];
-          
-          // Update image src to use the dictionary ID
-          img.setAttribute('src', imgId);
-          
-          // Remove the temporary attribute
-          img.removeAttribute('data-promise-index');
-        }
-      }
-      
-      // Get the updated HTML
-      const processedHtml = tempDiv.innerHTML;
-      
-      // Convert processed HTML to pdfmake format
-      const pdfContent = htmlToPdfmake(processedHtml, {
+
+      // Convert cleaned HTML to pdfmake format
+      const pdfContent = htmlToPdfmake(cleanedHtml, {
         window: window, // Required for html-to-pdfmake to work correctly
       });
 
@@ -182,9 +91,7 @@ const TicketDetails = (props) => {
             fontSize: 12,
             margin: [0, 0, 0, 10]
           }
-        },
-        // Add the image dictionary for pdfMake to use
-        images: imageDict
+        }
       };
 
       // Open the PDF in a new window
