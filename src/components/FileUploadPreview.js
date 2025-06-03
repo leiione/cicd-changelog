@@ -113,7 +113,6 @@ const FileUploadPreview = ({
     setOpenPreview(false);
     setPreviewImage("");
   };
-  console.log("previews", previews);
 
   return (
     <Box>

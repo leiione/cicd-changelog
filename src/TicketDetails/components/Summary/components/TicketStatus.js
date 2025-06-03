@@ -5,7 +5,7 @@ import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import { makeStyles } from "@mui/styles";
 import { getUserAction } from "utils/getUserAction";
 import { find } from "lodash";
-import { GET_TICKET_STATUS, GET_UPDATE_REQUIREMENTS } from "TicketDetails/TicketGraphQL";
+import { GET_TICKET_STATUS, GET_TICKET_TASKS, GET_UPDATE_REQUIREMENTS } from "TicketDetails/TicketGraphQL";
 import { useQuery } from "@apollo/client";
 import { useSelector } from "react-redux";
 import { checkIfCacheExists } from "config/apollo";
@@ -63,16 +63,27 @@ const StatusMenu = props => {
     return (!rLoading || rCacheExists) && rData && rData.ticketUpdateRequirements ? rData.ticketUpdateRequirements : [];
   }, [rLoading, rCacheExists, rData]);
 
+  
+  const { data: taskData, loading: taskLoading } = useQuery(GET_TICKET_TASKS, {
+    variables: { ticket_id: ticket.ticket_id },
+    fetchPolicy: online ? "cache-and-network" : "cache-only",
+  });
+  
+  const taskCacheExists = checkIfCacheExists(client, { query: GET_TICKET_TASKS, variables: { ticket_id: ticket.ticket_id } })
+  const tasks = useMemo(() => {
+    return (!taskLoading || taskCacheExists) && taskData && taskData.ticketTasks ? taskData.ticketTasks : [];
+  }, [taskLoading, taskCacheExists, taskData]);
+
   const tooltipMsgs = useMemo(() => {
     let resolvingTooltipMsgs = [];
     let closingTooltipMsgs = [];
-    const hasConvertedTask = find(ticket.tasks, (task) => !task.is_completed && task.converted_ticket_id > 0 && !task.flag_ticket_deleted);
+    const hasConvertedTask = find(tasks, (task) => !task.is_completed && task.converted_ticket_id > 0 && !task.flag_ticket_deleted);
     if (hasConvertedTask) {
       resolvingTooltipMsgs.push("- all tasks to be checked");
       closingTooltipMsgs.push("- all tasks to be checked");
     }
 
-    const hasUncompletedTask = find(ticket.tasks, (task) => !task.is_completed && task.is_default);
+    const hasUncompletedTask = find(tasks, (task) => !task.is_completed && task.is_default);
     const hasUncompletedAttachments = defaultAttacmentCount > 0;
     const hasRequiredCustomFields = requiredCustomFieldsCount > 0;
     const hasUncompletedSignature = !isSignatureAdded;
@@ -137,7 +148,7 @@ const StatusMenu = props => {
       });
     }
     return { resolvingTooltipMsgs, closingTooltipMsgs };
-  }, [ticket.tasks, update_requirements, defaultAttacmentCount, requiredCustomFieldsCount, isSignatureAdded]);
+  }, [tasks, update_requirements, defaultAttacmentCount, requiredCustomFieldsCount, isSignatureAdded]);
 
   const resolvingClosingMessage = (action) => {
     if (["Resolved", "Close"].includes(action)) {

@@ -17,7 +17,7 @@ const AttachmentCount = ({ ticket, attachmentRef }) => {
     <>
       <Grid container spacing={1} className="mb-2">
         <Grid item xs={3.5}>
-          <Typography variant="subtitle1">Attachment: </Typography>
+          <Typography variant="subtitle1">Attachments: </Typography>
         </Grid>
         <Grid item xs="auto">
           <Chip

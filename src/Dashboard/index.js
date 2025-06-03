@@ -6,17 +6,20 @@ import TicketsTable from './components/TicketsTable';
 import { useSelector, useDispatch } from 'react-redux';
 import { useMutation, useQuery } from '@apollo/client';
 import { SAVE_USER_PREFERENCES, GET_USER_PREFERENCES } from '../components/UserPreferences/UserPreferencesGraphQL';
-import { setDashboardCards, preferenceSaved, setInitialUserPreferences, populateISPUserSettings } from '../config/store';
+import { setDashboardCards, preferenceSaved, setInitialUserPreferences, populateISPUserSettings, setContentDrawer } from '../config/store';
 import AddWidget from './components/AddWidget';
 import GlobalSnackbar from 'Common/GlobalSnackbar';
 import TicketWidget from './components/TicketWidget';
+import ContentDrawer from './components/ContentDrawer';
+import { find } from 'lodash';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const Dashboard = (props) => {
-  const {handleOpenTicket, userPreferences } =  props;
+  const { userPreferences, hideContentDrawer, dockedItems } =  props;
   const dispatch = useDispatch();
   const { items = [], nextId = 1 } = useSelector(state => state.ticketDashboardWidget || {});
+  const contentDrawer = useSelector(state => state.contentDrawer);
   const lastChanges = useSelector(state => state.userPreferencesTimeStamp);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
@@ -201,12 +204,13 @@ const Dashboard = (props) => {
           >
             <CardContent style={{ paddingBottom: "10px"}}>
               <TicketWidget
-                handleOpenTicket={handleOpenTicket}
                 item={item}
                 items={items}
                 index={index}
                 nextId={nextId}
                 onRemoveItem={onRemoveItem}
+                hideContentDrawer={hideContentDrawer}
+                dockedItems={dockedItems}
               />
             </CardContent>
           </Card>
@@ -224,7 +228,7 @@ const Dashboard = (props) => {
         <Typography variant="h5" gutterBottom>Tickets</Typography>
         <Card>
           <CardContent sx={{ height: '500px' }}>
-            <TicketsTable  handleOpenTicket={handleOpenTicket} />
+            <TicketsTable hideContentDrawer={hideContentDrawer} dockedItems={dockedItems}/>
           </CardContent>
         </Card>
       </Box>
@@ -236,6 +240,13 @@ const Dashboard = (props) => {
         message={useSelector((state) => state.snackbar?.message || '')}
         duration={useSelector((state) => state.snackbar?.duration || 4000)}
       />
+      {contentDrawer && contentDrawer.open && contentDrawer.id > 0 && 
+        <ContentDrawer
+          {...contentDrawer}
+          {...props}
+          category={"Service Desk"}
+        />
+      }
     </div>
   );
 };
@@ -243,7 +254,7 @@ const Dashboard = (props) => {
 const DashboardPreferences = props => {
   const dispatch = useDispatch();
   const ispId = localStorage.getItem("Visp.ispId")
-  const { timeZone, settingsPreferences, user, flags, networkStatus, handleOpenTicket} = props
+  const { timeZone, settingsPreferences, user, flags, networkStatus, dockedItems } = props
   
   const { data, loading } = useQuery(GET_USER_PREFERENCES, {
     fetchPolicy: "cache-first",
@@ -258,6 +269,22 @@ const DashboardPreferences = props => {
   , [loading, data]);
 
   useEffect(() => {
+    // to close or open drawer on render
+    const openedFromDocked = find(dockedItems, { open: true })
+    if (openedFromDocked) {
+      dispatch(setContentDrawer({
+        open: true,
+        component: 'ticket',
+        description: openedFromDocked.description,
+        id: openedFromDocked.id,
+        ticket_id: openedFromDocked.id,
+        ticket: openedFromDocked
+      }));
+    }
+    // eslint-disable-next-line 
+  }, [dockedItems])
+
+  useEffect(() => {
     // initialize redux based on saved user preferences
     if (data && !loading) {
       const userPreferences = data.getCRMUserPreferences;
@@ -267,14 +294,14 @@ const DashboardPreferences = props => {
 
   useEffect(() => {
     if (ispId) {
-      dispatch(populateISPUserSettings({ ispId: Number(ispId), timeZone, settingsPreferences, user, flags, networkStatus }))
+      dispatch(populateISPUserSettings({ ispId: Number(ispId), timeZone, settingsPreferences, user, flags, networkStatus, dockedItems }))
     } else {
       // app was rendered outside main app so fetch separately
     }
-  }, [dispatch, timeZone, settingsPreferences, user, ispId, flags, networkStatus])
+  }, [dispatch, timeZone, settingsPreferences, user, ispId, flags, networkStatus, dockedItems])
 
   return (
-    <Dashboard handleOpenTicket={handleOpenTicket} {...props} userPreferences={memoizedUserPreferences} />
+    <Dashboard {...props} userPreferences={memoizedUserPreferences} />
   )
 
 }

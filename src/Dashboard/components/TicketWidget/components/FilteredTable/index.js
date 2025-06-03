@@ -41,7 +41,8 @@ const FilteredTable = (props) => {
     widgetVariables,
     setWidgetIncludeDeleted,
     widgetIncludeDeleted,
-    handleOpenTicket
+    hideContentDrawer,
+    dockedItems,
   } = props;
 
   const contentDrawer = useSelector(state => state.contentDrawer);
@@ -106,14 +107,17 @@ const FilteredTable = (props) => {
 
   // Handle when a row is clicked
   const handleRowClick = (event, params) => {
-    handleOpenTicket({...params.row, disableCRMDrawertoggleButton: true});
     dispatch(setContentDrawer({
       open: true,
       component: 'ticket',
       description: params.row.description,
       id: params.row.id,
       ticket_id: params.row.id,
+      ticket: params.row
     }));
+    if (dockedItems.find(x => x.temp)) {
+      hideContentDrawer()
+    }
   };
   
   let ticketsColumns = useMemo(() => getTicketsColumns(2), []);

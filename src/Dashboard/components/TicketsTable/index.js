@@ -3,7 +3,6 @@ import { useQuery, useLazyQuery, useSubscription} from '@apollo/client';
 import { GET_ASSIGNEES } from 'TicketDetails/TicketGraphQL';
 import DataGridTable from 'Common/DataGridTable';
 import { makeStyles } from '@mui/styles';
-import Loader from '../../../Common/Loader';
 import { Box, Select, MenuItem, Typography, IconButton, FormControl } from '@mui/material';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
@@ -87,8 +86,7 @@ const useStyles = makeStyles({
   }
 });
 
-const TicketsTable = (props) => {
-  const {handleOpenTicket} =props
+const TicketsTable = ({ hideContentDrawer, dockedItems }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   
@@ -467,14 +465,17 @@ const TicketsTable = (props) => {
 
   // Handle when a row is clicked
   const handleRowClick = (event, params) => {
-    handleOpenTicket({...params.row, disableCRMDrawertoggleButton: true});
     dispatch(setContentDrawer({
       open: true,
       component: 'ticket',
       description: params.row.description,
       id: params.row.id,
       ticket_id: params.row.id,
+      ticket: params.row
     }));
+    if (dockedItems.find(x => x.temp)) {
+      hideContentDrawer()
+    }
   };
 
   // Handle page change
@@ -647,10 +648,7 @@ const TicketsTable = (props) => {
       
       {/* Table with virtualization */}
       <div className={classes.tableContainer}>
-        {loading && !data?.getISPTickets ? (
-          <Loader />
-        ) : (
-          <div className={classes.tableScrollContainer}>
+        <div className={classes.tableScrollContainer}>
             <div className={`${classes.tableContent} ${classes.dataGridStyles}`}>
               <DataGridTable
                 rows={tickets}
@@ -681,7 +679,6 @@ const TicketsTable = (props) => {
               />
             </div>
           </div>
-        )}
       </div>
 
       {/* MUI-styled pagination footer (always visible) */}

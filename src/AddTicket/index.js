@@ -129,7 +129,7 @@ const AddTicket = (props) => {
 
   const onSubmit = async (values) => {
     try {
-      await addTicket({
+      await addTicket({ 
         variables: {
           input_ticket: {
             ...omit(values, ["initSelected", "payment_status", "subscriber"]),
@@ -137,7 +137,7 @@ const AddTicket = (props) => {
           },
         },
         update: (cache, { data }) => {
-          handleOpenTicket({ ...data.addTicket, disableCRMDrawertoggleButton: true }, "docked", { ticket_id: ticket.ticket_id })
+          handleOpenTicket({ ...data.addTicket, disableCRMDrawertoggleButton: true }, ticket.task_id > 0 ? "docked" : "", { ticket_id: ticket.ticket_id })
         },
       });
       dispatch(showSnackbar({ message: "The ticket was added successfully", severity: "success" }))

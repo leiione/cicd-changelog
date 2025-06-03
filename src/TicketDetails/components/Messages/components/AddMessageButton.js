@@ -17,7 +17,8 @@ const AddMessageButton = (props) => {
 
   const onIconClick = (event) => {
     preventEvent(event);
-    if(permitCreate) {
+    // Only set anchor element if user has permission AND there's no error
+    if(permitCreate && !error) {
       setAnchorEl(event.currentTarget);
     }
   };
@@ -47,20 +48,23 @@ const AddMessageButton = (props) => {
           disabled={error || !permitCreate}
         />
       </span>
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-        MenuListProps={{
-          "aria-labelledby": "basic-button",
-        }}
-      >
-        <MenuItem onClick={(event) => handleAdd(event, "email")}>
-          Email
-        </MenuItem>
-        <MenuItem onClick={(event) => handleAdd(event, "sms")}>SMS</MenuItem>
-      </Menu>
+      {/* Only render Menu when user has permission and there's no error */}
+      {permitCreate && !error && (
+        <Menu
+          id="basic-menu"
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={() => setAnchorEl(null)}
+          MenuListProps={{
+            "aria-labelledby": "basic-button",
+          }}
+        >
+          <MenuItem onClick={(event) => handleAdd(event, "email")}>
+            Email
+          </MenuItem>
+          <MenuItem onClick={(event) => handleAdd(event, "sms")}>SMS</MenuItem>
+        </Menu>
+      )}
     </>
   );
 };

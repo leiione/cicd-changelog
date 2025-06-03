@@ -12,7 +12,7 @@ import {
 import { makeStyles } from "@mui/styles";
 import { MoreVert } from "@mui/icons-material";
 import { preventEvent } from "Common/helper";
-import { includes, startCase, toLower } from "lodash";
+import { get, includes, startCase, toLower } from "lodash";
 import DialogAlert from "components/DialogAlert";
 import { useMutation } from "@apollo/client";
 import { DELETE_TICKET } from "TicketDetails/TicketGraphQL";
@@ -22,6 +22,8 @@ import CSAT from "Common/CSAT";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy, faFileLines } from "@fortawesome/pro-regular-svg-icons";
 import ChangeTicketAssignment from "./components/ChangeTicketAssignment";
+import HeaderActions from "./components/HeaderActions";
+import { useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   header: {
@@ -46,9 +48,10 @@ const Header = (props) => {
     appuser_id,
     toggleOffCRMDrawer,
     handleOpenTicketAssignment,
-    ticketData
+    ticketData,
+    fromDashboard,
+    addRecentActionsDrawer
   } = props;
-
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [openDelete, toggleDelete] = useState(null);
@@ -58,6 +61,8 @@ const Header = (props) => {
   const [editAssignment, setEditAssignment] = useState(null);
 
   const [deleteTicket] = useMutation(DELETE_TICKET);
+  const dockedItems = useSelector(state => get(state, "dockedItems"))
+  const moveToolBar = dockedItems && dockedItems.length > 0
 
   const handleClick = (event) => {
     preventEvent(event);
@@ -114,18 +119,25 @@ const Header = (props) => {
 
   const assigned_name = !ticket.assigned_name && ticket.subscriber && ticket.subscriber.first_name ? `${ticket.subscriber.first_name} ${ticket.subscriber.last_name} (${ticket.subscriber.customer_id})` : ticket.assigned_name
   const assignmnetId = (ticket.subscriber && ticket.subscriber.customer_id) || (ticket.location_id) || (ticket.equipment_id)
+  const rightStyle = fromDashboard ? (moveToolBar ? 25 : 13) : (includes(category, "Add") || includes(category, "config") ? 50 : 97);
+  
   return (
     <>
       <div
         className={`${classes.header} docker-buttons`}
-        style={{
-          right:
-            includes(category, "Add") || includes(category, "config") ? 50 : 97,
-        }}
+        style={{ right: rightStyle }}
       >
         <IconButton onClick={handleClick} size="large" className="text-light">
           <MoreVert className="f-20" />
         </IconButton>
+        {fromDashboard && 
+          <HeaderActions
+            ticket={ticket}
+            category={category}
+            addRecentActionsDrawer={addRecentActionsDrawer}
+            dockedItems={dockedItems}
+          />
+        }
         <Popover
           open={Boolean(anchorEl)}
           anchorEl={anchorEl}

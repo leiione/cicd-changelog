@@ -17,7 +17,7 @@ import { TICKET_LIST_SUBSCRIPTION } from 'TicketDetails/TicketGraphQL';
 
 const TicketWidget = (props) => {
   const dispatch = useDispatch();
-  const { item, items, index, nextId, onRemoveItem, handleOpenTicket } = props;
+  const { item, items, index, nextId, onRemoveItem, hideContentDrawer, dockedItems } = props;
 
   const [editingItemId, setEditingItemId] = useState(null);
   const [editingTitle, setEditingTitle] = useState("");
@@ -557,7 +557,6 @@ const TicketWidget = (props) => {
         }}
       >
         <FilteredTable
-          handleOpenTicket={handleOpenTicket}
           page={page}
           setPage={setPage}
           setSort={setSort}
@@ -575,6 +574,8 @@ const TicketWidget = (props) => {
           widgetId={item.i}
           widgetVariables={variables}
           error={error}
+          hideContentDrawer={hideContentDrawer}
+          dockedItems={dockedItems}
         />
       </Grid>
     </Grid>

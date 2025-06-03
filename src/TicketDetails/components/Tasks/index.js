@@ -26,7 +26,7 @@ import {
   TASK_SUBSCRIPTION,
 } from "TicketDetails/TicketGraphQL";
 import { useDispatch } from "react-redux";
-import { setCardPreferences, showSnackbar } from "config/store";
+import { setCardPreferences, setContentDrawer, showSnackbar } from "config/store";
 import ProgressButton from "Common/ProgressButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/pro-regular-svg-icons";
@@ -416,8 +416,10 @@ const Tasks = (props) => {
 };
 
 const TicketTaskContainer = props => {
+  const dispatch = useDispatch()
   const online = useSelector(state => state.networkStatus?.online || false);
-  const { ticket, handleOpenTicket } = props;
+  const contentDrawer = useSelector(state => state.contentDrawer);
+  const { ticket, handleOpenTicket, addRecentActionsDrawer } = props;
 
   const [convertTask, setTaskToConvert] = useState(null);
   
@@ -439,7 +441,30 @@ const TicketTaskContainer = props => {
 
   const onClose = () => {
     setTaskToConvert(null);
+    dispatch(setContentDrawer({
+      open: false,
+      id: 0,
+    }));
   };
+
+  const handleOpenTicketMS = (ticket, action, prevTicket) => {
+    if (contentDrawer && contentDrawer.open && contentDrawer.ticket_id > 0) {
+      if (addRecentActionsDrawer && action === 'docked' && prevTicket && prevTicket.ticket_id > 0) {
+        addRecentActionsDrawer({ ...prevTicket, category: "Service Desk", name: prevTicket.summary || prevTicket.type, id: prevTicket.ticket_id, fromMS: true })
+      }
+      dispatch(setContentDrawer({
+        open: true,
+        component: 'ticket',
+        description: ticket.description || ticket.type,
+        id: ticket.ticket_id,
+        ticket_id: ticket.ticket_id,
+        ticket: ticket
+      }));
+    } else {
+      handleOpenTicket(ticket, action, prevTicket)
+    }
+    setTaskToConvert(null);
+  }
 
   return (
     <>
@@ -449,14 +474,14 @@ const TicketTaskContainer = props => {
         loading={loading && !cacheExists}
         tasks={tasks}
         taskError={error}
-        handleOpenTicket={handleOpenTicket}
+        handleOpenTicket={handleOpenTicketMS}
         setTaskToConvert={setTaskToConvert}
       />
       {convertTask && (
         <AddTicket
           category={"Convert to Ticket"}
           ticket={convertTask.ticket}
-          handleOpenTicket={handleOpenTicket}
+          handleOpenTicket={handleOpenTicketMS}
           hideContentDrawer={onClose}
         />
       )}
