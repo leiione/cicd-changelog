@@ -10,91 +10,181 @@ jobs:
     executor: node-executor
     steps:
       - checkout
+
       - run:
           name: Install dependencies
           command: npm install --legacy-peer-deps
+
+     
+      
       - run:
           name: Build the application
-          command: npm run build
+          command: CI=false npm run build
+
       - run:
-          name: Create Dist folder and copy build artifacts
-          command: mkdir dist && cp -r build/* dist/
+          name: Create Dist folder and copy build artifact
+          command: |
+            mkdir dist && cp -r build/* dist/
+
       - run:
           name: Install zip utility
           command: |
             apt-get update
             apt-get install -y zip
+
       - run:
           name: Zip the build artifacts
-          command: zip -r build.zip dist
+          command: |
+            mkdir dist && cp -r build/* dist/
+            zip -r build.zip dist
+
+      - run:
+          name: Install AWS CLI and Less
+          command: |
+            apt-get update && apt-get install -y awscli less
+      - run:
+          name: Download .env from S3
+          command: |
+            BRANCH_NAME=${CIRCLE_BRANCH}
+            if [ "$BRANCH_NAME" == "develop" ]; then
+              ENV_FILE=".env.staging.txt"
+            elif [ "$BRANCH_NAME" == "master" ]; then
+              ENV_FILE=".env.live.txt"
+            else
+              echo "No Environment file needed for this branch" && exit 0
+            fi
+            aws s3 cp s3://crm-art/crm-envs-fe/$ENV_FILE .env
+            echo "Using Environment file: $ENV_FILE"
+
+
       - persist_to_workspace:
           root: .
           paths:
+            - .env
             - dist
 
   deploy:
-    executor: node-executor
+    docker:
+      - image: node:18  # For AWS CLI
     steps:
       - checkout
       - attach_workspace:
           at: /workspace
       - run:
+          name: Verify Workspace Contents
+          command: ls -la /workspace/dist
+      - run:
           name: Install Prerequisites
-          command: apt-get update && apt-get install -y unzip less
+          command: |
+            apt-get update
+            apt-get install -y unzip less
+
       - run:
           name: Install AWS CLI
           command: |
+            apt-get update
+            apt-get install -y unzip
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             ./aws/install
+
       - run:
           name: Configure AWS CLI
           command: |
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
             aws configure set region $AWS_REGION
+
+      - run:
+          name: Determine Target S3 Bucket
+          command: |
+            BRANCH_NAME=${CIRCLE_BRANCH}
+            if [ "$BRANCH_NAME" == "develop" ]; then
+              S3_BUCKET="staging"
+            elif [ "$BRANCH_NAME" == "master" ]; then
+              S3_BUCKET="prod"
+            else
+              S3_BUCKET="$BRANCH_NAME"
+            fi
+            echo "S3_BUCKET=$S3_BUCKET" >> $BASH_ENV
+            echo "Deploying to S3 bucket: $S3_BUCKET"
+
       - run:
           name: Upload to S3
           command: |
-            BRANCH_NAME=staging
-            S3_BUCKET=microfrontend-crm-ms
-            aws s3 sync /workspace/dist/ s3://$S3_BUCKET/$BRANCH_NAME/ --acl public-read
+            source $BASH_ENV
+            aws s3 sync /workspace/dist/ s3://microfrontend-crm-ms/$S3_BUCKET/ --acl public-read
+            echo "Uploaded files to s3://microfrontend-crm-ms/$S3_BUCKET/"
+
       - run:
           name: Invalidate CloudFront Cache
           command: |
             CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
-            aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*"
-            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
+            INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/*" --query "Invalidation.Id" --output text --no-cli-pager)
+
+            echo "Waiting for CloudFront Invalidation ID: $INVALIDATION_ID"
+            while true; do
+              STATUS=$(aws cloudfront get-invalidation --distribution-id $CLOUDFRONT_DIST_ID --id $INVALIDATION_ID --query "Invalidation.Status" --output text --no-cli-pager)
+              echo "Invalidation Status: $STATUS"
+              if [ "$STATUS" == "Completed" ]; then
+                echo "Invalidation Completed!"
+                break
+              fi
+              sleep 10  # Wait for 10 seconds before checking again
+            done
+       
+      - run:
+          name: Microfrontend MS URL Verification
+          command: |
+            source $BASH_ENV
+            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$S3_BUCKET"
             echo "Microfrontend is accessible at: $DEPLOY_URL"
+            
+      
+      - run:
+          name: Send Slack Notification
+          command: |
+            source $BASH_ENV
+            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$S3_BUCKET"
+            COMMIT_AUTHOR="$(git log -1 --pretty=format:'%an')"
+            
+            curl -X POST -H 'Content-type: application/json' --data "{
+              \"attachments\": [
+                {
+                  \"color\": \"#36a64f\",
+                  \"title\": \"CircleCI Build Notification\",
+                  \"fields\": [
+                    { \"title\": \"Job\", \"value\": \"${CIRCLE_JOB}\", \"short\": true },
+                    { \"title\": \"Branch\", \"value\": \"${CIRCLE_BRANCH}\", \"short\": true },
+                    { \"title\": \"Commit Author\", \"value\": \"${COMMIT_AUTHOR}\", \"short\": true },
+                    { \"title\": \"Commit\", \"value\": \"${CIRCLE_SHA1:0:7}\", \"short\": true },
+                    { \"title\": \"Build Number\", \"value\": \"${CIRCLE_BUILD_NUM}\", \"short\": true },
+                    { \"title\": \"Status\", \"value\": \"${CIRCLE_JOB}\", \"short\": true },
+                    { \"title\": \"Build URL\", \"value\": \"<${CIRCLE_BUILD_URL}|View Build>\", \"short\": false },
+                    { \"title\": \"Deploy URL\", \"value\": \"${DEPLOY_URL}\", \"short\": false }
+                  ]
+                }
+              ]
+            }" https://hooks.slack.com/services/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
+
       - run:
           name: Send Notification to RingCentral
           command: |
-            if [ $? -eq 0 ]; then
-              STATUS="Success"
-              MESSAGE="Deployment for branch '${CIRCLE_BRANCH}' completed successfully."
-            else
-              STATUS="Failure"
-              MESSAGE="Deployment for branch '${CIRCLE_BRANCH}' failed."
-            fi
+            BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+            DEPLOY_URL="https://crm-microfrontend.ms-visp.net/$BRANCH_NAME"
+            BUILD_NUM=$CIRCLE_BUILD_NUM
+            BUILD_URL=$CIRCLE_BUILD_URL
+            VCS_URL=$CIRCLE_REPOSITORY_URL
+            REPO_NAME=$CIRCLE_PROJECT_REPONAME
+            USERNAME=$CIRCLE_USERNAME
+            STATUS="success"
 
-            BUILD_URL="https://circleci.com/gh/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BUILD_NUM}"
+            PAYLOAD="{\"payload\": {\"activity\": \"Deployment Completed\", \"title\": \"Deployment Notification\", \"body\": \"Build #$BUILD_NUM for branch: $BRANCH_NAME\\nDeploy URL: $DEPLOY_URL\", \"build_num\": $BUILD_NUM, \"build_url\": \"$BUILD_URL\", \"branch\": \"$BRANCH_NAME\", \"vcs_url\": \"$VCS_URL\", \"reponame\": \"$REPO_NAME\", \"username\": \"$USERNAME\", \"status\": \"$STATUS\"}}"
 
-            USERNAME="${CIRCLE_USERNAME}"
+            echo "Payload: $PAYLOAD"
+            curl -X POST -H 'Content-Type: application/json' -d "$PAYLOAD" $RINGCENTRAL
 
-            PAYLOAD=$(echo -e '{
-              "payload": {
-                "status": "'${STATUS}'",
-                "text": "**CircleCI Deployment Notification**\\nBranch: '${CIRCLE_BRANCH}'\\nStatus: '${STATUS}'\\nMessage: '${MESSAGE}'",
-                "build_num": '${CIRCLE_BUILD_NUM}',
-                "build_url": "'${BUILD_URL}'",
-                "vcs_url": "'${VCS_URL}'",
-                "branch": "'${CIRCLE_BRANCH}'",
-                "reponame": "'${CIRCLE_PROJECT_REPONAME}'",
-                "username": "'${USERNAME}'"
-                }
-              }')
 
-              curl -X POST -H "Content-Type: application/json" -d "$PAYLOAD" ${WEBHOOK_URL}
 workflows:
   build_and_deploy:
     jobs:
