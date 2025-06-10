@@ -1,18 +1,2 @@
 [
-  {
-    "date": "2025-06-10",
-    "message": "✅ crm-723 deployed via update-changelog"
-  },
-  {
-    "date": "2025-06-10",
-    "message": "✅ crm-723 deployed via update-changelog"
-  },
-  {
-    "date": "2025-06-10",
-    "message": "Initial CI/CD integration with GitHub Pages."
-  },
-  {
-    "date": "2025-06-09",
-    "message": "Added staging auto-deploy."
-  }
-]
+ {"date": "2025-06-10|CI:", "message": "crm-723 - changelog update from update-changelog" }
