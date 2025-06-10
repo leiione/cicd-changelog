@@ -1,6 +1,7 @@
 
+.env
+
 node_modules/
 .idea
 package-lock.json
 .circleci/config.yml
-.env
