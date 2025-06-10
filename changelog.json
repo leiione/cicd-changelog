@@ -2,7 +2,7 @@
   {
     "date": "2025-06-10",
     "message": "✅ crm-723 deployed via update-changelog",
-    "release_notes": "null",
+    "release_notes": "AI failed: You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.",
     "commits": [
   "- 0bd0ad7 Kamran Farooq: Update changelog.json",
   "- 425078b Kamran Farooq: Update changelog.json",
