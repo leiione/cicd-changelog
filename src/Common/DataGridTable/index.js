@@ -26,7 +26,6 @@ const DataGridTable = ({
   selectedRow,
   enableInlineEditing,
   handleUpdateCell,
-  ispTimeZone,
   currency = '$',
   customEmptyMsg,
   tableOptions,
@@ -35,7 +34,8 @@ const DataGridTable = ({
   setSort,
   actionColumn,
   onCellClick,
-  disableRowSelectionOnClick = false
+  disableRowSelectionOnClick = false,
+  filters
 }) => {
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
@@ -45,10 +45,11 @@ const DataGridTable = ({
   const apiRef = useGridApiRef();
   const [forceLoading, setForceLoading] = useState(false); // result from table built-in function wont show
   const dockedItems = useSelector(state => get(state, "dockedItems", []))
-
+  const ispTimeZone = useSelector((state) => state.timeZone);
+  
   let dgColumns = React.useMemo(() => getDataGridColumns({
-    columns, loading, fullWidth, enableInlineEditing, handleUpdateCell, ispTimeZone, currency, tableOptions
-  }), [columns, currency, enableInlineEditing, fullWidth, handleUpdateCell, ispTimeZone, loading, tableOptions]);
+    columns, loading, fullWidth, enableInlineEditing, handleUpdateCell, ispTimeZone, currency, tableOptions, filters
+  }), [columns, currency, enableInlineEditing, fullWidth, handleUpdateCell, ispTimeZone, loading, tableOptions, filters]);
 
   let dockedData = React.useMemo(() => (dockedItems.filter(x => x.category ==="Service Desk" && !x.temp).map(y => y.table_id || y.id)
 ), [dockedItems])
@@ -104,7 +105,7 @@ const DataGridTable = ({
   }, [dockedData]);
 
   return (
-    <div className='h-100 w-100'>
+    <div>
       <DataGridPro
         apiRef={apiRef}
         columns={dgColumns}
@@ -137,6 +138,10 @@ const DataGridTable = ({
         onSortModelChange={onSortModelChange}
         hideFooter={hideFooter}
         {...dataGridProps}
+        sx={{
+          height: 300, // or any height you need
+          width: '100%', // or a specific width like 800
+        }}
       />
     </div>
   );

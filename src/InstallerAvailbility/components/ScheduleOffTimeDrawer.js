@@ -30,6 +30,7 @@ import { useDispatch } from 'react-redux';
 import { showSnackbar } from 'config/store';
 import DialogAlert from "components/DialogAlert";
 
+
 const ScheduleOffTimeDrawer = ({ open, onClose, editUserScheduleOffID, seteditUserScheduledOffID }) => {
   const dispatch = useDispatch();
   const [dateRange, setDateRange] = useState([null, null]);
@@ -507,6 +508,7 @@ const ScheduleOffTimeDrawer = ({ open, onClose, editUserScheduleOffID, seteditUs
       <InnerDrawer
         header={isEditMode ? "Edit Schedule Off Time" : "Schedule Off Time"}
         open={open}
+        width={"40vw"}
         onCloseDrawer={handleClose}
       >
         <FormProvider {...methods}>

@@ -298,8 +298,7 @@ const WorkOrder = ({
               "link",
               "media",
             ],
-            toolbar:
-              "undo redo | bold italic underline forecolor backcolor | link image code | align | bullist numlist",
+            toolbar: "undo redo | bold italic underline forecolor backcolor | link image code | print | align | bullist numlist",
             image_title: true,
             automatic_uploads: true,
             file_picker_types: "file image media",

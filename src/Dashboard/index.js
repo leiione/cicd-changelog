@@ -53,7 +53,7 @@ const Dashboard = (props) => {
             cache.writeQuery({
               query: GET_USER_PREFERENCES,
               data: {
-                getCRMUserPreferences: { ...userPreferences, ...data.saveCRMUserPreferences}
+                getCRMUserPreferences: { ...userPreferences, ...data.saveCRMUserPreferences }
               }
             })
           }
@@ -150,18 +150,23 @@ const Dashboard = (props) => {
   };
 
   return (
-    <div className="drawer-wrapper-full">
+    <>
+    <Button
+        variant="contained"
+        sx={{  
+          position: "fixed",
+          top: "100px",
+          right: "16px"
+         }}
+        startIcon={<AddCircleIcon />}
+        onClick={() => setIsModalOpen(true)}
+      >
+        Add Widget
+      </Button>
+    
+    <div className="drawer-wrapper-full ticketing-dashboard p-3">
 
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
-        <Button
-          variant="contained"
-          startIcon={<AddCircleIcon />}
-          onClick={() => setIsModalOpen(true)}
-        >
-          Add Widget
-        </Button>
-      </Box>
-
+      
       <ResponsiveGridLayout
         className="layout"
         layouts={layouts}
@@ -169,19 +174,19 @@ const Dashboard = (props) => {
         cols={{ lg: 2, md: 2, sm: 1, xs: 1 }}
         rowHeight={200}
         isDraggable={true}
-        isResizable={false}
-        preventCollision={false}
+        isResizable={true}
+        preventCollision={true}
         autoSize={true}
         margin={[16, 16]}
-        onLayoutChange={(layout, layouts) => onLayoutChange(layout)}
+       onLayoutChange={(layout, layouts) => onLayoutChange(layout)}
         resizeHandles={[]}
         style={{
           '& .react-resizable-handle': {
             display: 'none !important'
           }
         }}
-        draggableCancel=".edit-title-area" 
-        draggableHandle=".card-drag-handle" 
+        draggableCancel=".edit-title-area"
+        draggableHandle=".card-drag-handle"
 
       >
 
@@ -189,8 +194,6 @@ const Dashboard = (props) => {
           <Card
             key={item.i}
             sx={{
-              width: '100%',
-              height: '100%',
               position: 'relative',
               cursor: 'grab',
               '&:active': {
@@ -218,9 +221,9 @@ const Dashboard = (props) => {
       </ResponsiveGridLayout>
       {isModalOpen &&
         <AddWidget
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleAddWidget}
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleAddWidget}
         />
       }
       {/* Tickets Table Section */}
@@ -248,6 +251,7 @@ const Dashboard = (props) => {
         />
       }
     </div>
+    </>
   );
 };
 

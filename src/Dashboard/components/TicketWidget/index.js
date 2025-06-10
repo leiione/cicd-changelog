@@ -549,12 +549,9 @@ const TicketWidget = (props) => {
           />
         }
       </Grid>
-      <Grid
-        item
-        xs={12}
-        onMouseDown={(e) => {
-          e.stopPropagation();
-        }}
+      <Grid item xs={12} onMouseDown={(e) => {
+        e.stopPropagation();
+      }}
       >
         <FilteredTable
           page={page}

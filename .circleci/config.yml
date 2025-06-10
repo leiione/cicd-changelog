@@ -6,72 +6,244 @@ executors:
       - image: cimg/node:18.20.2
 
 jobs:
-  deploy-to-production:
+  build:
     executor: node-executor
     steps:
       - checkout
-
       - run:
-          name: Install AWS CLI
+          name: Install dependencies & tools
           command: |
-            sudo apt-get update && sudo apt-get install -y unzip
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
-
+            sudo apt-get update && sudo apt-get install -y tar unzip less zip
+            curl -sSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
+            unzip awscliv2.zip && sudo ./aws/install
+            npm install --legacy-peer-deps
       - run:
-          name: Download .env from S3
+          name: Download environment config
           command: |
-            aws s3 cp s3://crm-art/crm-envs-fe/.env.live.txt .env
-            echo "Downloaded .env"
+            if [ "$CIRCLE_BRANCH" == "develop" ]; then
+              ENV_FILE=".env.tbd-staging.txt"
+            elif [[ "$CIRCLE_BRANCH" == crm-hotfix-* ]] || [[ "$CIRCLE_BRANCH" == "master" ]]; then
+              ENV_FILE=".env.tbd-production.txt"
+            elif [[ "$CIRCLE_BRANCH" == crm-slrb-* ]]; then
+              ENV_FILE=".env.tbd-staging.txt"
+            elif [ "$CIRCLE_BRANCH" ==~ ^crm-[0-9]+$ ]]; then
+              ENV_FILE=".env.staging.txt"
+            else
+              echo "No .env needed" && exit 0
+            fi
+            aws s3 cp s3://crm-art/crm-envs-fe/$ENV_FILE .env
+      - run: CI=false npm run build
+      - run: |
+          mkdir dist && cp -r build/* dist/
+          zip -r build.zip dist
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .env
+            - dist
 
-      - run:
-          name: Install dependencies
-          command: npm install --legacy-peer-deps
+  hold-for-hotfix-approval:
+    type: approval
 
-      - run:
-          name: Build application
-          command: CI=false npm run build
+  hold-for-develop-approval:
+    type: approval
 
+  deploy-preview:
+    docker:
+      - image: cimg/node:18.20.2
+    steps:
+      - checkout
+      - attach_workspace:
+          at: workspace
       - run:
-          name: Deploy to S3 /prod
+          name: Deploy to Preview
           command: |
-            aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
-            aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
-            aws configure set region "$AWS_REGION"
+            aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/${CIRCLE_BRANCH}/ --acl public-read
+            aws cloudfront create-invalidation --distribution-id E27YPOVXTAAHKM --paths "/${CIRCLE_BRANCH}/*"
+      - run:
+          name: Install dependencies & tools
+          command: |
+            sudo apt-get update && sudo apt-get install -y tar unzip less zip
+            curl -sSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
+            unzip awscliv2.zip && sudo ./aws/install
+            npm install --legacy-peer-deps
+      - run:
+          name: Verify Preview
+          command: |
+            URL="https://crm-microfrontend.ms-visp.net/${CIRCLE_BRANCH}"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L "$URL")
+            [[ "$STATUS" =~ ^2|^3 ]] && echo OK || exit 1
 
-            mkdir dist && cp -r build/* dist/
-            echo "Build Timestamp: $(date -u)" > dist/deploy_info.txt
+  deploy-staging:
+    docker:
+      - image: cimg/node:18.20.2
+    steps:
+      - checkout
+      - attach_workspace:
+          at: workspace
+      - run:
+          name: Install dependencies & tools
+          command: |
+            sudo apt-get update && sudo apt-get install -y tar unzip less zip
+            curl -sSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
+            unzip awscliv2.zip && sudo ./aws/install
+            npm install --legacy-peer-deps
+      - run:
+          name: Deploy to Staging
+          command: |
+            aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/tbd-staging/ --acl public-read
+            aws cloudfront create-invalidation --distribution-id E27YPOVXTAAHKM --paths "/tbd-staging/*"
+      - run:
+          name: Verify Staging
+          command: |
+            URL="https://crm-microfrontend.ms-visp.net/tbd-staging"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L "$URL")
+            [[ "$STATUS" =~ ^2|^3 ]] && echo OK || exit 1
 
-            aws s3 sync dist/ s3://microfrontend-crm-ms/prod/ \
-              --acl public-read \
-              --cache-control "no-cache, no-store, must-revalidate" \
-              --metadata-directive REPLACE \
-              --delete
+  deploy-production:
+    docker:
+      - image: cimg/node:18.20.2
+    steps:
+      - checkout
+      - attach_workspace:
+          at: workspace
 
       - run:
-          name: Invalidate CloudFront Cache
+          name: Install dependencies & tools
           command: |
-            CLOUDFRONT_DIST_ID=E27YPOVXTAAHKM
-            INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DIST_ID --paths "/prod/*" --query "Invalidation.Id" --output text --no-cli-pager)
+            sudo apt-get update && sudo apt-get install -y tar unzip less zip
+            curl -sSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
+            unzip awscliv2.zip && sudo ./aws/install
+            npm install --legacy-peer-deps
 
-            echo "Waiting for CloudFront Invalidation ID: $INVALIDATION_ID"
-            while true; do
-              STATUS=$(aws cloudfront get-invalidation --distribution-id $CLOUDFRONT_DIST_ID --id $INVALIDATION_ID --query "Invalidation.Status" --output text --no-cli-pager)
-              echo "Invalidation Status: $STATUS"
-              if [ "$STATUS" == "Completed" ]; then
-                echo "Invalidation Completed!"
-                break
-              fi
-              sleep 10
-            done
+      - run:
+          name: Download production .env file
+          command: |
+            aws s3 cp s3://crm-art/crm-envs-fe/.env.tbd-production.txt .env
+            echo "Downloaded .env.tbd-production.txt for production deployment"
+
+      
+
+      - run:
+          name: Deploy to Production
+          command: |
+            aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/tbd-production/ --acl public-read
+            aws cloudfront create-invalidation --distribution-id E27YPOVXTAAHKM --paths "/tbd-production/*"
+
+      - run:
+          name: Verify Production
+          command: |
+            URL="https://crm-microfrontend.ms-visp.net/tbd-production"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L "$URL")
+            [[ "$STATUS" =~ ^2|^3 ]] && echo OK || exit 1
+
+
+  deploy-standard:
+    docker:
+      - image: cimg/node:18.20.2
+    steps:
+      - checkout
+      - attach_workspace:
+          at: workspace
+
+      - run:
+          name: Validate Deploy Branch Pattern
+          command: |
+            if [[ "$CIRCLE_BRANCH" == crm-slrb-* ]] || [[ "$CIRCLE_BRANCH" =~ ^crm-[0-9]+$ ]]; then
+              echo "Valid branch pattern for deploy-standard: $CIRCLE_BRANCH"
+            else
+              echo "Invalid branch for deploy-standard: $CIRCLE_BRANCH"
+              circleci step halt
+            fi
+
+      - run:
+          name: Determine Folder
+          command: |
+            DEPLOY_PATH="$CIRCLE_BRANCH"
+            echo "export DEPLOY_PATH=$DEPLOY_PATH" >> $BASH_ENV
+
+      - run:
+          name: Install dependencies & tools
+          command: |
+            sudo apt-get update && sudo apt-get install -y tar unzip less zip
+            curl -sSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
+            unzip awscliv2.zip && sudo ./aws/install
+            npm install --legacy-peer-deps
+
+      - run:
+          name: Deploy to S3
+          command: |
+            source $BASH_ENV
+            aws s3 sync workspace/dist/ s3://microfrontend-crm-ms/$DEPLOY_PATH/ --acl public-read
+            aws cloudfront create-invalidation --distribution-id E27YPOVXTAAHKM --paths "/$DEPLOY_PATH/*"
+
+      - run:
+          name: Verify URL
+          command: |
+            source $BASH_ENV
+            URL="https://crm-microfrontend.ms-visp.net/$DEPLOY_PATH"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L "$URL")
+            [[ "$STATUS" =~ ^2|^3 ]] && echo OK || exit 1
 
 workflows:
   version: 2
-  deploy:
+  deploy-flow:
     jobs:
-      - deploy-to-production:
+      - build
+          
+
+      - deploy-standard:
+          requires:
+            - build
+          
+
+
+      - deploy-staging:
+          requires:
+            - build
           filters:
             branches:
               only:
-                - master
+                - develop
+
+      - hold-for-develop-approval:
+          requires:
+            - deploy-staging
+          filters:
+            branches:
+              only:
+                - develop
+
+      - deploy-production:
+          name: deploy-develop-production
+          requires:
+            - hold-for-develop-approval
+          filters:
+            branches:
+              only:
+                - develop
+
+      - deploy-preview:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - /crm-hotfix-.*/
+
+      - hold-for-hotfix-approval:
+          requires:
+            - deploy-preview
+          filters:
+            branches:
+              only:
+                - /crm-hotfix-.*/
+
+      - deploy-production:
+          name: deploy-hotfix-production
+          requires:
+            - hold-for-hotfix-approval
+          filters:
+            branches:
+              only:
+                - /crm-hotfix-.*/

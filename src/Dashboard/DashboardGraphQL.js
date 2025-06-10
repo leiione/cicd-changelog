@@ -13,7 +13,9 @@ export const GET_ISP_TICKETS = gql`
     $dateRange: DateRangeInput,
     $dueDateRange: DateRangeInput,
     $sortField: String,
-    $sortOrder: String
+    $sortOrder: String,
+    $searchVal: String,
+    $timeZone: String
   ) {
     getISPTickets(
       page: $page, 
@@ -27,7 +29,9 @@ export const GET_ISP_TICKETS = gql`
       dateRange: $dateRange,
       dueDateRange: $dueDateRange,
       sortField: $sortField,
-      sortOrder: $sortOrder
+      sortOrder: $sortOrder,
+      searchVal: $searchVal,
+      timeZone: $timeZone
     ) {
       tickets {
         id: ticket_id

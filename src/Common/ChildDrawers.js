@@ -2,8 +2,6 @@ import React from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { Drawer, IconButton, Toolbar, Typography } from "@mui/material";
 import { Close } from "@mui/icons-material";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPrint } from "@fortawesome/pro-regular-svg-icons";
 
 const useStyles = makeStyles({
   drawerPaper: {
@@ -18,28 +16,10 @@ const ChildDrawers = (props) => {
     open,
     handleDrawerClose1,
     children,
-    handlePrint,
-    ticketDetail,
   } = props;
 
   const getTitle = (title) => {
-    if (title === "Work Order") {
-      return (
-        <>
-          {title}
-          <IconButton
-            className="ml-2 text-light"
-            onClick={() => {
-              handlePrint(ticketDetail);
-            }}
-          >
-            <FontAwesomeIcon icon={faPrint} />
-          </IconButton>
-        </>
-      );
-    } else {
-      return title;
-    }
+    return title;
   };
 
   return (

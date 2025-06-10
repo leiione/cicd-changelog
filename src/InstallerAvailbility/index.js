@@ -64,7 +64,7 @@ const InstallerAvailbility = () => {
       renderCell: (params) => {
         return (
           <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-            <Typography 
+            <Typography
               className="w-100 text-truncate"
               sx={{
                 color: params.value !== 'None' ? '#1976d2' : 'inherit',
@@ -79,7 +79,7 @@ const InstallerAvailbility = () => {
             </Typography>
             {params.value !== 'None' && params.row.timeOffCount > 1 && (
               <Badge
-                badgeContent={params.row.timeOffCount} 
+                badgeContent={params.row.timeOffCount}
                 color="primary"
                 sx={{ ml: 1, flexShrink: 0 }}
               />
@@ -97,13 +97,13 @@ const InstallerAvailbility = () => {
     }
   };
 
-  const handelEditScheduleOffClick =(event,params)=>{
+  const handelEditScheduleOffClick = (event, params) => {
     setIsScheduledOffDialogOpen(false);
     seteditUserScheduledOffID(params.id)
     setIsScheduleOffDrawerOpen(true)
-    
+
   }
-  
+
   return (
     <>
       <Box sx={{ height: "100%", width: "100%", p: 2 }}>
@@ -137,7 +137,7 @@ const InstallerAvailbility = () => {
               </IconButton>
             )}
           </Box>
-          <Box sx={{ height: '400px', overflow: 'auto' }}>
+          <Box>
             <DataGridTable
               containerHeight={ref.current ? ref.current.clientHeight : 300}
               rows={filteredData}
@@ -146,10 +146,11 @@ const InstallerAvailbility = () => {
               handleRowClick={null}
               onCellClick={handleCellClick} // Add this line to pass your cell click handler
               disableRowSelectionOnClick={true}
-              
+              sx={{ height: '400px' }}
+
             />
           </Box>
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <div className="text-right mt-3" >
             <Button
               variant="outlined"
               color="primary"
@@ -157,11 +158,11 @@ const InstallerAvailbility = () => {
             >
               Schedule Off-Day
             </Button>
-          </Box>
+          </div>
         </Paper>
       </Box>
       <ScheduleOffTimeDrawer
-        editUserScheduleOffID ={editUserScheduleOffID}
+        editUserScheduleOffID={editUserScheduleOffID}
         open={isScheduleOffDrawerOpen}
         seteditUserScheduledOffID={seteditUserScheduledOffID}
         onClose={() => setIsScheduleOffDrawerOpen(false)}

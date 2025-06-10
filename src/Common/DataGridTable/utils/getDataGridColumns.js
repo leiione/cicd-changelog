@@ -1,7 +1,8 @@
-import { Skeleton, Typography } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import { dateFormat, formatDateTime } from "Common/utils/formatter";
 import { find, get, includes } from "lodash";
 import html2plaintext from "html2plaintext";
+import HighlightText from "../components/HighlightText";
 
 const renderSelectEditCell = (props, handleUpdateCell) => {
   return "ToDo"
@@ -15,7 +16,8 @@ export const getDataGridColumns = ({
   handleUpdateCell,
   ispTimeZone,
   currency = '$',
-  tableOptions
+  tableOptions,
+  filters
 }) => {
   let dataGridColumns = [];
   let orderColumns = columns
@@ -115,7 +117,11 @@ export const getDataGridColumns = ({
                   text = value.toString()
                 }
                 return (
-                  <Typography className={`w-100 text-truncate`} style={cellStyles}>{text}</Typography>
+                  <HighlightText
+                    value={text}
+                    filters={filters}
+                    cellStyles={cellStyles}
+                  />
                 );
             }
           };

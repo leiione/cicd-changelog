@@ -10,8 +10,8 @@ const TaskMenuOptions = (props) => {
   const { ticket, show, task, ticketTasks, setTicketTasks, onSaveTaskChanges, setTaskToConvert, disabled, setOnEditMode, onEdit } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [openAlert, setOpenAlert] = React.useState(null);
-  const [isSubmitting] = React.useState(null);
-
+  const [isSubmitting] = React.useState(null); 
+  
   const openMenu = Boolean(anchorEl);
   const handleClick = (event) => {
     preventEvent(event);
@@ -90,7 +90,7 @@ const TaskMenuOptions = (props) => {
           }}
         >
           <MenuItem onClick={onConvertTask} disabled={disabled}> Convert to ticket</MenuItem>
-          {!task.default_required &&
+          {!task.default_required && !task.is_default &&
             <>
               <MenuItem onClick={handleEdit}> Edit</MenuItem>
               <MenuItem onClick={() => onOpenAlert("delete")}> Delete</MenuItem>

@@ -415,6 +415,7 @@ export const getTicketsColumns = (size = 1) => [
     flex: 0.8,
     sortable: true,
     resizable: true,
+    format: 'dateTimewSec',
     dataType: 'dateTime'
   },
   { 
@@ -440,6 +441,7 @@ export const getTicketsColumns = (size = 1) => [
     flex: 0.8,
     sortable: true,
     resizable: true,
+    format: 'dateTimewSec',
     dataType: 'dateTime'
   },
   { 
@@ -449,6 +451,7 @@ export const getTicketsColumns = (size = 1) => [
     flex: 0.5,
     sortable: true,
     resizable: true,
+    format: 'dateTimewSec',
     dataType: 'dateTime'
   },
   { 
@@ -466,6 +469,7 @@ export const getTicketsColumns = (size = 1) => [
     flex: 0.5,
     sortable: true,
     resizable: true,
+    format: 'dateTimewSec',
     dataType: 'dateTime'
   },
   { 

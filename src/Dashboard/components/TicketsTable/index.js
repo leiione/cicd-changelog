@@ -10,10 +10,9 @@ import TableOptions from '../TableOptions';
 import { useSelector, useDispatch } from 'react-redux';
 import { setContentDrawer, setPageNumber, setPageSize } from '../../../config/store';
 import { getTicketsColumns, getVisibleColumns } from './ticketsColumns';
-import { processTicketDates, clearDateFormatCache } from './utils/dateUtils';
-import { GET_ISP_TICKETS,GET_TICKET } from 'Dashboard/DashboardGraphQL';
+import { GET_ISP_TICKETS, GET_TICKET } from 'Dashboard/DashboardGraphQL';
 import { TICKET_LIST_SUBSCRIPTION } from 'TicketDetails/TicketGraphQL';
-
+import { checkIfCacheExists } from 'config/apollo';
 
 // Styling with optimized containers
 const useStyles = makeStyles({
@@ -89,10 +88,12 @@ const useStyles = makeStyles({
 const TicketsTable = ({ hideContentDrawer, dockedItems }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const timeZone = useSelector((state) => state.timeZone);
   
   //const [selectedRow, setSelectedRow] = useState([]);
   const [expectedLastPage, setExpectedLastPage] = useState(null);
   const [visibleColumns, setVisibleColumns] = useState([]);
+  const [searchVal, setSearchVal] = useState({});
   const [sortModel, setSortModel] = useState({ field: 'ticket_id', order: 'desc' });
   const isp_id = useSelector(state => state.ispId)
   
@@ -142,7 +143,9 @@ const TicketsTable = ({ hideContentDrawer, dockedItems }) => {
       pageSize: parseInt(pageSize, 10),
       sortField: sortModel.field,
       sortOrder: sortModel.order,
-      flag_subscriber_deleted: includeDeletedSubscribers
+      flag_subscriber_deleted: includeDeletedSubscribers,
+      searchVal: searchVal.searchValue,
+      timeZone
     };
     
     // Add filters to query variables if they are set
@@ -167,10 +170,10 @@ const TicketsTable = ({ hideContentDrawer, dockedItems }) => {
     }
     
     return variables;
-  }, [page, pageSize, technicianId, statusFilter, priorityFilter, schedulingFilter, dateRange, includeDeletedSubscribers, sortModel]);
+  }, [page, pageSize, technicianId, statusFilter, priorityFilter, schedulingFilter, dateRange, includeDeletedSubscribers, sortModel, searchVal, timeZone]);
   
   // Query for getting ISP tickets with pagination and filters
-  const { loading, error, data, refetch } = useQuery(GET_ISP_TICKETS, {
+  const { loading, error, data, client, refetch } = useQuery(GET_ISP_TICKETS, {
     variables: queryVariables,
     fetchPolicy: 'cache-and-network', // Changed from no-cache for better memory usage
     notifyOnNetworkStatusChange: true,
@@ -178,6 +181,8 @@ const TicketsTable = ({ hideContentDrawer, dockedItems }) => {
       console.error('Error in ISP tickets query:', error);
     }
   });
+
+  const cacheExists = checkIfCacheExists(client, { query: GET_ISP_TICKETS, variables: queryVariables })
 
   const [getTicketDetails] = useLazyQuery(GET_TICKET, {
     fetchPolicy: 'network-only',
@@ -391,16 +396,6 @@ const TicketsTable = ({ hideContentDrawer, dockedItems }) => {
     },
   });
 
-  // Apollo's useQuery hook automatically refetches when variables change
-  // No manual refetch needed here - the fetchPolicy and notifyOnNetworkStatusChange settings handle this
-
-  // Clean up the date format cache when component unmounts
-  useEffect(() => {
-    return () => {
-      clearDateFormatCache();
-    };
-  }, []);
-  
   // Listen for changes to the flag_subscriber_deleted parameter
   useEffect(() => {
     const handleFlagSubscriberDeletedChange = (event) => {
@@ -525,10 +520,10 @@ const TicketsTable = ({ hideContentDrawer, dockedItems }) => {
       hasPreviousPage: false
     };
     
-    if (!loading && !error && data?.getISPTickets) {
+    if ((!loading || cacheExists) && !error && data?.getISPTickets) {
       // Process ticket data with optimized date formatting
       if (data.getISPTickets.tickets && Array.isArray(data.getISPTickets.tickets)) {
-        processedTickets = processTicketDates(data.getISPTickets.tickets);
+        processedTickets = data.getISPTickets.tickets;
       } else {
         console.error('Unexpected data structure. Expected tickets array:', data.getISPTickets);
         
@@ -539,7 +534,7 @@ const TicketsTable = ({ hideContentDrawer, dockedItems }) => {
             
           if (possibleTicketsArrays.length > 0) {
             // Use the first array property found
-            processedTickets = processTicketDates(possibleTicketsArrays[0]);
+            processedTickets = possibleTicketsArrays[0];
           }
         }
       }
@@ -560,7 +555,7 @@ const TicketsTable = ({ hideContentDrawer, dockedItems }) => {
     }
     
     return { tickets: processedTickets, paginationMetadata: paginationInfo };
-  }, [data, loading, error, page, pageSize]);
+  }, [data, loading, error, page, pageSize, cacheExists]);
 
   // Store previous pagination state for smoother transitions
   const [previousPaginationState, setPreviousPaginationState] = useState({
@@ -605,7 +600,7 @@ const TicketsTable = ({ hideContentDrawer, dockedItems }) => {
   // Calculate pagination display details - modified to maintain state during loading
   let startIndex, endIndex, totalCount;
   
-  if (loading) {
+  if (loading && !cacheExists) {
     if (previousPaginationState.totalCount > 0) {
       // Use previous state during loading to avoid showing "0-0 of 0"
       const expectedStart = (page * pageSize) + 1;
@@ -636,14 +631,16 @@ const TicketsTable = ({ hideContentDrawer, dockedItems }) => {
 
   const isFirstPage = page === 0;
   // Only consider it the last page if we're not loading AND we know there's no next page
-  const isLastPage = !loading ? !paginationMetadata.hasNextPage : false;
+  const isLastPage = !loading || cacheExists ? !paginationMetadata.hasNextPage : false;
 
   return (
     <div className={classes.container}>
       {/* Table Options with filters */}
       <TableOptions 
         appuserTechnicians={technicians} 
-        loading={loading}
+        loading={loading && !cacheExists}
+        searchVal={searchVal}
+        setSearchVal={setSearchVal}
       />
       
       {/* Table with virtualization */}
@@ -651,31 +648,16 @@ const TicketsTable = ({ hideContentDrawer, dockedItems }) => {
         <div className={classes.tableScrollContainer}>
             <div className={`${classes.tableContent} ${classes.dataGridStyles}`}>
               <DataGridTable
+                containerHeight={window.innerHeight * 0.7} // Provide containerHeight for better skeleton loading
                 rows={tickets}
                 columns={filteredColumns}
-                loading={loading}
+                loading={loading && !cacheExists}
                 handleRowClick={handleRowClick}
                 selectedRow={selectedRow}
-                pageSize={pageSize}
-                page={page}
-                rowsPerPageOptions={[5, 10, 25, 50]}
-                disableSelectionOnClick={false}
+                filters={{ searchValue: searchVal.searchValue || '' }}
                 autoHeight={false}
                 hideFooter={true}
-                containerHeight={window.innerHeight * 0.7} // Provide containerHeight for better skeleton loading
-                // MUI-X DataGrid optimization props
-                columnVisibilityModel={{}} // Column visibility managed by our custom chooser
-                rowSelection // Enable row selection for click handling
-                density="compact" // Compact rows for better performance
-                disableColumnFilter // Disable built-in filtering to use custom filters
-                disableColumnMenu={false} // Enable menu for sorting options
-                disableVirtualization={false} // Enable virtualization
                 setSort={handleSortChange}
-                initialState={{
-                  sorting: {
-                    sortModel: [{ field: sortModel.field, sort: sortModel.order }],
-                  },
-                }}
               />
             </div>
           </div>

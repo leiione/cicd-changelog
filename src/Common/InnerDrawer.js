@@ -5,9 +5,9 @@ import { makeStyles } from "@mui/styles"
 
 const useStyles = makeStyles((theme) => ({
   drawerPaper: {
-    width: "40vw",
+    width: "35vw",
     [theme.breakpoints.down('lg')]: {
-      width: "50vw"
+      width: "35vw"
     },
     [theme.breakpoints.down('md')]: {
       width: "100%"

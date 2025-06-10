@@ -117,9 +117,9 @@ const Header = (props) => {
     setCopyTicket(false);
   }, 4000);
 
-  const assigned_name = !ticket.assigned_name && ticket.subscriber && ticket.subscriber.first_name ? `${ticket.subscriber.first_name} ${ticket.subscriber.last_name} (${ticket.subscriber.customer_id})` : ticket.assigned_name
+  const assigned_name = ticket.subscriber && (ticket.subscriber_name || ticket.subscriber.first_name) ? `${ticket.subscriber_name || `${ticket.subscriber.first_name} ${ticket.subscriber.last_name}`} (${ticket.customer_id || ticket.subscriber.customer_id})` : ticket.assigned_name
   const assignmnetId = (ticket.subscriber && ticket.subscriber.customer_id) || (ticket.location_id) || (ticket.equipment_id)
-  const rightStyle = fromDashboard ? (moveToolBar ? 25 : 13) : (includes(category, "Add") || includes(category, "config") ? 50 : 97);
+  const rightStyle = fromDashboard ? (moveToolBar ? 25 : 13) : (includes(category, "Add") || includes(category, "config") ? 50 : (97 + (moveToolBar ? 23 : 0)));
   
   return (
     <>

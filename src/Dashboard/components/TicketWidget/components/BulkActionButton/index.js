@@ -21,7 +21,7 @@ const style = {
 
 const BulkActionModal = props => {
   const dispatch = useDispatch()
-  
+
   const { open, onClose, action, hasUnmetReqIds, checkedRows, widgetVar, setCheckedRows, setHasUnmetReqIds } = props;
   const [bulkUpdateTickets] = useMutation(BULK_UPDATE_TICKETS);
   const [loading, setLoading] = useState(false);
@@ -39,7 +39,7 @@ const BulkActionModal = props => {
       await bulkUpdateTickets({
         variables: { includedTicketIds: checkedRows, bulkAction: action },
         refetchQueries: [
-          { 
+          {
             query: GET_FILTERED_TICKETS,
             variables: widgetVar
           }
@@ -60,7 +60,7 @@ const BulkActionModal = props => {
     checkedRows.length === 1
       ? `Are you sure you want to ${action} this 1 ticket?`
       : `Are you sure you want to ${action} these ${checkedRows.length} tickets?`;
-  
+
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={style}>
@@ -86,10 +86,10 @@ const BulkActionModal = props => {
                   has unmet requirements.
                 </Typography>
               </Grid>
-            : <Grid item xs={12}>
-              <Typography variant="subtitle1">{deleteMessage}</Typography>
-            </Grid>
-          }
+              : <Grid item xs={12}>
+                <Typography variant="subtitle1">{deleteMessage}</Typography>
+              </Grid>
+            }
           </Grid>
           <Grid item xs={12}>
             <div className="text-right">
@@ -141,9 +141,8 @@ const BulkActionButton = ({ hasUnmetReqIds, checkedRows, widgetVar, setCheckedRo
   };
 
   return (
-    <Box>
+    <>
       <Tooltip title={checkedRows.length === 0 ? "Select tickets to enable bulk actions" : ""}>
-      <span>
         <Button
           variant="outlined"
           color="primary"
@@ -157,8 +156,7 @@ const BulkActionButton = ({ hasUnmetReqIds, checkedRows, widgetVar, setCheckedRo
           disabled={checkedRows.length === 0}
         >
           Bulk Action
-          </Button>
-        </span>
+        </Button>
       </Tooltip>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
         <MenuItem onClick={() => handleBulkAction("resolve")}>Resolve</MenuItem>
@@ -177,7 +175,7 @@ const BulkActionButton = ({ hasUnmetReqIds, checkedRows, widgetVar, setCheckedRo
           widgetVar={widgetVar}
         />
       }
-    </Box>
+    </>
   );
 };
 

@@ -16,9 +16,6 @@ import Messages from "./components/Messages";
 import Attachments from "./components/Attachments";
 import DialogAlert from "components/DialogAlert"; // Import DialogAlert
 import BomDrawer from "./components/BillsOfMaterial/components/BomDrawer";
-import pdfMake from "pdfmake/build/pdfmake";
-// import pdfFonts from "pdfmake/build/vfs_fonts";
-import htmlToPdfmake from "html-to-pdfmake";
 import { GET_USER_PREFERENCES, SAVE_USER_PREFERENCES } from "components/UserPreferences/UserPreferencesGraphQL";
 import { saveUserPreferences } from "components/UserPreferences/savePreferencesUtils";
 import moment from "moment-timezone";
@@ -30,78 +27,9 @@ import PropTypes from 'prop-types';
 import usePermission from "config/usePermission";
 import { checkIfCacheExists } from "config/apollo";
 
-// Set virtual file system for pdfMake - compatible with pdfmake 0.2.10 on Node 18
-// if (pdfFonts && typeof pdfFonts === 'object') {
-//   if (pdfFonts.pdfMake && pdfFonts.pdfMake.vfs) {
-//     pdfMake.vfs = pdfFonts.pdfMake.vfs;
-//   } else if (pdfFonts.vfs) {
-//     pdfMake.vfs = pdfFonts.vfs;
-//   } else {
-//     console.warn('Could not find valid fonts structure for pdfMake');
-//   }
-// }
-
-const pdfFonts = {
-  // download default Roboto font from cdnjs.com
-  Roboto: {
-    normal:
-      "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf",
-    bold: "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Medium.ttf",
-    italics:
-      "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Italic.ttf",
-    bolditalics:
-      "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-MediumItalic.ttf",
-  },
-};
-
 const TicketDetails = (props) => {
-  const removeDuplicateIds = (htmlContent) => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlContent, 'text/html');
-    const elementsWithId = doc.querySelectorAll('[id]');
-
-    elementsWithId.forEach((element, index) => {
-      // Append a unique suffix to each duplicate id
-      element.id += `-${index}`;
-    });
-
-    return doc.body.innerHTML;
-  };
-
-  const handlePrint = (detailText) => {
-    try {
-      // Remove duplicate IDs from the HTML content
-      const cleanedHtml = removeDuplicateIds(detailText);
-
-      // Convert cleaned HTML to pdfmake format
-      const pdfContent = htmlToPdfmake(cleanedHtml, {
-        window: window, // Required for html-to-pdfmake to work correctly
-      });
-
-      // Create a document definition for pdfmake
-      const docDefinition = {
-        content: pdfContent,
-        styles: {
-          header: {
-            fontSize: 18,
-            bold: true,
-            margin: [0, 0, 0, 10]
-          },
-          htmlContent: {
-            fontSize: 12,
-            margin: [0, 0, 0, 10]
-          }
-        }
-      };
-
-      // Open the PDF in a new window
-      pdfMake.createPdf(docDefinition, null, pdfFonts).open();
-    } catch (error) {
-      console.error("Failed to create and open PDF:", error);
-    }
-  };
-
-  const [ticketDetail, setTicketDetail] = useState(null);
+  // eslint-disable-next-line no-unused-vars
+  const [ticketDetail, setTicketDetail] = useState(null); // Still needed for WorkOrder component
   const [editorContentChanged, setEditorContentChanged] = useState(false); // State to track editor changes
   const [dialogOpen, setDialogOpen] = useState(false); // State for DialogAlert
   const [handleSave, setHandleSave] = useState(null); // State to hold handleSave function
@@ -298,8 +226,6 @@ const TicketDetails = (props) => {
         open={Boolean(open1)}
         handleDrawerClose1={handleDrawerClose1}
         title={open1}
-        handlePrint={handlePrint}
-        ticketDetail={ticketDetail}
         editorContentChanged={editorContentChanged} // Pass the state to ChildDrawers
       >
         {renderChildComponent()}
@@ -344,7 +270,7 @@ const TicketDetails = (props) => {
 const TicketContainer = props => {
   const dispatch = useDispatch()
   const ispId = localStorage.getItem("Visp.ispId")
-  const { isSigningOut, timeZone, settingsPreferences, user, flags, networkStatus, fromDashboard = false } = props
+  const { isSigningOut, timeZone, settingsPreferences, user, flags, networkStatus, fromDashboard = false, dockedItems } = props
   const userPreferencesTimeStamp = useSelector(state => state.userPreferencesTimeStamp)
   const summaryCard = useSelector(state => state.summaryCard)
   const tasksCard = useSelector(state => state.tasksCard)
@@ -385,11 +311,11 @@ const TicketContainer = props => {
 
   useEffect(() => {
     if (!fromDashboard && (ispId && timeZone)) {
-      dispatch(populateISPUserSettings({ ispId: Number(ispId), timeZone, settingsPreferences, user, flags, networkStatus }))
+      dispatch(populateISPUserSettings({ ispId: Number(ispId), timeZone, settingsPreferences, user, flags, networkStatus, dockedItems }))
     } else {
       // app was rendered outside main app so fetch separately
     }
-  }, [dispatch, timeZone, settingsPreferences, user, ispId, flags, networkStatus, fromDashboard])
+  }, [dispatch, timeZone, settingsPreferences, user, ispId, flags, networkStatus, fromDashboard, dockedItems])
 
 
   return (
