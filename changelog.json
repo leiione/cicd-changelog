@@ -1,2 +1,16 @@
 [
- {"date": "2025-06-10|CI:", "message": "crm-723 - changelog update from update-changelog" }
+  {
+    "date": "2025-06-10",
+    "message": "✅ crm-723 deployed via update-changelog",
+    "commits": [
+  "- 4b4249b CI Bot: CI: crm-723 - changelog update from update-changelog",
+  "- 83a72ca Kamran Farooq: Update index.html",
+  "- 8ba387a CI Bot: CI: crm-723 - changelog update from update-changelog",
+  "- 931fc71 Kamran Farooq: Create changelog.json",
+  "- a5a8be0 CI Bot: CI: crm-723 - changelog update from update-changelog",
+  "- b656f53 Kamran Farooq: Update index.html",
+  "- ce519c2 Kamran Farooq: Create index.html",
+  "- f4a32bf Kamran Farooq: Update index.html"
+]
+  }
+]
