@@ -1,0 +1,10 @@
+[
+  {
+    "date": "2025-06-10",
+    "message": "Initial CI/CD integration with GitHub Pages."
+  },
+  {
+    "date": "2025-06-09",
+    "message": "Added staging auto-deploy."
+  }
+]
