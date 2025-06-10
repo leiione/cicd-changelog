@@ -6,14 +6,14 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 2em;
       background-color: #f9f9f9;
+      padding: 2em;
     }
     h1 {
       color: #2c3e50;
     }
     .changelog-entry {
-      background: #ffffff;
+      background: #fff;
       border-left: 4px solid #3498db;
       padding: 1em;
       margin-bottom: 1.5em;
@@ -22,7 +22,15 @@
     .date {
       font-weight: bold;
       color: #34495e;
-      margin-bottom: 0.3em;
+    }
+    ul {
+      margin-top: 0.5em;
+      padding-left: 1.5em;
+    }
+    li {
+      font-family: monospace;
+      font-size: 0.9em;
+      color: #555;
     }
   </style>
 </head>
@@ -38,15 +46,27 @@
       })
       .then(data => {
         const container = document.getElementById('changelog-container');
-        container.innerHTML = ''; // Clear loading text
+        container.innerHTML = '';
 
         data.forEach(entry => {
           const div = document.createElement('div');
           div.className = 'changelog-entry';
+
           div.innerHTML = `
             <div class="date">${entry.date}</div>
             <p>${entry.message}</p>
           `;
+
+          if (entry.commits && Array.isArray(entry.commits)) {
+            const ul = document.createElement('ul');
+            entry.commits.forEach(commit => {
+              const li = document.createElement('li');
+              li.textContent = commit;
+              ul.appendChild(li);
+            });
+            div.appendChild(ul);
+          }
+
           container.appendChild(div);
         });
       })
