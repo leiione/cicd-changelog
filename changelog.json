@@ -1,6 +1,10 @@
 [
   {
     "date": "2025-06-10",
+    "message": "✅ crm-723 deployed via update-changelog"
+  },
+  {
+    "date": "2025-06-10",
     "message": "Initial CI/CD integration with GitHub Pages."
   },
   {
