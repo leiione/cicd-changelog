@@ -1,14 +1,62 @@
-[
-  {
-    "date": "2025-06-10",
-    "message": "✅ crm-723 deployed via update-changelog",
-    "commits": [
-  "- 0bd0ad7 Kamran Farooq: Update changelog.json",
-  "- 83a72ca Kamran Farooq: Update index.html",
-  "- 931fc71 Kamran Farooq: Create changelog.json",
-  "- b656f53 Kamran Farooq: Update index.html",
-  "- ce519c2 Kamran Farooq: Create index.html",
-  "- f4a32bf Kamran Farooq: Update index.html"
-]
-  }
-]
+  update-changelog:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run:
+          name: Generate and push changelog with AI summary
+          command: |
+            set -e
+            sudo apt-get update && sudo apt-get install -y jq git curl
+
+            git config --global user.email "ci-bot@example.com"
+            git config --global user.name "CI Bot"
+
+            git clone https://${GH_CHANGELOG_TOKEN}@github.com/leiione/cicd-changelog.git
+            cd cicd-changelog
+
+            git remote set-url origin https://${GH_CHANGELOG_TOKEN}@github.com/leiione/cicd-changelog.git
+
+            # Collect and format recent commits
+            COMMIT_LOG=$(git log --since="7 days ago" --pretty=format:'- %h %an: %s' --no-merges | grep -v 'CI Bot' | sort -u)
+            COMMITS_JSON=$(echo "$COMMIT_LOG" | jq -R . | jq -s .)
+
+            RAW_COMMITS=$(git log --since="7 days ago" --pretty=format:'%s' --no-merges | grep -v 'CI Bot' | sort -u | jq -Rs .)
+
+            # Compose OpenAI prompt for release notes
+            PROMPT=$(jq -n --arg commits "$RAW_COMMITS" '
+              {
+                model: "gpt-3.5-turbo",
+                messages: [
+                  {
+                    role: "system",
+                    content: "You are a release manager. Summarize the following Git commit messages into 1-2 customer-facing sentences, omitting technical or internal details."
+                  },
+                  {
+                    role: "user",
+                    content: $commits
+                  }
+                ]
+              }')
+
+            # Get AI-generated release note using AI_KEY
+            RELEASE_NOTES=$(curl -s https://api.openai.com/v1/chat/completions \
+              -H "Authorization: Bearer $AI_KEY" \
+              -H "Content-Type: application/json" \
+              -d "$PROMPT" | jq -r '.choices[0].message.content')
+
+            # Generate changelog.json
+            {
+              echo "["
+              echo "  {"
+              echo "    \"date\": \"$(date +%F)\","
+              echo "    \"message\": \"✅ ${CIRCLE_BRANCH} deployed via ${CIRCLE_JOB}\","
+              echo "    \"release_notes\": \"${RELEASE_NOTES//\"/\\\"}\","
+              echo "    \"commits\": $COMMITS_JSON"
+              echo "  }"
+              echo "]"
+            } > changelog.json
+
+            git add changelog.json
+            git commit -m "CI: ${CIRCLE_BRANCH} changelog update from ${CIRCLE_JOB}" || echo "No changes to commit"
+            git pull origin main --rebase
+            git push origin main
