@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CI/CD Pipeline Changelog</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      padding: 2em;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    .changelog-entry {
+      background: #fff;
+      border-left: 4px solid #3498db;
+      padding: 1em;
+      margin-bottom: 1.5em;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .date {
+      font-weight: bold;
+      color: #34495e;
+    }
+    .release-notes {
+      margin-top: 0.5em;
+      font-style: italic;
+      color: #2d3436;
+    }
+    ul {
+      margin-top: 0.5em;
+      padding-left: 1.5em;
+    }
+    li {
+      font-family: monospace;
+      font-size: 0.9em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>CI/CD Pipeline Changelog</h1>
+  <div id="changelog-container">Loading...</div>
+
+  <script>
+    fetch('changelog.json?ts=' + new Date().getTime())
+      .then(response => {
+        if (!response.ok) throw new Error('Changelog not found');
+        return response.json();
+      })
+      .then(data => {
+        const container = document.getElementById('changelog-container');
+        container.innerHTML = '';
+
+        data.forEach(entry => {
+          const div = document.createElement('div');
+          div.className = 'changelog-entry';
+
+          div.innerHTML = `
+            <div class="date">${entry.date}</div>
+            <p>${entry.message}</p>
+          `;
+
+          // Add release notes if available
+          if (entry.release_notes) {
+            const notes = document.createElement('p');
+            notes.className = 'release-notes';
+            notes.innerHTML = `<strong>Release Notes:</strong> ${entry.release_notes}`;
+            div.appendChild(notes);
+          }
+
+          // Add commits list if available
+          if (entry.commits && Array.isArray(entry.commits)) {
+            const ul = document.createElement('ul');
+            entry.commits.forEach(commit => {
+              const li = document.createElement('li');
+              li.textContent = commit;
+              ul.appendChild(li);
+            });
+            div.appendChild(ul);
+          }
+
+          container.appendChild(div);
+        });
+      })
+      .catch(err => {
+        document.getElementById('changelog-container').innerText = '❌ Failed to load changelog.';
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
