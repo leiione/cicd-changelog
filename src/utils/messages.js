@@ -1,1 +1,0 @@
-export const NO_RIGHTS_MSG = 'This feature is restricted for your account.'
