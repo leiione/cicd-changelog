@@ -1,1 +1,12 @@
+[
+  {
+    "date": "2025-06-16",
+    "message": "✅ crm-723 deployed via deploy-standard",
+    "release_notes": "No AI processing in this release.",
+    "commits": [
+      "- 0bd0ad7 Kamran Farooq: Update changelog.json",
+      "- 425078b Kamran Farooq: Update changelog.json"
+    ]
+  }
+]
 
