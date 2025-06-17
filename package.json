@@ -50,6 +50,7 @@
     "html-to-pdfmake": "^2.5.12",
     "html2plaintext": "^2.1.4",
     "jspdf": "^2.5.1",
+    "leaflet-geosearch": "^4.2.0",
     "lodash": "^4.17.21",
     "moment-timezone": "^0.5.43",
     "pdfmake": "^0.2.10",
@@ -73,6 +74,7 @@
     "react-scan": "^0.3.2",
     "react-scripts": "5.0.1",
     "react-signature-canvas": "^1.0.6",
+    "us-state-converter": "^1.0.8",
     "use-debounce": "^10.0.1",
     "web-vitals": "^4.2.4"
   },

@@ -12,8 +12,12 @@ import ContactNumberField from "./ContactNumberField";
 import EmailDropdown from "./EmailDropdown";
 import ProgressButton from "Common/ProgressButton";
 import { omit } from "lodash";
+import { useDispatch } from "react-redux";
+import { setCardPreferences } from "config/store";
+import usePermission from "config/usePermission";
 
 const EditServiceContact = (props) => {
+  const dispatch = useDispatch()
   const {
     onEditMode,
     control,
@@ -25,8 +29,27 @@ const EditServiceContact = (props) => {
     cData,
     contact,
     ticket,
+    messageCardRef,
+    setAddNew,
+    setSelectedEmail
   } = props
 
+  const permitMessageView = usePermission("ticket_note_message", "flag_read")
+
+
+  const handleEmailClick = () => {
+    if (values.ticket_contact_emails && permitMessageView) {
+      dispatch(setCardPreferences({ card: 'messagesCard', preferences: { expanded: true } }))
+      setAddNew("email");
+      setSelectedEmail(null)
+
+      setTimeout(() => {
+        setSelectedEmail(values.ticket_contact_emails)
+        messageCardRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    }
+
+  };
   return (
     <>
       {onEditMode && !isSubscriber && (
@@ -84,7 +107,7 @@ const EditServiceContact = (props) => {
       </Grid>
       {onEditMode && <Divider style={{ width: "42%", marginLeft: "5%" }} />}
       <ContactNumberField onEditMode={onEditMode} values={values} contact={contact} setValue={setValue} isSubscriber={isSubscriber} />
-      <EmailDropdown onEditMode={onEditMode} values={values} contact={contact} setValue={setValue} isSubscriber={isSubscriber} />
+      <EmailDropdown onEditMode={onEditMode} values={values} contact={contact} setValue={setValue} isSubscriber={isSubscriber} handleEmailClick={handleEmailClick} permitMessageView={permitMessageView} />
     </>
   )
 }
@@ -110,7 +133,7 @@ const EditServiceContactForm = (props) => {
     mode: "onChange",
     reValidateMode: "onSubmit"
   });
-  
+
   useEffect(() => {
     form.reset(initialValues)
     // eslint-disable-next-line

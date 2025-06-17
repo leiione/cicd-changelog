@@ -19,12 +19,12 @@ import AddNoteButton from "./components/AddNoteButton";
 import AddNoteForm from "./components/AddNoteForm";
 import AddSMSForm from "./components/AddSMSForm";
 import { useSelector } from "react-redux";
+import { Box } from "@mui/material";
 
 const Messages = (props) => {
   const online = useSelector(state => state.networkStatus?.online || false);
-  const { appuser_id, ticket, lablesVisible } = props;
+  const { appuser_id, ticket, lablesVisible, messageCardRef, addNew, setAddNew,selectedEmail,setSelectedEmail } = props;
   const [filter, setFilter] = React.useState(["all"]); // Default to "all"
-  const [addNew, setAddNew] = React.useState(null);
   const [qoutedContent, setQoutedContent] = React.useState(null);
   const [replyMessage, setReplyMessage] = React.useState({});
 
@@ -149,6 +149,8 @@ const Messages = (props) => {
   };
 
   return (
+    <Box ref={messageCardRef} className="pb-3">
+
     <AccordionCard
       label="Messages"
       iconButtons={
@@ -158,6 +160,8 @@ const Messages = (props) => {
             setAddNew={setAddNew}
             lablesVisible={lablesVisible}
             error={messageError}
+            setSelectedEmail={setSelectedEmail}
+            
           />
         </>
       }
@@ -175,6 +179,7 @@ const Messages = (props) => {
               ticket={ticket}
               handleCancel={handleCancel}
               replyMessage={replyMessage}
+              selectedEmail={selectedEmail}
             />
           )}
           {addNew === "note" && (
@@ -203,6 +208,7 @@ const Messages = (props) => {
         </>
       )}
     </AccordionCard>
+    </Box>
   );
 };
 

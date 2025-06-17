@@ -31,5 +31,6 @@ export const getAvatarBackground = (name) => {
 };
 
 export const formatDate = (dateString) => {
-    return dayjs(dateString).format("M/D/YYYY h:mm A");
+  if (!dateString) return "Not Scheduled";
+  return dayjs(dateString).format("M/D/YYYY h:mm A");
 };

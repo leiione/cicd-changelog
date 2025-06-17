@@ -98,7 +98,7 @@ const TicketItem = ({ tickets, expandedTicketId, handleAccordionChange }) => {
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <LabelTypography variant="caption">Start Date:</LabelTypography>
                   <Typography variant="caption">
-                    {formatDate(ticket.date_added)}
+                    {formatDate(ticket.start)}
                   </Typography>
                 </Box>
               </DetailsContentBox>

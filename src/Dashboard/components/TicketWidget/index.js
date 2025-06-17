@@ -23,7 +23,7 @@ const TicketWidget = (props) => {
   const [editingTitle, setEditingTitle] = useState("");
   const [openPrompt, setOpenPrompt] = useState(false);
   const isp_id = useSelector(state => state.ispId)
-
+  const timeZone = useSelector((state) => state.timeZone);
 
   const [page, setPage] = useState({ offset: 0, page: 0, limit: 25 });
   const [sort, setSort] = useState({ order: 'desc', field: 'ticket_id' });
@@ -38,11 +38,12 @@ const TicketWidget = (props) => {
     pageSize: page.limit,
     sortField: sort?.field || 'ticket_id',
     sortOrder: sort?.order || 'desc',
-    flag_subscriber_deleted: widgetIncludeDeleted
+    flag_subscriber_deleted: widgetIncludeDeleted,
+    timeZone
   }
 
   if (item.filters && item.filters.length > 0) {
-    getFilterTableVariables(variables, item.filters);
+    getFilterTableVariables(variables, item.filters, timeZone);
   }
 
   const { loading, error, data, client, refetch } = useQuery(GET_FILTERED_TICKETS, {

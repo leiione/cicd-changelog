@@ -71,7 +71,19 @@ const ContactNumberField = props => {
               selectedNumbers.map((item, index) => (
                 <Grid item xs={6} key={`selected-${item.phone}-${index}`}>
                   <Typography variant="subtitle1">
-                    <span>{item.label} &nbsp; {item.phone}</span>
+                    <span>{item.label} &nbsp;</span>
+                    <Typography 
+                      component="span"
+                      color="primary"
+                      onClick={event => {
+                        event.preventDefault()
+                        window.open(`tel:${item.phone.replace(/\D/g, '')}`)
+                      }}
+                      sx={{ cursor: "pointer", display: "inline" }}
+                    >
+                      {item.phone}
+                    </Typography>
+
                   </Typography>
                 </Grid>
               ))

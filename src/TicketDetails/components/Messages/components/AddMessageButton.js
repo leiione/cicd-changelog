@@ -11,7 +11,7 @@ import { NO_RIGHTS_MSG } from "utils/messages";
 
 const AddMessageButton = (props) => {
   const dispatch = useDispatch();
-  const { setAddNew, error, lablesVisible } = props;
+  const { setAddNew, error, lablesVisible,setSelectedEmail } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const permitCreate = usePermission("ticket_note_message", "flag_create")
 
@@ -27,6 +27,10 @@ const AddMessageButton = (props) => {
     preventEvent(event);
     if(permitCreate) {
       setAddNew(type);
+      if(type === "email")
+      {
+        setSelectedEmail(null)
+      }
       dispatch(
         setCardPreferences({
           card: "messagesCard",

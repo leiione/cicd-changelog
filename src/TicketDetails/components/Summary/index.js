@@ -51,7 +51,11 @@ const Summary = (props) => {
     setIsSignatureAdded,
     ticketCached,
     setTicketCached,
-    attachmentRef
+    attachmentRef,
+    handelOpenMap,
+    messageCardRef,
+    setAddNew,
+    setSelectedEmail
   } = props;
 
   const showSignature = true; // this should come from ticket type settings
@@ -155,8 +159,12 @@ const Summary = (props) => {
               <div className="border-top mt-3 pt-3">
                 <ServiceContact
                   ticket={customer}
+                  handelOpenMap={handelOpenMap}
+                  messageCardRef={messageCardRef}
                   updateTicket={handleUpdate}
                   isSubmitting={isSubmitting}
+                  setAddNew={setAddNew}
+                  setSelectedEmail={setSelectedEmail}
                 />
                 <Schedule
                   isSubmitting={isSubmitting}

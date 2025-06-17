@@ -23,7 +23,7 @@ const InnerDrawer = props => {
   return (
     <Drawer classes={{ paper: customDrawerPaper || classes.drawerPaper }} variant="persistent" anchor={"right"} open={open} >
       <Toolbar className="drawer-header">
-        <Grid container spacing={2} justifyContent="space-between" alignItems="center">
+        <Grid container spacing={2} justifyContent="space-between" alignItems="center" flexWrap="nowrap">
           <Grid item xs={9}>
             <Typography variant="h6">{header}</Typography>
           </Grid>

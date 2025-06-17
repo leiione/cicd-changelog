@@ -14,9 +14,9 @@ const HeaderActions = (props) => {
     dockedItems
   } = props; 
 
-  const closeContentDrawer = () => {
+  const closeContentDrawer = (closed = true) => {
 		const docked = find(dockedItems, { category: 'Service Desk', id: ticket.ticket_id })
-		if (docked && docked.open) {
+		if (closed && docked && docked.open) {
 			addRecentActionsDrawer({ ...docked, remove: true })
 		}
     dispatch(setContentDrawer({
@@ -29,7 +29,7 @@ const HeaderActions = (props) => {
 			<IconButton
 				onClick={() => {
 					addRecentActionsDrawer({ ...ticket, category, name: ticket.summary || ticket.type, id: ticket.ticket_id, fromMS: true })
-					closeContentDrawer()
+					closeContentDrawer(false)
 				}}
 				aria-label="Add to Recent Actions"
 				size="large"

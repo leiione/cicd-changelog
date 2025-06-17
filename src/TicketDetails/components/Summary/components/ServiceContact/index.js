@@ -24,7 +24,7 @@ const ServiceContact = (props) => {
   const summaryCard = useSelector((state) => state.summaryCard);
   const preferences = summaryCard ? summaryCard.subComponent : {};
 
-  const { ticket, updateTicket } = props;
+  const { ticket, updateTicket,handelOpenMap, messageCardRef,setAddNew,setSelectedEmail } = props;
   const [onEditMode, setEditMode] = useState(false);
   const isSubscriber = toUpper(ticket.category_type) === "SUBSCRIBER";
 
@@ -113,10 +113,12 @@ const ServiceContact = (props) => {
           in={preferences.service}
           className="ml-3 pl-3 position-relative"
         >
+          
           <Grid container spacing={2}>
             <EditServiceContact
               onEditMode={onEditMode}
               setEditMode={setEditMode}
+              handelOpenMap={handelOpenMap}
               isSubscriber={isSubscriber}
               cLoading={loading && !cacheExists}
               cError={error}
@@ -124,6 +126,9 @@ const ServiceContact = (props) => {
               contact={contact}
               ticket={ticket}
               updateTicket={updateTicket}
+              messageCardRef={messageCardRef}
+              setAddNew={setAddNew}
+              setSelectedEmail={setSelectedEmail}
             />
           </Grid>
         </Collapse>

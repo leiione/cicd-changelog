@@ -148,7 +148,7 @@ const Header = (props) => {
             horizontal: "left",
           }}
         >
-          {(ticketData && !ticketData.disableCRMDrawertoggleButton) &&
+          {(ticketData && !ticketData.disableCRMDrawertoggleButton && !fromDashboard) &&
             <MenuItem>
               <FormControlLabel
                 control={

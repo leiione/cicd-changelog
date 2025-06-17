@@ -17,7 +17,7 @@ export const getDueDateMessage = (dateValue) => {
   return range;
 }
 
-export const getDateRange = (operator, frequency, period) => {
+export const getDateRange = (operator, frequency, period, ispTimeZone) => {
   const today = new Date();
   let startDate, endDate;
   let freq = Number(frequency);
@@ -43,10 +43,10 @@ export const getDateRange = (operator, frequency, period) => {
     endDate = startDate;
   }
     
-  return { startDate: moment(startDate).format('YYYY-MM-DD'), endDate: endDate ? moment(endDate).format('YYYY-MM-DD') : null };
+  return { startDate: moment.tz(startDate, ispTimeZone).format('YYYY-MM-DD'), endDate: endDate ? moment.tz(endDate, ispTimeZone).format('YYYY-MM-DD') : null };
 }
 
-export const getFilterTableVariables = (variables, filters) => {
+export const getFilterTableVariables = (variables, filters, ispTimeZone) => {
   let fStart = null;
   let fEnd = null;
   filters.forEach(filter => {
@@ -65,7 +65,7 @@ export const getFilterTableVariables = (variables, filters) => {
         break;
       case 'date':
         if (filter.value?.length > 0 && (filter.value[0].operator === "=" || (filter.value[0].operator && filter.value[0].frequency && filter.value[0].period))) {
-          const { startDate, endDate } = getDateRange(filter.value[0].operator, filter.value[0].frequency, filter.value[0].period);
+          const { startDate, endDate } = getDateRange(filter.value[0].operator, filter.value[0].frequency, filter.value[0].period, ispTimeZone);
           fStart = fStart && moment(fStart).isBefore(startDate) ? fStart : startDate;
           fEnd = fEnd && moment(fEnd).isAfter(endDate) ? fEnd : endDate;
           // Format dates as strings in YYYY-MM-DD HH:MM:SS format

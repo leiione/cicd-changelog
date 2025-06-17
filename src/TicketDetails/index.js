@@ -38,6 +38,9 @@ const TicketDetails = (props) => {
   const [defaultAttacmentCount, setDefaultAttacmentCount] = React.useState(0);
   const [requiredCustomFieldsCount, setRequiredCustomFieldsCount] = useState(0);
   const [isSignatureAdded, setIsSignatureAdded] = useState(false);
+  const [addNew, setAddNew] = useState(null);
+  const [selectedEmail, setSelectedEmail] = useState(null);
+  
   const {
     lablesVisible,
     ticket: ticketData = {},
@@ -48,12 +51,14 @@ const TicketDetails = (props) => {
     appuser_id,
     handleOpenTicketAssignment,
     fromDashboard,
-    addRecentActionsDrawer
+    addRecentActionsDrawer,
+    handelOpenMap
   } = props;
   const timeZone = useSelector((state) => state.timeZone);
   const snackbar = useSelector((state) => state.snackbar);
   const online = useSelector(state => state.networkStatus?.online || false);
   const attachmentRef = useRef(null);
+  const messageCardRef = useRef(null);
 
   const permitMessageView = usePermission("ticket_note_message", "flag_read") 
 
@@ -157,6 +162,7 @@ const TicketDetails = (props) => {
         : <div className="drawer-wrapper-full p-3" hidden={error}>
           <Summary
             attachmentRef={attachmentRef}
+            messageCardRef={messageCardRef}
             loading={loading && !cacheExists}
             appuser_id={appuser_id}
             handleIconButton={handleIconButton}
@@ -170,6 +176,10 @@ const TicketDetails = (props) => {
             setIsSignatureAdded={setIsSignatureAdded}
             ticketCached={ticketCached}
             setTicketCached={setTicketCached}
+            handelOpenMap={handelOpenMap}
+            setAddNew={setAddNew}
+            setSelectedEmail={setSelectedEmail}
+            
           />
 
           {!hideInprogress &&
@@ -191,10 +201,15 @@ const TicketDetails = (props) => {
               />
               {permitMessageView &&
                 <Messages
+                  messageCardRef={messageCardRef}
                   handleIconButton={handleIconButton}
                   ticket={ticketCached}
                   lablesVisible={lablesVisible}
                   appuser_id={appuser_id}
+                  addNew={addNew}
+                  setAddNew={setAddNew}
+                  selectedEmail={selectedEmail}
+                  setSelectedEmail={setSelectedEmail}
                 />
               }
               <Attachments

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Divider, Grid, IconButton, Tooltip, Typography } from "@mui/material";
 import EditorContainer from "components/EditorContainer";
@@ -234,7 +234,7 @@ const AddEmailFields = (props) => {
 const AddEmailForm = (props) => {
   const dispatch = useDispatch();
   const isp_id = Number(useSelector(state => state.ispId))
-  const { ticket, handleCancel, replyMessage } = props;
+  const { ticket, handleCancel, replyMessage, selectedEmail } = props;
   const [sendTicketEmail] = useMutation(ADD_NEW_TICKET_EMAIL);
   const customerId = ticket.subscriber && ticket.subscriber.customer_id > 0 ? ticket.subscriber.customer_id : 0
 
@@ -268,11 +268,16 @@ const AddEmailForm = (props) => {
 
   const initialValues = React.useMemo(() => {
     const toEmail = [];
-    if (replyMessage.recipient && replyMessage.recipient.length > 0) {
+
+    if (selectedEmail) {
+      toEmail.push({ to: selectedEmail, customOption: true });
+    }
+    else if (replyMessage.recipient && replyMessage.recipient.length > 0) {
       replyMessage.recipient.forEach((email) => {
         toEmail.push({ to: email, customOption: true });
       });
-    } else {
+    }
+    else {
       const contactEmail = ticket.ticket_contact_email
         ? ticket.ticket_contact_email.split(",")
         : [];
@@ -280,6 +285,7 @@ const AddEmailForm = (props) => {
         toEmail.push({ to: email, customOption: true });
       });
     }
+
 
     return {
       to: toEmail,
@@ -290,14 +296,22 @@ const AddEmailForm = (props) => {
       flag_internal: false,
       attachments: [],
     };
-  }, [ticket, replyMessage]);
+  }, [ticket, replyMessage, selectedEmail]);
+
+
 
   const form = useForm({
     defaultValues: initialValues,
-    // resolver: yupResolver(validationSchemaSubLocation),
     mode: "onChange",
     reValidateMode: "onSubmit",
   });
+
+  useEffect(() => {
+    if (selectedEmail) {
+      form.setValue('to', [{ to: selectedEmail, customOption: true }]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedEmail]);
 
   const onSubmit = async (values) => {
     try {

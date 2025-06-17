@@ -5,8 +5,10 @@ import { Divider, Grid, IconButton, MenuItem, MenuList, Popover, Typography } fr
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEnvelope } from "@fortawesome/pro-regular-svg-icons"
 
+
+
 const EmailDropdown = props => {
-  const { onEditMode, contact, values, setValue, isSubscriber } = props
+  const { onEditMode, contact, values, setValue, isSubscriber, handleEmailClick, permitMessageView } = props
   const [anchorEl, setAnchorEl] = React.useState(false)
   const open = Boolean(anchorEl);
 
@@ -31,11 +33,20 @@ const EmailDropdown = props => {
     setAnchorEl(null)
   }
 
+ 
   return (
     <>
       <Grid item xs={12} className="d-inline-flex">
         <FontAwesomeIcon icon={faEnvelope} className="fa-fw text-muted f-16 mr-2" />
-        <Typography variant="subtitle1" style={{ width: "40%" }}>{values.ticket_contact_emails || "No contact email."}</Typography>
+        {!values.ticket_contact_emails ? (
+          <Typography variant="subtitle1" style={{ width: "40%" }}>
+            No contact email.
+           
+          </Typography>
+        ): (    <Typography variant="subtitle1"   component="span"
+          color={permitMessageView ? "primary" : "textSecondary"}
+          onClick={handleEmailClick}
+          sx={{ cursor: "pointer", display: "inline" }}>{values.ticket_contact_emails}</Typography>)}
         {onEditMode && <>
           <IconButton style={{ padding: 0 }} onClick={e => setAnchorEl(e.currentTarget)}>
             {open ?
